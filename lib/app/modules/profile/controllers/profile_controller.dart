@@ -20,13 +20,13 @@ class ProfileController extends GetxController {
       "title": "Address",
       "subtitle": "Delete, Update and add your address",
       "icon": AppIcons.locationIcon,
-      "ontap": Routes.myOrdersView,
+      "ontap": Routes.addressView,
     },
     {
       "title": "Help Center",
       "subtitle": "Have a problem? you can contact us",
       "icon": AppIcons.phoneIcon,
-      "ontap": Routes.myOrdersView,
+      "ontap": Routes.helpCenterView,
     },
     {
       "title": "Logout",

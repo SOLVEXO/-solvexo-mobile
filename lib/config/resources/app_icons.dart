@@ -5,6 +5,8 @@ class AppIcons {
   static const String appleIcon = '${_baseIconsPath}apple.svg';
   static const String bankIcon = '${_baseIconsPath}bankicon.svg';
   static const String coinIcon = '${_baseIconsPath}coin.svg';
+  static const String mapsIcon = '${_baseIconsPath}mapsicon.svg';
+  static const String checkIcon = '${_baseIconsPath}checkicon.svg';
   static const String dhlLogo = '${_baseIconsPath}dhl-logo.svg';
   static const String inTransitIcon = '${_baseIconsPath}intransit.svg';
   static const String deliveryCompleted = '${_baseIconsPath}done-delivery.svg';
@@ -24,7 +26,6 @@ class AppIcons {
   static const String truckIcon = '${_baseIconsPath}truck.svg';
   static const String shoppingBag = '${_baseIconsPath}shopbag.svg';
   static const String saleIcon = '${_baseIconsPath}sale.svg';
-  static const String checkIcon = '${_baseIconsPath}check.svg';
   static const String settingIcon = '${_baseIconsPath}settings.svg';
   static const String aboutIcon = '${_baseIconsPath}about.svg';
   static const String emailIcon = '${_baseIconsPath}email.svg';

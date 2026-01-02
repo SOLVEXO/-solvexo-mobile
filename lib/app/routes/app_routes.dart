@@ -22,7 +22,11 @@ abstract class Routes {
   static const myOrdersView = '/profile/myorders';
   static const orderTrackingView = '/profile/myorders/order_tracking';
   static const addressView = '/profile/address';
+  static const addAddressView = '/profile/add_address';
   static const trackerView = '/profile/ordertracker';
   static const refundRequestView = '/profile/refund-request';
   static const reviewsView = '/profile/reviews-view';
+  static const helpCenterView = '/profile/help-center';
+  static const faqListView = '/profile/faq_view';
+  static const faqDetailView = '/profile/faq_details';
 }
