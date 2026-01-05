@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/models/banner_model.dart';
+import 'package:book_store_app/app/modules/profile/modules/address/models/address_model.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:get/get.dart';
 
@@ -11,7 +12,16 @@ class HomeController extends GetxController {
 
   /// Favourite handling
   RxMap<String, bool> favouriteMap = <String, bool>{}.obs;
-
+  AddressModel get address => AddressModel(
+    label: "home",
+    name: "Jami Raza",
+    phone: "028866372",
+    address: "flat 1, fb area",
+    apartment: '302',
+    state: "sindh",
+    city: "Karachi",
+    zip: "21092",
+  );
   // -------------------- BANNERS --------------------
 
   final List<BannerModel> banners = [

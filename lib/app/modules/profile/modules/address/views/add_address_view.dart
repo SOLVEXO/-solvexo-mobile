@@ -2,7 +2,7 @@ import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
-import 'package:book_store_app/app/modules/profile/modules/address/controllers/profile_address_controller.dart';
+import 'package:book_store_app/app/modules/profile/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';

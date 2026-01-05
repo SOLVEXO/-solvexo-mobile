@@ -8,10 +8,12 @@ class HelpSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final searchController = TextEditingController();
     final controller = Get.find<HelpCenterController>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: CustomTextField(
+        controller: searchController,
         isborder: true,
         hintText: "Search an issue",
         prefixIcon: const Icon(Icons.search),
@@ -19,7 +21,10 @@ class HelpSearchBar extends StatelessWidget {
           () => controller.searchQuery.value.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: () => controller.searchQuery.value = "",
+                  onPressed: () {
+                    controller.searchQuery.value = "";
+                    searchController.clear();
+                  },
                 )
               : const SizedBox(),
         ),

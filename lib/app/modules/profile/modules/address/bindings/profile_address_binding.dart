@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import '../controllers/profile_address_controller.dart';
+import '../controllers/address_controller.dart';
 
 class ProfileAddressBinding extends Bindings {
   @override

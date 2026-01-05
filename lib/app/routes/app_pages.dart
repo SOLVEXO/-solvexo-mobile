@@ -1,5 +1,5 @@
-import 'package:book_store_app/app/modules/profile/help_center/views/faq_detail_view.dart';
-import 'package:book_store_app/app/modules/profile/help_center/views/faq_list_view.dart';
+import 'package:book_store_app/app/modules/profile/modules/help_center/views/faq_detail_view.dart';
+import 'package:book_store_app/app/modules/profile/modules/help_center/views/faq_list_view.dart';
 import 'package:get/get.dart';
 
 import '../modules/auth/auth_tabs_view.dart';
@@ -23,11 +23,11 @@ import '../modules/payment/views/authentication_view.dart';
 import '../modules/payment/views/payment_success_view.dart';
 import '../modules/payment/views/payment_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
-import '../modules/profile/help_center/bindings/profile_help_center_binding.dart';
-import '../modules/profile/help_center/views/help_center_view.dart';
+import '../modules/profile/modules/help_center/bindings/profile_help_center_binding.dart';
+import '../modules/profile/modules/help_center/views/help_center_view.dart';
 import '../modules/profile/modules/address/bindings/profile_address_binding.dart';
 import '../modules/profile/modules/address/views/add_address_view.dart';
-import '../modules/profile/modules/address/views/profile_address_view.dart';
+import '../modules/profile/modules/address/views/address_view.dart';
 import '../modules/profile/modules/myorders/bindings/profile_myorders_binding.dart';
 import '../modules/profile/modules/myorders/views/my_orders_view.dart';
 import '../modules/profile/modules/myorders/views/order_tracking_view.dart';

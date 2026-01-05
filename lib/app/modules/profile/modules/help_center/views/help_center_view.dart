@@ -1,7 +1,7 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recent_order.dart';
-import 'package:book_store_app/app/modules/profile/help_center/widgets/search_bar.dart';
+import 'package:book_store_app/app/modules/profile/modules/help_center/widgets/search_bar.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';

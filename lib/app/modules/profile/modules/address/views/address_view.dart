@@ -3,7 +3,7 @@ import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/modules/profile/modules/address/controllers/profile_address_controller.dart';
+import 'package:book_store_app/app/modules/profile/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/profile/modules/address/models/address_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';

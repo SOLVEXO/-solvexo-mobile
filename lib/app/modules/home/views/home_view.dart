@@ -1,16 +1,12 @@
-import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/delivery_address.dart';
 import 'package:book_store_app/app/components/home_shimmer_view.dart';
 import 'package:book_store_app/app/components/main_app_bar.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
 import 'package:book_store_app/app/modules/home/widgets/category_item.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:book_store_app/app/modules/home/widgets/tab_header.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -36,26 +32,7 @@ class HomeView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                color: AppColors.white,
-                child: ListTile(
-                  leading: SvgIcon(
-                    assetName: AppIcons.locationIcon,
-                    color: AppColors.primaryColor,
-                    size: 50,
-                  ),
-                  title: CustomText(text: "Delivery to"),
-                  subtitle: CustomText(
-                    text: "Karachi, Pakistan, 24532",
-                    fontSize: AppFontSize.small,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  trailing: IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.expand_more_rounded, size: 30),
-                  ),
-                ),
-              ),
+              DeliveryAddress(),
 
               /// 🔹 Location bar UI space (you will put your own)
               SizedBox(height: 15),
