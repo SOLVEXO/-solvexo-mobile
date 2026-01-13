@@ -1,8 +1,8 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/auth/login/controller/auth_tabs_controller.dart';
-import 'package:book_store_app/app/modules/auth/login/login_view.dart';
-import 'package:book_store_app/app/modules/auth/signup/sign_up_view.dart';
+import 'package:book_store_app/app/modules/login/controller/auth_tabs_controller.dart';
+import 'package:book_store_app/app/modules/login/login_view.dart';
+import 'package:book_store_app/app/modules/signup/sign_up_view.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

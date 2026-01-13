@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:book_store_app/app/components/custom_catagory_header.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -13,10 +14,13 @@ class BannerCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Start auto-scroll when widget is built
+    _startAutoScroll();
+
     return Column(
       children: [
         SizedBox(
-          height: 180,
+          height: Get.height / 5,
           child: PageView.builder(
             controller: controllerPage,
             onPageChanged: (i) => c.bannerIndex.value = i,
@@ -48,13 +52,24 @@ class BannerCarousel extends StatelessWidget {
               activeDotColor: AppColors.primaryColor,
               dotColor: Colors.grey.shade300,
             ),
-            size: Size(
-              Get.width * 0.18, // responsive width based on dot count
-              20, // height
-            ),
+            size: Size(Get.width * 0.18, 20),
           ),
         ),
       ],
     );
+  }
+
+  void _startAutoScroll() {
+    Timer.periodic(Duration(seconds: 5), (timer) {
+      if (controllerPage.hasClients && c.banners.isNotEmpty) {
+        int nextPage = (c.bannerIndex.value + 1) % c.banners.length;
+
+        controllerPage.animateToPage(
+          nextPage,
+          duration: Duration(milliseconds: 900),
+          curve: Curves.easeInCubic,
+        );
+      }
+    });
   }
 }

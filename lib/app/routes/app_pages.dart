@@ -1,13 +1,15 @@
-import 'package:book_store_app/app/modules/profile/modules/help_center/views/faq_detail_view.dart';
-import 'package:book_store_app/app/modules/profile/modules/help_center/views/faq_list_view.dart';
+import 'package:book_store_app/app/modules/help_center/views/faq_detail_view.dart';
+import 'package:book_store_app/app/modules/help_center/views/faq_list_view.dart';
+import 'package:book_store_app/app/modules/map_picker/bindings/mappicker_binding.dart';
+import 'package:book_store_app/app/modules/map_picker/views/mappicker_view.dart';
 import 'package:get/get.dart';
 
 import '../modules/auth/auth_tabs_view.dart';
-import '../modules/auth/login/binding/login_binding.dart';
-import '../modules/auth/otp/binding/otp_binding.dart';
-import '../modules/auth/otp/views/get_notified.dart';
-import '../modules/auth/otp/views/otp_view.dart';
-import '../modules/auth/welcome/splash_screen.dart';
+import '../modules/login/binding/login_binding.dart';
+import '../modules/otp/binding/otp_binding.dart';
+import '../modules/otp/views/get_notified.dart';
+import '../modules/otp/views/otp_view.dart';
+import '../modules/welcome/splash_screen.dart';
 import '../modules/cart/bindings/cart_binding.dart';
 import '../modules/cart/views/cart_view.dart';
 import '../modules/category/bindings/category_binding.dart';
@@ -23,19 +25,19 @@ import '../modules/payment/views/authentication_view.dart';
 import '../modules/payment/views/payment_success_view.dart';
 import '../modules/payment/views/payment_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
-import '../modules/profile/modules/help_center/bindings/profile_help_center_binding.dart';
-import '../modules/profile/modules/help_center/views/help_center_view.dart';
-import '../modules/profile/modules/address/bindings/profile_address_binding.dart';
-import '../modules/profile/modules/address/views/add_address_view.dart';
-import '../modules/profile/modules/address/views/address_view.dart';
-import '../modules/profile/modules/myorders/bindings/profile_myorders_binding.dart';
-import '../modules/profile/modules/myorders/views/my_orders_view.dart';
-import '../modules/profile/modules/myorders/views/order_tracking_view.dart';
-import '../modules/profile/modules/myorders/views/reviews_view.dart';
-import '../modules/profile/modules/ordertracker/bindings/order_tracker_binding.dart';
-import '../modules/profile/modules/ordertracker/views/tracker_order_view.dart';
-import '../modules/profile/modules/refund_request/bindings/refund_request_binding.dart';
-import '../modules/profile/modules/refund_request/views/refund_request_view.dart';
+import '../modules/help_center/bindings/profile_help_center_binding.dart';
+import '../modules/help_center/views/help_center_view.dart';
+import '../modules/address/bindings/profile_address_binding.dart';
+import '../modules/address/views/add_address_view.dart';
+import '../modules/address/views/address_view.dart';
+import '../modules/myorders/bindings/profile_myorders_binding.dart';
+import '../modules/myorders/views/my_orders_view.dart';
+import '../modules/myorders/views/order_tracking_view.dart';
+import '../modules/myorders/views/reviews_view.dart';
+import '../modules/ordertracker/bindings/order_tracker_binding.dart';
+import '../modules/ordertracker/views/tracker_order_view.dart';
+import '../modules/refund_request/bindings/refund_request_binding.dart';
+import '../modules/refund_request/views/refund_request_view.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/search/bindings/search_binding.dart';
 import '../modules/search/views/search_view.dart';
@@ -169,6 +171,11 @@ class AppPages {
       name: Routes.faqDetailView,
       page: () => FAQDetailView(),
       binding: ProfileHelpCenterBinding(),
+    ),
+    GetPage(
+      name: Routes.mapPickerView,
+      page: () => MapPickerScreen(),
+      binding: MappickerBinding(),
     ),
   ];
 }

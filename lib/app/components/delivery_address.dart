@@ -1,6 +1,8 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
+import 'package:book_store_app/app/modules/map_picker/controllers/mappicker_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -13,7 +15,8 @@ class DeliveryAddress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<HomeController>();
-    final address = controller.address;
+    final mapPickerController = Get.put(MapPickerController());
+
     return Container(
       color: AppColors.white,
       child: ListTile(
@@ -24,13 +27,13 @@ class DeliveryAddress extends StatelessWidget {
         ),
         title: CustomText(text: "Delivery to"),
         subtitle: CustomText(
-          text: "${address.name} - ${address.city} ${address.zip}",
+          text: mapPickerController.selectedAddress.value,
           fontSize: AppFontSize.small,
           fontWeight: FontWeight.w500,
         ),
         trailing: IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.expand_more_rounded, size: 30),
+          onPressed: () => Get.toNamed(Routes.mapPickerView),
+          icon: SvgIcon(assetName: AppIcons.mapsIcon),
         ),
       ),
     );

@@ -1,4 +1,4 @@
-import 'package:book_store_app/app/modules/auth/welcome/controller/welcome_controller.dart';
+import 'package:book_store_app/app/modules/welcome/controller/welcome_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

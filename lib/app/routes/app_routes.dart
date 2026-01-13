@@ -29,4 +29,5 @@ abstract class Routes {
   static const helpCenterView = '/profile/help-center';
   static const faqListView = '/profile/faq_view';
   static const faqDetailView = '/profile/faq_details';
+  static const mapPickerView = '/map_picker';
 }

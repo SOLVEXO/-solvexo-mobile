@@ -1,6 +1,6 @@
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/models/banner_model.dart';
-import 'package:book_store_app/app/modules/profile/modules/address/models/address_model.dart';
+import 'package:book_store_app/app/modules/address/models/address_model.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:get/get.dart';
 
