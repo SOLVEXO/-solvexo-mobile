@@ -7,25 +7,37 @@ class SvgIcon extends StatelessWidget {
   final String assetName;
   final double? size;
   final Color? color;
-
-  const SvgIcon({super.key, required this.assetName, this.size, this.color});
+  final Function()? onTap;
+  const SvgIcon({
+    super.key,
+    required this.assetName,
+    this.size,
+    this.color,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (assetName.toLowerCase().endsWith('.svg')) {
-      return SvgPicture.asset(
-        assetName,
-        height: size ?? 24,
-        width: size ?? 24,
-        color: color,
+      return GestureDetector(
+        onTap: onTap,
+        child: SvgPicture.asset(
+          assetName,
+          height: size ?? 24,
+          width: size ?? 24,
+          color: color,
+        ),
       );
     } else {
       // fallback for PNG/JPG
-      return Image.asset(
-        assetName,
-        height: size ?? 24,
-        width: size ?? 24,
-        color: color,
+      return GestureDetector(
+        onTap: onTap,
+        child: Image.asset(
+          assetName,
+          height: size ?? 24,
+          width: size ?? 24,
+          color: color,
+        ),
       );
     }
   }

@@ -1,7 +1,7 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/icon_with_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_item_model.dart';
 import 'package:book_store_app/app/modules/cart/widgets/inc_dicr_quantity_widget.dart';
@@ -26,13 +26,14 @@ class CartItemWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Checkbox(
+                activeColor: AppColors.primaryColor,
                 materialTapTargetSize: MaterialTapTargetSize.padded,
                 value: item.isSelected,
                 onChanged: (v) => controller.toggleItemSelection(item, v!),
               ),
 
               /// Product Image
-              SvgIcon(assetName: item.product.image, size: 60),
+              CommonImageView(url: item.product.images[0], width: 60),
 
               const SizedBox(width: 10),
 
@@ -71,11 +72,11 @@ class CartItemWidget extends StatelessWidget {
               /// Delete
               CustomIconButton(
                 assetName: AppIcons.deleteIcon,
-                size: 35,
+                size: 30,
                 isPadding: true,
                 onPressed: () {
                   controller.showDeleteConfirmation(
-                    () => controller.removeItem(item),
+                    () => controller.removeFromCart(item.productId!),
                   );
                 },
               ),
@@ -93,7 +94,7 @@ class CartItemWidget extends StatelessWidget {
                 iconName: AppIcons.deleteIcon,
                 text: "Delete",
                 onTap: () => controller.showDeleteConfirmation(
-                  () => controller.removeItem(item),
+                  () => controller.removeFromCart(item.productId!),
                 ),
               ),
               Expanded(child: IncDicrQuantityWidget(item: item)),

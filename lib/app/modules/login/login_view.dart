@@ -1,16 +1,21 @@
 import 'package:book_store_app/app/components/auth_or_row.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/buttons/social_button.dart';
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginView extends StatelessWidget {
-  const LoginView({super.key});
+  LoginView({super.key});
+  final authController = Get.put(AuthController());
 
   @override
   Widget build(BuildContext context) {
@@ -19,52 +24,93 @@ class LoginView extends StatelessWidget {
       child: Column(
         children: [
           /// Logo
-          CustomText(
-            text: "Home\nDecor.",
-            fontSize: AppFontSize.veryLarge2,
-            fontWeight: FontWeight.w800,
-            color: AppColors.primaryColor,
+          CommonImageView(
+            imagePath: AppImages.fullLogo,
+            width: Get.width / 1.5,
           ),
-
-          const SizedBox(height: 30),
-
-          SocialButton.google(() {}),
-          const SizedBox(height: 12),
-          SocialButton.facebook(() {}),
-          const SizedBox(height: 12),
-          SocialButton.apple(() {}),
-
-          const SizedBox(height: 25),
-
-          AuthOrRow(),
-
-          const SizedBox(height: 20),
+          // CustomText(
+          //   text: "EDU\nDEEN",
+          //   fontSize: AppFontSize.veryLarge2,
+          //   fontWeight: FontWeight.w800,
+          //   textAlign: TextAlign.center,
+          //   color: AppColors.primaryColor,
+          // ),
+          SizedBox(height: 10),
 
           /// Email / phone field
-          CustomTextField(
-            hintText: "Email Address or Phone number",
-            isborder: true,
-            borderRadius: BorderRadius.circular(12),
+          Form(
+            key: authController.loginFormKey,
+            child: Column(
+              children: [
+                CustomTextField(
+                  controller: authController.loginEmailController,
+                  hintText: "Email Address or Phone number",
+                  isborder: true,
+                  borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+                ),
+
+                const SizedBox(height: AppDimen.borderRadius),
+                Obx(
+                  () => CustomTextField(
+                    hintText: "Enter password",
+                    isborder: true,
+                    controller: authController.loginPasswordController,
+                    obscureText: !authController.isPasswordVisible.value,
+                    validator: authController.validatePassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        authController.isPasswordVisible.value
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: AppColors.lightGrey,
+                      ),
+                      onPressed: authController.togglePasswordVisibility,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-
-          const SizedBox(height: 20),
-
-          AppButton(
-            label: "Continue to Sign In",
-            onPressed: () {
-              Get.toNamed(Routes.otpView);
+          SizedBox(height: AppDimen.borderRadius),
+          Obx(
+            () => AppButton(
+              label: authController.isLoading.value ? 'Logging In...' : 'Login',
+              onPressed: authController.isLoading.value
+                  ? null
+                  : () {
+                      authController.login();
+                    },
+            ),
+          ),
+          const SizedBox(height: AppDimen.borderRadius),
+          GestureDetector(
+            onTap: () {
+              Get.toNamed(Routes.forgetPasswordView);
             },
+            child: CustomText(
+              text: "Forgot Password?",
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryColor,
+              fontSize: AppFontSize.small2,
+              textAlign: TextAlign.end,
+            ),
           ),
-
-          const SizedBox(height: 15),
-
+          const SizedBox(height: AppDimen.borderRadius),
           CustomText(
             text:
                 "By continuing with sign in process, we may send you a one time code...",
             fontSize: AppFontSize.small2,
             color: AppColors.lightGrey,
           ),
-
+          const SizedBox(height: AppDimen.borderRadius),
+          const AuthOrRow(),
+          const SizedBox(height: AppDimen.borderRadius),
+          // Social Login Buttons
+          SocialButton.google(authController.signInWithGoogle),
+          const SizedBox(height: AppDimen.borderRadius),
+          SocialButton.facebook(authController.signInWithFacebook),
+          const SizedBox(height: AppDimen.borderRadius),
+          SocialButton.apple(authController.signInWithApple),
           const SizedBox(height: 40),
         ],
       ),

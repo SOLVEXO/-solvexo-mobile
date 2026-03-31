@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/help_center_controller.dart';
@@ -11,8 +12,9 @@ class FAQListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<HelpCenterController>();
+    final controller = Get.find<FaqController>();
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "FAQ"),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5),

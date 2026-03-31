@@ -1,214 +1,312 @@
-import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:book_store_app/app/network/dio_service.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:flutter/material.dart';
 
 class BaseClient {
-  static final BaseClient _baseClient = BaseClient._internal();
-
-  factory BaseClient() {
-    return _baseClient;
-  }
-
-  BaseClient._internal();
-
-  // Future<bool> _checkInternetConnection() async {
-  //   var connectivityResult = await (Connectivity().checkConnectivity());
-  //   if (connectivityResult == ConnectivityResult.mobile) {
-  //     return true;
-  //   } else if (connectivityResult == ConnectivityResult.wifi) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
-
-  /// GET request
   Future<Response> get(
     String url, {
-    Map<String, dynamic>? headers,
     Map<String, dynamic>? queryParameters,
     dynamic data,
-    Function(int value, int progress)? onReceiveProgress,
-    Function? onLoading,
   }) async {
-    try {
-      debugPrint("URL GET --> $url");
-      debugPrint("Request param GET --> $data");
-      debugPrint("Query Param GET --> $queryParameters");
-      debugPrint("Headers GET --> $headers");
+    final dio = await DioService.getDio();
 
-      // if (await _checkInternetConnection()) {
-      //   throw DioException(requestOptions: RequestOptions(), type: DioExceptionType.connectionError);
-      // }
+    debugPrint("GET → $url");
 
-      var dio = await DioService.getDio(headers: headers);
-
-      return dio.get(
-        url,
-        data: data,
-        queryParameters: queryParameters,
-        onReceiveProgress: onReceiveProgress,
-      );
-    } on DioException {
-      rethrow;
-    }
+    return dio.get(url, queryParameters: queryParameters, data: data);
   }
 
-  ///POST request
   Future<Response> post(
     String url, {
-    Map<String, dynamic>? headers,
-    Map<String, dynamic>? queryParameters,
-    Function(int total, int progress)? onSendProgress,
-    Function(int total, int progress)? onReceiveProgress,
-    Function? onLoading,
     dynamic data,
-  }) async {
-    try {
-      debugPrint("URL POST --> $url");
-      debugPrint("Request param POST --> $data");
-      debugPrint("Headers POST --> $headers");
-
-      var dio = await DioService.getDio(headers: headers);
-
-      return dio.post(
-        url,
-        data: data,
-        onReceiveProgress: onReceiveProgress,
-        onSendProgress: onSendProgress,
-        queryParameters: queryParameters,
-      );
-    } on DioException {
-      rethrow;
-    }
-  }
-
-  /// POST multipart request
-  Future<Response> postMultipart(
-    String url, {
     Map<String, dynamic>? queryParameters,
-    Function(int total, int progress)?
-    onSendProgress, // while sending (uploading) progress
-    Function(int total, int progress)?
-    onReceiveProgress, // while receiving data(response)
-    required File file,
   }) async {
-    try {
-      String fileName = file.path.split('/').last;
-      var fileExt = fileName.split('.').last;
+    final dio = await DioService.getDio();
 
-      var formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          file.path,
-          filename: fileName,
-          contentType: MediaType("image", fileExt),
-        ),
-      });
+    debugPrint("POST → $url");
 
-      var dio = await DioService.getDio(
-        headers: {'Content-Type': 'multipart/form-data'},
-      );
-
-      debugPrint("URL POST Multipart --> $url");
-      debugPrint("Request param POST Multipart --> $formData");
-      debugPrint("File name POST Multipart --> $fileName");
-      debugPrint("Extension --> $fileExt");
-
-      return dio.post(
-        url,
-        data: formData,
-        onReceiveProgress: onReceiveProgress,
-        onSendProgress: onSendProgress,
-        queryParameters: queryParameters,
-      );
-    } on DioException {
-      rethrow;
-    }
+    return dio.post(url, data: data, queryParameters: queryParameters);
   }
 
-  /// PUT request
   Future<Response> put(
     String url, {
-    Map<String, dynamic>? headers,
-    Map<String, dynamic>? queryParameters,
-    Function(int total, int progress)? onSendProgress,
-    Function(int total, int progress)? onReceiveProgress,
     dynamic data,
+    Map<String, dynamic>? queryParameters,
   }) async {
-    try {
-      debugPrint("URL PUT --> $url");
-      debugPrint("Request param PUT --> ${jsonEncode(data)}");
-      debugPrint("Headers PUT --> $headers");
+    final dio = await DioService.getDio();
 
-      var dio = await DioService.getDio(headers: headers);
+    debugPrint("PUT → $url");
 
-      return dio.put(
-        url,
-        queryParameters: queryParameters,
-        data: data,
-        onReceiveProgress: onReceiveProgress,
-        onSendProgress: onSendProgress,
-      );
-    } on DioException {
-      rethrow;
-    }
+    return dio.put(url, data: data, queryParameters: queryParameters);
   }
 
-  /// PATCH request
-  Future<Response> patch(
-    String url, {
-    Map<String, dynamic>? headers,
-    Map<String, dynamic>? queryParameters,
-    Function(int total, int progress)? onSendProgress,
-    Function(int total, int progress)? onReceiveProgress,
-    Function? onLoading,
-    dynamic data,
-  }) async {
-    try {
-      debugPrint("URL PATCH --> $url");
-      debugPrint("Request param PATCH --> ${jsonEncode(data)}");
-      debugPrint("Headers PATCH --> $headers");
-
-      if (headers != null) {
-        headers["Cache-Control"] = "no-cache";
-      } else {
-        headers = {"Cache-Control": "no-cache"};
-      }
-
-      var dio = await DioService.getDio(headers: headers);
-
-      return dio.patch(
-        url,
-        queryParameters: queryParameters,
-        data: data,
-        onReceiveProgress: onReceiveProgress,
-        onSendProgress: onSendProgress,
-      );
-    } on DioException {
-      rethrow;
-    }
-  }
-
-  /// DELETE request
   Future<Response> delete(
     String url, {
-    Map<String, dynamic>? headers,
-    Map<String, dynamic>? queryParameters,
     dynamic data,
+    Map<String, dynamic>? queryParameters,
   }) async {
-    try {
-      debugPrint("URL DELETE --> $url");
-      debugPrint("Request param DELETE --> ${jsonEncode(data)}");
-      debugPrint("Headers DELETE --> $headers");
+    final dio = await DioService.getDio();
 
-      var dio = await DioService.getDio(headers: headers);
+    debugPrint("DELETE → $url");
 
-      return dio.delete(url, queryParameters: queryParameters, data: data);
-    } on DioException {
-      rethrow;
+    return dio.delete(url, data: data, queryParameters: queryParameters);
+  }
+
+  /// multipart upload
+  Future<Response> postMultipart(
+    String url, {
+    required List<File> files,
+    String fieldName = 'file',
+    Map<String, dynamic>? additionalData,
+  }) async {
+    final dio = await DioService.getDio(
+      headers: {'Content-Type': 'multipart/form-data'},
+    );
+
+    final map = <String, dynamic>{};
+
+    for (var file in files) {
+      final name = file.path.split('/').last;
+      final ext = name.split('.').last;
+
+      map[fieldName] = await MultipartFile.fromFile(
+        file.path,
+        filename: name,
+        contentType: MediaType("image", ext),
+      );
     }
+
+    if (additionalData != null) map.addAll(additionalData);
+
+    return dio.post(url, data: FormData.fromMap(map));
   }
 }
+
+// import 'dart:async';
+// import 'dart:convert';
+// import 'dart:io';
+// import 'package:book_store_app/app/network/dio_service.dart';
+// import 'package:dio/dio.dart';
+// import 'package:flutter/material.dart';
+// import 'package:http_parser/http_parser.dart';
+
+// class BaseClient {
+//   static final BaseClient _baseClient = BaseClient._internal();
+
+//   factory BaseClient() {
+//     return _baseClient;
+//   }
+
+//   BaseClient._internal();
+
+//   /// GET request
+//   Future<Response> get(
+//     String url, {
+//     Map<String, dynamic>? headers,
+//     Map<String, dynamic>? queryParameters,
+//     dynamic data,
+//     Function(int value, int progress)? onReceiveProgress,
+//     Function? onLoading,
+//   }) async {
+//     try {
+//       debugPrint("URL GET --> $url");
+//       debugPrint("Request param GET --> $data");
+//       debugPrint("Query Param GET --> $queryParameters");
+//       debugPrint("Headers GET --> $headers");
+
+//       var dio = await DioService.getDio(headers: headers);
+
+//       return dio.get(
+//         url,
+//         data: data,
+//         queryParameters: queryParameters,
+//         onReceiveProgress: onReceiveProgress,
+//       );
+//     } on DioException {
+//       rethrow;
+//     }
+//   }
+
+//   /// POST request
+//   Future<Response> post(
+//     String url, {
+//     Map<String, dynamic>? headers,
+//     Map<String, dynamic>? queryParameters,
+//     Function(int total, int progress)? onSendProgress,
+//     Function(int total, int progress)? onReceiveProgress,
+//     Function? onLoading,
+//     dynamic data,
+//   }) async {
+//     try {
+//       debugPrint("URL POST --> $url");
+//       debugPrint("Request param POST --> $data");
+//       debugPrint("Headers POST --> $headers");
+
+//       var dio = await DioService.getDio(headers: headers);
+
+//       return dio.post(
+//         url,
+//         data: data,
+//         onReceiveProgress: onReceiveProgress,
+//         onSendProgress: onSendProgress,
+//         queryParameters: queryParameters,
+//       );
+//     } on DioException {
+//       rethrow;
+//     }
+//   }
+
+//   /// POST multipart request for file upload
+//   Future<Response> postMultipart(
+//     String url, {
+//     Map<String, dynamic>? queryParameters,
+//     Function(int total, int progress)? onSendProgress,
+//     Function(int total, int progress)? onReceiveProgress,
+//     required List<File> files,
+//     String fieldName =
+//         'productImages', // Can be 'productImages', 'categoryImage', 'profileImage'
+//     Map<String, dynamic>? additionalData,
+//   }) async {
+//     try {
+//       Map<String, dynamic> formDataMap = {};
+
+//       // Add files
+//       if (fieldName == 'productImages') {
+//         // Multiple files for products
+//         List<MultipartFile> multipartFiles = [];
+//         for (var file in files) {
+//           String fileName = file.path.split('/').last;
+//           var fileExt = fileName.split('.').last;
+//           multipartFiles.add(
+//             await MultipartFile.fromFile(
+//               file.path,
+//               filename: fileName,
+//               contentType: MediaType("image", fileExt),
+//             ),
+//           );
+//         }
+//         formDataMap[fieldName] = multipartFiles;
+//       } else {
+//         // Single file for category or profile
+//         if (files.isNotEmpty) {
+//           String fileName = files.first.path.split('/').last;
+//           var fileExt = fileName.split('.').last;
+//           formDataMap[fieldName] = await MultipartFile.fromFile(
+//             files.first.path,
+//             filename: fileName,
+//             contentType: MediaType("image", fileExt),
+//           );
+//         }
+//       }
+
+//       // Add additional data if any
+//       if (additionalData != null) {
+//         formDataMap.addAll(additionalData);
+//       }
+
+//       var formData = FormData.fromMap(formDataMap);
+
+//       var dio = await DioService.getDio(
+//         headers: {'Content-Type': 'multipart/form-data'},
+//       );
+
+//       debugPrint("URL POST Multipart --> $url");
+//       debugPrint("Field name --> $fieldName");
+//       debugPrint("Files count --> ${files.length}");
+
+//       return dio.post(
+//         url,
+//         data: formData,
+//         onReceiveProgress: onReceiveProgress,
+//         onSendProgress: onSendProgress,
+//         queryParameters: queryParameters,
+//       );
+//     } on DioException {
+//       rethrow;
+//     }
+//   }
+
+//   /// PUT request
+//   Future<Response> put(
+//     String url, {
+//     Map<String, dynamic>? headers,
+//     Map<String, dynamic>? queryParameters,
+//     Function(int total, int progress)? onSendProgress,
+//     Function(int total, int progress)? onReceiveProgress,
+//     dynamic data,
+//   }) async {
+//     try {
+//       debugPrint("URL PUT --> $url");
+//       debugPrint("Request param PUT --> ${jsonEncode(data)}");
+//       debugPrint("Headers PUT --> $headers");
+
+//       var dio = await DioService.getDio(headers: headers);
+
+//       return dio.put(
+//         url,
+//         queryParameters: queryParameters,
+//         data: data,
+//         onReceiveProgress: onReceiveProgress,
+//         onSendProgress: onSendProgress,
+//       );
+//     } on DioException {
+//       rethrow;
+//     }
+//   }
+
+//   /// PATCH request
+//   Future<Response> patch(
+//     String url, {
+//     Map<String, dynamic>? headers,
+//     Map<String, dynamic>? queryParameters,
+//     Function(int total, int progress)? onSendProgress,
+//     Function(int total, int progress)? onReceiveProgress,
+//     Function? onLoading,
+//     dynamic data,
+//   }) async {
+//     try {
+//       debugPrint("URL PATCH --> $url");
+//       debugPrint("Request param PATCH --> ${jsonEncode(data)}");
+//       debugPrint("Headers PATCH --> $headers");
+
+//       if (headers != null) {
+//         headers["Cache-Control"] = "no-cache";
+//       } else {
+//         headers = {"Cache-Control": "no-cache"};
+//       }
+
+//       var dio = await DioService.getDio(headers: headers);
+
+//       return dio.patch(
+//         url,
+//         queryParameters: queryParameters,
+//         data: data,
+//         onReceiveProgress: onReceiveProgress,
+//         onSendProgress: onSendProgress,
+//       );
+//     } on DioException {
+//       rethrow;
+//     }
+//   }
+
+//   /// DELETE request
+//   Future<Response> delete(
+//     String url, {
+//     Map<String, dynamic>? headers,
+//     Map<String, dynamic>? queryParameters,
+//     dynamic data,
+//   }) async {
+//     try {
+//       debugPrint("URL DELETE --> $url");
+//       debugPrint("Request param DELETE --> ${jsonEncode(data)}");
+//       debugPrint("Headers DELETE --> $headers");
+
+//       var dio = await DioService.getDio(headers: headers);
+
+//       return dio.delete(url, queryParameters: queryParameters, data: data);
+//     } on DioException {
+//       rethrow;
+//     }
+//   }
+// }

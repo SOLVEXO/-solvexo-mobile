@@ -36,6 +36,7 @@ class AppIcons {
   static const String changePassword = '${_baseIconsPath}lock.svg';
   static const String lockPassword = '${_baseIconsPath}lockpassword.svg';
   static const String privacy = '${_baseIconsPath}privacy.svg';
+  static const String cross = '${_baseIconsPath}cross.svg';
   static const String deleteIcon = '${_baseIconsPath}trash.svg';
   // static const String termsIcon = '${_baseIconsPath}terms.svg';
   static const String chevronRight = '${_baseIconsPath}chevron-right.svg';

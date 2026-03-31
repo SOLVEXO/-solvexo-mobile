@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProductDetailSummary extends StatelessWidget {
-  const ProductDetailSummary({super.key});
+  final int index;
+  const ProductDetailSummary({super.key, required this.index});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<MyOrdersController>();
+    final order = controller.orders[index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 5,
@@ -19,11 +21,11 @@ class ProductDetailSummary extends StatelessWidget {
           fontSize: AppFontSize.medium,
           fontWeight: FontWeight.w800,
         ),
-        _row("Sub Total", controller.subTotal),
-        _row("Shipping", controller.shipping),
-        _row("Discount", -controller.discount),
+        _row("Sub Total", order.itemsPrice),
+        _row("Shipping", order.shippingPrice),
+
         const Divider(),
-        _row("Total", controller.total, bold: true),
+        _row("Total", order.itemsPrice + order.shippingPrice, bold: true),
       ],
     );
   }

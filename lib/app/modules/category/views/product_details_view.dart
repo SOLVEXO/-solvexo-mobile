@@ -1,10 +1,15 @@
+import 'package:book_store_app/app/bottom_bar/controllers/bottom_navbar_controller.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
+import 'package:book_store_app/app/components/cart_icon_with_count.dart';
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
+import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -15,15 +20,20 @@ import 'package:get/get.dart';
 class ProductDetailsView extends StatelessWidget {
   ProductDetailsView({super.key});
   final controller = Get.put(CategoryController());
+  final profileController = Get.put(ProfileController());
+  final bottombarcontroller = Get.put(BottomNavController());
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final product = controller.selectedProduct.value;
+    final ProductModel product = controller.selectedProduct.value!;
     final date = DateTime.now().day;
     final month = DateTime.now().month;
     final year = DateTime.now().year;
     return Scaffold(
-      bottomNavigationBar: _bottomBar(size, context, product),
+      backgroundColor: AppColors.background,
+      bottomNavigationBar: profileController.user.isNull
+          ? null
+          : _bottomBar(size, context, product),
       appBar: CustomAppBarTwo(
         backgroundColor: AppColors.background,
         actions: [
@@ -32,11 +42,7 @@ class ProductDetailsView extends StatelessWidget {
             assetName: AppIcons.searchIcon,
             size: AppFontSize.extraLarge,
           ),
-          CustomIconButton(
-            isPadding: true,
-            assetName: AppIcons.cartIcon,
-            size: AppFontSize.veryLarge2,
-          ),
+          CartIconWithCount(),
         ],
       ),
       body: SingleChildScrollView(
@@ -47,10 +53,15 @@ class ProductDetailsView extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 color: AppColors.background,
-                child: SvgIcon(assetName: product!.image, size: 200),
+                child: CommonImageView(
+                  url: product.images[0],
+                  width: 50,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             Container(
+              color: AppColors.white,
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               width: double.infinity,
               child: Column(
@@ -74,7 +85,24 @@ class ProductDetailsView extends StatelessWidget {
                       CustomIconButton(assetName: AppIcons.heartIcon),
                     ],
                   ),
-                  titleText("\$ ${product.price}"),
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      titleText(
+                        "\$ ${product.price}",
+                        color: AppColors.primaryColor,
+                      ),
+                      CustomText(
+                        text: "Stock (${product.stock.toString()})",
+                        fontSize: AppFontSize.small2,
+                        color: product.inStock
+                            ? AppColors.green2
+                            : AppColors.red,
+                      ),
+                    ],
+                  ),
                   Divider(),
                   titleText("Description"),
                   CustomText(
@@ -88,8 +116,8 @@ class ProductDetailsView extends StatelessWidget {
                         assetName: AppIcons.fillStar,
                         size: AppFontSize.small,
                       ),
-                      CustomText(text: product.rating.toString()),
-                      CustomText(text: "(${product.reviews})"),
+                      CustomText(text: product.ratings.toString()),
+
                       VerticalDivider(
                         color: AppColors.black,
                         width: 1,
@@ -99,32 +127,6 @@ class ProductDetailsView extends StatelessWidget {
                     ],
                   ),
                   Divider(),
-                  _expandTile(
-                    "Measurement",
-                    false.obs,
-                    Column(
-                      spacing: 5,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomText(
-                          text: 'Small - 24',
-                          fontSize: AppFontSize.regular,
-                        ),
-                        CustomText(
-                          text: 'medium - 28',
-                          fontSize: AppFontSize.regular,
-                        ),
-                        CustomText(
-                          text: 'large - 32',
-                          fontSize: AppFontSize.regular,
-                        ),
-                        CustomText(
-                          text: 'Extra Large - 36',
-                          fontSize: AppFontSize.regular,
-                        ),
-                      ],
-                    ),
-                  ),
                   _expandTile(
                     "Reviews",
                     false.obs,
@@ -178,9 +180,10 @@ class ProductDetailsView extends StatelessWidget {
     );
   }
 
-  CustomText titleText(String text) {
+  Widget titleText(String text, {Color color = AppColors.black}) {
     return CustomText(
       text: text,
+      color: color,
       fontSize: AppFontSize.medium,
       fontWeight: FontWeight.w800,
     );
@@ -207,8 +210,19 @@ class ProductDetailsView extends StatelessWidget {
     );
   }
 
-  Widget _bottomBar(Size size, context, product) {
+  Widget _bottomBar(Size size, context, ProductModel product) {
+    if (profileController.user.value.isNull) {
+      return Container(
+        color: AppColors.white,
+        padding: const EdgeInsets.only(left: 30, right: 30, bottom: 20, top: 5),
+        child: AppButton(
+          label: "Login",
+          onPressed: () => Get.toNamed(Routes.authTabView),
+        ),
+      );
+    }
     return Container(
+      color: AppColors.white,
       padding: const EdgeInsets.only(left: 30, right: 30, bottom: 20, top: 5),
       child: Row(
         spacing: 10,
@@ -240,7 +254,7 @@ class ProductDetailsView extends StatelessWidget {
           Expanded(
             child: AppButton(
               label: "Add to cart",
-              onPressed: () => controller.addToCart(context, product.image),
+              onPressed: () => controller.addToCart(context, product),
             ),
           ),
         ],

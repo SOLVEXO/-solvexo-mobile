@@ -2,10 +2,16 @@ import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
-// import 'package:book_store_app/app/modules/cart/models/cart_item_model.dart';
+import 'package:book_store_app/app/data/repositories/order_repository.dart';
+import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
+import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
+import 'package:book_store_app/app/modules/cart/models/cart_item_model.dart';
+import 'package:book_store_app/app/modules/checkout/models/order_request_model.dart';
 import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/checkout_item_model.dart';
@@ -50,25 +56,85 @@ class CheckoutController extends GetxController {
       time: "Flat rate (Estimate delivery: 2 Days)",
     ),
   ];
+  final AddressController addressController = Get.put(AddressController());
 
-  // @override
-  // void onInit() {
-  //   super.onInit();
+  @override
+  void onInit() {
+    super.onInit();
 
-  //   // final cartItems = Get.arguments as List<CartItem>;
+    final List<CartItem> cartItems = (Get.arguments as List<CartItem>? ?? []);
 
-  //   // orderItems.assignAll(
-  //   //   cartItems.map(
-  //   //     (item) => CheckoutItem(
-  //   //       name: item.product.name,
-  //   //       color: "${item.selectedVariant}",
-  //   //       image: item.product.image,
-  //   //       price: item.product.price,
-  //   //       quantity: item.quantity,
-  //   //     ),
-  //   //   ),
-  //   // );
-  // }
+    orderItems.assignAll(
+      cartItems
+          .map(
+            (item) => CheckoutItem(
+              id: item.product.id,
+              name: item.product.name,
+              color: "${item.selectedVariant}",
+              image: item.product.images.first,
+              price: item.product.price,
+              quantity: item.quantity,
+            ),
+          )
+          .toList(),
+    );
+    final defaultAddr = addressController.defaultAddress;
+    if (defaultAddr != null) {
+      address.value = defaultAddr.addressLine1;
+    }
+  }
+
+  final OrderRepository _orderRepository = OrderRepository();
+
+  RxBool isPlacingOrder = false.obs;
+
+  Future<void> placeOrder() async {
+    try {
+      final defaultAddr = addressController.defaultAddress;
+      if (defaultAddr == null) {
+        ToastUtil.showToast("Please select a delivery address");
+        return;
+      }
+
+      isPlacingOrder.value = true;
+
+      final request = OrderRequestModel(
+        orderItems: orderItems.map((e) {
+          return OrderItemRequest(
+            product: e.id!,
+            name: e.name,
+            quantity: e.quantity,
+            price: e.price,
+            image: e.image,
+          );
+        }).toList(),
+        shippingAddress: ShippingAddressRequest(
+          fullName: defaultAddr.fullName,
+          phone: defaultAddr.phone,
+          addressLine1: defaultAddr.addressLine1,
+          addressLine2: defaultAddr.addressLine2,
+          city: defaultAddr.city,
+          state: defaultAddr.state,
+          zipCode: defaultAddr.zipCode,
+          country: defaultAddr.country,
+        ),
+        paymentMethod: "cash_on_delivery",
+        itemsPrice: subtotal,
+        shippingPrice: shippingCost.value,
+        taxPrice: 0,
+        totalPrice: total,
+      );
+
+      await _orderRepository.placeOrder(request);
+
+      Get.find<CartController>().clearCart();
+      Get.offAllNamed(Routes.paymentSuccessView);
+    } catch (e) {
+      ToastUtil.showToast("Failed to place order");
+    } finally {
+      isPlacingOrder.value = false;
+    }
+  }
 
   void selectShippingOption(ShippingOption option) {
     selectedShipping.value = option;

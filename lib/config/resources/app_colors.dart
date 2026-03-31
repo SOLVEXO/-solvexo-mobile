@@ -1,7 +1,19 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primaryColor = Color(0xFF7a73ff);
+  static const Gradient appbarGradient = LinearGradient(
+    colors: [AppColors.primaryColorLight, AppColors.secondryColorLight],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+  static const Color primaryColor = Color(0xFF1F4E79);
+  // static const Color primaryColor = Color(0xFF7a73ff);
+  // static const Color primaryColorLight = Color.fromARGB(168, 122, 115, 255);
+  static const Color primaryColorLight = Color.fromARGB(193, 31, 78, 121);
+  static const Color secondryColor = Color(0xFF6FBF4A);
+  static const Color secondryColorLight = Color.fromARGB(179, 111, 191, 74);
+  static const Color accentColor = Color(0xFFD4AF37); // Gold
+  // purple
   static const Color white = Color(0xFFFFFFFF);
   static const Color white2 = Color(0xFFF0F0F0);
   static const Color background = Color.fromARGB(242, 249, 249, 249);

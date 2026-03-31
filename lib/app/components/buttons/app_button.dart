@@ -2,12 +2,13 @@
 
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 // import 'package:hifzpro_app/apptheme/app_colors.dart';
 
 class AppButton extends StatelessWidget {
   final String label;
-  final VoidCallback onPressed;
+  final void Function()? onPressed;
   final IconData? icon;
   final Widget? iconWidget;
   final bool isOutlined;
@@ -31,7 +32,7 @@ class AppButton extends StatelessWidget {
 
     final btnColor =
         backgroundColor ??
-        (isOutlined ? Colors.transparent : AppColors.primaryColor);
+        (isOutlined ? Colors.transparent : AppColors.accentColor);
 
     final borderColor = backgroundColor;
 
@@ -59,10 +60,10 @@ class AppButton extends StatelessWidget {
           backgroundColor: btnColor,
           padding: EdgeInsets.symmetric(vertical: isTablet ? 20 : 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppDimen.borderRadius),
             side: BorderSide(
               color: isOutlined
-                  ? borderColor ?? AppColors.primaryColor
+                  ? borderColor ?? AppColors.accentColor
                   : AppColors.transparent,
               width: 1.4,
             ),

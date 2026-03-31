@@ -1,63 +1,130 @@
 class ApiConstants {
-  // Base URL
-  static const String baseUrl = "https://smartvanride.com";
-  static const String webSocket = "https://smartvanride.com";
+  // static const String baseUrl = "http://localhost:3001";
+  // static const String baseUrl = "https://api.edudeen.com";
 
-  // static const String baseUrl = "http://192.168.20.127:3002";
-  // static const String webSocket = "http://192.168.20.127:3002";
+  static const String baseUrl = "http://192.168.1.102:3001";
 
-  // Auth Endpoints
-  static const String registerUser = "$baseUrl/auth/registeruser";
-  static const String login = "$baseUrl/auth/login";
-  static const String verifyOtp = "$baseUrl/auth/verifyOtp";
-  static const String resendOtp = "$baseUrl/auth/resend-otp";
-  static const String forgotPassword = "$baseUrl/auth/forgot-password";
-  static const String resetPassword = "$baseUrl/auth/reset-password";
-  static const String resendOtpResetPassword =
-      "$baseUrl/auth/resend-otp-reset-password";
-  static const String socialLogin = "$baseUrl/auth/social-login";
+  static const String apiPrefix = "$baseUrl/api";
 
-  // Profile
-  static const String getProfile = "$baseUrl/auth/getprofile";
+  // Timeouts
+  static const int connectTimeout = 30000; // 30 seconds
+  static const int receiveTimeout = 30000;
 
-  // Van
-  static const String addVan = "$baseUrl/van/addVan";
-  static const String getVans = "$baseUrl/van/getVans";
-  static const String editVan = "$baseUrl/van/update-van";
-  static const String getVanById = "$baseUrl/van/getVanById";
+  // OTP
+  static const String sendOtp = "$apiPrefix/otp/send";
+  static const String verifyOtp = "$apiPrefix/otp/verify";
+  static const String resendOtp = "$apiPrefix/otp/resend";
 
-  // Kid
-  static const String addKid = "$baseUrl/Kid/addKid";
-  static const String getKids = "$baseUrl/Kid/getKids";
+  // ============ Auth Endpoints ============
+  static const String register = "$apiPrefix/auth/register";
+  static const String socialLogin = '$apiPrefix/auth/social-login';
+  static const String login = "$apiPrefix/auth/login";
+  static const String getMe = "$apiPrefix/auth/me";
+  static const String logout = "$apiPrefix/auth/logout";
+  static const String verifyEmail = "$apiPrefix/auth/verify-email";
+  static const String resendVerification =
+      "$apiPrefix/auth/resend-verification";
+  static const String forgotPassword = "$apiPrefix/auth/forgot-password";
+  static const String resetPassword = "$apiPrefix/auth/reset-password";
 
-  // School
-  static const String getAllSchools = "$baseUrl/Admin/getAllSchools";
+  static const String faqs = '$apiPrefix/faqs';
+  // OAuth endpoints
+  static const String googleAuth = "$apiPrefix/auth/google";
+  static const String facebookAuth = "$apiPrefix/auth/facebook";
+  static const String appleAuth = "$apiPrefix/auth/apple";
 
-  // Reports / Alerts
-  static const String getFaq = "$baseUrl/report/getFaq";
-  static const String reportIssues = "$baseUrl/report/issue-types";
-  static const String reportIssuesDriver = "$baseUrl/report/issue-types-Driver";
-  static const String addReport = "$baseUrl/report/addReport";
-  static const String addReportByDriver = "$baseUrl/report/addReportByDriver";
-  static const String allAlerts = "$baseUrl/notification/getAlerts";
-  static const String issuesForDelete = "$baseUrl/auth/issuesForDelete";
+  // ============ User Profile Endpoints ============
+  static const String getUserProfile = "$apiPrefix/users/profile";
+  static const String updateUserProfile = "$apiPrefix/users/profile";
+  static const String deleteUserAccount = "$apiPrefix/users/profile";
+  static const String changePassword = "$apiPrefix/users/change-password";
+  static const String banners = "$apiPrefix/banners";
 
-  // Auth / User Settings
-  static const String uploadImage = "$baseUrl/upload/image";
-  static const String logout = "$baseUrl/auth/logout";
-  static const String deleteAccount = "$baseUrl/auth/delete-account";
-  static const String changePassword = "$baseUrl/auth/change-password";
-  static const String editProfile = "$baseUrl/van/update-profile";
+  // ============ Category Endpoints ============
+  static const String categories = "$apiPrefix/categories";
+  static String getCategoryById(String id) => "$apiPrefix/categories/$id";
+  static String updateCategory(String id) => "$apiPrefix/categories/$id";
+  static String deleteCategory(String id) => "$apiPrefix/categories/$id";
 
-  // Trips
-  static const String startTrip = "$baseUrl/trips/startTrip";
-  static const String pickStudent = "$baseUrl/trips/pickStudent";
-  static const String endTrip = "$baseUrl/trips/endTrip";
-  static const String getLocation = "$baseUrl/trips/getLocation";
-  static const String getKidsByDriver = "$baseUrl/van/getKidsByDriver";
-  static const String getActiveTrips = "$baseUrl/kid/getActiveTripDetails";
-  static const String getTripHistory = "$baseUrl/kid/getTripHistory";
+  // ============ Product Endpoints ============
+  static const String products = "$apiPrefix/products";
+  static const String featuredProducts = "$apiPrefix/products/featured";
+  static String getProductById(String id) => "$apiPrefix/products/$id";
+  static String updateProduct(String id) => "$apiPrefix/products/$id";
+  static String deleteProduct(String id) => "$apiPrefix/products/$id";
 
-  static const String deleteVanByDriver = "$baseUrl/van/deleteVanByDriver";
-  static const String getVehicleType = "$baseUrl/van/getVehicleType ";
+  // ============ Address Endpoints ============
+  static const String addresses = "$apiPrefix/addresses";
+  static String getAddressById(String id) => "$apiPrefix/addresses/$id";
+  static String updateAddress(String id) => "$apiPrefix/addresses/$id";
+  static String deleteAddress(String id) => "$apiPrefix/addresses/$id";
+  static String setDefaultAddress(String id) =>
+      "$apiPrefix/addresses/$id/default";
+
+  // ============ Order Endpoints ============
+  static const String refunds = "$apiPrefix/refunds";
+  static const String myRefunds = "$apiPrefix/refunds/my";
+  static const String uploadRefundImages = '$apiPrefix/refunds/upload-images';
+  static const String orders = "$apiPrefix/orders";
+  static const String myOrders = "$apiPrefix/orders/myorders";
+  static String getOrderById(String id) => "$apiPrefix/orders/$id";
+  static String updateOrderToPaid(String id) => "$apiPrefix/orders/$id/pay";
+  static String cancelOrder(String id) => "$apiPrefix/orders/$id/cancel";
+
+  // Cart endpoints
+  static const String cart = '$apiPrefix/cart';
+  static const String cartCount = '$apiPrefix/cart/count';
+  static const String cartItems = '$apiPrefix/cart/items';
+  static const String cartValidate = '$apiPrefix/cart/validate';
+  static const String cartSync = '$apiPrefix/cart/sync';
+
+  // ============ Upload Endpoints ============
+  // ✅ Upload
+  static const String uploadImage = '$apiPrefix/upload/image';
+  static const String uploadProductImages = "$apiPrefix/upload/products";
+  static const String uploadCategoryImage = "$apiPrefix/upload/category";
+  static const String uploadProfileImage = "$apiPrefix/upload/profile";
+
+  // ============ Query Parameters Helper ============
+  // For product filtering and search
+  static String getProductsWithFilters({
+    String? search,
+    String? category,
+    double? minPrice,
+    double? maxPrice,
+    String? brand,
+    String? sort, // price_asc, price_desc, rating, newest
+    int page = 1,
+    int limit = 10,
+  }) {
+    String url = products;
+    List<String> queryParams = [];
+
+    if (search != null && search.isNotEmpty) {
+      queryParams.add('search=$search');
+    }
+    if (category != null && category.isNotEmpty) {
+      queryParams.add('category=$category');
+    }
+    if (minPrice != null) {
+      queryParams.add('minPrice=$minPrice');
+    }
+    if (maxPrice != null) {
+      queryParams.add('maxPrice=$maxPrice');
+    }
+    if (brand != null && brand.isNotEmpty) {
+      queryParams.add('brand=$brand');
+    }
+    if (sort != null && sort.isNotEmpty) {
+      queryParams.add('sort=$sort');
+    }
+    queryParams.add('page=$page');
+    queryParams.add('limit=$limit');
+
+    if (queryParams.isNotEmpty) {
+      url += '?${queryParams.join('&')}';
+    }
+
+    return url;
+  }
 }

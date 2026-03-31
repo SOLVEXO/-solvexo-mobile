@@ -1,4 +1,5 @@
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 // import 'package:hifzpro_app/apptheme/app_colors.dart';
@@ -23,9 +24,11 @@ class CustomTextField extends StatelessWidget {
   final bool ispadding;
   final bool isborder;
   final TextEditingController? controller;
+  final double borderBorderradius;
 
   const CustomTextField({
     super.key,
+    this.borderBorderradius = AppDimen.borderRadius,
     this.label,
     this.hintText,
     this.prefixIcon,
@@ -83,20 +86,23 @@ class CustomTextField extends StatelessWidget {
           ),
           enabledBorder: isborder
               ? OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: AppColors.lightGrey),
+                  borderRadius: BorderRadius.circular(borderBorderradius),
+                  borderSide: BorderSide(
+                    color: AppColors.lightGrey,
+                    width: 0.3,
+                  ),
                 )
               : OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(borderBorderradius),
                   borderSide: BorderSide.none,
                 ),
           focusedBorder: isborder
               ? OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(borderBorderradius),
                   borderSide: BorderSide(color: AppColors.primaryColor),
                 )
               : OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(borderBorderradius),
                   borderSide: BorderSide.none,
                 ),
         ),

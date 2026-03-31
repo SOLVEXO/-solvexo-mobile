@@ -1,39 +1,54 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
-import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/config/resources/app_images.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:book_store_app/app/data/repositories/auth_repository.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 
-class OtpController extends GetxController {
-  final phoneNumber = "".obs;
-  final otpLength = 6;
+class OtpController extends GetxController
+    with GetSingleTickerProviderStateMixin {
+  final AuthRepository _authRepository = AuthRepository();
+
+  final int otpLength = 6;
 
   late List<TextEditingController> textControllers;
   late List<FocusNode> focusNodes;
 
   RxBool resendAvailable = false.obs;
   RxInt timerSec = 15.obs;
+  RxBool isLoading = false.obs;
+
+  final String otpType = Get.arguments['type'] ?? "";
+  final String email = Get.arguments['email'] ?? "";
+
+  late AnimationController shakeController;
+  late Animation<double> shakeAnimation;
 
   @override
   void onInit() {
+    super.onInit();
+
     textControllers = List.generate(otpLength, (_) => TextEditingController());
 
     focusNodes = List.generate(otpLength, (_) => FocusNode());
 
+    // 🔥 Shake animation for errors
+    shakeController = AnimationController(
+      vsync: this,
+      duration: 300.milliseconds,
+    );
+
+    shakeAnimation = Tween(begin: 0.0, end: 12.0).animate(shakeController);
+
     startTimer();
-    super.onInit();
   }
+
+  // ================= TIMER =================
 
   void startTimer() async {
     resendAvailable.value = false;
     timerSec.value = 15;
 
-    for (int i = timerSec.value; i > 0; i--) {
+    for (int i = 15; i > 0; i--) {
       await Future.delayed(const Duration(seconds: 1));
       timerSec.value = i - 1;
     }
@@ -41,11 +56,9 @@ class OtpController extends GetxController {
     resendAvailable.value = true;
   }
 
-  void resendCode() {
-    if (resendAvailable.value == false) return;
-    clearOtp();
-    startTimer();
-  }
+  // ================= OTP HELPERS =================
+
+  String get otpCode => textControllers.map((e) => e.text).join();
 
   void clearOtp() {
     for (var c in textControllers) {
@@ -54,15 +67,25 @@ class OtpController extends GetxController {
     focusNodes.first.requestFocus();
   }
 
-  String get otpCode {
-    String code = "";
-    for (var c in textControllers) {
-      code += c.text;
+  // 🔥 Paste full OTP support
+  void handlePaste(String value) {
+    if (value.length != otpLength) return;
+
+    for (int i = 0; i < otpLength; i++) {
+      textControllers[i].text = value[i];
     }
-    return code;
+
+    submitOtp();
   }
 
-  void onOtpInput(String value, int index, Size size) {
+  // ================= INPUT HANDLING =================
+
+  void onOtpInput(String value, int index) {
+    if (value.length > 1) {
+      handlePaste(value);
+      return;
+    }
+
     if (value.isEmpty && index > 0) {
       focusNodes[index - 1].requestFocus();
       return;
@@ -72,51 +95,66 @@ class OtpController extends GetxController {
       focusNodes[index + 1].requestFocus();
     }
 
+    // Auto verify
     if (index == otpLength - 1 && otpCode.length == otpLength) {
-      submitOtp(size);
+      submitOtp();
     }
   }
 
-  void submitOtp(Size size) {
+  // ================= VERIFY OTP =================
+
+  Future<void> submitOtp() async {
     if (otpCode.length != otpLength) {
-      Get.snackbar("Error", "Invalid OTP");
+      ToastUtil.showToast("Invalid OTP");
       return;
     }
 
-    // navigate or call API
-    debugPrint("OTP is: $otpCode");
+    isLoading.value = true;
 
-    Get.snackbar("Success", "OTP Verified!");
-    Get.bottomSheet(
-      backgroundColor: AppColors.white,
-      CustomBottomSheet(
-        height: size.height / 2,
-        title: 'Verification Successfull',
-        widget: Column(
-          spacing: 10,
-          children: [
-            SizedBox(height: 10),
-            SvgIcon(assetName: AppImages.userImage, size: 150),
-            SizedBox(height: 10),
-            CustomText(
-              text: 'Congratulation!',
-              fontSize: AppFontSize.large,
-              fontWeight: FontWeight.w600,
-            ),
-            CustomText(
-              text: 'Your verification has been successfull',
-              fontSize: AppFontSize.small2,
-            ),
-            AppButton(
-              label: "OK",
-              onPressed: () {
-                Get.offAllNamed(Routes.getNotified);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+    if (otpType == "verify_email") {
+      final auth = await _authRepository.verifyEmailOtp(
+        email: email,
+        otp: otpCode,
+      );
+
+      isLoading.value = false;
+
+      if (auth != null) {
+        Get.offAllNamed(Routes.mainHome);
+      } else {
+        ToastUtil.showToast("Invalid OTP");
+      }
+    } else if (otpType == "password_reset") {
+      Get.toNamed(
+        Routes.newPasswordView,
+        arguments: {"email": email, "otp": otpCode},
+      );
+
+      isLoading.value = false;
+    }
+  }
+
+  // ================= RESEND =================
+
+  Future<void> resendCode() async {
+    if (!resendAvailable.value) return;
+
+    final ok = await _authRepository.resendVerificationOtp(email);
+
+    if (ok) {
+      ToastUtil.showToast("OTP sent again");
+      clearOtp();
+      startTimer();
+    } else {
+      ToastUtil.showToast("Failed to resend OTP");
+    }
+  }
+
+  // ================= ERROR ANIMATION =================
+
+  void triggerError() async {
+    await shakeController.forward();
+    shakeController.reverse();
   }
 
   @override
@@ -127,6 +165,8 @@ class OtpController extends GetxController {
     for (var f in focusNodes) {
       f.dispose();
     }
+
+    shakeController.dispose();
     super.onClose();
   }
 }

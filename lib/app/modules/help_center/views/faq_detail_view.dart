@@ -12,7 +12,7 @@ class FAQDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final FAQModel faq = Get.arguments;
+    final FaqModel faq = Get.arguments;
 
     return Scaffold(
       appBar: CustomAppBarTwo(title: "FAQ"),

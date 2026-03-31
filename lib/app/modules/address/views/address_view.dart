@@ -94,12 +94,13 @@ class AddressView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
-                      text: a.name,
+                      text: a.fullName,
                       fontSize: AppFontSize.regular,
                       fontWeight: FontWeight.bold,
                     ),
                     CustomText(
-                      text: "${a.address}, ${a.city}, ${a.state} ${a.zip}",
+                      text:
+                          "${a.addressLine1.toUpperCase()}, ${a.city.toUpperCase()}, ${a.state.toUpperCase()}, ${a.zipCode}, ${a.country.toUpperCase()}",
                       fontSize: AppFontSize.small,
                     ),
                     CustomText(text: a.phone, fontSize: AppFontSize.small),
@@ -110,7 +111,7 @@ class AddressView extends StatelessWidget {
                 assetName: AppIcons.checkIcon,
                 size: 30,
                 color: a.isDefault ? AppColors.primaryColor : AppColors.gray600,
-                onPressed: () => controller.selectDefault(index),
+                onPressed: () => controller.setDefault(a.id!),
               ),
               // Radio(
               //   value: true,

@@ -20,37 +20,61 @@ class IncDicrQuantityWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        spacing: 20,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.lightGrey10,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                bottomLeft: Radius.circular(15),
+          /// 🔻 DECREASE
+          Expanded(
+            flex: 2,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.lightGrey10,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  bottomLeft: Radius.circular(15),
+                ),
+              ),
+              child: InkWell(
+                onTap: () => controller.decreaseQuantity(item.productId!),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Icon(Icons.remove, color: AppColors.grey, size: 18),
+                ),
               ),
             ),
-            child: IconButton(
-              onPressed: () => controller.decreaseQty(item),
-              icon: const Icon(Icons.remove, color: AppColors.grey),
-            ),
           ),
-          CustomText(
-            text: item.quantity.toString(),
-            fontSize: AppFontSize.medium,
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.2),
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(15),
-                bottomRight: Radius.circular(15),
+
+          /// 🔹 QUANTITY
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: CustomText(
+                text: item.quantity.toString(),
+                fontSize: AppFontSize.medium,
               ),
             ),
-            child: IconButton(
-              onPressed: () => controller.increaseQty(item),
-              icon: const Icon(Icons.add, color: AppColors.primaryColor),
+          ),
+
+          /// 🔺 INCREASE
+          Expanded(
+            flex: 2,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.2),
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(15),
+                  bottomRight: Radius.circular(15),
+                ),
+              ),
+              child: InkWell(
+                onTap: () => controller.increaseQuantity(item.productId!),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Icon(
+                    Icons.add,
+                    color: AppColors.primaryColor,
+                    size: 18,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

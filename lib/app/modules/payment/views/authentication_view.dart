@@ -18,6 +18,7 @@ class AuthenticationView extends StatelessWidget {
   Widget build(BuildContext context) {
     final date = DateTime.now();
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Authentication"),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -98,15 +99,20 @@ class AuthenticationView extends StatelessWidget {
                     controller: pvController.otpController,
                     maxLength: 6,
                     keyboardType: TextInputType.number,
+                    borderRadius: BorderRadius.circular(10),
                     onChanged: pvController.onOtpChanged,
                   ),
                 ),
-                Expanded(
-                  child: AppButton(
-                    label: "Submit",
-                    onPressed: () {
-                      pvController.verifyOtp();
-                    },
+                Obx(
+                  () => Expanded(
+                    child: AppButton(
+                      label: pvController.isLoading.value
+                          ? "Submitting..."
+                          : "Submit",
+                      onPressed: () {
+                        pvController.verifyOtp();
+                      },
+                    ),
                   ),
                 ),
               ],

@@ -1,15 +1,16 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CategoryItem extends StatelessWidget {
   final String title;
-  final String image;
+  final String? image;
 
-  const CategoryItem({super.key, required this.title, required this.image});
+  const CategoryItem({super.key, required this.title, this.image});
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +32,19 @@ class CategoryItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
               ),
-              child: SvgIcon(assetName: image, size: 60),
+              child: CommonImageView(
+                url: image, // Backend image URL
+                height: 60,
+                width: 60,
+                fit: BoxFit.cover,
+                radius: BorderRadius.circular(12),
+                placeHolder: AppImages.sampleProduct,
+              ),
             ),
             const SizedBox(height: 8),
             CustomText(
               text: title,
-              fontWeight: FontWeight.w500,
-              fontSize: AppFontSize.small,
+              fontSize: AppFontSize.small2,
               textAlign: TextAlign.center,
             ),
           ],

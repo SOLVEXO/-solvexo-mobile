@@ -1,5 +1,5 @@
 class CheckoutItem {
-  final int? id;
+  final String? id;
   final String name;
   final String? color;
   final String image;

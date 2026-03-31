@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../models/faq_model.dart';
 
 class FaqTile extends StatelessWidget {
-  final FAQModel faq;
+  final FaqModel faq;
   final VoidCallback onTap;
 
   const FaqTile({super.key, required this.faq, required this.onTap});

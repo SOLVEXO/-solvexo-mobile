@@ -1,9 +1,11 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/recent_order.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/modules/refund_request/controllers/refund_request_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -15,7 +17,7 @@ import 'package:image_picker/image_picker.dart';
 class RefundRequestView extends StatelessWidget {
   RefundRequestView({super.key});
   final controller = Get.put(RefundRequestController());
-
+  final OrderModel order = Get.arguments as OrderModel;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +31,7 @@ class RefundRequestView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /// Order Header
-              RecentOrder(),
+              RecentOrder(isRefundView: true, orders: order),
 
               const SizedBox(height: 20),
 
@@ -42,9 +44,18 @@ class RefundRequestView extends StatelessWidget {
               const Spacer(),
 
               /// Continue Button
-              AppButton(
-                label: "Continue",
-                onPressed: controller.canContinue ? () {} : () {},
+              Obx(
+                () => AppButton(
+                  iconWidget: controller.isLoading.value
+                      ? CircularProgressIndicator(color: AppColors.background)
+                      : SizedBox(),
+                  label: controller.isLoading.value ? "Continuing" : "Continue",
+                  onPressed: controller.canContinue
+                      ? () {
+                          controller.submitRefund(order);
+                        }
+                      : null,
+                ),
               ),
             ],
           ),
@@ -132,9 +143,18 @@ class RefundRequestView extends StatelessWidget {
                     Positioned(
                       right: -5,
                       top: -5,
-                      child: IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        onPressed: () => controller.removeAttachment(i),
+                      child: Container(
+                        padding: EdgeInsets.only(left: 7, top: 7, right: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: SvgIcon(
+                          size: 24,
+                          assetName: AppIcons.cross,
+                          color: AppColors.black,
+                          onTap: () => controller.removeAttachment(i),
+                        ),
                       ),
                     ),
                   ],
@@ -180,8 +200,8 @@ class RefundRequestView extends StatelessWidget {
 
   void _showPicker(BuildContext context) {
     Get.bottomSheet(
-      SafeArea(
-        child: Wrap(
+      CustomBottomSheet(
+        widget: Wrap(
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera),
@@ -201,6 +221,7 @@ class RefundRequestView extends StatelessWidget {
             ),
           ],
         ),
+        title: 'upload Image',
       ),
     );
   }

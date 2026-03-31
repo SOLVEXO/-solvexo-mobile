@@ -1,139 +1,158 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
-  static late final SharedPreferences _preferences;
+  static const String _accessTokenKey = 'access_token';
+  static const String _refreshTokenKey = 'refresh_token';
+  static const String _userIdKey = 'user_id';
+  static const String _userNameKey = 'user_name';
+  static const String _userEmailKey = 'user_email';
+  static const String _recentSearchesKey = 'recent_searches';
+  static const String _recentlyViewedKey = 'recently_viewed_products';
 
-  static Future<SharedPreferences> init() async =>
-      _preferences = await SharedPreferences.getInstance();
-
-  AppPreferences._internal();
-
-  static const String _prefTypeBool = "BOOL";
-  static const String _prefTypeInteger = "INTEGER";
-  static const String _prefTypeDouble = "DOUBLE";
-  static const String _prefTypeString = "STRING";
-
-  /// Constants for Preference-Keys
-  static const String _userId = "USER_ID";
-  // static const String _userDetails = "USER_DETAILS";
-  static const String _accessToken = "ACCESS_TOKEN";
-  static const String _loggedIn = "IS_LOGGED_IN";
-  static const String _role = "ROLE";
-  static const String _theme = "theme";
-  static const String _language = "language";
-  static const String _selectedRole = "_selectedRole";
-
-  //--------------------------------------------------- Public Preference Methods -------------------------------------------------------------
-  static void removeValue({required String key}) {
-    _preferences.remove(key);
+  // Save access token
+  static Future<void> setAccessToken(
+    String accessToken,
+    String refreshToken,
+  ) async {
+    await setTokens(accessToken: accessToken, refreshToken: refreshToken);
   }
 
-  static Future<bool> setUserId({required String userId}) async =>
-      _setPreference(
-        prefName: _userId,
-        prefValue: userId,
-        prefType: _prefTypeString,
-      );
-
-  static String? getUserId() => _getPreference(prefName: _userId);
-
-  static Future<bool> setRole({required int role}) async => _setPreference(
-    prefName: _role,
-    prefValue: role,
-    prefType: _prefTypeInteger,
-  );
-
-  static int? getRole() => _getPreference(prefName: _role);
-
-  // static Future<bool> setUserDetails({required UserModel user}) =>
-  //     _setPreference(prefName: _userDetails, prefValue: jsonEncode(user), prefType: _prefTypeString);
-
-  // static UserModel? getUserDetails() {
-  //   if (_preferences.getString(_userDetails) == null) return null;
-  //   Map<String, dynamic> userMap = jsonDecode(_preferences.getString(_userDetails)!);
-  //   var userDetails = UserModel.fromJson(userMap);
-  //   return userDetails;
-  // }
-
-  static Future<bool> setAccessToken({required String token}) => _setPreference(
-    prefName: _accessToken,
-    prefValue: token,
-    prefType: _prefTypeString,
-  );
-
-  static String getAccessToken() =>
-      (_getPreference(prefName: _accessToken)) ?? "";
-
-  static Future<bool> setIsLoggedIn({required bool loggedIn}) => _setPreference(
-    prefName: _loggedIn,
-    prefValue: loggedIn,
-    prefType: _prefTypeBool,
-  );
-
-  static bool getIsLoggedIn() {
-    return _preferences.getBool(_loggedIn) ?? false;
+  // Get access token
+  static Future<String?> getAccessTokenAsync() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_accessTokenKey);
   }
 
-  static Future<bool> setIsDarkTheme({required bool darkTheme}) =>
-      _setPreference(
-        prefName: _theme,
-        prefValue: darkTheme,
-        prefType: _prefTypeBool,
-      );
-
-  static bool getIsDarkTheme() {
-    return _preferences.getBool(_theme) ?? true;
+  // Save refresh token
+  static Future<void> setRefreshToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_refreshTokenKey, token);
   }
 
-  static Future<bool> setCurrentLanguage({required String language}) =>
-      _setPreference(
-        prefName: _language,
-        prefValue: language,
-        prefType: _prefTypeString,
-      );
+  // Get refresh token
+  static Future<String?> getRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_refreshTokenKey);
+  }
 
-  static Future<bool> setPageData({
-    required String data,
-    required String page,
-  }) => _setPreference(
-    prefName: page,
-    prefValue: data,
-    prefType: _prefTypeString,
-  );
-
-  static Future<String?> getPageData({required String page}) async =>
-      await _getPreference(prefName: page);
-
-  static Future<bool> setSelectedRole({required int selectedRole}) =>
-      _setPreference(
-        prefName: _selectedRole,
-        prefValue: selectedRole,
-        prefType: _prefTypeInteger,
-      );
-
-  //--------------------------------------------------- Private Preference Methods ----------------------------------------------------
-  /// @usage -> This is a generalized method to set preferences with required Preference-Name(Key) with Preference-Value(Value) and Preference-Value's data-type.
-  static Future<bool> _setPreference({
-    required String prefName,
-    required dynamic prefValue,
-    required String prefType,
+  // ✅ Save both tokens at once
+  static Future<void> setTokens({
+    required String accessToken,
+    required String refreshToken,
   }) async {
-    switch (prefType) {
-      case _prefTypeBool:
-        return _preferences.setBool(prefName, prefValue);
-      case _prefTypeInteger:
-        return _preferences.setInt(prefName, prefValue);
-      case _prefTypeDouble:
-        return _preferences.setDouble(prefName, prefValue);
-      case _prefTypeString:
-        return _preferences.setString(prefName, prefValue);
-      default:
-        return Future.value(false);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      debugPrint('💾 Saving tokens...');
+      final accessSaved = await prefs.setString(_accessTokenKey, accessToken);
+      final refreshSaved = await prefs.setString(
+        _refreshTokenKey,
+        refreshToken,
+      );
+
+      debugPrint('✅ Access token saved: $accessSaved');
+      debugPrint('✅ Refresh token saved: $refreshSaved');
+
+      // Verify
+      final savedAccess = prefs.getString(_accessTokenKey);
+      final savedRefresh = prefs.getString(_refreshTokenKey);
+      debugPrint('✅ Verified access: ${savedAccess?.substring(0, 20)}...');
+      debugPrint('✅ Verified refresh: ${savedRefresh?.substring(0, 20)}...');
+    } catch (e) {
+      debugPrint('❌ Error saving tokens: $e');
+      rethrow;
     }
   }
 
-  static dynamic _getPreference({required prefName}) =>
-      _preferences.get(prefName);
+  // Clear access token
+  static Future<void> clearAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_accessTokenKey);
+  }
 
-  static Future<bool> clearPreference() => _preferences.clear();
+  // Clear refresh token
+  static Future<void> clearRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_refreshTokenKey);
+  }
+
+  // Clear both tokens
+  static Future<void> clearTokens() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_accessTokenKey);
+    await prefs.remove(_refreshTokenKey);
+  }
+
+  // Save user data
+  static Future<void> saveUserData({
+    required String userId,
+    required String name,
+    required String email,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userIdKey, userId);
+    await prefs.setString(_userNameKey, name);
+    await prefs.setString(_userEmailKey, email);
+  }
+
+  // Get user ID
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userIdKey);
+  }
+
+  // Get user name
+  static Future<String?> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userNameKey);
+  }
+
+  // Get user email
+  static Future<String?> getUserEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userEmailKey);
+  }
+
+  // Clear all user data
+  static Future<void> clearUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_userIdKey);
+    await prefs.remove(_userNameKey);
+    await prefs.remove(_userEmailKey);
+  }
+
+  // Clear all preferences
+  static Future<void> clearPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
+
+  // Check if user is logged in
+  static Future<bool> isLoggedIn() async {
+    final token = await getAccessTokenAsync();
+    return token != null && token.isNotEmpty;
+  }
+
+  // Recent Searches
+  static Future<void> saveRecentSearches(List<String> searches) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_recentSearchesKey, searches);
+  }
+
+  static Future<List<String>?> getRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_recentSearchesKey);
+  }
+
+  // Recently Viewed Products
+  static Future<void> saveRecentlyViewedProductIds(List<String> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_recentlyViewedKey, ids);
+  }
+
+  static Future<List<String>?> getRecentlyViewedProductIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(_recentlyViewedKey);
+  }
 }

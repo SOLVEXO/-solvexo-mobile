@@ -1,4 +1,3 @@
-import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/login/controller/auth_tabs_controller.dart';
 import 'package:book_store_app/app/modules/login/login_view.dart';
@@ -19,23 +18,7 @@ class AuthTabsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBarTwo(
-        backgroundColor: AppColors.white,
-        color: AppColors.black,
-        actions: [
-          Container(
-            margin: EdgeInsets.only(right: 22),
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(5),
-              border: Border.all(color: AppColors.lightGrey, strokeAlign: 0.5),
-            ),
-            child: CustomText(text: "Skip", letterSpacing: 2),
-          ),
-        ],
-      ),
-      body: Center(
+      body: SafeArea(
         child: Container(
           width: isTab ? size.width * 0.55 : size.width,
           padding: EdgeInsets.symmetric(
@@ -91,7 +74,7 @@ class AuthTabsView extends StatelessWidget {
         child: Obx(() {
           final active = controller.tabIndex.value == pos;
           return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 500),
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),

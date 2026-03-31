@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -6,7 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapPickerController extends GetxController {
   GoogleMapController? mapController;
-
+  var currentAddress = 'Fetching location...'.obs;
   var currentPosition = LatLng(24.8607, 67.0011).obs; // Default: Karachi
   var selectedAddress = ''.obs;
   var isLoading = false.obs;
@@ -65,7 +66,7 @@ class MapPickerController extends GetxController {
         }
       }
     } catch (e) {
-      print('Search error: $e');
+      searchResults.add({"name": '$e'});
     }
   }
 
@@ -100,11 +101,8 @@ class MapPickerController extends GetxController {
 
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        Get.snackbar(
-          'Error',
-          'Please enable location services',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        currentAddress.value = 'Location services are disabled';
+        CustomAppSnackbar.error('Please enable location services');
         isLoading.value = false;
         return;
       }
@@ -113,23 +111,20 @@ class MapPickerController extends GetxController {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          Get.snackbar(
-            'Error',
-            'Location permission denied',
-            snackPosition: SnackPosition.BOTTOM,
-          );
+          currentAddress.value = 'Location permission denied';
+          CustomAppSnackbar.error('Location permission denied');
+
           isLoading.value = false;
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        Get.snackbar(
-          'Error',
+        currentAddress.value = 'Location permission denied permanently';
+        CustomAppSnackbar.error(
           'Location permission permanently denied. Please enable from settings.',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: Duration(seconds: 4),
         );
+
         isLoading.value = false;
         return;
       }
@@ -150,11 +145,8 @@ class MapPickerController extends GetxController {
 
       await getAddressFromLatLng(currentPosition.value);
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to get location: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      currentAddress.value = 'Unable to get location';
+      CustomAppSnackbar.error('Failed to get location: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
@@ -179,7 +171,7 @@ class MapPickerController extends GetxController {
                 .replaceAll(RegExp(r',\s*$'), '');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to get address');
+      CustomAppSnackbar.error('Failed to get address');
     } finally {
       isLoading.value = false;
     }

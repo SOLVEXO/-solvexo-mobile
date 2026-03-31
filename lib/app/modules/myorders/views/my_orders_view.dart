@@ -7,9 +7,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
-
 import '../controllers/my_orders_controller.dart';
 
 class MyOrdersView extends StatelessWidget {
@@ -19,13 +17,27 @@ class MyOrdersView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: CustomTextField(
-          hintText: "Search Order",
-          isborder: true,
-          prefixIcon: SvgIcon(assetName: AppIcons.searchIcon),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(90),
+        child: Container(
+          padding: EdgeInsets.only(
+            top: Get.height / 14,
+            bottom: 13,
+            left: 15,
+            right: 15,
+          ),
+          decoration: BoxDecoration(gradient: AppColors.appbarGradient),
+          child: CustomTextField(
+            hintText: "Search Order",
+            isborder: true,
+            borderRadius: BorderRadius.circular(15),
+            borderBorderradius: 15,
+            prefixIcon: SvgIcon(
+              assetName: AppIcons.searchIcon,
+              color: AppColors.gray600,
+            ),
+          ),
         ),
-        backgroundColor: AppColors.white,
       ),
       body: Column(
         children: [
@@ -70,9 +82,13 @@ class MyOrdersView extends StatelessWidget {
           Expanded(
             child: Obx(
               () => ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
                 itemCount: controller.filteredOrders.length,
                 itemBuilder: (_, i) {
                   final order = controller.filteredOrders[i];
+
                   if (order.isNull) {
                     return Center(child: CustomText(text: "NO order Found!"));
                   }

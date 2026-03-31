@@ -1,4 +1,6 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
+import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
+import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -38,11 +40,7 @@ class MapPickerScreen extends StatelessWidget {
 
           // Center marker
           Center(
-            child: SvgIcon(
-              assetName: AppIcons.locationIcon,
-              color: AppColors.red,
-              size: 30,
-            ),
+            child: Icon(Icons.location_pin, color: AppColors.red, size: 50),
           ),
 
           // Search bar
@@ -54,21 +52,30 @@ class MapPickerScreen extends StatelessWidget {
               spacing: AppDimen.bottomPadding,
               children: [
                 Container(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.lightGrey, width: 0.3),
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(AppDimen.borderRadius),
                   ),
-                  child: IconButton(
+                  child: CustomIconButton(
                     onPressed: () {
                       Get.back();
                     },
-                    icon: Icon(Icons.chevron_left_rounded, size: 35),
+                    assetName: AppIcons.chevronLeft,
+                    size: 35,
                   ),
                 ),
                 Expanded(
                   child: CustomTextField(
+                    isborder: true,
+                    borderRadius: BorderRadius.circular(AppDimen.borderRadius),
                     hintText: 'Search location...',
-                    prefixIcon: SvgIcon(assetName: AppIcons.searchIcon),
+                    prefixIcon: SvgIcon(
+                      assetName: AppIcons.searchIcon,
+                      color: AppColors.gray600,
+                      size: 20,
+                    ),
                     controller: controller.searchController,
                     onChanged: (value) {
                       if (value.isNotEmpty) {
@@ -174,7 +181,11 @@ class MapPickerScreen extends StatelessWidget {
             child: FloatingActionButton(
               backgroundColor: Colors.white,
               onPressed: controller.getCurrentLocation,
-              child: Icon(Icons.my_location, color: Colors.blue, size: 30),
+              child: Icon(
+                Icons.my_location,
+                color: AppColors.primaryColor,
+                size: 30,
+              ),
             ),
           ),
 
@@ -189,11 +200,7 @@ class MapPickerScreen extends StatelessWidget {
                 if (controller.selectedAddress.value.isNotEmpty) {
                   Get.back(result: controller.selectedAddress.value);
                 } else {
-                  Get.snackbar(
-                    'Error',
-                    'Please select a location',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+                  CustomAppSnackbar.error('Please select a location');
                 }
               },
             ),

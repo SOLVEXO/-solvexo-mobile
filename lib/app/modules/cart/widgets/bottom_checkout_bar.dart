@@ -1,7 +1,7 @@
+import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +20,7 @@ class BottomCheckoutBar extends StatelessWidget {
           boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
         ),
         child: Row(
+          spacing: 20,
           children: [
             Row(
               children: [
@@ -34,24 +35,20 @@ class BottomCheckoutBar extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(width: 60),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text("Sub Total"),
-                Text(
-                  "\$ ${controller.subTotal.toStringAsFixed(2)}",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                const CustomText(text: "Sub Total"),
+                CustomText(
+                  text: "\$ ${controller.subtotal.toStringAsFixed(2)}",
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ],
             ),
-            const SizedBox(width: 12),
             Expanded(
-              child: ElevatedButton(
-                onPressed: controller.subTotal == 0
+              child: AppButton(
+                onPressed: controller.subtotal.value == 0
                     ? null
                     : () {
                         Get.toNamed(
@@ -59,12 +56,7 @@ class BottomCheckoutBar extends StatelessWidget {
                           arguments: controller.cartItems,
                         );
                       },
-                child: CustomText(
-                  color: AppColors.background,
-                  text: "Checkout",
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppFontSize.regular,
-                ),
+                label: "Checkout",
               ),
             ),
           ],

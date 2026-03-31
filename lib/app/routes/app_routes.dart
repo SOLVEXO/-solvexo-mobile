@@ -30,4 +30,11 @@ abstract class Routes {
   static const faqListView = '/profile/faq_view';
   static const faqDetailView = '/profile/faq_details';
   static const mapPickerView = '/map_picker';
+  static const editProfileView = '/edit-profile';
+  static const forgetPasswordView = '/forget-password';
+  static const newPasswordView = '/new-password';
+  static const SETTINGS = '/settings';
+  static const CHANGE_PASSWORD = '/change-password';
+  static const PRIVACY_POLICY = '/privacy-policy';
+  static const ABOUT = '/about';
 }

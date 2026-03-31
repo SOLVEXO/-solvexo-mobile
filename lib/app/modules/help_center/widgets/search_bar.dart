@@ -9,7 +9,7 @@ class HelpSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final searchController = TextEditingController();
-    final controller = Get.find<HelpCenterController>();
+    final controller = Get.find<FaqController>();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: CustomTextField(

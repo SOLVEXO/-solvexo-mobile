@@ -13,7 +13,6 @@ class MainView extends StatelessWidget {
     // final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppColors.white,
-
       body: Obx(() => controller.screens[controller.selectedIndex.value]),
       bottomNavigationBar: DashboardBottomNav(),
     );

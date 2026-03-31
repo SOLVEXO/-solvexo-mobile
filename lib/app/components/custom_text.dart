@@ -46,6 +46,7 @@ class CustomText extends StatelessWidget {
       overflow: overflow ?? TextOverflow.visible,
       maxLines: maxLines,
       textDirection: textDirection,
+
       style: TextStyle(
         color: color,
         fontSize: fontSize.sp,

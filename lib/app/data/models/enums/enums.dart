@@ -1,11 +1,32 @@
 enum RefundIssue {
   missing,
   notReceived,
-  notAsDescribed,
-  damaged,
   wrongItem,
+  damaged,
   defective,
+  notAsDescribed,
   counterfeit,
+}
+
+extension RefundIssueExtension on RefundIssue {
+  String get apiValue {
+    switch (this) {
+      case RefundIssue.missing:
+        return "missing";
+      case RefundIssue.notReceived:
+        return "not_received";
+      case RefundIssue.wrongItem:
+        return "wrong_item";
+      case RefundIssue.damaged:
+        return "damaged";
+      case RefundIssue.defective:
+        return "defective";
+      case RefundIssue.notAsDescribed:
+        return "not_as_described";
+      case RefundIssue.counterfeit:
+        return "counterfeit";
+    }
+  }
 }
 
 enum TrackingStatus {
@@ -17,6 +38,6 @@ enum TrackingStatus {
   delivered,
 }
 
-enum OrderStatus { unpaid, toShip, shipped, delivered }
+enum OrderStatus { pending, processing, shipped, delivered, cancelled }
 
 enum OrderDeliveryStatus { process, deliver, inTransit, delivered }

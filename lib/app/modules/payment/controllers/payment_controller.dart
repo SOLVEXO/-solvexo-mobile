@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
+import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
@@ -8,6 +9,7 @@ import 'package:book_store_app/app/modules/payment/models/payment_method_model.d
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_sounds.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -47,7 +49,7 @@ class PaymentController extends GetxController {
   void paymentMethodBottomSheet(Size size) {
     Get.bottomSheet(
       CustomBottomSheet(
-        height: size.height / 1.8,
+        // height: size.height / 1.8,
         title: "Select Payment",
         widget: Column(
           spacing: 15,
@@ -129,7 +131,6 @@ class PaymentController extends GetxController {
 
     Get.bottomSheet(
       CustomBottomSheet(
-        height: size.height / 1.9,
         title: "Add new card",
         widget: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 13),
@@ -230,7 +231,12 @@ class PaymentController extends GetxController {
 
   void proceedToPayment() {
     if (selectedPaymentMethod.value == null) {
-      Get.snackbar("Payment Required", "Please select a payment method");
+      CustomAppSnackbar.show(
+        soundPath: AppSounds.warningSound,
+        title: "Payment Required",
+        message: "Please select a payment method",
+      );
+
       return;
     }
 

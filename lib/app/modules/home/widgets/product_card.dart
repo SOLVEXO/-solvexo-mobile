@@ -1,43 +1,35 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
-import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/app/modules/home/widgets/pricing_section.dart';
+import 'package:book_store_app/app/modules/home/widgets/product_image_with_favorite_button.dart';
+import 'package:book_store_app/app/modules/home/widgets/ratting_row.dart';
+import 'package:book_store_app/app/modules/home/widgets/seller_name_row.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProductCard extends StatelessWidget {
-  final int index;
-  final String image, name, price, reviews, disc;
-  final double rating;
+  final ProductModel product;
 
-  ProductCard({
-    super.key,
-    required this.image,
-    required this.name,
-    required this.price,
-    required this.rating,
-    required this.reviews,
-    required this.disc,
-    required this.index,
-  });
+  ProductCard({super.key, required this.product});
 
   final controller = Get.find<HomeController>();
-  final categoryController = Get.find<CategoryController>();
+  final categoryController = Get.put(CategoryController());
+
   @override
   Widget build(BuildContext context) {
-    double radius = 15;
+    double radius = AppDimen.borderRadius;
+
     return GestureDetector(
-      onTap: () {
-        categoryController.openProductDetails(
-          categoryController.products[index],
-        );
-      },
+      onTap: () => categoryController.openProductDetails(product),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppDimen.allPadding),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(radius),
           boxShadow: [
             BoxShadow(
@@ -48,73 +40,62 @@ class ProductCard extends StatelessWidget {
           ],
         ),
         child: Column(
+          spacing: 2,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Obx(
-              () => Stack(
-                alignment: AlignmentGeometry.topRight,
-                children: [
-                  AspectRatio(
-                    aspectRatio: 1.5,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(radius),
-                      child: SvgIcon(assetName: image),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      controller.favouriteMap[name] =
-                          !controller.favouriteMap[name]!;
-                    },
-                    icon: SvgIcon(
-                      assetName: controller.favouriteMap[name]!
-                          ? AppIcons.heartFill
-                          : AppIcons.heartIcon,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Product Image with Favorite Button and Discount Badge
+            ProductImageWithFavoriteButton(product: product),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
 
+            // Product Name
             CustomText(
-              text: name,
+              text: product.name,
               fontSize: AppFontSize.regular,
               fontWeight: FontWeight.w600,
               color: Colors.black,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            CustomText(
-              text: disc,
-              fontSize: AppFontSize.small2,
-              color: Colors.grey,
-            ),
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: 5,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) => Padding(
-                        padding: const EdgeInsets.only(left: 2.0),
-                        child: SvgIcon(
-                          assetName: AppIcons.fillStar,
-                          size: AppFontSize.small,
-                        ),
-                      ),
-                    ),
-                  ),
-                  CustomText(text: "($rating)"),
-                ],
+
+            // Brand or Category
+            if (product.brand != null || product.category != null)
+              CustomText(
+                text: product.brand ?? product.category?.name ?? '',
+                fontSize: AppFontSize.small2,
+                color: Colors.grey,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            CustomText(
-              text: "\$ $price",
-              fontSize: AppFontSize.regular,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF7a73ff),
-            ),
+
+            // Rating
+            RattingRow(product: product),
+            // Price Section
+            PricingSection(product: product),
+            // Featured Badge (Optional)
+            if (product.isFeatured)
+              Container(
+                margin: EdgeInsets.only(top: 4),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: CustomText(
+                  text: "Featured",
+                  fontSize: AppFontSize.verySmall,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+
+            // CustomText(
+            //   text: "Stock (${product.stock.toString()})",
+            //   fontSize: AppFontSize.small2,
+            // ),
+            const SizedBox(height: 5),
+            SellerNameRow(name: "Seller Name"),
           ],
         ),
       ),

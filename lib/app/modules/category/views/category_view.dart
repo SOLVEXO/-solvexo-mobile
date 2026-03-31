@@ -1,10 +1,11 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,9 +25,11 @@ class CategoryView extends StatelessWidget {
         preferredSize: Size.fromHeight(60),
         child: Obx(
           () => CustomAppBarTwo(
-            title: controller
-                .categories[controller.selectedCategoryIndex.value]
-                .title,
+            title: controller.selectedCategoryIndex.value == 0
+                ? controller.categories[0].name
+                : controller
+                      .categories[controller.selectedCategoryIndex.value - 0]
+                      .name,
           ),
         ),
       ),
@@ -58,16 +61,29 @@ class CategoryView extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
-                                color: isSelected
-                                    ? AppColors.primaryColor.withOpacity(0.2)
-                                    : AppColors.background,
-                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  width: 0.3,
+                                  color: isSelected
+                                      ? AppColors.primaryColor
+                                      : AppColors.white,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppDimen.borderRadius,
+                                ),
                               ),
-                              child: SvgIcon(assetName: item.icon, size: 60),
+                              child: CommonImageView(
+                                url: item.image,
+
+                                radius: BorderRadius.circular(
+                                  AppDimen.borderRadius,
+                                ),
+                                width: 60,
+                                height: 60,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             CustomText(
-                              text: item.title,
+                              text: item.name,
                               color: isSelected
                                   ? AppColors.primaryColor
                                   : AppColors.textPrimary,
@@ -87,17 +103,13 @@ class CategoryView extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(color: AppColors.background),
-                child: Obx(
-                  () => ListView.builder(
+                child: Obx(() {
+                  final categoryObject = controller
+                      .categories[controller.selectedCategoryIndex.value];
+                  return ListView.builder(
                     padding: const EdgeInsets.all(15),
-                    itemCount: controller
-                        .categories[controller.selectedCategoryIndex.value]
-                        .children
-                        .length,
+                    itemCount: controller.products.length,
                     itemBuilder: (_, i) {
-                      final categoryObject = controller
-                          .categories[controller.selectedCategoryIndex.value];
-
                       return GestureDetector(
                         onTap: () => Get.toNamed(Routes.subCategoryView),
                         child: Container(
@@ -119,10 +131,18 @@ class CategoryView extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              SvgIcon(assetName: categoryObject.icon, size: 60),
+                              CommonImageView(
+                                radius: BorderRadius.circular(
+                                  AppDimen.borderRadius,
+                                ),
+                                url: categoryObject.image,
+                                width: 60,
+                                height: 60,
+                              ),
                               const SizedBox(width: 10),
                               CustomText(
-                                text: categoryObject.children[i],
+                                text: categoryObject.name,
+                                // text: categoryObject.name[i],
                                 fontWeight: FontWeight.w600,
                                 fontSize: 15,
                               ),
@@ -131,8 +151,8 @@ class CategoryView extends StatelessWidget {
                         ),
                       );
                     },
-                  ),
-                ),
+                  );
+                }),
               ),
             ),
           ],

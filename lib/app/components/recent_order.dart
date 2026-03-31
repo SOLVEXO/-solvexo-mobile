@@ -1,18 +1,32 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
+import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class RecentOrder extends StatelessWidget {
-  const RecentOrder({super.key});
-
+  final bool isRefundView;
+  final OrderModel orders;
+  const RecentOrder({
+    super.key,
+    this.isRefundView = false,
+    required this.orders,
+  });
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(MyOrdersController());
+    final order = orders;
+    final orderItem =
+        order.orderItems[controller
+                .orders[controller.orders.length - 1]
+                .orderItems
+                .length -
+            1];
     return Column(
       spacing: 5,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -21,7 +35,7 @@ class RecentOrder extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             CustomText(
-              text: "Order Number: 741214",
+              text: "Order Number: ${orderItem.productId.codeUnitAt(8)}",
               fontSize: AppFontSize.small,
               fontWeight: FontWeight.w600,
             ),
@@ -32,7 +46,7 @@ class RecentOrder extends StatelessWidget {
               ),
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               child: CustomText(
-                text: "Done",
+                text: order.orderStatus,
                 color: AppColors.green2,
                 fontSize: AppFontSize.small2,
                 fontWeight: FontWeight.w600,
@@ -40,20 +54,20 @@ class RecentOrder extends StatelessWidget {
             ),
           ],
         ),
-        Text("January, 24 2024", style: TextStyle(color: Colors.grey)),
+        CustomText(text: order.createdAt.toString(), color: Colors.grey),
 
         Row(
           children: [
             Expanded(
               child: ListTile(
-                leading: SvgIcon(assetName: AppImages.sampleProduct, size: 50),
+                leading: CommonImageView(url: orderItem.image, width: 50),
                 title: CustomText(
-                  text: "Hem box",
+                  text: orderItem.name,
                   fontSize: AppFontSize.small,
                   fontWeight: FontWeight.bold,
                 ),
                 subtitle: CustomText(
-                  text: "1 item",
+                  text: "${orderItem.quantity} item",
                   fontSize: AppFontSize.small2,
                   color: AppColors.gray600,
                 ),
@@ -68,36 +82,42 @@ class RecentOrder extends StatelessWidget {
           children: [
             Text("Total Transaction", style: TextStyle(color: Colors.grey)),
             Text(
-              "\$19.98",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        Row(
-          spacing: 20,
-          children: [
-            Expanded(
-              child: AppButton(
-                label: "Track Order",
-                onPressed: () {
-                  Get.toNamed(Routes.orderTrackingView);
-                },
-                isOutlined: true,
-                textColor: AppColors.primaryColor,
-              ),
-            ),
-            Expanded(
-              child: AppButton(
-                label: "Request Refund",
-                onPressed: () {
-                  Get.toNamed(Routes.refundRequestView);
-                },
-                isOutlined: true,
-                textColor: AppColors.primaryColor,
+              "\$${orderItem.price}",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryColor,
               ),
             ),
           ],
         ),
+        isRefundView
+            ? SizedBox()
+            : Row(
+                spacing: 20,
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      label: "Track Order",
+                      onPressed: () {
+                        Get.toNamed(Routes.orderTrackingView);
+                      },
+                      isOutlined: true,
+                      textColor: AppColors.primaryColor,
+                    ),
+                  ),
+                  Expanded(
+                    child: AppButton(
+                      label: "Request Refund",
+                      onPressed: () {
+                        Get.toNamed(Routes.refundRequestView, arguments: order);
+                      },
+                      isOutlined: true,
+                      textColor: AppColors.primaryColor,
+                    ),
+                  ),
+                ],
+              ),
       ],
     );
   }

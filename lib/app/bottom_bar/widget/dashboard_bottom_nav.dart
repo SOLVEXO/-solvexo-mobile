@@ -1,5 +1,7 @@
-import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/bottom_bar/controllers/bottom_navbar_controller.dart';
+import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +15,9 @@ class DashboardBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       int activeTab = controller.selectedIndex.value;
-
+      final profileController = Get.put(ProfileController());
+      final user = profileController.user.value;
+      final userProfile = user?.profileImage ?? "";
       return Container(
         height: 70,
         decoration: BoxDecoration(
@@ -40,16 +44,19 @@ class DashboardBottomNav extends StatelessWidget {
               icon: AppIcons.billsIcon,
               isActive: activeTab == 1,
               onTap: () => controller.changeTab(1),
-              iconSize: 35,
+              iconSize: 25,
             ),
             _buildNavItem(
               index: 2,
               icon: AppIcons.cartIcon,
+              isCartIcon: true,
               isActive: activeTab == 2,
               onTap: () => controller.changeTab(2),
             ),
             _buildNavItem(
               index: 3,
+              profile: true,
+              url: userProfile.isEmpty ? null : userProfile,
               icon: activeTab == 3 ? AppIcons.moreFill : AppIcons.more,
               isActive: activeTab == 3,
               onTap: () => controller.changeTab(3),
@@ -63,9 +70,12 @@ class DashboardBottomNav extends StatelessWidget {
   Widget _buildNavItem({
     required int index,
     required String icon,
+    String? url,
     required bool isActive,
     required VoidCallback onTap,
-    double iconSize = 30,
+    double iconSize = 22,
+    bool isCartIcon = false,
+    bool profile = false,
   }) {
     return Expanded(
       child: InkWell(
@@ -75,17 +85,71 @@ class DashboardBottomNav extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgIcon(
-              size: iconSize,
-              assetName: icon,
-              color: isActive ? AppColors.primaryColor : AppColors.lightGrey,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                CommonImageView(
+                  height: iconSize,
+                  width: iconSize,
+                  svgPath: profile ? null : icon,
+                  url: profile ? url : null,
+                  fit: BoxFit.cover,
+                  radius: BorderRadius.circular(profile ? 50 : 0),
+                  color: profile
+                      ? null
+                      : (isActive
+                            ? AppColors.primaryColor
+                            : AppColors.lightGrey),
+                ),
+
+                if (isCartIcon)
+                  Positioned(
+                    top: -6,
+                    right: -8,
+                    child: Obx(() {
+                      final count = controller.cartController.cartItems.length;
+
+                      if (count == 0) return const SizedBox();
+
+                      return Container(
+                        // padding: const EdgeInsets.symmetric(
+                        //   horizontal: 2,
+                        //   vertical: 2,
+                        // ),
+                        constraints: const BoxConstraints(
+                          minWidth: 15,
+                          minHeight: 15,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: CustomText(
+                          text: count > 9 ? "9+" : count.toString(),
+                          color: AppColors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    }),
+                  ),
+              ],
             ),
-            SizedBox(height: 5),
+
+            const SizedBox(height: 5),
+
             AnimatedContainer(
               height: 4,
-              width: 30,
+              width: 20,
+              duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              duration: Duration(milliseconds: 200),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: isActive ? AppColors.primaryColor : Colors.transparent,

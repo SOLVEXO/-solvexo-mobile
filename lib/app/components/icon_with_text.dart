@@ -20,10 +20,10 @@ class IconWithText extends StatelessWidget {
       child: Row(
         spacing: 2,
         children: [
-          SvgIcon(assetName: iconName, size: 25),
+          SvgIcon(assetName: iconName, size: 20),
           CustomText(
             text: text,
-            fontSize: AppFontSize.small,
+            fontSize: AppFontSize.small2,
             fontWeight: FontWeight.w500,
           ),
         ],

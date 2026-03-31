@@ -21,9 +21,9 @@ class OrderInfo extends StatelessWidget {
         spacing: 7,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          customRow("Order Number:", item.orderNumber),
-          customRow("Order Date:", item.date.toString()),
-          customRow("Payment Date:", item.date.toString()),
+          customRow("Order Number:", item.id),
+          customRow("Order Date:", item.createdAt.toString()),
+          customRow("Payment Date:", item.createdAt.toString()),
         ],
       ),
     );

@@ -1,10 +1,10 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
-import 'package:book_store_app/app/components/card_shimmer.dart';
-import 'package:book_store_app/app/components/custom_icon_button.dart';
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/main_app_bar.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/horizontal_product_card.dart';
 import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -18,6 +18,7 @@ class SearchView extends StatelessWidget {
   SearchView({super.key});
 
   final c = Get.put(SearchBarController());
+  final categoryController = Get.put(CategoryController());
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +35,9 @@ class SearchView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // No Results Message
             Obx(
-              () => c.showResults.value
-                  ? SizedBox()
-                  : c.showSuggestions.value
+              () => c.showResults.value && !c.loading.value && !c.hasResults
                   ? Container(
                       padding: EdgeInsets.symmetric(
                         vertical: 30,
@@ -47,17 +47,23 @@ class SearchView extends StatelessWidget {
                         child: Column(
                           spacing: 10,
                           children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 80,
+                              color: Colors.grey[300],
+                            ),
                             CustomText(
-                              text: "Sorry, Product is not Found",
+                              text: "No Products Found",
                               fontSize: AppFontSize.medium,
                               fontWeight: FontWeight.w600,
                               textAlign: TextAlign.center,
                             ),
                             CustomText(
                               text:
-                                  "Find other Products or check our recommendation Product",
+                                  "Try different keywords or check our recommendations",
                               fontSize: AppFontSize.small2,
                               textAlign: TextAlign.center,
+                              color: AppColors.gray600,
                             ),
                           ],
                         ),
@@ -65,93 +71,112 @@ class SearchView extends StatelessWidget {
                     )
                   : SizedBox(),
             ),
+
+            // Recent Searches Header
             Obx(
-              () => c.searchText.value.isEmpty ? _recentHeader() : SizedBox(),
+              () => c.searchText.value.isEmpty && !c.showResults.value
+                  ? _recentHeader()
+                  : SizedBox(),
             ),
+
+            // Recent Searches List OR Suggestions
             Obx(() {
-              if (c.searchText.value.isEmpty) {
+              if (c.searchText.value.isEmpty && !c.showResults.value) {
                 return _recentSearchList();
               }
 
-              if (!c.showSuggestions.value || c.suggestions.isEmpty) {
-                return const SizedBox();
+              if (c.showSuggestions.value && c.suggestions.isNotEmpty) {
+                return suggestionList();
               }
 
-              return suggetionList();
+              return const SizedBox();
             }),
+
             const SizedBox(height: 5),
+
+            // See More/Less Button for Recent Searches
             Obx(
-              () => c.searchText.value.isEmpty ? _seeMoreButton() : SizedBox(),
+              () => c.searchText.value.isEmpty && !c.showResults.value
+                  ? _seeMoreButton()
+                  : SizedBox(),
             ),
+
             const SizedBox(height: 20),
-            Obx(
-              () => _lastSeenHeader(
-                c.showResults.value
-                    ? "Product"
-                    : c.searchText.value.isEmpty
-                    ? "Last Seen"
-                    : "Recomanded Product",
-              ),
-            ),
+
+            // Section Header (Products/Last Seen/Recommended)
+            Obx(() {
+              if (c.showResults.value && c.hasResults) {
+                return _sectionHeader("Search Results (${c.resultsCount})");
+              } else if (c.searchText.value.isEmpty) {
+                return _sectionHeader("Recently Viewed");
+              } else if (c.showSuggestions.value && !c.hasResults) {
+                return _sectionHeader("Recommended Products");
+              }
+              return SizedBox();
+            }),
+
             const SizedBox(height: 10),
-            Obx(
-              () => c.showResults.value
-                  ? Expanded(child: _resultsBody())
-                  : c.searchText.value.isEmpty
-                  ? _lastSeenList(w)
-                  : RecommendedProductList(),
-            ),
+
+            // Main Content Area
+            Obx(() {
+              if (c.showResults.value) {
+                return Expanded(child: _resultsBody());
+              } else if (c.searchText.value.isEmpty) {
+                return _lastSeenList(w);
+              } else if (c.showSuggestions.value) {
+                return RecommendedProductList();
+              }
+              return SizedBox();
+            }),
           ],
         ),
       ),
     );
   }
 
+  /// Results body with backend products
   Widget _resultsBody() {
     return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Shimmer when loading
-          c.loading.value
-              ? const SizedBox(height: 100, child: CardShimmer())
-              : Expanded(
-                  child: ListView.builder(
-                    itemCount: c.filteredProducts.length,
-                    itemBuilder: (_, i) {
-                      final prod = c.filteredProducts[i];
-                      return HorizontalProductCard(
-                        prodName: prod.name,
-                        prodDesc: prod.description,
-                        price: prod.price.toString(),
-                        reviews: prod.reviews.toString(),
-                        ratings: prod.rating,
-                        prodImage: prod.image,
-                        index: i,
+      () => c.loading.value
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(50),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          : ListView.builder(
+              itemCount: c.filteredProducts.length,
+              itemBuilder: (_, i) {
+                final prod = c.filteredProducts[i];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: HorizontalProductCard(
+                    prod: prod,
+                    onTap: () {
+                      categoryController.openProductDetails(
+                        c.filteredProducts[i],
                       );
+                      // Navigate to product details
+                      // Get.toNamed(Routes.PRODUCT_DETAILS, arguments: prod);
+
+                      // Add to recently viewed
+                      c.addToRecentlyViewed(prod.id);
                     },
                   ),
-                ),
-        ],
-      ),
+                );
+              },
+            ),
     );
   }
 
+  /// App bar with back button and search
   Widget appBar() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10.0, left: 10),
-          child: CustomIconButton(
-            assetName: AppIcons.chevronLeft,
-            size: 30,
-            onPressed: () => Get.back(),
-          ),
-        ),
         Expanded(
           child: MainAppBar(
-            actionIcon: AppIcons.cartIcon,
+            issearch: true,
             onPressed: () => Get.toNamed(Routes.cartView),
           ),
         ),
@@ -159,44 +184,79 @@ class SearchView extends StatelessWidget {
     );
   }
 
+  /// Recent searches header
   Widget _recentHeader() {
-    return const Padding(
-      padding: EdgeInsets.only(top: 10, bottom: 10),
-      child: CustomText(
-        text: "Recent Searches",
-        fontWeight: FontWeight.bold,
-        fontSize: AppFontSize.regular,
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const CustomText(
+          text: "Recent Searches",
+          fontWeight: FontWeight.bold,
+          fontSize: AppFontSize.regular,
+        ),
+        if (c.recentSearches.isNotEmpty)
+          TextButton(
+            onPressed: c.clearRecentSearches,
+            child: Text(
+              'Clear All',
+              style: TextStyle(
+                color: AppColors.primaryColor,
+                fontSize: AppFontSize.small,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
+  /// Recent searches list
   Widget _recentSearchList() {
+    if (c.recentSearches.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: CustomText(
+            text: "No recent searches",
+            color: AppColors.gray600,
+            fontSize: AppFontSize.small,
+          ),
+        ),
+      );
+    }
+
     return Column(
       children: c.shownRecentSearches.map((item) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 15),
-          child: Row(
-            children: [
-              Icon(Icons.access_time, size: 20, color: AppColors.gray600),
-              const SizedBox(width: 10),
-              Expanded(
-                child: CustomText(
-                  text: item,
-                  fontSize: AppFontSize.small,
-                  color: Colors.black,
+        return InkWell(
+          onTap: () {
+            c.textController.text = item;
+            c.performSearch(item);
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 15),
+            child: Row(
+              children: [
+                Icon(Icons.access_time, size: 20, color: AppColors.gray600),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: CustomText(
+                    text: item,
+                    fontSize: AppFontSize.small,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              GestureDetector(
-                onTap: () => c.deleteRecent(item),
-                child: const Icon(Icons.close, size: 25),
-              ),
-            ],
+                GestureDetector(
+                  onTap: () => c.deleteRecent(item),
+                  child: Icon(Icons.close, size: 25, color: Colors.grey),
+                ),
+              ],
+            ),
           ),
         );
       }).toList(),
     );
   }
 
+  /// See more/less button
   Widget _seeMoreButton() {
     return Obx(
       () => c.recentSearches.length > 4
@@ -210,7 +270,8 @@ class SearchView extends StatelessWidget {
     );
   }
 
-  Widget _lastSeenHeader(String text) {
+  /// Section header
+  Widget _sectionHeader(String text) {
     return CustomText(
       text: text,
       fontWeight: FontWeight.bold,
@@ -218,29 +279,69 @@ class SearchView extends StatelessWidget {
     );
   }
 
+  /// Last seen/recently viewed list
   Widget _lastSeenList(double w) {
+    if (c.lastSeenProducts.isEmpty) {
+      // Fallback to dummy images
+      return SizedBox(
+        height: 80,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: c.lastSeenImages.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (_, index) {
+            final item = c.lastSeenImages[index];
+            return Container(
+              width: w / 5,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xffF5F5F5),
+              ),
+              child: CommonImageView(
+                imagePath: item,
+                fit: BoxFit.cover,
+                radius: BorderRadius.circular(12),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    // Real backend products
     return SizedBox(
       height: 80,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: c.lastSeenImages.length,
+        itemCount: c.lastSeenProducts.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (_, index) {
-          final item = c.lastSeenImages[index];
-          return Container(
-            width: w / 5,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: const Color(0xffF5F5F5),
+          final product = c.lastSeenProducts[index];
+          return GestureDetector(
+            onTap: () {
+              // Navigate to product details
+              // Get.toNamed(Routes.PRODUCT_DETAILS, arguments: product);
+            },
+            child: Container(
+              width: w / 5,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xffF5F5F5),
+              ),
+              child: CommonImageView(
+                url: product.images.isNotEmpty ? product.images.first : null,
+                fit: BoxFit.cover,
+                radius: BorderRadius.circular(12),
+              ),
             ),
-            child: SvgIcon(assetName: item),
           );
         },
       ),
     );
   }
 
-  Widget suggetionList() {
+  /// Suggestions list
+  Widget suggestionList() {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
@@ -252,37 +353,46 @@ class SearchView extends StatelessWidget {
       ),
       child: ListView.separated(
         shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
         itemCount: c.suggestions.length,
         separatorBuilder: (_, __) =>
-            const Divider(height: 1, color: AppColors.background, thickness: 3),
+            const Divider(height: 1, color: AppColors.background, thickness: 1),
         itemBuilder: (_, i) {
           final item = c.suggestions[i];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: Row(
-              children: [
-                SvgIcon(assetName: AppIcons.searchIcon),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: CustomText(
-                    text: item.name,
-                    fontSize: AppFontSize.small,
-                    color: Colors.black,
+          return InkWell(
+            onTap: () => c.selectSuggestion(item),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              child: Row(
+                children: [
+                  SvgIcon(assetName: AppIcons.searchIcon, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text: item.name,
+                          fontSize: AppFontSize.small,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        if (item.category != null) ...[
+                          SizedBox(height: 2),
+                          CustomText(
+                            text: item.category!.name,
+                            fontSize: AppFontSize.verySmall,
+                            color: AppColors.gray600,
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                ),
-                GestureDetector(
-                  onTap: () => c.selectSuggestion(item),
-                  child: const Icon(Icons.trending_up_rounded, size: 25),
-                ),
-              ],
+                  Icon(Icons.north_west, size: 20, color: Colors.grey[400]),
+                ],
+              ),
             ),
           );
-          // return ListTile(
-          //   leading: const Icon(Icons.search),
-          //   title: Text(item.name),
-          //   subtitle: Text(item.description),
-          //   onTap: () => c.selectSuggestion(item),
-          // );
         },
       ),
     );

@@ -15,7 +15,7 @@ class AuthOrRow extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: CustomText(
-            text: "Or continue with email",
+            text: "Or continue with Socials",
             color: AppColors.textPrimary,
             fontSize: 14,
           ),

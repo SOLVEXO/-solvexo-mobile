@@ -40,17 +40,12 @@ class AddAddressView extends StatelessWidget {
               true,
             ),
             customLableWithField(
-              controller.addressCtrl,
+              controller.addressCtrl1,
               "Street address or P.O.Box",
               "Address",
               true,
             ),
-            customLableWithField(
-              controller.aptCtrl,
-              "Apt, suite, unit",
-              "",
-              false,
-            ),
+
             customLableWithField(
               controller.stateCtrl,
               "Select state",
@@ -69,6 +64,12 @@ class AddAddressView extends StatelessWidget {
               "Zip Code",
               true,
             ),
+            customLableWithField(
+              controller.countryCtrl,
+              "Country",
+              "Country",
+              true,
+            ),
             Obx(
               () => CheckboxListTile(
                 value: controller.makeDefault.value,
@@ -79,7 +80,12 @@ class AddAddressView extends StatelessWidget {
                 ),
               ),
             ),
-            AppButton(label: "Add Address", onPressed: controller.saveAddress),
+            AppButton(
+              label: "Add Address",
+              onPressed: () {
+                controller.saveAddress();
+              },
+            ),
           ],
         ),
       ),
@@ -87,7 +93,7 @@ class AddAddressView extends StatelessWidget {
   }
 
   Widget customLableWithField(
-    RxString controller,
+    TextEditingController controller,
     String hint,
     String label,
     bool islabel,
@@ -104,8 +110,9 @@ class AddAddressView extends StatelessWidget {
               )
             : SizedBox(),
         CustomTextField(
+          controller: controller,
           hintText: hint,
-          onChanged: (v) => controller.value = v,
+          onChanged: (v) => controller.text = v,
           filled: true,
           fillColor: AppColors.background,
           isborder: true,

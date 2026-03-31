@@ -11,28 +11,19 @@ class RecommendedProductList extends StatelessWidget {
     final controller = Get.put(CategoryController());
     return Obx(
       () => SizedBox(
-        height: 250,
+        height: Get.height / 2.7,
         child: GridView.builder(
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+          padding: EdgeInsets.symmetric(vertical: 8),
           scrollDirection: Axis.horizontal,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 1,
             mainAxisSpacing: 10,
-            childAspectRatio: 1.5,
+            childAspectRatio: 1.8,
           ),
           itemCount: controller.products.length,
-
           itemBuilder: (_, index) {
             final item = controller.products[index];
-            return ProductCard(
-              index: index,
-              image: item.image,
-              name: item.name,
-              price: item.price.toString(),
-              rating: item.rating,
-              reviews: item.reviews.toString(),
-              disc: item.description,
-            );
+            return ProductCard(product: item);
           },
         ),
       ),

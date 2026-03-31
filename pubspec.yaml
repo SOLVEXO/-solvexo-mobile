@@ -53,6 +53,15 @@ dependencies:
   geolocator: ^14.0.2
   geocoding: ^4.0.0
   google_maps_flutter: ^2.14.0
+  cached_network_image: ^3.4.1
+  pin_code_fields: ^8.0.1
+  google_sign_in: ^7.2.0
+  sign_in_with_apple: ^7.0.1
+  flutter_facebook_auth: ^7.1.5
+  firebase_messaging: ^16.1.1
+  audioplayers: ^6.6.0
+  flutter_launcher_icons: ^0.14.4
+  lottie: ^3.3.2
 
 dev_dependencies:
   flutter_test:
@@ -67,7 +76,10 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
+flutter_launcher_icons:
+    android: true
+    ios: true
+    image_path: "assets/images/logo.png"
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -81,6 +93,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/app_fonts/
+    - assets/sounds/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

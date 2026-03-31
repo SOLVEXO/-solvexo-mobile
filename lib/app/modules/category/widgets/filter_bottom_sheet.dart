@@ -13,8 +13,8 @@ class FilterBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: Get.height * 0.80,
-      padding: EdgeInsets.all(20),
+      height: Get.height / 2.5,
+      padding: EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -25,25 +25,6 @@ class FilterBottomSheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// HEADER
-          Row(
-            children: [
-              Expanded(
-                child: CustomText(
-                  text: "Filter",
-                  fontSize: AppFontSize.large,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Get.back(),
-                child: Icon(Icons.close),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 24),
-
           /// BRAND
           InkWell(
             onTap: () => _showBrandSelector(),
@@ -126,14 +107,7 @@ class FilterBottomSheet extends StatelessWidget {
           ),
 
           Divider(height: 30),
-
-          _filterItem("Colors"),
-          _filterItem("Dimensions"),
-          _filterItem("Patterns"),
-          _filterItem("Styles"),
-          _filterItem("Materials"),
-
-          Spacer(),
+          SizedBox(height: 10),
 
           AppButton(
             label: 'Apply',
@@ -141,25 +115,9 @@ class FilterBottomSheet extends StatelessWidget {
               Get.back();
             },
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 20),
         ],
       ),
-    );
-  }
-
-  Widget _filterItem(String title) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: CustomText(text: title, fontSize: AppFontSize.small),
-            ),
-            SvgIcon(assetName: AppIcons.chevronRight, size: 16),
-          ],
-        ),
-        Divider(height: 30),
-      ],
     );
   }
 

@@ -2,7 +2,6 @@ import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/app/data/models/enums/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,9 +11,9 @@ class OrderActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (order.status != OrderStatus.delivered) return const SizedBox();
+    if (order.orderStatus != "delivered") return const SizedBox();
 
-    if (!order.isReviewed) {
+    if (!order.isDelivered) {
       return AppButton(
         isOutlined: true,
         textColor: AppColors.primaryColor,

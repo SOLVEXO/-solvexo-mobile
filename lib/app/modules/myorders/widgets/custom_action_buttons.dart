@@ -6,11 +6,13 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class CustomActionButtons extends StatelessWidget {
-  const CustomActionButtons({super.key});
+  final int index;
+  const CustomActionButtons({super.key, required this.index});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<MyOrdersController>();
+    final order = controller.orders[index];
     if (controller.canReview) {
       return Row(
         children: [
@@ -38,7 +40,7 @@ class CustomActionButtons extends StatelessWidget {
     if (controller.canRefund) {
       return AppButton(
         onPressed: () {
-          Get.toNamed(Routes.refundRequestView);
+          Get.toNamed(Routes.refundRequestView, arguments: order);
         },
         label: "Request Refund",
       );

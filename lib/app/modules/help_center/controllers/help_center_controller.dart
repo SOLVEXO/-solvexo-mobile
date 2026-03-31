@@ -1,85 +1,117 @@
+import 'package:book_store_app/app/modules/help_center/models/faq_model.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../models/faq_model.dart';
+import 'package:book_store_app/app/data/repositories/faq_repository.dart';
 
-class HelpCenterController extends GetxController {
-  /// Search
-  RxString searchQuery = ''.obs;
+class FaqController extends GetxController {
+  final FaqRepository _faqRepository = FaqRepository();
 
-  /// FAQ List
-  RxList<FAQModel> faqs = <FAQModel>[].obs;
+  // ─── State ───────────────────────────────
+  final RxList<FaqModel> faqs = <FaqModel>[].obs;
+  final RxList<FaqModel> filteredFaqs = <FaqModel>[].obs;
+  final RxList<String> categories = <String>[].obs;
 
-  /// Suggestions
-  RxList<FAQModel> filteredFaqs = <FAQModel>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxBool isSearching = false.obs;
+
+  final RxString selectedCategory = 'all'.obs;
+  final RxString searchQuery = ''.obs;
+
+  final RxInt expandedIndex = (-1).obs; // For accordion
 
   @override
   void onInit() {
     super.onInit();
-    _loadFaqs();
-    debounce(
-      searchQuery,
-      (_) => _filterFaqs(),
-      time: const Duration(milliseconds: 300),
-    );
+    fetchFaqs();
+    fetchCategories();
   }
 
-  void _loadFaqs() {
-    faqs.assignAll([
-      FAQModel(
-        id: "1",
-        question: "How can I track the package that returned?",
-        answer:
-            "You can track returned packages via the Track Order section using your order number.",
-        category: "Order",
-      ),
-      FAQModel(
-        id: "2",
-        question: "What is the return policy and how do I initiate a return?",
-        answer:
-            "Returns can be initiated from My Orders within 7 days of delivery.",
-        category: "Refund",
-      ),
-      FAQModel(
-        id: "3",
-        question: "How do I recover my account?",
-        answer:
-            "Go to Login → Forgot Password and follow the verification steps.",
-        category: "Account",
-      ),
-      FAQModel(
-        id: "4",
-        question: "How can I delete my account?",
-        answer:
-            "Please contact customer support to permanently delete your account.",
-        category: "Account",
-      ),
-      FAQModel(
-        id: "5",
-        question: "What can I do if my account has been hacked?",
-        answer: "Immediately reset your password and contact support.",
-        category: "Account",
-      ),
-      FAQModel(
-        id: "6",
-        question: "What should I do if I received a damaged item?",
-        answer: "You can request a refund or replacement from Order Details.",
-        category: "Order",
-      ),
-    ]);
+  // ─────────────────────────────────────────
+  // FETCH FAQs
+  // ─────────────────────────────────────────
 
-    filteredFaqs.assignAll(faqs);
-  }
-
-  void _filterFaqs() {
-    if (searchQuery.value.isEmpty) {
-      filteredFaqs.assignAll(faqs);
-    } else {
-      filteredFaqs.assignAll(
-        faqs.where(
-          (f) => f.question.toLowerCase().contains(
-            searchQuery.value.toLowerCase(),
-          ),
-        ),
+  Future<void> fetchFaqs({String? category}) async {
+    try {
+      isLoading.value = true;
+      final result = await _faqRepository.fetchFaqs(
+        category: category == 'all' ? null : category,
       );
+      faqs.assignAll(result);
+      filteredFaqs.assignAll(result);
+      debugPrint('✅ FAQs loaded: ${faqs.length}');
+    } catch (e) {
+      debugPrint('❌ Error loading FAQs: $e');
+      faqs.clear();
+      filteredFaqs.clear();
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  // ─────────────────────────────────────────
+  // FETCH CATEGORIES
+  // ─────────────────────────────────────────
+
+  Future<void> fetchCategories() async {
+    try {
+      final result = await _faqRepository.fetchCategories();
+      categories.assignAll(['all', ...result]);
+    } catch (e) {
+      debugPrint('❌ Error loading categories: $e');
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // FILTER BY CATEGORY
+  // ─────────────────────────────────────────
+
+  void filterByCategory(String category) {
+    selectedCategory.value = category;
+    searchQuery.value = ''; // Clear search
+    fetchFaqs(category: category);
+  }
+
+  // ─────────────────────────────────────────
+  // SEARCH
+  // ─────────────────────────────────────────
+
+  Future<void> searchFaqs(String query) async {
+    searchQuery.value = query;
+
+    if (query.trim().isEmpty) {
+      filteredFaqs.assignAll(faqs);
+      return;
+    }
+
+    try {
+      isSearching.value = true;
+      final result = await _faqRepository.searchFaqs(query);
+      filteredFaqs.assignAll(result);
+    } catch (e) {
+      debugPrint('❌ Search error: $e');
+    } finally {
+      isSearching.value = false;
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // TOGGLE ACCORDION
+  // ─────────────────────────────────────────
+
+  void toggleExpanded(int index) {
+    if (expandedIndex.value == index) {
+      expandedIndex.value = -1; // Collapse
+    } else {
+      expandedIndex.value = index; // Expand
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // REFRESH
+  // ─────────────────────────────────────────
+
+  @override
+  Future<void> refresh() async {
+    await fetchFaqs(category: selectedCategory.value);
   }
 }

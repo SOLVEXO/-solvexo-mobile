@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/modules/cart/widgets/bottom_checkout_bar.dart';
@@ -7,9 +8,7 @@ import 'package:book_store_app/app/modules/cart/widgets/empty_cart_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
-
 import '../controllers/cart_controller.dart';
 
 class CartView extends StatelessWidget {
@@ -21,53 +20,65 @@ class CartView extends StatelessWidget {
     // final size = MediaQuery.of(context).size;
     // final cartItem = controller.cartItems[index];
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Cart"),
       body: Obx(() {
         if (controller.cartItems.isEmpty) {
           return EmptyCartText();
         }
-        return Column(
-          children: [
-            /// 🔹 Select All Row
-            selectAllRow(),
+        return CustomRefreshWrapper(
+          onRefresh: controller.refreshCart,
+          child: Column(
+            children: [
+              /// 🔹 Select All Row
+              selectAllRow(),
+              const Divider(height: 1, thickness: 0.5),
 
-            const Divider(height: 1, thickness: 0.5),
+              /// 🔹 Cart Items List
+              Expanded(
+                child: Scrollbar(
+                  trackVisibility: true,
+                  interactive: true,
+                  thickness: 4,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: ClampingScrollPhysics(),
+                    ),
+                    itemCount: controller.cartItems.length,
+                    itemBuilder: (context, index) {
+                      final cartItem = controller.cartItems[index];
 
-            /// 🔹 Cart Items List
-            Expanded(
-              child: ListView.builder(
-                itemCount: controller.cartItems.length,
-                itemBuilder: (context, index) {
-                  final cartItem = controller.cartItems[index];
-
-                  return Column(
-                    children: [
-                      CartItemWidget(item: cartItem),
-                      const Divider(height: 1, thickness: 0.5),
-                    ],
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20.0,
-                vertical: 10,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    text: "Featured Items you may like",
-                    fontSize: AppFontSize.regular,
-                    fontWeight: FontWeight.w600,
+                      return Column(
+                        children: [
+                          CartItemWidget(item: cartItem),
+                          const Divider(height: 1, thickness: 0.5),
+                        ],
+                      );
+                    },
                   ),
-                  RecommendedProductList(),
-                ],
+                ),
               ),
-            ),
-            BottomCheckoutBar(),
-          ],
+              if (controller.cartItems.length <= 2)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 10,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        text: "Featured Items you may like",
+                        fontSize: AppFontSize.regular,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      RecommendedProductList(),
+                    ],
+                  ),
+                ),
+              BottomCheckoutBar(),
+            ],
+          ),
         );
       }),
     );
@@ -78,11 +89,16 @@ class CartView extends StatelessWidget {
       children: [
         Obx(
           () => Checkbox(
+            activeColor: AppColors.primaryColor,
             value: controller.selectAll.value,
             onChanged: (v) => controller.toggleSelectAll(v!),
           ),
         ),
-        const CustomText(text: "Select All", fontSize: AppFontSize.regular),
+        const CustomText(
+          text: "Select All",
+          fontSize: AppFontSize.small,
+          fontWeight: FontWeight.w500,
+        ),
         const Spacer(),
         TextButton(
           onPressed: () {

@@ -1,9 +1,11 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/checkout/widgets/coupon_code_list_tile.dart';
+import 'package:book_store_app/app/modules/map_picker/controllers/mappicker_controller.dart';
 import 'package:book_store_app/app/modules/payment/controllers/payment_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -14,12 +16,14 @@ class CheckoutView extends StatelessWidget {
   CheckoutView({super.key});
 
   final controller = Get.put(CheckoutController());
+  final mapPickerController = Get.put(MapPickerController());
   final paymentController = Get.put(PaymentController());
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Checkout"),
 
       bottomNavigationBar: _bottomBar(size),
@@ -45,16 +49,18 @@ class CheckoutView extends StatelessWidget {
   Widget _deliveryAddress() {
     return _section(
       title: "Delivery Address",
-      child: Obx(
-        () => Row(
+      child: Obx(() {
+        final defaultAddress = controller.addressController.defaultAddress;
+        return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
               child: CustomText(
-                text: controller.address.isEmpty
+                text: controller.addressController.defaultAddress == null
                     ? "You don’t have shipping address information"
-                    : controller.address.value,
+                    : "${defaultAddress!.addressLine1.toUpperCase()}, ${defaultAddress.zipCode}, ${defaultAddress.city.toUpperCase()}, ${defaultAddress.state.toUpperCase()}, ${defaultAddress.country.toUpperCase()}",
                 color: AppColors.gray600,
+                fontWeight: FontWeight.w700,
                 fontSize: AppFontSize.small,
               ),
             ),
@@ -65,15 +71,18 @@ class CheckoutView extends StatelessWidget {
                   isOutlined: true,
                   textColor: AppColors.primaryColor,
                   onPressed: () {
-                    controller.addAddress("New York, USA");
+                    Get.toNamed(Routes.addAddressView);
+                    // controller.addAddress(
+                    //   mapPickerController.selectedAddress.value,
+                    // );
                   },
                   label: "Add",
                 ),
               ),
             ),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -123,7 +132,7 @@ class CheckoutView extends StatelessWidget {
           children: controller.orderItems
               .map(
                 (item) => ListTile(
-                  leading: SvgIcon(assetName: item.image, size: 60),
+                  leading: CommonImageView(url: item.image, width: 60),
                   title: CustomText(
                     text: item.name,
                     fontSize: AppFontSize.small,

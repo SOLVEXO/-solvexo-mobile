@@ -1,25 +1,25 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 
 class SubCategoryItem extends StatelessWidget {
-  final String prodImage;
+  final String? prodImage;
   final String subCategoryName;
 
   const SubCategoryItem({
     super.key,
-    required this.prodImage,
+    this.prodImage,
     required this.subCategoryName,
   });
 
   @override
   Widget build(BuildContext context) {
-    double w = MediaQuery.of(context).size.width;
+    // double w = MediaQuery.of(context).size.width;
 
     return Container(
-      width: w / 3.9,
-      padding: const EdgeInsets.all(12),
+      // width: w / 3.9,
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
@@ -30,13 +30,20 @@ class SubCategoryItem extends StatelessWidget {
 
       // 👇 KEY: only take required height
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        spacing: 5,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgIcon(assetName: prodImage, size: 70),
+          CommonImageView(
+            url: prodImage,
+            width: 50,
+            height: 50,
+            radius: BorderRadius.circular(AppDimen.borderRadius),
+          ),
 
           CustomText(
             text: subCategoryName,
-            fontSize: AppFontSize.extraSmall,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
             textAlign: TextAlign.center,
           ),
         ],

@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:book_store_app/app/modules/checkout/controllers/checkout_controller.dart';
 import 'package:book_store_app/app/modules/payment/models/payment_method_model.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_sounds.dart';
+import 'package:book_store_app/utils/sound_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -72,7 +74,9 @@ class PaymentVerificationController extends GetxController {
     isLoading.value = false;
   }
 
+  final CheckoutController _checkoutController = Get.put(CheckoutController());
   void _onSuccess() {
-    Get.offAllNamed(Routes.paymentSuccessView);
+    _checkoutController.placeOrder();
+    SoundUtil.play(AppSounds.successSound);
   }
 }

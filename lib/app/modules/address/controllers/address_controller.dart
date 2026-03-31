@@ -1,64 +1,145 @@
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/app/data/repositories/address_repository.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/address_model.dart';
 
 class AddressController extends GetxController {
+  final AddressRepository service = Get.put(AddressRepository());
+
   RxList<AddressModel> addresses = <AddressModel>[].obs;
+  RxBool loading = false.obs;
+
   RxString selectedLabel = "Home".obs;
   RxBool makeDefault = false.obs;
 
-  /// Form fields
-  final nameCtrl = "".obs;
-  final phoneCtrl = "".obs;
-  final addressCtrl = "".obs;
-  final aptCtrl = "".obs;
-  final stateCtrl = "".obs;
-  final cityCtrl = "".obs;
-  final zipCtrl = "".obs;
+  // =============================
+  // FORM CONTROLLERS
+  // =============================
+  final nameCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  final addressCtrl1 = TextEditingController();
+  final addressCtrl2 = TextEditingController();
+  final stateCtrl = TextEditingController();
+  final cityCtrl = TextEditingController();
+  final zipCtrl = TextEditingController();
+  final countryCtrl = TextEditingController();
 
-  void saveAddress() {
-    if (makeDefault.value) {
-      for (var a in addresses) {
-        a.isDefault = false;
-      }
+  @override
+  void onInit() {
+    super.onInit();
+    fetchAddresses();
+  }
+
+  @override
+  void onClose() {
+    nameCtrl.dispose();
+    phoneCtrl.dispose();
+    addressCtrl1.dispose();
+    addressCtrl2.dispose();
+    stateCtrl.dispose();
+    cityCtrl.dispose();
+    zipCtrl.dispose();
+    countryCtrl.dispose();
+    super.onClose();
+  }
+
+  // =========================================================
+  // FETCH
+  // =========================================================
+  Future<void> fetchAddresses() async {
+    try {
+      loading.value = true;
+      addresses.value = await service.fetchAddresses();
+    } finally {
+      loading.value = false;
     }
+  }
 
-    addresses.add(
-      AddressModel(
+  AddressModel? get defaultAddress {
+    try {
+      return addresses.firstWhere((e) => e.isDefault == true);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // =========================================================
+  // CREATE
+  // =========================================================
+  Future<void> saveAddress() async {
+    try {
+      final model = AddressModel(
         label: selectedLabel.value,
-        name: nameCtrl.value,
-        phone: phoneCtrl.value,
-        address: addressCtrl.value,
-        apartment: aptCtrl.value,
-        state: stateCtrl.value,
-        city: cityCtrl.value,
-        zip: zipCtrl.value,
+        fullName: nameCtrl.text.trim(),
+        phone: phoneCtrl.text.trim(),
+        addressLine1: addressCtrl1.text.trim(),
+        addressLine2: addressCtrl2.text.trim(),
+        city: cityCtrl.text.trim(),
+        state: stateCtrl.text.trim(),
+        zipCode: zipCtrl.text.trim(),
+        country: countryCtrl.text.trim(),
         isDefault: makeDefault.value,
-      ),
-    );
+      );
 
-    Get.back();
-    Get.snackbar(
-      "Success",
-      "We have added your new address",
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.barrierColor,
-      colorText: AppColors.white,
-    );
-  }
+      await service.createAddress(model); // ✅ send ONE object only
+      await fetchAddresses(); // refresh from backend
 
-  void selectDefault(int index) {
-    for (var a in addresses) {
-      a.isDefault = false;
+      _clearForm();
+
+      Get.back();
+      Get.snackbar("Success", "Address added successfully");
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
     }
-    addresses[index].isDefault = true;
-    addresses.refresh();
   }
 
+  // =========================================================
+  // UPDATE
+  // =========================================================
+  Future<void> updateAddress(AddressModel model) async {
+    await service.updateAddress(model);
+    await fetchAddresses();
+  }
+
+  // =========================================================
+  // DELETE
+  // =========================================================
+  Future<void> deleteAddress(String id) async {
+    await service.deleteAddress(id);
+    await fetchAddresses();
+  }
+
+  // =========================================================
+  // SET DEFAULT
+  // =========================================================
+  Future<void> setDefault(String id) async {
+    await service.setDefault(id);
+    await fetchAddresses();
+  }
+
+  // =========================================================
+  // HELPERS
+  // =========================================================
+  void _clearForm() {
+    nameCtrl.clear();
+    phoneCtrl.clear();
+    addressCtrl1.clear();
+    addressCtrl2.clear();
+    stateCtrl.clear();
+    cityCtrl.clear();
+    zipCtrl.clear();
+    countryCtrl.clear();
+
+    selectedLabel.value = "Home";
+    makeDefault.value = false;
+  }
+
+  // =========================================================
+  // LABEL BOTTOM SHEET
+  // =========================================================
   void labelSheet(Size size) {
     Get.bottomSheet(
       CustomBottomSheet(

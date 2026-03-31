@@ -12,7 +12,7 @@ class OtpFieldBox extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     return Container(
-      width: size.width * 0.11,
+      width: size.width * 0.13,
       height: size.width * 0.13,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
@@ -24,13 +24,12 @@ class OtpFieldBox extends StatelessWidget {
         focusNode: controller.focusNodes[index],
         maxLength: 1,
         textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         decoration: const InputDecoration(
           counterText: "",
           border: InputBorder.none,
         ),
-        onChanged: (value) => controller.onOtpInput(value, index, size),
+        onChanged: (value) => controller.onOtpInput(value, index),
       ),
     );
   }
