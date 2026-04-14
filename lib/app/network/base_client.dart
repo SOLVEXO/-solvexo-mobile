@@ -21,12 +21,22 @@ class BaseClient {
     String url, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
+    bool requiresAuth = true, // ✅ NEW FLAG
   }) async {
     final dio = await DioService.getDio();
 
     debugPrint("POST → $url");
 
-    return dio.post(url, data: data, queryParameters: queryParameters);
+    return dio.post(
+      url,
+      data: data,
+      queryParameters: queryParameters,
+      options: Options(
+        extra: {
+          'requiresAuth': requiresAuth, // 🔥 pass to interceptor
+        },
+      ),
+    );
   }
 
   Future<Response> put(

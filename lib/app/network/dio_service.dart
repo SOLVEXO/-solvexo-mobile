@@ -5,34 +5,41 @@ import 'package:flutter/material.dart';
 
 class DioService {
   static Future<Dio> getDio({Map<String, dynamic>? headers}) async {
-    final dio = Dio(); // ✅ NEW instance every time
+    final dio = Dio();
 
     dio.options.connectTimeout = const Duration(seconds: 30);
     dio.options.receiveTimeout = const Duration(seconds: 30);
 
     dio.options.headers = {
       'Accept': 'application/json',
+      'Content-Type': 'application/json',
       'Platform': Util.deviceType(),
       if (headers != null) ...headers,
     };
 
-    /// ✅ TOKEN INTERCEPTOR (auto attach JWT)
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final token = await AppPreferences.getAccessTokenAsync();
+          /// ✅ Check if request requires auth
+          final requiresAuth = options.extra['requiresAuth'] ?? true;
 
-          if (token != null && token.isNotEmpty) {
-            options.headers['Authorization'] = 'Bearer $token';
+          if (requiresAuth) {
+            final token = await AppPreferences.getAccessTokenAsync();
+
+            if (token != null && token.isNotEmpty) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
           }
 
           debugPrint("➡️ ${options.method} ${options.path}");
           debugPrint("Headers: ${options.headers}");
+          debugPrint("Auth Required: $requiresAuth");
 
           handler.next(options);
         },
         onError: (e, handler) {
           debugPrint("❌ Dio Error: ${e.response?.statusCode}");
+          debugPrint("❌ Response: ${e.response?.data}");
           handler.next(e);
         },
       ),

@@ -48,7 +48,7 @@ class CommonImageView extends StatelessWidget {
     this.radius = BorderRadius.zero,
     this.margin,
     this.border,
-    this.placeHolder = AppImages.transparentLogo,
+    this.placeHolder = AppImages.placeHolderImage,
     this.matchTextDirection = false,
   });
 
@@ -90,7 +90,7 @@ class CommonImageView extends StatelessWidget {
       try {
         return SvgPicture.asset(
           placeHolder,
-          color: AppColors.gray600.withOpacity(0.5),
+          // color: AppColors.gray600.withOpacity(0.5),
           height: height,
           width: width,
           fit: fit,
@@ -105,7 +105,7 @@ class CommonImageView extends StatelessWidget {
       try {
         return Image.asset(
           placeHolder,
-          color: AppColors.gray600.withOpacity(0.5),
+          // color: AppColors.gray600.withOpacity(0.5),
           height: height,
           width: width,
           fit: fit,
@@ -126,9 +126,8 @@ class CommonImageView extends StatelessWidget {
       width: width,
       color: AppColors.background,
       child: SvgIcon(
-        assetName: AppImages.transparentLogo,
+        assetName: AppImages.placeHolderImage,
         size: (height ?? 50) * 0.4,
-        color: AppColors.gray600.withOpacity(0.5),
       ),
     );
   }

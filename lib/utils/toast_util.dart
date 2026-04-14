@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/comp_controllers/toast_controller.dart';
 import 'package:book_store_app/app/components/custom_toast.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,7 +8,7 @@ class ToastUtil {
   static void showToast(
     String message, {
     String? imagePath,
-    Color bgColor = const Color(0xFF1E1E1E),
+    Color bgColor = AppColors.black2,
     Color textColor = Colors.white,
     Duration duration = const Duration(seconds: 2),
   }) {

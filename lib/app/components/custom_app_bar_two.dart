@@ -29,7 +29,7 @@ class CustomAppBarTwo extends StatelessWidget implements PreferredSizeWidget {
     this.iconColor,
     this.actions,
     this.onBack,
-    this.appbarHeight = 60.0,
+    this.appbarHeight = 50.0,
     this.child,
     this.assetName = AppIcons.home,
   });

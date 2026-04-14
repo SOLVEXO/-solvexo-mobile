@@ -69,7 +69,6 @@ class CheckoutView extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 50.0),
                 child: AppButton(
                   isOutlined: true,
-                  textColor: AppColors.primaryColor,
                   onPressed: () {
                     Get.toNamed(Routes.addAddressView);
                     // controller.addAddress(

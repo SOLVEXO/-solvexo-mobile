@@ -1,8 +1,8 @@
 class ApiConstants {
   // static const String baseUrl = "http://localhost:3001";
-  // static const String baseUrl = "https://api.edudeen.com";
+  static const String baseUrl = "https://api.edudeen.com";
 
-  static const String baseUrl = "http://192.168.1.102:3001";
+  // static const String baseUrl = "http://192.168.1.113:3001";
 
   static const String apiPrefix = "$baseUrl/api";
 
@@ -11,19 +11,19 @@ class ApiConstants {
   static const int receiveTimeout = 30000;
 
   // OTP
-  static const String sendOtp = "$apiPrefix/otp/send";
-  static const String verifyOtp = "$apiPrefix/otp/verify";
-  static const String resendOtp = "$apiPrefix/otp/resend";
+  // static const String sendOtp = "$apiPrefix/auth/send";
+  static const String verifyOtp = "$apiPrefix/auth/verifyOtp";
+  static const String resendOtp = "$apiPrefix/auth/resend-otp";
 
   // ============ Auth Endpoints ============
   static const String register = "$apiPrefix/auth/register";
   static const String socialLogin = '$apiPrefix/auth/social-login';
   static const String login = "$apiPrefix/auth/login";
-  static const String getMe = "$apiPrefix/auth/me";
+  static const String getMe = "$apiPrefix/auth/getprofile";
   static const String logout = "$apiPrefix/auth/logout";
-  static const String verifyEmail = "$apiPrefix/auth/verify-email";
-  static const String resendVerification =
-      "$apiPrefix/auth/resend-verification";
+  // static const String verifyEmail = "$apiPrefix/auth/verify-email";
+  // static const String resendVerification =
+  //     "$apiPrefix/auth/resend-verification";
   static const String forgotPassword = "$apiPrefix/auth/forgot-password";
   static const String resetPassword = "$apiPrefix/auth/reset-password";
 
@@ -34,7 +34,7 @@ class ApiConstants {
   static const String appleAuth = "$apiPrefix/auth/apple";
 
   // ============ User Profile Endpoints ============
-  static const String getUserProfile = "$apiPrefix/users/profile";
+  static const String getUserProfile = "$apiPrefix/auth/getprofile";
   static const String updateUserProfile = "$apiPrefix/users/profile";
   static const String deleteUserAccount = "$apiPrefix/users/profile";
   static const String changePassword = "$apiPrefix/users/change-password";

@@ -6,13 +6,14 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
+import 'package:book_store_app/app/modules/category/models/category_model.dart'
+    as BackendModel;
 import 'package:book_store_app/app/modules/category/models/product_model.dart'
     as BackendModel;
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/category/widgets/filter_bottom_sheet.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/toast_util.dart';

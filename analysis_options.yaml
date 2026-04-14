@@ -12,6 +12,7 @@ analyzer:
     deprecated_member_use: ignore
     constant_identifier_names: ignore
     library_prefixes: ignore
+    unrelated_type_equality_checks: ignore
 include: package:flutter_lints/flutter.yaml
 
 linter:

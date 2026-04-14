@@ -18,12 +18,12 @@ class TrackOrderView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Track Order"),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Obx(() {
           final items = controller.visibleEvents;
-
           return Column(
             children: [
               /// Courier Info
@@ -64,11 +64,13 @@ class TrackOrderView extends StatelessWidget {
               ),
 
               /// Show more / less
-              AppButton(
-                isOutlined: true,
-                textColor: AppColors.primaryColor,
-                onPressed: controller.toggleShow,
-                label: controller.showAll.value ? "Show less" : "Show more",
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: AppButton(
+                  isOutlined: true,
+                  onPressed: controller.toggleShow,
+                  label: controller.showAll.value ? "Show less" : "Show more",
+                ),
               ),
             ],
           );

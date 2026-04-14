@@ -6,12 +6,8 @@ class TokenPair {
 
   factory TokenPair.fromJson(Map<String, dynamic> json) {
     return TokenPair(
-      accessToken: json['accessToken'] as String,
-      refreshToken: json['refreshToken'] as String,
+      accessToken: json['accessToken'] ?? '',
+      refreshToken: json['refreshToken'] ?? '',
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'accessToken': accessToken, 'refreshToken': refreshToken};
   }
 }

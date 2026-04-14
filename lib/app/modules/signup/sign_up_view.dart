@@ -149,7 +149,7 @@ class SignUpView extends StatelessWidget {
 
             const AuthOrRow(),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: AppDimen.borderRadius),
 
             // Social Login Buttons
             SocialButton.google(authController.signInWithGoogle),

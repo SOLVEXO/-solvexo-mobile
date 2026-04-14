@@ -19,14 +19,18 @@ class AuthResponseModel {
     try {
       debugPrint("🔍 Parsing AuthResponseModel");
 
+      final data = json['data'] ?? {};
+
       return AuthResponseModel(
-        success: json['success'] as bool,
-        message: json['message'] as String,
-        // ✅ CRITICAL: Parse from json['data']['user']
-        user: UserModel.fromJson(json['data']['user'] as Map<String, dynamic>),
-        // ✅ CRITICAL: Parse from json['data']['token']
+        // ✅ Safe parsing (avoid crash if null)
+        success: json['success'] ?? false,
+        message: json['message'] ?? '',
+
+        // ✅ Nested parsing with safety
+        user: UserModel.fromJson((data['user'] ?? {}) as Map<String, dynamic>),
+
         token: TokenPair.fromJson(
-          json['data']['token'] as Map<String, dynamic>,
+          (data['token'] ?? {}) as Map<String, dynamic>,
         ),
       );
     } catch (e) {

@@ -14,7 +14,7 @@ class OtpController extends GetxController
   late List<FocusNode> focusNodes;
 
   RxBool resendAvailable = false.obs;
-  RxInt timerSec = 15.obs;
+  RxInt timerSec = 60.obs;
   RxBool isLoading = false.obs;
 
   final String otpType = Get.arguments['type'] ?? "";
@@ -46,9 +46,9 @@ class OtpController extends GetxController
 
   void startTimer() async {
     resendAvailable.value = false;
-    timerSec.value = 15;
+    timerSec.value = 60;
 
-    for (int i = 15; i > 0; i--) {
+    for (int i = 60; i > 0; i--) {
       await Future.delayed(const Duration(seconds: 1));
       timerSec.value = i - 1;
     }
@@ -118,12 +118,12 @@ class OtpController extends GetxController
       );
 
       isLoading.value = false;
+      Get.offAllNamed(Routes.mainHome);
+      // if (auth != null) {
 
-      if (auth != null) {
-        Get.offAllNamed(Routes.mainHome);
-      } else {
-        ToastUtil.showToast("Invalid OTP");
-      }
+      // } else {
+      //   ToastUtil.showToast("Invalid OTP");
+      // }
     } else if (otpType == "password_reset") {
       Get.toNamed(
         Routes.newPasswordView,

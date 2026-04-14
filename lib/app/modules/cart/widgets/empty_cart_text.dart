@@ -22,11 +22,16 @@ class EmptyCartText extends StatelessWidget {
         spacing: 20,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgIcon(assetName: AppIcons.emptyCart, size: 100),
+          SvgIcon(
+            assetName: AppIcons.emptyCart,
+            size: 100,
+            color: AppColors.gray600.withOpacity(0.3),
+          ),
           CustomText(
             text: "Your Shopping cart is empty",
             fontWeight: FontWeight.w700,
-            fontSize: AppFontSize.large,
+            fontSize: AppFontSize.medium,
+            color: AppColors.gray600.withOpacity(0.3),
           ),
           AppButton(
             label: "Start Shopping",

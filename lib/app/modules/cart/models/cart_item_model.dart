@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:flutter/material.dart';

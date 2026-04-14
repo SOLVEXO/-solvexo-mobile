@@ -14,10 +14,10 @@ class CustomAppSnackbar {
     required String title,
     required String soundPath,
     required String message,
-    String imagePath = AppImages.sampleProduct,
+    String imagePath = AppImages.logoImage,
     Color textColor = AppColors.black,
     Color backgroundColor = AppColors.white,
-    Color accentColor = AppColors.primaryColor,
+    Color accentColor = AppColors.accentColor,
     String? actionLabel,
     VoidCallback? onAction,
   }) {
@@ -34,6 +34,7 @@ class CustomAppSnackbar {
       messageText: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
+          // gradient: AppColors.appbarGradient,
           color: backgroundColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
@@ -47,18 +48,17 @@ class CustomAppSnackbar {
         ),
         child: Row(
           children: [
-            /// 🔥 LOGO / ICON
             // if (imagePath != null)
             Container(
               height: 42,
               width: 42,
               margin: const EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(15),
                 color: Colors.white.withOpacity(0.1),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(50),
+                borderRadius: BorderRadius.circular(15),
                 child: CommonImageView(imagePath: imagePath, fit: BoxFit.cover),
               ),
             ),

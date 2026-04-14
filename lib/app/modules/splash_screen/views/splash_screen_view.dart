@@ -16,34 +16,14 @@ class SplashView extends StatelessWidget {
     return Scaffold(
       body: Container(
         width: double.infinity,
-
-        /// 🔥 Gradient Background
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primaryColor, AppColors.primaryColorLight],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-
+        decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
         child: AnimatedBuilder(
           animation: controller.logoController,
           builder: (context, child) {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                /// 🔥 LOTTIE BACKGROUND ANIMATION
-                // SizedBox(
-                //   height: 200,
-                //   child: Lottie.asset(
-
-                //     AppImages.logoImage, // 👈 your lottie
-                //     fit: BoxFit.contain,
-                //   ),
-                // ),
                 const SizedBox(height: 10),
-
-                /// 🔥 LOGO ANIMATION (BOTTOM → SCALE)
                 SlideTransition(
                   position: controller.slideAnim,
                   child: ScaleTransition(
@@ -69,19 +49,16 @@ class SplashView extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 10),
-
-                /// 🔥 TEXT FADE IN
                 Opacity(
                   opacity: controller.textFade.value,
                   child: Column(
                     children: [
                       const CustomText(
-                        text: "EduDeen Book Store",
+                        text: "EduDeen",
                         fontSize: AppFontSize.medium,
                         fontWeight: FontWeight.bold,
                         color: AppColors.white,
                       ),
-                      const SizedBox(height: 5),
                       CustomText(
                         text: "Read. Learn. Grow.",
                         fontSize: AppFontSize.small2,

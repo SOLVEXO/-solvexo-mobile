@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
-  static const String _accessTokenKey = 'access_token';
-  static const String _refreshTokenKey = 'refresh_token';
+  static const String _accessTokenKey = 'token';
+  static const String _refreshTokenKey = 'refreshToken';
   static const String _userIdKey = 'user_id';
   static const String _userNameKey = 'user_name';
+  static const String _userRoleKey = 'user_role';
   static const String _userEmailKey = 'user_email';
   static const String _recentSearchesKey = 'recent_searches';
   static const String _recentlyViewedKey = 'recently_viewed_products';
@@ -89,11 +90,13 @@ class AppPreferences {
     required String userId,
     required String name,
     required String email,
+    required String role,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_userIdKey, userId);
     await prefs.setString(_userNameKey, name);
     await prefs.setString(_userEmailKey, email);
+    await prefs.setString(_userRoleKey, role);
   }
 
   // Get user ID

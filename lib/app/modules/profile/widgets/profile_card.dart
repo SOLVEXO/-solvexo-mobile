@@ -69,27 +69,35 @@ class ProfileCard extends StatelessWidget {
                     height: 60,
                     fit: BoxFit.fill,
                   ),
-            CustomText(
-              text: user.name,
-              letterSpacing: 1,
-              color: AppColors.white,
-              fontWeight: FontWeight.w500,
-              fontSize: AppFontSize.medium,
-            ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 5,
               children: [
                 CustomText(
-                  text: user.phone ?? "please add phone number",
-                  fontSize: AppFontSize.small2,
+                  text: user.name,
+                  letterSpacing: 1,
                   color: AppColors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: AppFontSize.medium,
                 ),
                 user.isEmailVerified
                     ? Icon(Icons.verified, color: AppColors.blue, size: 18)
                     : SizedBox(),
               ],
             ),
+            // CustomText(
+            //   text: user.phone ?? "please add phone number",
+            //   fontSize: AppFontSize.small2,
+            //   fontWeight: FontWeight.w500,
+            //   color: AppColors.white,
+            // ),
+            // CustomText(
+            //   text: user.email,
+            //   fontSize: AppFontSize.small2,
+            //   fontWeight: FontWeight.w500,
+            //   color: AppColors.white,
+            // ),
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.center,
             //   spacing: 5,

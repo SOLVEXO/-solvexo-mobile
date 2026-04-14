@@ -16,6 +16,7 @@ class OtpView extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "OTP Verification", centerTitle: true),
       body: Padding(
         padding: EdgeInsets.symmetric(
@@ -61,9 +62,9 @@ class OtpView extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       )
-                    : Text(
-                        "Resend in ${controller.timerSec}s",
-                        style: const TextStyle(color: Colors.grey),
+                    : CustomText(
+                        text: "Resend in ${controller.timerSec}s",
+                        color: AppColors.grey,
                       ),
               );
             }),

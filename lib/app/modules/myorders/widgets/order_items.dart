@@ -24,27 +24,47 @@ class OrderItems extends StatelessWidget {
           fontWeight: FontWeight.w800,
         ),
         ListView.builder(
+          itemCount: item.orderItems.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: item.orderItems.length,
           itemBuilder: (context, index) {
-            final orderDetails = item.orderItems[index];
-            return ListTile(
-              leading: CommonImageView(url: orderDetails.image, width: 50),
-              title: CustomText(
-                text: orderDetails.name,
-                fontSize: AppFontSize.regular,
-                fontWeight: FontWeight.w600,
-              ),
-              subtitle: CustomText(
-                text: "Qty ${orderDetails.quantity}",
-                fontSize: AppFontSize.small,
-                color: AppColors.gray600,
-              ),
-              trailing: CustomText(
-                text: "\$${orderDetails.price.toStringAsFixed(2)}",
-                fontSize: AppFontSize.small,
-                fontWeight: FontWeight.w800,
+            final orderDetail = item.orderItems[index];
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CommonImageView(
+                    url: orderDetail.image,
+                    height: 50,
+                    width: 50,
+                  ),
+                  const SizedBox(width: 10),
+
+                  /// Expanded allowed inside Row
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text: orderDetail.name,
+                          fontSize: AppFontSize.small,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        CustomText(
+                          text: "Qty: ${orderDetail.quantity}",
+                          color: AppColors.gray600,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  CustomText(
+                    text: "\$${orderDetail.price.toStringAsFixed(2)}",
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
               ),
             );
           },

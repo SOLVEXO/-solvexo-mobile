@@ -111,11 +111,11 @@ class RefundRequestView extends StatelessWidget {
         ),
         ListTile(
           title: CustomText(
-            text: controller.selectedIssue.value.toString(),
+            text: controller.issues[controller.selectedIssue.value].toString(),
             fontWeight: FontWeight.w500,
-            fontSize: AppFontSize.regular,
+            fontSize: AppFontSize.small,
           ),
-          trailing: SvgIcon(assetName: AppIcons.chevronRight),
+          trailing: SvgIcon(assetName: AppIcons.chevronRight, size: 20),
         ),
         const Text(
           "Upload images or videos (Required)",

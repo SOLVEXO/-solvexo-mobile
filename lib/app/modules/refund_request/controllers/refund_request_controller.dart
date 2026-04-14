@@ -60,7 +60,7 @@ class RefundRequestController extends GetxController {
         attachments: attachments,
       );
       CustomAppSnackbar.success("Refund request submitted");
-      Get.back();
+
       debugPrint("$refund");
       if (refund == null) {
         CustomAppSnackbar.error("Refund request Failed");

@@ -212,7 +212,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.CHANGE_PASSWORD,
-      page: () => const ChangePasswordView(),
+      page: () => ChangePasswordView(),
       binding: ChangePasswordBinding(),
     ),
     GetPage(

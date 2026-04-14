@@ -16,7 +16,7 @@ class MyOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 5),
       decoration: const BoxDecoration(color: AppColors.white),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,11 +24,12 @@ class MyOrderCard extends StatelessWidget {
           OrderHeader(order: order),
           const SizedBox(height: 10),
 
-          /// ✅ FIXED: No Expanded + No Nested Scroll Conflict
           ListView.builder(
             itemCount: order.orderItems.length,
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            physics: AlwaysScrollableScrollPhysics(
+              parent: ClampingScrollPhysics(),
+            ),
             itemBuilder: (context, index) {
               final orderDetail = order.orderItems[index];
 

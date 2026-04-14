@@ -5,6 +5,7 @@ import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -43,8 +44,8 @@ class AuthRepository {
   }) async {
     try {
       final response = await _baseClient.post(
-        ApiConstants.verifyEmail,
-        data: {"email": email, "otp": otp},
+        ApiConstants.verifyOtp,
+        data: {"email": email, "otp": otp, 'role': 'user'},
       );
 
       if (response.data['success'] == true) {
@@ -68,11 +69,17 @@ class AuthRepository {
   Future<bool> resendVerificationOtp(String email) async {
     try {
       final res = await _baseClient.post(
-        ApiConstants.resendVerification,
-        data: {"email": email},
+        ApiConstants.resendOtp,
+        data: {"email": email, 'role': 'user'},
       );
 
-      return res.data['success'] == true;
+      if (res.data['success'] == true) {
+        debugPrint("Otp has sent once again");
+        return true;
+      } else {
+        debugPrint("Message = ${res.data['message']}");
+        return false;
+      }
     } catch (_) {
       return false;
     }
@@ -123,13 +130,24 @@ class AuthRepository {
           'name': name,
           'email': email,
           'password': password,
+          'role': 'user', // ✅ REQUIRED
           if (phone != null) 'phone': phone,
           if (address != null) 'address': address,
         },
+        requiresAuth: false,
       );
 
-      return response.data['success'] == true;
-    } catch (e) {
+      if (response.data['success'] == true) {
+        return true;
+      } else {
+        debugPrint("MESSAGE: ${response.data['message']}");
+        ToastUtil.showToast(response.data['message']);
+        return false;
+      }
+    } on DioException catch (e) {
+      debugPrint("❌ Status Code: ${e.response?.statusCode}");
+      ToastUtil.showToast("${e.response?.data['message']}");
+      debugPrint("❌ Response: ${e.response?.data}");
       debugPrint("Register error: $e");
       return false;
     }
@@ -143,7 +161,8 @@ class AuthRepository {
     try {
       final response = await _baseClient.post(
         ApiConstants.login,
-        data: {'email': email, 'password': password},
+        data: {'email': email, 'password': password, 'role': 'user'},
+        requiresAuth: false,
       );
 
       debugPrint("Login Response --> ${response.data}");
@@ -173,6 +192,7 @@ class AuthRepository {
             userId: authResponse.user.id,
             name: authResponse.user.name,
             email: authResponse.user.email,
+            role: authResponse.user.role,
           );
 
           debugPrint("✅ Returning authResponse");

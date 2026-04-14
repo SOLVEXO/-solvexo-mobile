@@ -11,9 +11,7 @@ import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/config/resources/app_sounds.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
-import 'package:book_store_app/utils/sound_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

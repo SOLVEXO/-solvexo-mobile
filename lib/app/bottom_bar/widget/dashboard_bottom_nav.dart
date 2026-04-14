@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/bottom_bar/controllers/bottom_navbar_controller.dart';
+import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -15,11 +16,12 @@ class DashboardBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       int activeTab = controller.selectedIndex.value;
+      final homeController = Get.put(HomeController());
       final profileController = Get.put(ProfileController());
       final user = profileController.user.value;
       final userProfile = user?.profileImage ?? "";
       return Container(
-        height: 70,
+        height: 60,
         decoration: BoxDecoration(
           color: AppColors.white,
           boxShadow: [
@@ -37,7 +39,10 @@ class DashboardBottomNav extends StatelessWidget {
               index: 0,
               icon: AppIcons.home,
               isActive: activeTab == 0,
-              onTap: () => controller.changeTab(0),
+              onTap: () {
+                controller.changeTab(0);
+                homeController.refreshHome();
+              },
             ),
             _buildNavItem(
               index: 1,

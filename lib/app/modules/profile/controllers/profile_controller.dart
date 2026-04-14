@@ -1,17 +1,13 @@
 import 'dart:io';
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
-import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -528,41 +524,15 @@ class ProfileController extends GetxController {
   /// Logout
   Future<void> logout() async {
     Get.dialog(
-      AlertDialog(
-        title: CustomText(
-          text: 'Logout',
-          fontSize: AppFontSize.medium,
-          fontWeight: FontWeight.w600,
-        ),
-        content: CustomText(
-          text: 'Are you sure you want to logout?',
-          fontSize: AppFontSize.small,
-          fontWeight: FontWeight.w400,
-        ),
-        actions: [
-          Row(
-            spacing: AppDimen.borderRadius,
-            children: [
-              Expanded(
-                child: AppButton(
-                  onPressed: () => Get.back(),
-                  label: 'Cancel',
-                  isOutlined: true,
-                  textColor: AppColors.primaryColor,
-                ),
-              ),
-              Expanded(
-                child: AppButton(
-                  onPressed: () async {
-                    await _authController.logout();
-                  },
-
-                  label: 'Logout',
-                ),
-              ),
-            ],
-          ),
-        ],
+      CustomAlertDialogUtil(
+        title: "Logout",
+        content: 'Are you sure you want to logout?',
+        leftButtonName: "Cancel",
+        rightButtonName: "Logout",
+        onLeftButtonTap: () => Get.back(),
+        onRightButtonTap: () async {
+          await _authController.logout();
+        },
       ),
     );
   }

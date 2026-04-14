@@ -52,7 +52,8 @@ class AppButton extends StatelessWidget {
         label: CustomText(
           // fontFamily: AppTextStyles.fontFamily,
           text: label,
-          color: textColor ?? (isOutlined ? AppColors.white : Colors.white),
+          color:
+              textColor ?? (isOutlined ? AppColors.accentColor : Colors.white),
           fontSize: isTablet ? 20 : 16,
           fontWeight: FontWeight.w600,
         ),

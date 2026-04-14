@@ -20,7 +20,7 @@ class SubCategoryGrid extends StatelessWidget {
         if (width > 900) crossAxisCount = 4; // large screens
 
         // 🔥 Responsive aspect ratio
-        final aspectRatio = width < 400 ? 1.2 : 1.35;
+        final aspectRatio = width < 400 ? 1.2 : 1.45;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
