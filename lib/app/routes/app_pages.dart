@@ -1,4 +1,4 @@
-import 'package:book_store_app/app/modules/splash_screen/views/splash_screen_view.dart';
+import 'package:book_store_app/app/modules/category/views/categories_screen.dart';
 import 'package:get/get.dart';
 
 import '../modules/about/bindings/about_binding.dart';
@@ -15,6 +15,8 @@ import '../modules/category/views/product_details_view.dart';
 import '../modules/category/views/sub_category_view.dart';
 import '../modules/change_password/bindings/change_password_binding.dart';
 import '../modules/change_password/views/change_password_view.dart';
+import '../modules/chat/bindings/chat_binding.dart';
+import '../modules/chat/views/chat_view.dart';
 import '../modules/checkout/bindings/checkout_binding.dart';
 import '../modules/checkout/views/checkout_view.dart';
 import '../modules/edit_profile/bindings/edit_profile_binding.dart';
@@ -55,6 +57,7 @@ import '../modules/search/views/search_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
+import '../modules/splash_screen/views/splash_screen_view.dart';
 
 part 'app_routes.dart';
 
@@ -87,7 +90,12 @@ class AppPages {
     // GetPage(name: Routes.loginView, page: () => LoginView()),
     GetPage(
       name: Routes.categoryView,
-      page: () => const CategoryView(),
+      page: () => CategoryView(),
+      binding: CategoryBinding(),
+    ),
+    GetPage(
+      name: Routes.categoryScreen,
+      page: () => CategoriesScreen(),
       binding: CategoryBinding(),
     ),
     GetPage(
@@ -224,6 +232,11 @@ class AppPages {
       name: Routes.ABOUT,
       page: () => const AboutView(),
       binding: AboutBinding(),
+    ),
+    GetPage(
+      name: Routes.CHAT,
+      page: () => const ChatView(),
+      binding: ChatBinding(),
     ),
   ];
 }

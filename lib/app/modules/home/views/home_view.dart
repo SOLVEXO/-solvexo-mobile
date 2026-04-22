@@ -5,7 +5,9 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/delivery_address.dart';
 import 'package:book_store_app/app/components/main_app_bar.dart';
 import 'package:book_store_app/app/components/no_signal_view.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/data/services/network_controller.dart';
+import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
 import 'package:book_store_app/app/modules/home/widgets/categories_grid.dart';
@@ -14,7 +16,9 @@ import 'package:book_store_app/app/modules/home/widgets/sub_category_grid.dart';
 import 'package:book_store_app/app/modules/home/widgets/tab_header.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,6 +30,7 @@ class HomeView extends StatelessWidget {
     // double w = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     final controller = Get.put(HomeController());
+    final categoryController = Get.put(CategoryController());
     final profileController = Get.put(ProfileController());
     // final categoryController = Get.put(CategoryController());
     final networkController = Get.put(NetworkController());
@@ -33,7 +38,16 @@ class HomeView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: MainAppBar(),
-
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor,
+        tooltip: "Here for Help to find Products.",
+        child: SvgIcon(
+          assetName: AppIcons.assistantIcon,
+          size: 30,
+          color: AppColors.background.withOpacity(0.8),
+        ),
+        onPressed: () => Get.toNamed(Routes.CHAT),
+      ),
       body: Obx(() {
         /// ❌ NO INTERNET
         if (!networkController.isConnected.value) {
@@ -42,7 +56,9 @@ class HomeView extends StatelessWidget {
         return Stack(
           children: [
             CustomRefreshWrapper(
-              onRefresh: controller.refreshHome,
+              onRefresh: () {
+                return controller.refreshHome();
+              },
               child: Scrollbar(
                 trackVisibility: true,
                 interactive: true,
@@ -70,11 +86,11 @@ class HomeView extends StatelessWidget {
 
                     /// 🔹 Categories - Now from backend
                     Obx(() {
-                      if (controller.isLoading.value) {
+                      if (categoryController.isLoading.value) {
                         return const DynamicShimmer(iscategories: true);
                       }
                       // If categories are loading, show shimmer or placeholder
-                      if (controller.categories.isEmpty) {
+                      if (categoryController.allCategoriesFlat.isEmpty) {
                         return SizedBox(
                           height: height / 3.25,
                           child: Center(

@@ -4,7 +4,7 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/main_app_bar.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/horizontal_product_card.dart';
 import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -18,7 +18,7 @@ class SearchView extends StatelessWidget {
   SearchView({super.key});
 
   final c = Get.put(SearchBarController());
-  final categoryController = Get.put(CategoryController());
+  final productController = Get.put(ProductController());
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +153,7 @@ class SearchView extends StatelessWidget {
                   child: HorizontalProductCard(
                     prod: prod,
                     onTap: () {
-                      categoryController.openProductDetails(
+                      productController.openProductDetails(
                         c.filteredProducts[i],
                       );
                       // Navigate to product details

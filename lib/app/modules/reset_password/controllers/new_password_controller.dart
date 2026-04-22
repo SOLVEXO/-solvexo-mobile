@@ -76,15 +76,15 @@ class ResetPasswordController extends GetxController {
     );
 
     isLoading.value = false;
+    ToastUtil.showToast("Password reset successful");
 
-    if (success) {
-      ToastUtil.showToast("Password reset successful");
+    // back to login
+    Get.offAllNamed(Routes.authTabView);
+    // if (success) {
 
-      // back to login
-      Get.offAllNamed(Routes.authTabView);
-    } else {
-      ToastUtil.showToast("Failed to reset password");
-    }
+    // } else {
+    //   ToastUtil.showToast("Failed to reset password");
+    // }
   }
 
   @override

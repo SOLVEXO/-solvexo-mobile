@@ -1,6 +1,5 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/comp_controllers/toast_controller.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

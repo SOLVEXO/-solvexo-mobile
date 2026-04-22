@@ -1,12 +1,12 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CustomVarient extends StatelessWidget {
   CustomVarient({super.key});
-  final controller = Get.put(CategoryController());
+  final controller = Get.put(ProductController());
   @override
   Widget build(BuildContext context) {
     return Column(

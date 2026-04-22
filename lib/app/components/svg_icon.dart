@@ -23,8 +23,8 @@ class SvgIcon extends StatelessWidget {
         onTap: onTap,
         child: SvgPicture.asset(
           assetName,
-          height: size ?? 24,
-          width: size ?? 24,
+          height: size ?? 22,
+          width: size ?? 22,
           color: color,
         ),
       );
@@ -34,8 +34,8 @@ class SvgIcon extends StatelessWidget {
         onTap: onTap,
         child: Image.asset(
           assetName,
-          height: size ?? 24,
-          width: size ?? 24,
+          height: size ?? 22,
+          width: size ?? 22,
           color: color,
         ),
       );

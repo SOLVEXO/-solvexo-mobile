@@ -41,10 +41,13 @@ class ApiConstants {
   static const String banners = "$apiPrefix/banners";
 
   // ============ Category Endpoints ============
-  static const String categories = "$apiPrefix/categories";
-  static String getCategoryById(String id) => "$apiPrefix/categories/$id";
-  static String updateCategory(String id) => "$apiPrefix/categories/$id";
-  static String deleteCategory(String id) => "$apiPrefix/categories/$id";
+  static const String categories = "$apiPrefix/categories/category-tree";
+  static String getCategoryTree(String id) =>
+      "$apiPrefix/categories/category-tree?id=$id";
+  static String getCategoryById(String id) =>
+      "$apiPrefix/categories/category/$id";
+  // static String updateCategory(String id) => "$apiPrefix/categories/$id";
+  // static String deleteCategory(String id) => "$apiPrefix/categories/$id";
 
   // ============ Product Endpoints ============
   static const String products = "$apiPrefix/products";

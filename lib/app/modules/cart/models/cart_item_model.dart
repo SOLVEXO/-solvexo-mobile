@@ -46,19 +46,19 @@ class CartItem {
           if (productData['category'] is Map) {
             final categoryData =
                 productData['category'] as Map<String, dynamic>;
-            category = CategoryModel(
-              id: categoryData['_id'] as String,
-              name: categoryData['name'] as String,
-              description: categoryData['description'] as String?,
-              image: categoryData['image'] as String?,
-              isActive: categoryData['isActive'] as bool? ?? true,
-              createdAt: categoryData['createdAt'] != null
-                  ? DateTime.parse(categoryData['createdAt'])
-                  : DateTime.now(),
-              updatedAt: categoryData['updatedAt'] != null
-                  ? DateTime.parse(categoryData['updatedAt'])
-                  : DateTime.now(),
-            );
+            // category = CategoryModel(
+            //   id: categoryData['_id'] as String,
+            //   name: categoryData['name'] as String,
+            //   description: categoryData['description'] as String?,
+            //   image: categoryData['image'] as String?,
+            //   isActive: categoryData['isActive'] as bool? ?? true,
+            //   createdAt: categoryData['createdAt'] != null
+            //       ? DateTime.parse(categoryData['createdAt'])
+            //       : DateTime.now(),
+            //   updatedAt: categoryData['updatedAt'] != null
+            //       ? DateTime.parse(categoryData['updatedAt'])
+            //       : DateTime.now(),
+            // );
           }
         }
 
@@ -279,19 +279,19 @@ class CartItem {
       );
     }
 
-    // Create CategoryModel if available
-    CategoryModel? category;
-    if (json['categoryName'] != null) {
-      category = CategoryModel(
-        id: json['categoryId'] ?? '',
-        name: json['categoryName'],
-        description: null,
-        image: null,
-        isActive: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-    }
+    // // Create CategoryModel if available
+    // CategoryModel? category;
+    // if (json['categoryName'] != null) {
+    //   category = CategoryModel(
+    //     id: json['categoryId'] ?? '',
+    //     name: json['categoryName'],
+    //     description: null,
+    //     image: null,
+    //     isActive: true,
+    //     createdAt: DateTime.now(),
+    //     updatedAt: DateTime.now(),
+    //   );
+    // }
 
     final product = ProductModel(
       id: json['productId'] ?? '',
@@ -302,7 +302,7 @@ class CartItem {
           : [AppImages.sampleProduct],
       price: (json['productPrice'] ?? 0).toDouble(),
       ratings: ratings ?? ProductRatings(average: 0.0, count: 0),
-      category: category,
+      // category: category,
       categoryId: json['categoryId'] ?? '',
       stock: json['stock'] ?? 0,
       tags: [],

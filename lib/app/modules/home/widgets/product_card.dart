@@ -1,5 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/pricing_section.dart';
@@ -18,7 +18,7 @@ class ProductCard extends StatelessWidget {
   ProductCard({super.key, required this.product});
 
   final controller = Get.find<HomeController>();
-  final categoryController = Get.put(CategoryController());
+  final categoryController = Get.put(ProductController());
 
   @override
   Widget build(BuildContext context) {

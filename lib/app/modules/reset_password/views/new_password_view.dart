@@ -17,7 +17,7 @@ class NewPasswordView extends GetView<ResetPasswordController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Reset Password"),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
@@ -35,6 +35,7 @@ class NewPasswordView extends GetView<ResetPasswordController> {
                   topLeft: Radius.circular(AppDimen.borderRadius),
                   topRight: Radius.circular(AppDimen.borderRadius),
                 ),
+                fillColor: AppColors.background,
                 obscureText: !controller.showPassword.value,
                 hintText: "Set New Password",
                 ispadding: true,
@@ -43,6 +44,8 @@ class NewPasswordView extends GetView<ResetPasswordController> {
                   assetName: controller.showPassword.value
                       ? AppIcons.showPassword
                       : AppIcons.hidePassword,
+                  color: AppColors.gray600,
+                  size: 20,
                 ),
                 controller: controller.passwordController,
               ),
@@ -53,12 +56,14 @@ class NewPasswordView extends GetView<ResetPasswordController> {
                   bottomLeft: Radius.circular(AppDimen.borderRadius),
                   bottomRight: Radius.circular(AppDimen.borderRadius),
                 ),
-
+                fillColor: AppColors.background,
                 suffixIcon: SvgIcon(
                   onTap: controller.toggleConfirmPassword,
                   assetName: controller.showConfirmPassword.value
                       ? AppIcons.showPassword
                       : AppIcons.hidePassword,
+                  color: AppColors.gray600,
+                  size: 20,
                 ),
                 obscureText: !controller.showConfirmPassword.value,
                 hintText: "Conform Password",
@@ -68,9 +73,15 @@ class NewPasswordView extends GetView<ResetPasswordController> {
             const SizedBox(height: AppDimen.borderRadius),
             Obx(
               () => AppButton(
-                onPressed: controller.isLoading.value
-                    ? null
-                    : controller.resetPassword,
+                onPressed: () {
+                  if (controller.isLoading.value) {
+                    return;
+                  }
+                  controller.resetPassword();
+                },
+                // onPressed: controller.isLoading.value
+                //     ? null
+                //     : controller.resetPassword,
                 label: controller.isLoading.value
                     ? "Updating..."
                     : "Reset Password",

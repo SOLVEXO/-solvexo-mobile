@@ -21,6 +21,7 @@ class ProductRatings {
 class ProductModel {
   final String id;
   final String name;
+  final String? sellerName;
   final String description;
   final double price;
   final double? discountPrice;
@@ -41,6 +42,7 @@ class ProductModel {
   ProductModel({
     required this.id,
     required this.name,
+    this.sellerName,
     required this.description,
     required this.price,
     this.discountPrice,
@@ -76,6 +78,7 @@ class ProductModel {
     return ProductModel(
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
+      sellerName: json['seller_name'] ?? '',
       description: json['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       discountPrice: json['discountPrice'] != null
@@ -107,6 +110,7 @@ class ProductModel {
     return {
       'id': id,
       'name': name,
+      'seller_name': sellerName,
       'description': description,
       'price': price,
       'discountPrice': discountPrice,

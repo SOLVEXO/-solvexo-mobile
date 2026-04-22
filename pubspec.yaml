@@ -58,11 +58,16 @@ dependencies:
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^7.0.1
   flutter_facebook_auth: ^7.1.5
-  firebase_messaging: ^16.1.1
+  firebase_messaging: ^16.2.0
   audioplayers: ^6.6.0
   flutter_launcher_icons: ^0.14.4
   lottie: ^3.3.2
   connectivity_plus: ^7.1.0
+  flutter_markdown_plus: ^1.0.7
+  http: ^1.6.0
+  flutter_dotenv: ^6.0.0
+  flutter_local_notifications: ^20.1.0
+  firebase_core: ^4.7.0
 
 dev_dependencies:
   flutter_test:
@@ -95,6 +100,7 @@ flutter:
     - assets/icons/
     - assets/app_fonts/
     - assets/sounds/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

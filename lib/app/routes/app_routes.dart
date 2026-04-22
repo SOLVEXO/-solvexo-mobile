@@ -10,6 +10,7 @@ abstract class Routes {
   static const otpView = '/auth/otp';
   static const getNotified = '/auth/otp/get_notified';
   static const categoryView = '/category';
+  static const categoryScreen = '/category_screen';
   static const subCategoryView = '/category/sub_category';
   static const productDetailsView = '/category/product_details';
   static const searchView = '/search';
@@ -37,4 +38,5 @@ abstract class Routes {
   static const CHANGE_PASSWORD = '/change-password';
   static const PRIVACY_POLICY = '/privacy-policy';
   static const ABOUT = '/about';
+  static const CHAT = '/chat';
 }

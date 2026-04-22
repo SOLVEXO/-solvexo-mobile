@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/data/repositories/banners_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
+import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/models/banner_model.dart';
@@ -7,6 +8,7 @@ import 'package:book_store_app/app/modules/address/models/address_model.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart';
 
 class HomeController extends GetxController {
   final ProductRepository _productRepository = ProductRepository();
@@ -272,8 +274,11 @@ class HomeController extends GetxController {
     fetchProducts();
   }
 
+  final categoryController = Get.put(CategoryController());
+
   /// Refresh all data
   Future<void> refreshHome() async {
+    await categoryController.refresh();
     await initializeHome();
   }
 

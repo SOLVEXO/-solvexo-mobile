@@ -4,7 +4,7 @@ import 'package:book_store_app/app/components/custom_bread_crumbs.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/sub_category_item.dart';
-import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/widgets/floating_item_row.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
@@ -20,7 +20,7 @@ class SubCategoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CategoryController());
+    final controller = Get.put(ProductController());
     final homeController = Get.put(HomeController());
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;

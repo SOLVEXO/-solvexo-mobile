@@ -14,7 +14,7 @@ class ForgetPasswordView extends GetView<ForgotPasswordController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Forget Password"),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
@@ -27,6 +27,7 @@ class ForgetPasswordView extends GetView<ForgotPasswordController> {
             ),
             const SizedBox(height: AppDimen.borderRadius),
             CustomTextField(
+              fillColor: AppColors.background,
               borderRadius: BorderRadius.circular(AppDimen.borderRadius),
               hintText: "Enter your existing email!",
               controller: controller.emailController,

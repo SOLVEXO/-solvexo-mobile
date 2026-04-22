@@ -1,4 +1,4 @@
-import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +8,7 @@ class RecommendedProductList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CategoryController());
+    final controller = Get.put(ProductController());
     return Obx(
       () => SizedBox(
         height: Get.height / 2.7,

@@ -91,6 +91,19 @@ class BaseClient {
 
     return dio.post(url, data: FormData.fromMap(map));
   }
+
+  /// Streaming POST — for SSE endpoints like Claude API
+  Future<ResponseBody> postStream(
+    String url, {
+    required Map<String, dynamic> data,
+    Map<String, dynamic>? headers,
+  }) async {
+    final dio = await DioService.getDio(headers: headers);
+    dio.options.responseType = ResponseType.stream;
+
+    final response = await dio.post(url, data: data);
+    return response.data as ResponseBody;
+  }
 }
 
 // import 'dart:async';

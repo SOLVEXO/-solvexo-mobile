@@ -7,7 +7,7 @@ import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -19,7 +19,7 @@ import 'package:get/get.dart';
 
 class ProductDetailsView extends StatelessWidget {
   ProductDetailsView({super.key});
-  final controller = Get.put(CategoryController());
+  final controller = Get.put(ProductController());
   final profileController = Get.put(ProfileController());
   final bottombarcontroller = Get.put(BottomNavController());
   @override

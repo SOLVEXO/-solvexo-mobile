@@ -4,6 +4,7 @@ import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
+import 'package:book_store_app/app/notification/fcm_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
@@ -89,7 +90,8 @@ class AuthRepository {
     try {
       final res = await _baseClient.post(
         ApiConstants.forgotPassword,
-        data: {"email": email},
+        data: {"email": email, 'role': 'user'},
+        requiresAuth: false,
       );
 
       return res.data['success'] == true;
@@ -106,7 +108,13 @@ class AuthRepository {
     try {
       final res = await _baseClient.post(
         ApiConstants.resetPassword,
-        data: {"email": email, "otp": otp, "newPassword": newPassword},
+        data: {
+          "email": email,
+          "otp": otp,
+          "newPassword": newPassword,
+          'role': 'user',
+        },
+        requiresAuth: false,
       );
 
       return res.data['success'] == true;
@@ -158,6 +166,13 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
+    // String fcmToken = "";
+
+    // try {
+    //   fcmToken = await FcmService().fcmToken ?? "";
+    // } catch (e) {
+    //   debugPrint("FCM not ready: $e");
+    // }
     try {
       final response = await _baseClient.post(
         ApiConstants.login,

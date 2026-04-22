@@ -1,7 +1,7 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
+import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -14,7 +14,7 @@ class HorizontalProductCard extends StatelessWidget {
   final Function()? onTap;
   HorizontalProductCard({super.key, this.onTap, required this.prod});
   final controller = Get.find<SearchBarController>();
-  final categoryController = Get.find<CategoryController>();
+  final categoryController = Get.find<ProductController>();
 
   @override
   Widget build(BuildContext context) {
