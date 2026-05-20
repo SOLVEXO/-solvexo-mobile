@@ -3,7 +3,7 @@ import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/icon_with_text.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
-import 'package:book_store_app/app/modules/cart/models/cart_item_model.dart';
+import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/cart/widgets/inc_dicr_quantity_widget.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -16,6 +16,7 @@ class CartItemWidget extends StatelessWidget {
   CartItemWidget({super.key, required this.item});
 
   final controller = Get.find<CartController>();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -32,8 +33,8 @@ class CartItemWidget extends StatelessWidget {
                 onChanged: (v) => controller.toggleItemSelection(item, v!),
               ),
 
-              /// Product Image
-              CommonImageView(url: item.product.images[0], width: 60),
+              /// Product Image — use displayImage getter (images[0] or '')
+              CommonImageView(url: item.displayImage, width: 60),
 
               const SizedBox(width: 10),
 
@@ -43,8 +44,9 @@ class CartItemWidget extends StatelessWidget {
                   spacing: 5,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // item.name directly (no product wrapper)
                     CustomText(
-                      text: item.product.name,
+                      text: item.name,
                       fontSize: AppFontSize.small,
                       fontWeight: FontWeight.bold,
                     ),
@@ -58,25 +60,30 @@ class CartItemWidget extends StatelessWidget {
                       color: AppColors.gray600,
                       fontSize: AppFontSize.small,
                     ),
+                    // unitPrice via actualPrice getter
                     CustomText(
-                      text: "\$${item.product.price}",
+                      text: "\$${item.actualPrice.toStringAsFixed(2)}",
                       fontSize: AppFontSize.regular,
                       fontWeight: FontWeight.bold,
                     ),
-
-                    /// Quantity
                   ],
                 ),
               ),
 
-              /// Delete
+              /// Delete — productId is now non-nullable
               CustomIconButton(
                 assetName: AppIcons.deleteIcon,
                 size: 30,
                 isPadding: true,
                 onPressed: () {
                   controller.showDeleteConfirmation(
-                    () => controller.removeFromCart(item.productId!),
+                    onLeftButtonTap: () => controller.showWishListConformation(
+                      onRightButtonTap: () => controller.moveToWishlist(item),
+                    ),
+                    onRightButtonTap: () => controller.removeFromCart(
+                      item.productId,
+                      item.productVariantId,
+                    ),
                   );
                 },
               ),
@@ -88,13 +95,21 @@ class CartItemWidget extends StatelessWidget {
               IconWithText(
                 iconName: AppIcons.heartIcon,
                 text: "WishList",
-                onTap: () => controller.showWishListConformation(),
+                onTap: () => controller.showWishListConformation(
+                  onRightButtonTap: () => controller.moveToWishlist(item),
+                ),
               ),
               IconWithText(
                 iconName: AppIcons.deleteIcon,
                 text: "Delete",
                 onTap: () => controller.showDeleteConfirmation(
-                  () => controller.removeFromCart(item.productId!),
+                  onLeftButtonTap: () => controller.showWishListConformation(
+                    onRightButtonTap: () => controller.moveToWishlist(item),
+                  ),
+                  onRightButtonTap: () => controller.removeFromCart(
+                    item.productId,
+                    item.productVariantId,
+                  ),
                 ),
               ),
               Expanded(child: IncDicrQuantityWidget(item: item)),

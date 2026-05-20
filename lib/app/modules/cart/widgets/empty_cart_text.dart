@@ -30,7 +30,7 @@ class EmptyCartText extends StatelessWidget {
           CustomText(
             text: "Your Shopping cart is empty",
             fontWeight: FontWeight.w700,
-            fontSize: AppFontSize.medium,
+            fontSize: AppFontSize.regular,
             color: AppColors.gray600.withOpacity(0.3),
           ),
           AppButton(

@@ -69,7 +69,7 @@ class ResetPasswordController extends GetxController {
 
     isLoading.value = true;
 
-    final success = await _authRepository.resetPassword(
+    await _authRepository.resetPassword(
       email: email,
       otp: otp,
       newPassword: passwordController.text,

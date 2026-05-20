@@ -52,15 +52,36 @@ class ApiConstants {
   // ============ Product Endpoints ============
   static const String products = "$apiPrefix/products";
   static const String featuredProducts = "$apiPrefix/products/featured";
-  static String getProductById(String id) => "$apiPrefix/products/$id";
-  static String updateProduct(String id) => "$apiPrefix/products/$id";
-  static String deleteProduct(String id) => "$apiPrefix/products/$id";
+  static String getProductById(String id) =>
+      '$apiPrefix/products/getProductById/$id';
+  static String getVariantById(String id) =>
+      '$apiPrefix/products/getVariantById/$id';
+  // ============ Product by Category Endpoint ============
+  static String getProductsByCategory({
+    String? categoryId,
+    int page = 1,
+    int limit = 10,
+  }) {
+    String url = '$apiPrefix/products/products-by-category';
+    List<String> queryParams = [];
+
+    if (categoryId != null && categoryId.isNotEmpty) {
+      queryParams.add('id=$categoryId');
+    }
+    queryParams.add('page=$page');
+    queryParams.add('limit=$limit');
+
+    return '$url?${queryParams.join('&')}';
+  }
 
   // ============ Address Endpoints ============
-  static const String addresses = "$apiPrefix/addresses";
-  static String getAddressById(String id) => "$apiPrefix/addresses/$id";
-  static String updateAddress(String id) => "$apiPrefix/addresses/$id";
+  static const String addAdresses = "$baseUrl/address/add-address";
+  static const String getAdresses = "$baseUrl/address/getMyAddresses";
+  static const String getDefaultAddress = "$baseUrl/address/getDefaultAddress";
+  static const String updateAddress = "$baseUrl/address/update-address";
   static String deleteAddress(String id) => "$apiPrefix/addresses/$id";
+  static String getAddressById(String id) =>
+      "$apiPrefix/addresses/get-address-by-id/$id";
   static String setDefaultAddress(String id) =>
       "$apiPrefix/addresses/$id/default";
 
@@ -75,18 +96,27 @@ class ApiConstants {
   static String cancelOrder(String id) => "$apiPrefix/orders/$id/cancel";
 
   // Cart endpoints
-  static const String cart = '$apiPrefix/cart';
+  static const String getCart = '$apiPrefix/cart/get-cart';
+  static const String clearCart = '$apiPrefix/cart/clear-cart';
   static const String cartCount = '$apiPrefix/cart/count';
-  static const String cartItems = '$apiPrefix/cart/items';
-  static const String cartValidate = '$apiPrefix/cart/validate';
-  static const String cartSync = '$apiPrefix/cart/sync';
-
+  static const String addToCart = '$apiPrefix/cart/add-to-cart';
+  static const String removeCartItem = '$apiPrefix/cart/remove-cart-item';
+  static const String updateCartQuantity =
+      '$apiPrefix/cart/update-cart-quantity';
+  static const String clearWishList = '$apiPrefix/cart/clear-wishlist';
+  static const String addToWishlist = '$apiPrefix/cart/add-to-wishlist';
+  static const String getWishlist = '$apiPrefix/cart/get-wishlist';
+  static const String getWishlistItem = '$apiPrefix/cart/get-wishlist-item';
+  static const String removeFromWishlist =
+      '$apiPrefix/cart/remove-from-wishlist';
   // ============ Upload Endpoints ============
   // ✅ Upload
   static const String uploadImage = '$apiPrefix/upload/image';
   static const String uploadProductImages = "$apiPrefix/upload/products";
   static const String uploadCategoryImage = "$apiPrefix/upload/category";
   static const String uploadProfileImage = "$apiPrefix/upload/profile";
+
+  // static String get cartSync => null;
 
   // ============ Query Parameters Helper ============
   // For product filtering and search

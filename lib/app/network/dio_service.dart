@@ -21,7 +21,7 @@ class DioService {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           /// ✅ Check if request requires auth
-          final requiresAuth = options.extra['requiresAuth'] ?? true;
+          final requiresAuth = options.extra['requiresAuth'] ?? false;
 
           if (requiresAuth) {
             final token = await AppPreferences.getAccessTokenAsync();

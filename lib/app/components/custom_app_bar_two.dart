@@ -42,9 +42,12 @@ class CustomAppBarTwo extends StatelessWidget implements PreferredSizeWidget {
     final bool isTablet = MediaQuery.of(context).size.width >= 600;
 
     return AppBar(
+      foregroundColor: backgroundColor ?? AppColors.white,
       backgroundColor: backgroundColor ?? AppColors.white,
       centerTitle: centerTitle,
+      scrolledUnderElevation: 0, // ← add this line
       elevation: 0,
+      surfaceTintColor: Colors.transparent,
       leading: showBackButton
           ? IconButton(
               onPressed: onBack ?? () => Get.back(),

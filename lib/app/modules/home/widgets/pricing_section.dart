@@ -14,7 +14,7 @@ class PricingSection extends StatelessWidget {
       children: [
         // Current Price (or Discounted Price)
         CustomText(
-          text: "\$${product.actualPrice.toStringAsFixed(2)}",
+          text: "\$${product.price.toStringAsFixed(2)}",
           fontSize: AppFontSize.regular,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryColor,
@@ -23,14 +23,14 @@ class PricingSection extends StatelessWidget {
         const SizedBox(width: 8),
 
         // Original Price (if discounted)
-        if (product.hasDiscount)
-          CustomText(
-            text: "\$${product.price.toStringAsFixed(2)}",
-            fontSize: AppFontSize.small,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
-            textDecoration: TextDecoration.lineThrough,
-          ),
+        // if (product.)
+        //   CustomText(
+        //     text: "\$${product.price.toStringAsFixed(2)}",
+        //     fontSize: AppFontSize.small,
+        //     fontWeight: FontWeight.w500,
+        //     color: Colors.grey,
+        //     textDecoration: TextDecoration.lineThrough,
+        //   ),
       ],
     );
   }

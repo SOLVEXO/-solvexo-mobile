@@ -16,6 +16,7 @@ class AddAddressView extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Add Address"),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -64,12 +65,12 @@ class AddAddressView extends StatelessWidget {
               "Zip Code",
               true,
             ),
-            customLableWithField(
-              controller.countryCtrl,
-              "Country",
-              "Country",
-              true,
-            ),
+            // customLableWithField(
+            //   controller.countryCtrl,
+            //   "Country",
+            //   "Country",
+            //   true,
+            // ),
             Obx(
               () => CheckboxListTile(
                 value: controller.makeDefault.value,

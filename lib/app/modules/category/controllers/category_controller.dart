@@ -1,14 +1,17 @@
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/category_with_children_response.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CategoryController extends GetxController {
   final CategoryRepository _categoryRepo = CategoryRepository();
+
   var expandedIds = <String>{}.obs;
-  // ─── State ───────────────────────────────
+
+  // ─── State ────────────────────────────────────────────────────────────────
   final RxList<CategoryModel> categoryTrees = <CategoryModel>[].obs;
   final Rx<CategoryModel?> selectedCategory = Rx<CategoryModel?>(null);
   final Rx<CategoryWithChildrenResponse?> categoryWithChildren =
@@ -27,6 +30,8 @@ class CategoryController extends GetxController {
     fetchAllCategories();
   }
 
+  // ─── Expand / collapse (for CategoryTile tree view) ──────────────────────
+
   void toggleExpand(String id) {
     if (expandedIds.contains(id)) {
       expandedIds.remove(id);
@@ -37,14 +42,30 @@ class CategoryController extends GetxController {
 
   bool isExpanded(String id) => expandedIds.contains(id);
 
-  /// SELECT CATEGORY (UPDATED)
+  // ─── Select category ──────────────────────────────────────────────────────
+  /// • If the category has children  → drill down inside CategoryView
+  ///   (adds to navigationStack, loads details).
+  /// • If the category has NO children → navigate to SubCategoryView
+  ///   so the user can browse products for that leaf category.
+
   void selectCategory(CategoryModel category) {
+    if (!category.hasChildren) {
+      // Leaf category → go straight to products
+      Get.toNamed(
+        Routes.subCategoryView,
+        arguments: {'categoryId': category.id, 'categoryName': category.name},
+      );
+      return;
+    }
+
+    // Parent category → drill down in-place
     navigationStack.add(category);
     selectedCategory.value = category;
     fetchCategoryDetails(category.id);
   }
 
-  /// GO BACK
+  // ─── Go back one level ────────────────────────────────────────────────────
+
   void goBack() {
     if (navigationStack.isNotEmpty) {
       navigationStack.removeLast();
@@ -59,9 +80,8 @@ class CategoryController extends GetxController {
       fetchCategoryDetails(last.id);
     }
   }
-  // ─────────────────────────────────────────
-  // 1. FETCH ALL CATEGORY TREES
-  // ─────────────────────────────────────────
+
+  // ─── 1. Fetch all category trees ─────────────────────────────────────────
 
   Future<void> fetchAllCategories() async {
     try {
@@ -71,21 +91,18 @@ class CategoryController extends GetxController {
       debugPrint('✅ Loaded ${trees.length} category trees');
     } catch (e) {
       debugPrint('❌ Error loading categories: $e');
-      ToastUtil.showToast("Failed to load categories");
+      ToastUtil.showToast('Failed to load categories');
     } finally {
       isLoading.value = false;
     }
   }
 
-  // ─────────────────────────────────────────
-  // 2. FETCH CATEGORY TREE BY ID
-  // ─────────────────────────────────────────
+  // ─── 2. Fetch category tree by ID ────────────────────────────────────────
 
   Future<void> fetchCategoryTree(String categoryId) async {
     try {
       isLoadingTree.value = true;
       final tree = await _categoryRepo.getCategoryTreeById(categoryId);
-
       if (tree != null) {
         selectedCategory.value = tree;
         debugPrint('✅ Loaded category tree: ${tree.name}');
@@ -98,19 +115,17 @@ class CategoryController extends GetxController {
     }
   }
 
-  // ─────────────────────────────────────────
-  // 3. FETCH CATEGORY WITH DIRECT CHILDREN
-  // ─────────────────────────────────────────
+  // ─── 3. Fetch category with direct children ───────────────────────────────
 
   Future<void> fetchCategoryDetails(String categoryId) async {
     try {
       isLoadingDetails.value = true;
       final details = await _categoryRepo.getCategoryById(categoryId);
-
       if (details != null) {
         categoryWithChildren.value = details;
         debugPrint(
-          '✅ Loaded category: ${details.category.name} with ${details.childrenCount} children',
+          '✅ Loaded category: ${details.category.name} '
+          'with ${details.childrenCount} children',
         );
       }
     } catch (e) {
@@ -121,9 +136,7 @@ class CategoryController extends GetxController {
     }
   }
 
-  // ─────────────────────────────────────────
-  // SEARCH CATEGORIES
-  // ─────────────────────────────────────────
+  // ─── Search categories ────────────────────────────────────────────────────
 
   Future<void> searchCategories(String query) async {
     searchQuery.value = query;
@@ -143,17 +156,9 @@ class CategoryController extends GetxController {
     }
   }
 
-  // ─────────────────────────────────────────
-  // GET ROOT CATEGORIES ONLY
-  // ─────────────────────────────────────────
+  // ─── Getters ──────────────────────────────────────────────────────────────
 
-  List<CategoryModel> get rootCategories {
-    return categoryTrees;
-  }
-
-  // ─────────────────────────────────────────
-  // FIND CATEGORY BY ID IN LOADED TREES
-  // ─────────────────────────────────────────
+  List<CategoryModel> get rootCategories => categoryTrees;
 
   CategoryModel? findCategoryById(String categoryId) {
     for (final tree in categoryTrees) {
@@ -163,10 +168,6 @@ class CategoryController extends GetxController {
     return null;
   }
 
-  // ─────────────────────────────────────────
-  // GET ALL CATEGORIES AS FLAT LIST
-  // ─────────────────────────────────────────
-
   List<CategoryModel> get allCategoriesFlat {
     final flatList = <CategoryModel>[];
     for (final tree in categoryTrees) {
@@ -175,27 +176,17 @@ class CategoryController extends GetxController {
     return flatList;
   }
 
-  // ─────────────────────────────────────────
-  // SELECT CATEGORY
-  // ─────────────────────────────────────────
-
-  // void selectCategory(CategoryModel category) {
-  //   selectedCategory.value = category;
-  // }
-
-  // ─────────────────────────────────────────
-  // CLEAR SELECTION
-  // ─────────────────────────────────────────
+  // ─── Clear selection ──────────────────────────────────────────────────────
 
   void clearSelection() {
     selectedCategory.value = null;
     categoryWithChildren.value = null;
+    navigationStack.clear();
   }
 
-  // ─────────────────────────────────────────
-  // REFRESH
-  // ─────────────────────────────────────────
+  // ─── Refresh ──────────────────────────────────────────────────────────────
 
+  @override
   Future<void> refresh() async {
     await fetchAllCategories();
   }

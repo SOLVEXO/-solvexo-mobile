@@ -1,17 +1,20 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProductImageWithFavoriteButton extends StatelessWidget {
-  const ProductImageWithFavoriteButton({super.key, required this.product});
+  const ProductImageWithFavoriteButton({
+    super.key,
+    required this.product,
+    required this.index,
+  });
   final ProductModel product;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +50,10 @@ class ProductImageWithFavoriteButton extends StatelessWidget {
             right: 0,
             child: IconButton(
               onPressed: () {
-                controller.toggleFavourite(product.id);
+                controller.addorRemoveWishList(
+                  product.id,
+                  product.variants[index].id,
+                );
               },
               icon: SvgIcon(
                 assetName: controller.isFavourite(product.id)
@@ -57,25 +63,25 @@ class ProductImageWithFavoriteButton extends StatelessWidget {
             ),
           ),
 
-          // Discount Badge (Top Left)
-          if (product.hasDiscount && product.discountPercentage != null)
-            Positioned(
-              top: 8,
-              left: 8,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: CustomText(
-                  text: "-${product.discountPercentage}%",
-                  fontSize: AppFontSize.small,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+          // // Discount Badge (Top Left)
+          // if (product.hasDiscount && product.discountPercentage != null)
+          //   Positioned(
+          //     top: 8,
+          //     left: 8,
+          //     child: Container(
+          //       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          //       decoration: BoxDecoration(
+          //         color: Colors.red,
+          //         borderRadius: BorderRadius.circular(8),
+          //       ),
+          //       child: CustomText(
+          //         text: "-${product.discountPercentage}%",
+          //         fontSize: AppFontSize.small,
+          //         fontWeight: FontWeight.bold,
+          //         color: Colors.white,
+          //       ),
+          //     ),
+          //   ),
 
           // // Out of Stock Badge
           // if (!product.inStock)

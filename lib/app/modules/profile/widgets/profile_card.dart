@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/shimmer/shimmer_profile_details.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
@@ -25,9 +26,7 @@ class ProfileCard extends StatelessWidget {
       if (controller.user.value == null) {
         return Center(child: LoginSignupCard());
       }
-      if (controller.isLoading.value || user.isNull) {
-        return LoginSignupCard();
-      }
+
       if (controller.user.value == null) {
         return Center(
           child: Column(
@@ -42,6 +41,7 @@ class ProfileCard extends StatelessWidget {
           ),
         );
       }
+
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
         width: double.infinity,

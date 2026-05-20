@@ -106,7 +106,9 @@ class ClaudeService {
             try {
               final body = e.response!.data as ResponseBody;
               final bytes = <int>[];
-              await for (final chunk in body.stream) bytes.addAll(chunk);
+              await for (final chunk in body.stream) {
+                bytes.addAll(chunk);
+              }
               final errorText = utf8.decode(bytes);
               debugPrint('❌ Gemini error: $errorText');
             } catch (_) {}

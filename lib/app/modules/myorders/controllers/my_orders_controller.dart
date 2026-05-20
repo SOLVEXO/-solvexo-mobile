@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/base_view/controller/base_view_controller.dart';
 import 'package:book_store_app/app/data/repositories/order_repository.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/modules/myorders/models/order_timeline.dart';
@@ -6,7 +7,7 @@ import 'package:book_store_app/utils/toast_util.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
-class MyOrdersController extends GetxController {
+class MyOrdersController extends BaseController {
   RxInt selectedTab = 0.obs;
   final Rx<OrderDeliveryStatus> currentStatus = OrderDeliveryStatus.deliver.obs;
   int get currentStep =>
@@ -46,9 +47,7 @@ class MyOrdersController extends GetxController {
   }
 
   /// Refresh orders (pull to refresh)
-  Future<void> refreshOrders() async {
-    await fetchOrders();
-  }
+  Future<void> refreshOrders() => fetchOrders();
 
   /// Cancel order
   Future<void> cancelOrder(String orderId) async {

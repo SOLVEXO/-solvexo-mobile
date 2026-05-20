@@ -6,7 +6,6 @@ import 'package:book_store_app/app/modules/search/controllers/search_controller.
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,11 +15,13 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double size;
   final Function()? onPressed;
   final bool issearch;
+  final double height;
   const MainAppBar({
     super.key,
-    this.size = AppFontSize.veryLarge3,
+    this.size = 22,
     this.actionIcon = AppIcons.heartIcon,
     this.onPressed,
+    this.height = 80,
     this.issearch = false,
   });
 
@@ -36,15 +37,23 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         decoration: BoxDecoration(gradient: AppColors.appbarGradient),
         child: Row(
-          spacing: 10,
           children: [
             issearch
                 ? Padding(
                     padding: const EdgeInsets.only(left: 15.0),
-                    child: SvgIcon(
-                      size: size,
-                      assetName: AppIcons.chevronLeft,
-                      onTap: () => Get.back(),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(
+                          AppDimen.borderRadius,
+                        ),
+                      ),
+                      child: SvgIcon(
+                        size: size,
+                        assetName: AppIcons.chevronLeft,
+                        onTap: () => Get.back(),
+                      ),
                     ),
                   )
                 : SizedBox(),
@@ -52,10 +61,10 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: GestureDetector(
                 onTap: () => Get.toNamed(Routes.searchView),
                 child: Container(
-                  margin: const EdgeInsets.only(top: 10, left: 16),
+                  margin: const EdgeInsets.only(top: 5, left: 10),
                   // height: 45,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(AppDimen.borderRadius),
                   ),
                   child: Obx(
                     () => CustomTextField(
@@ -72,7 +81,9 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                             )
                           : null,
                       filled: false,
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(
+                        AppDimen.borderRadius,
+                      ),
                       prefixIcon: CustomIconButton(
                         onPressed: () => Get.toNamed(Routes.searchView),
                         assetName: AppIcons.searchIcon,
@@ -87,16 +98,19 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             // issearch ? SizedBox(width: 0) : Container(),
-            Padding(
-              padding: const EdgeInsets.only(right: 15.0),
-              child: issearch ? CartIconWithCount() : SizedBox(),
-              // : CustomIconButton(
-              //     assetName: actionIcon,
-              //     size: size,
-              //     onPressed: onPressed,
-              //     color: AppColors.white,
-              //   ),
-            ),
+            issearch
+                ? Container(
+                    margin: EdgeInsets.only(right: 10.0, left: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(
+                        AppDimen.borderRadius,
+                      ),
+                    ),
+                    child: CartIconWithCount(),
+                  )
+                : SizedBox(width: 10),
           ],
         ),
       ),
@@ -104,5 +118,5 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(80);
+  Size get preferredSize => Size.fromHeight(height);
 }

@@ -39,4 +39,5 @@ abstract class Routes {
   static const PRIVACY_POLICY = '/privacy-policy';
   static const ABOUT = '/about';
   static const CHAT = '/chat';
+  static const WISHLIST = '/wishlist';
 }

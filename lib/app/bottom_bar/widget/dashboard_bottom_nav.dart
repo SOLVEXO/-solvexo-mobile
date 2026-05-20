@@ -9,9 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DashboardBottomNav extends StatelessWidget {
-  final controller = Get.put(BottomNavController());
-  DashboardBottomNav({super.key});
+  final bool showShadow;
+  DashboardBottomNav({super.key, this.showShadow = true});
 
+  final controller = Get.put(BottomNavController());
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -26,7 +27,7 @@ class DashboardBottomNav extends StatelessWidget {
           color: AppColors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(showShadow ? 0.1 : 0),
               blurRadius: 10,
               offset: Offset(0, -2),
             ),

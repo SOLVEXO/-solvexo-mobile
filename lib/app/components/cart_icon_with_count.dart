@@ -4,7 +4,6 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,21 +19,21 @@ class CartIconWithCount extends StatelessWidget {
       children: [
         CustomIconButton(
           onPressed: () => Get.toNamed(Routes.cartView),
-          isPadding: true,
+          isPadding: false,
           assetName: AppIcons.cartIcon,
-          size: AppFontSize.veryLarge2,
+          size: 22,
         ),
         Positioned(
           top: -6,
-          right: 3,
+          right: -4,
           child: Obx(() {
             final count = bottombarcontroller.cartController.cartItems.length;
 
             if (count == 0) return const SizedBox();
 
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
               decoration: BoxDecoration(
                 color: Colors.red,
                 borderRadius: BorderRadius.circular(20),

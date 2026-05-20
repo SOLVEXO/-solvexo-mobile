@@ -64,7 +64,7 @@ class ShippingAddressRequest {
   final String city;
   final String state;
   final String zipCode;
-  final String country;
+  // final String country;
 
   ShippingAddressRequest({
     required this.fullName,
@@ -74,7 +74,7 @@ class ShippingAddressRequest {
     required this.city,
     required this.state,
     required this.zipCode,
-    required this.country,
+    // required this.country,
   });
 
   Map<String, dynamic> toJson() {
@@ -86,7 +86,7 @@ class ShippingAddressRequest {
       'city': city,
       'state': state,
       'zipCode': zipCode,
-      'country': country,
+      // 'country': country,
     };
   }
 }

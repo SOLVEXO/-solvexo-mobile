@@ -5,7 +5,7 @@ import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/data/repositories/order_repository.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
-import 'package:book_store_app/app/modules/cart/models/cart_item_model.dart';
+import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/checkout/models/order_request_model.dart';
 import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -68,20 +68,20 @@ class CheckoutController extends GetxController {
       cartItems
           .map(
             (item) => CheckoutItem(
-              id: item.product.id,
-              name: item.product.name,
-              color: "${item.selectedVariant}",
-              image: item.product.images.first,
-              price: item.product.price,
+              id: item.productId,
+              name: item.name,
+              color: item.productVariantId,
+              image: item.images.first,
+              price: item.price,
               quantity: item.quantity,
             ),
           )
           .toList(),
     );
-    final defaultAddr = addressController.defaultAddress;
-    if (defaultAddr != null) {
-      address.value = defaultAddr.addressLine1;
-    }
+    // final defaultAddr = addressController.defaultAddress;
+    // if (defaultAddr ) {
+    //   address.value = defaultAddr.addressLine1;
+    // }
   }
 
   final OrderRepository _orderRepository = OrderRepository();
@@ -90,11 +90,7 @@ class CheckoutController extends GetxController {
 
   Future<void> placeOrder() async {
     try {
-      final defaultAddr = addressController.defaultAddress;
-      if (defaultAddr == null) {
-        ToastUtil.showToast("Please select a delivery address");
-        return;
-      }
+      // final defaultAddr = addressController.defaultAddress;
 
       isPlacingOrder.value = true;
 
@@ -109,14 +105,21 @@ class CheckoutController extends GetxController {
           );
         }).toList(),
         shippingAddress: ShippingAddressRequest(
-          fullName: defaultAddr.fullName,
-          phone: defaultAddr.phone,
-          addressLine1: defaultAddr.addressLine1,
-          addressLine2: defaultAddr.addressLine2,
-          city: defaultAddr.city,
-          state: defaultAddr.state,
-          zipCode: defaultAddr.zipCode,
-          country: defaultAddr.country,
+          fullName: '',
+          phone: '',
+          addressLine1: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          // fullName: defaultAddr.,
+          // phone: defaultAddr.phoneNumber,
+          // addressLine1: defaultAddr.addressLine1,
+          // addressLine2: defaultAddr.addressLine2,
+          // city: defaultAddr.city,
+          // state: defaultAddr.state,
+          // zipCode: defaultAddr.zipCode,
+
+          // country: defaultAddr.country,
         ),
         paymentMethod: "cash_on_delivery",
         itemsPrice: subtotal,

@@ -1,6 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
+import 'package:book_store_app/app/modules/sub_category/controller/sub_category_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 
 class CustomFloatingButton extends StatelessWidget {
   CustomFloatingButton({super.key});
-  final controller = Get.find<ProductController>();
+  final controller = Get.find<SubCategoryController>();
   @override
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
@@ -45,7 +45,7 @@ class CustomFloatingButton extends StatelessWidget {
   Widget customRow(String icon, String text, context) {
     return GestureDetector(
       onTap: () {
-        controller.bottomsheet(context);
+        controller.openFilterBottomSheet();
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

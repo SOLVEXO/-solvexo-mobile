@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -24,112 +25,110 @@ class SearchView extends StatelessWidget {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(80),
-        child: appBar(),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // No Results Message
-            Obx(
-              () => c.showResults.value && !c.loading.value && !c.hasResults
-                  ? Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 30,
-                        horizontal: 30,
+    return BaseViewScreen(
+      backgroundColor: AppColors.white,
+      safeAreaTop: true,
+      showCustomAppBar: true,
+      height: 80,
+      mainAppBar: true,
+      issearch: true,
+      verticalPadding: false,
+      showBottomBar: false,
+      bottomBarShadow: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // No Results Message
+          Obx(
+            () => c.showResults.value && !c.loading.value && !c.hasResults
+                ? Container(
+                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 30),
+                    child: Center(
+                      child: Column(
+                        spacing: 10,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 80,
+                            color: Colors.grey[300],
+                          ),
+                          CustomText(
+                            text: "No Products Found",
+                            fontSize: AppFontSize.medium,
+                            fontWeight: FontWeight.w600,
+                            textAlign: TextAlign.center,
+                          ),
+                          CustomText(
+                            text:
+                                "Try different keywords or check our recommendations",
+                            fontSize: AppFontSize.small2,
+                            textAlign: TextAlign.center,
+                            color: AppColors.gray600,
+                          ),
+                        ],
                       ),
-                      child: Center(
-                        child: Column(
-                          spacing: 10,
-                          children: [
-                            Icon(
-                              Icons.search_off,
-                              size: 80,
-                              color: Colors.grey[300],
-                            ),
-                            CustomText(
-                              text: "No Products Found",
-                              fontSize: AppFontSize.medium,
-                              fontWeight: FontWeight.w600,
-                              textAlign: TextAlign.center,
-                            ),
-                            CustomText(
-                              text:
-                                  "Try different keywords or check our recommendations",
-                              fontSize: AppFontSize.small2,
-                              textAlign: TextAlign.center,
-                              color: AppColors.gray600,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : SizedBox(),
-            ),
+                    ),
+                  )
+                : SizedBox(),
+          ),
 
-            // Recent Searches Header
-            Obx(
-              () => c.searchText.value.isEmpty && !c.showResults.value
-                  ? _recentHeader()
-                  : SizedBox(),
-            ),
+          // Recent Searches Header
+          Obx(
+            () => c.searchText.value.isEmpty && !c.showResults.value
+                ? _recentHeader()
+                : SizedBox(),
+          ),
 
-            // Recent Searches List OR Suggestions
-            Obx(() {
-              if (c.searchText.value.isEmpty && !c.showResults.value) {
-                return _recentSearchList();
-              }
+          // Recent Searches List OR Suggestions
+          Obx(() {
+            if (c.searchText.value.isEmpty && !c.showResults.value) {
+              return _recentSearchList();
+            }
 
-              if (c.showSuggestions.value && c.suggestions.isNotEmpty) {
-                return suggestionList();
-              }
+            if (c.showSuggestions.value && c.suggestions.isNotEmpty) {
+              return suggestionList();
+            }
 
-              return const SizedBox();
-            }),
+            return const SizedBox();
+          }),
 
-            const SizedBox(height: 5),
+          const SizedBox(height: 5),
 
-            // See More/Less Button for Recent Searches
-            Obx(
-              () => c.searchText.value.isEmpty && !c.showResults.value
-                  ? _seeMoreButton()
-                  : SizedBox(),
-            ),
+          // See More/Less Button for Recent Searches
+          Obx(
+            () => c.searchText.value.isEmpty && !c.showResults.value
+                ? _seeMoreButton()
+                : SizedBox(),
+          ),
 
-            const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-            // Section Header (Products/Last Seen/Recommended)
-            Obx(() {
-              if (c.showResults.value && c.hasResults) {
-                return _sectionHeader("Search Results (${c.resultsCount})");
-              } else if (c.searchText.value.isEmpty) {
-                return _sectionHeader("Recently Viewed");
-              } else if (c.showSuggestions.value && !c.hasResults) {
-                return _sectionHeader("Recommended Products");
-              }
-              return SizedBox();
-            }),
+          // Section Header (Products/Last Seen/Recommended)
+          Obx(() {
+            if (c.showResults.value && c.hasResults) {
+              return _sectionHeader("Search Results (${c.resultsCount})");
+            } else if (c.searchText.value.isEmpty) {
+              return _sectionHeader("Recently Viewed");
+            } else if (c.showSuggestions.value && !c.hasResults) {
+              return _sectionHeader("Recommended Products");
+            }
+            return SizedBox();
+          }),
 
-            const SizedBox(height: 10),
+          const SizedBox(height: 10),
 
-            // Main Content Area
-            Obx(() {
-              if (c.showResults.value) {
-                return Expanded(child: _resultsBody());
-              } else if (c.searchText.value.isEmpty) {
-                return _lastSeenList(w);
-              } else if (c.showSuggestions.value) {
-                return RecommendedProductList();
-              }
-              return SizedBox();
-            }),
-          ],
-        ),
+          // Main Content Area
+          Obx(() {
+            if (c.showResults.value) {
+              return Expanded(child: _resultsBody());
+            } else if (c.searchText.value.isEmpty) {
+              return _lastSeenList(w);
+            } else if (c.showSuggestions.value) {
+              return RecommendedProductList();
+            }
+            return SizedBox();
+          }),
+        ],
       ),
     );
   }
@@ -166,21 +165,6 @@ class SearchView extends StatelessWidget {
                 );
               },
             ),
-    );
-  }
-
-  /// App bar with back button and search
-  Widget appBar() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: MainAppBar(
-            issearch: true,
-            onPressed: () => Get.toNamed(Routes.cartView),
-          ),
-        ),
-      ],
     );
   }
 
@@ -262,7 +246,7 @@ class SearchView extends StatelessWidget {
       () => c.recentSearches.length > 4
           ? AppButton(
               isOutlined: true,
-              textColor: AppColors.primaryColor,
+              // textColor: AppColors.primaryColor,
               label: c.showAll.value ? "See less" : "See more",
               onPressed: () => c.toggleSeeMore(),
             )

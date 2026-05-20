@@ -1,10 +1,11 @@
+import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/dynamic_shimmer.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/delivery_address.dart';
-import 'package:book_store_app/app/components/main_app_bar.dart';
 import 'package:book_store_app/app/components/no_signal_view.dart';
+import 'package:book_store_app/app/components/shimmer/banner_shimmer.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/data/services/network_controller.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
@@ -23,42 +24,47 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeView extends StatelessWidget {
-  const HomeView({super.key});
-
+  HomeView({super.key});
+  final controller = Get.put(HomeController());
+  final categoryController = Get.put(CategoryController());
+  // final profileController = Get.put(ProfileController());
+  final networkController = Get.put(NetworkController());
   @override
   Widget build(BuildContext context) {
-    // double w = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-    final controller = Get.put(HomeController());
-    final categoryController = Get.put(CategoryController());
-    final profileController = Get.put(ProfileController());
-    // final categoryController = Get.put(CategoryController());
-    final networkController = Get.put(NetworkController());
+    final double height = MediaQuery.of(context).size.height;
 
-    return Scaffold(
+    return BaseViewScreen(
       backgroundColor: AppColors.background,
-      appBar: MainAppBar(),
+      safeAreaTop: true,
+      showCustomAppBar: true,
+      height: 80,
+      mainAppBar: true,
+      horizontalPadding: false,
+      verticalPadding: false,
+      showBottomBar: false,
+      bottomBarShadow: true,
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor,
-        tooltip: "Here for Help to find Products.",
+        tooltip: 'Here for Help to find Products.',
+        onPressed: () => Get.toNamed(Routes.CHAT),
         child: SvgIcon(
           assetName: AppIcons.assistantIcon,
           size: 30,
           color: AppColors.background.withOpacity(0.8),
         ),
-        onPressed: () => Get.toNamed(Routes.CHAT),
       ),
-      body: Obx(() {
-        /// ❌ NO INTERNET
+      child: Obx(() {
+        // ── No internet ────────────────────────────────────────────────
         if (!networkController.isConnected.value) {
           return const NoSignalView();
         }
+        final bool isLoading =
+            controller.isLoading.value || categoryController.isLoading.value;
+
         return Stack(
           children: [
             CustomRefreshWrapper(
-              onRefresh: () {
-                return controller.refreshHome();
-              },
+              onRefresh: () => controller.refreshHome(),
               child: Scrollbar(
                 trackVisibility: true,
                 interactive: true,
@@ -69,141 +75,66 @@ class HomeView extends StatelessWidget {
                     parent: ClampingScrollPhysics(),
                   ),
                   children: [
+                    // ── Delivery address ─────────────────────────────
                     DeliveryAddress(),
+                    const SizedBox(height: 15),
 
-                    /// 🔹 Location bar UI space (you will put your own)
-                    SizedBox(height: 15),
+                    // ── Banner ───────────────────────────────────────
+                    isLoading ? BannerShimmer() : BannerCarousel(),
 
-                    /// 🔹 Banner
-                    Obx(() {
-                      if (controller.isLoading.value) {
-                        return const DynamicShimmer(isbanner: true);
-                      }
-                      return BannerCarousel();
-                    }),
+                    const SizedBox(height: 18),
 
-                    SizedBox(height: 18),
+                    // ── Categories ───────────────────────────────────
+                    isLoading
+                        ? const DynamicShimmer(iscategories: true)
+                        : categoryController.allCategoriesFlat.isEmpty
+                        ? SizedBox(
+                            height: height / 3.25,
+                            child: const Center(
+                              child: DynamicShimmer(iscategories: true),
+                            ),
+                          )
+                        : CategoriesGrid(),
 
-                    /// 🔹 Categories - Now from backend
-                    Obx(() {
-                      if (categoryController.isLoading.value) {
-                        return const DynamicShimmer(iscategories: true);
-                      }
-                      // If categories are loading, show shimmer or placeholder
-                      if (categoryController.allCategoriesFlat.isEmpty) {
-                        return SizedBox(
-                          height: height / 3.25,
-                          child: Center(
-                            child: DynamicShimmer(iscategories: true),
-                          ),
-                        );
-                      }
-                      return CategoriesGrid();
-                    }),
-
+                    // ── White card — subcategories + tabs + products ──
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       decoration: BoxDecoration(
-                        boxShadow: [
+                        color: AppColors.white,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black12,
                             blurRadius: 12,
                             offset: Offset(0, 3),
                           ),
                         ],
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
-                        ),
                       ),
                       child: Column(
                         children: [
-                          //sub categories
-                          Obx(() {
-                            if (controller.isLoading.value) {
-                              return const DynamicShimmer(
-                                issubcategories: true,
-                              );
-                            }
-                            return SubCategoryGrid();
-                          }),
+                          // ── Sub categories ─────────────────────────
+                          isLoading
+                              ? const DynamicShimmer(issubcategories: true)
+                              : SubCategoryGrid(),
 
-                          SizedBox(height: 10),
-                          Divider(thickness: 0.5),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
+                          const Divider(thickness: 0.5),
+                          const SizedBox(height: 10),
 
-                          /// 🔹 Tabs Header
-                          Obx(() {
-                            if (controller.isLoading.value) {
-                              return const DynamicShimmer(istabs: true);
-                            }
-                            return TabHeader();
-                          }),
+                          // ── Tab header ─────────────────────────────
+                          isLoading
+                              ? const DynamicShimmer(istabs: true)
+                              : TabHeader(),
 
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
 
-                          /// 🔹 Product grid - Now from backend with load more
-                          Obx(() {
-                            if (controller.isLoading.value) {
-                              return const DynamicShimmer(isproducts: true);
-                            }
-                            // Show empty state if no products
-                            if (controller.filteredProducts.isEmpty &&
-                                !controller.isFetchingProducts.value) {
-                              return SizedBox(
-                                height: 300,
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.shopping_bag_outlined,
-                                        size: 80,
-                                        color: Colors.grey[400],
-                                      ),
-                                      SizedBox(height: 16),
-                                      Obx(
-                                        () => CustomText(
-                                          text:
-                                              'No ${controller.tabs[controller.tabIndex.value]} found',
-                                          fontSize: 16,
-                                          color: AppColors.gray600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                            return Column(
-                              children: [
-                                // Products Grid
-                                ProductsGrid(),
-                                SizedBox(height: 20),
-
-                                // Load More Button - New addition for pagination
-                                if (controller.hasMoreProducts.value &&
-                                    !controller.isFetchingProducts.value)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 15,
-                                    ),
-                                    child: AppButton(
-                                      onPressed: controller.loadMoreProducts,
-                                      label: 'Load More Products',
-                                    ),
-                                  ),
-
-                                // Loading Indicator when fetching more
-                                if (controller.isFetchingProducts.value)
-                                  Padding(
-                                    padding: const EdgeInsets.all(20),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                              ],
-                            );
-                          }),
+                          // ── Products ───────────────────────────────
+                          isLoading
+                              ? const DynamicShimmer(isproducts: true)
+                              : _ProductsSection(controller: controller),
                         ],
                       ),
                     ),
@@ -212,8 +143,9 @@ class HomeView extends StatelessWidget {
               ),
             ),
 
+            // ── Login card overlay ───────────────────────────────────
             Obx(() {
-              if (profileController.user.value.isNull) {
+              if (controller.loginUser.value) {
                 return Positioned(
                   left: 12,
                   right: 12,
@@ -221,11 +153,75 @@ class HomeView extends StatelessWidget {
                   child: SafeArea(child: LoginSignupCard()),
                 );
               }
-              return const SizedBox();
+              return const SizedBox.shrink();
             }),
           ],
         );
       }),
     );
+  }
+}
+
+// ─── Products section (extracted to avoid Obx nesting issues) ─────────────
+
+class _ProductsSection extends StatelessWidget {
+  final HomeController controller;
+  const _ProductsSection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      // Empty state
+      if (controller.filteredProducts.isEmpty &&
+          !controller.isFetchingProducts.value) {
+        return SizedBox(
+          height: 300,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 80,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                CustomText(
+                  text:
+                      'No ${controller.tabs[controller.tabIndex.value]} found',
+                  fontSize: 16,
+                  color: AppColors.gray600,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return Column(
+        children: [
+          ProductsGrid(),
+          const SizedBox(height: 20),
+
+          // Load more button
+          if (controller.hasMoreProducts.value &&
+              !controller.isFetchingProducts.value)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: AppButton(
+                onPressed: controller.loadMoreProducts,
+                label: 'Load More Products',
+              ),
+            ),
+
+          // Fetching more indicator
+          if (controller.isFetchingProducts.value)
+            const Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(),
+            ),
+        ],
+      );
+    });
   }
 }

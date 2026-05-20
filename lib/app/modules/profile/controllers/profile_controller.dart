@@ -105,6 +105,8 @@ class ProfileController extends GetxController {
     super.onClose();
   }
 
+  Future<void> refreshProfile() => loadUserProfile();
+
   /// Load user profile from backend
   Future<void> loadUserProfile() async {
     try {
@@ -144,9 +146,9 @@ class ProfileController extends GetxController {
   }
 
   /// Refresh profile data
-  Future<void> refreshProfile() async {
-    await loadUserProfile();
-  }
+  // Future<void> refreshProfile() async {
+  //   await loadUserProfile();
+  // }
 
   /// Update text controllers with user data
   void _updateControllers() {
@@ -523,17 +525,15 @@ class ProfileController extends GetxController {
 
   /// Logout
   Future<void> logout() async {
-    Get.dialog(
-      CustomAlertDialogUtil(
-        title: "Logout",
-        content: 'Are you sure you want to logout?',
-        leftButtonName: "Cancel",
-        rightButtonName: "Logout",
-        onLeftButtonTap: () => Get.back(),
-        onRightButtonTap: () async {
-          await _authController.logout();
-        },
-      ),
+    showCustomDialog(
+      title: "Logout",
+      content: 'Are you sure you want to logout?',
+      leftButtonName: "Cancel",
+      rightButtonName: "Logout",
+      onLeftButtonTap: () => Get.back(),
+      onRightButtonTap: () async {
+        await _authController.logout();
+      },
     );
   }
 

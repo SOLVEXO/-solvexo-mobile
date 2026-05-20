@@ -11,12 +11,13 @@ class SellerNameRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: AppColors.primaryColor.withOpacity(0.2),
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         spacing: 10,
         children: [
           CommonImageView(

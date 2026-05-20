@@ -1,9 +1,8 @@
-import 'package:book_store_app/app/modules/category/views/categories_screen.dart';
 import 'package:get/get.dart';
 
 import '../modules/about/bindings/about_binding.dart';
 import '../modules/about/views/about_view.dart';
-import '../modules/address/bindings/profile_address_binding.dart';
+import '../modules/address/bindings/address_binding.dart';
 import '../modules/address/views/add_address_view.dart';
 import '../modules/address/views/address_view.dart';
 import '../modules/auth/auth_tabs_view.dart';
@@ -11,8 +10,6 @@ import '../modules/cart/bindings/cart_binding.dart';
 import '../modules/cart/views/cart_view.dart';
 import '../modules/category/bindings/category_binding.dart';
 import '../modules/category/views/category_view.dart';
-import '../modules/category/views/product_details_view.dart';
-import '../modules/category/views/sub_category_view.dart';
 import '../modules/change_password/bindings/change_password_binding.dart';
 import '../modules/change_password/views/change_password_view.dart';
 import '../modules/chat/bindings/chat_binding.dart';
@@ -46,6 +43,8 @@ import '../modules/payment/views/payment_success_view.dart';
 import '../modules/payment/views/payment_view.dart';
 import '../modules/privacy_policy/bindings/privacy_policy_binding.dart';
 import '../modules/privacy_policy/views/privacy_policy_view.dart';
+import '../modules/product_details/binding/product_detail_binding.dart';
+import '../modules/product_details/views/product_details_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/refund_request/bindings/refund_request_binding.dart';
@@ -58,6 +57,10 @@ import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
 import '../modules/splash_screen/views/splash_screen_view.dart';
+import '../modules/sub_category/binding/sub_category_binding.dart';
+import '../modules/sub_category/views/sub_category_view.dart';
+import '../modules/wishlist/bindings/wishlist_binding.dart';
+import '../modules/wishlist/views/wishlist_view.dart';
 
 part 'app_routes.dart';
 
@@ -93,20 +96,20 @@ class AppPages {
       page: () => CategoryView(),
       binding: CategoryBinding(),
     ),
-    GetPage(
-      name: Routes.categoryScreen,
-      page: () => CategoriesScreen(),
-      binding: CategoryBinding(),
-    ),
+    // GetPage(
+    //   name: Routes.categoryScreen,
+    //   page: () => CategoriesScreen(),
+    //   binding: CategoryBinding(),
+    // ),
     GetPage(
       name: Routes.subCategoryView,
       page: () => const SubCategoryView(),
-      binding: CategoryBinding(),
+      binding: SubCategoryBinding(),
     ),
     GetPage(
       name: Routes.productDetailsView,
       page: () => ProductDetailsView(),
-      binding: CategoryBinding(),
+      binding: ProductDetailBinding(),
     ),
     GetPage(
       name: Routes.searchView,
@@ -161,17 +164,17 @@ class AppPages {
     GetPage(
       name: Routes.addressView,
       page: () => AddressView(),
-      binding: ProfileAddressBinding(),
+      binding: AddressBinding(),
     ),
     GetPage(
       name: Routes.addAddressView,
       page: () => AddAddressView(),
-      binding: ProfileAddressBinding(),
+      binding: AddressBinding(),
     ),
     GetPage(
       name: Routes.trackerView,
       page: () => TrackOrderView(),
-      binding: ProfileOrdertrackerBinding(),
+      binding: OrderTrackerBinding(),
     ),
     GetPage(
       name: Routes.refundRequestView,
@@ -237,6 +240,11 @@ class AppPages {
       name: Routes.CHAT,
       page: () => const ChatView(),
       binding: ChatBinding(),
+    ),
+    GetPage(
+      name: Routes.WISHLIST,
+      page: () => const WishlistView(),
+      binding: WishlistBinding(),
     ),
   ];
 }

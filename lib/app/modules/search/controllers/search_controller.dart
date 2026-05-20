@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
-import 'package:book_store_app/app/modules/category/models/product_model.dart'
-    as BackendModel;
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -10,24 +9,27 @@ import 'package:get/get.dart';
 
 class SearchBarController extends GetxController {
   final ProductRepository _productRepository = ProductRepository();
-  final textController = TextEditingController();
+  final TextEditingController textController = TextEditingController();
 
-  /// user input
-  RxString searchText = "".obs;
-  RxBool showResults = false.obs;
-  RxBool loading = false.obs;
-  RxBool showSuggestions = false.obs;
+  // ─── UI state ──────────────────────────────────────────────────────────────
+  final RxString searchText = ''.obs;
+  final RxBool showResults = false.obs;
+  final RxBool loading = false.obs;
+  final RxBool showSuggestions = false.obs;
 
-  RxMap<String, bool> favouriteMap = <String, bool>{}.obs;
+  // ─── Products ─────────────────────────────────────────────────────────────
+  // ProductModel is now variants-based — use product.price, product.stock,
+  // product.averageRating computed getters; no alias import needed.
+  final RxList<ProductModel> allProducts = <ProductModel>[].obs;
+  final RxList<ProductModel> filteredProducts = <ProductModel>[].obs;
+  final RxList<ProductModel> suggestions = <ProductModel>[].obs;
 
-  Timer? debounce;
+  // ─── Favourites ───────────────────────────────────────────────────────────
+  final RxMap<String, bool> favouriteMap = <String, bool>{}.obs;
 
-  @override
-  void onClose() {
-    // textController.dispose();
-    debounce?.cancel();
-    super.onClose();
-  }
+  Timer? _debounce;
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
   void onInit() {
@@ -36,90 +38,106 @@ class SearchBarController extends GetxController {
     loadRecentlyViewed();
   }
 
-  /// all products source (from backend)
-  RxList<BackendModel.ProductModel> allProducts =
-      <BackendModel.ProductModel>[].obs;
+  @override
+  void onClose() {
+    _debounce?.cancel();
+    textController.dispose();
+    super.onClose();
+  }
 
-  /// filtered products
-  RxList<BackendModel.ProductModel> filteredProducts =
-      <BackendModel.ProductModel>[].obs;
-  RxList<BackendModel.ProductModel> suggestions =
-      <BackendModel.ProductModel>[].obs;
+  // ─── 1. Typing handler ────────────────────────────────────────────────────
 
-  /// called when user is typing
   void onSearchChanged(String value) {
     searchText.value = value;
 
-    if (value.isEmpty) {
-      showResults.value = false;
-      showSuggestions.value = false;
-      filteredProducts.clear();
-      suggestions.clear();
+    if (value.trim().isEmpty) {
+      _clearState();
       return;
     }
 
     showSuggestions.value = true;
 
-    // Cancel previous debounce
-    debounce?.cancel();
-
-    // Show suggestions from local data if available
+    // Instant suggestions from already-loaded products
     if (allProducts.isNotEmpty) {
-      suggestions.value = allProducts
-          .where(
-            (p) =>
-                p.name.toLowerCase().startsWith(value.toLowerCase()) ||
-                p.description.toLowerCase().contains(value.toLowerCase()),
-          )
-          .take(6)
-          .toList();
+      suggestions.assignAll(
+        allProducts
+            .where(
+              (p) =>
+                  p.name.toLowerCase().startsWith(value.toLowerCase()) ||
+                  p.description.toLowerCase().contains(value.toLowerCase()),
+            )
+            .take(6)
+            .toList(),
+      );
     }
 
-    // Debounce API call
-    debounce = Timer(const Duration(milliseconds: 100), () {
+    // Debounced API call — 400ms feels natural for search
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
       performSearch(value);
     });
   }
 
-  /// Main search - calls backend API
+  // ─── 2. Main search ───────────────────────────────────────────────────────
+  // Uses getProductsByCategory without a categoryId so the backend returns
+  // all products matching the search query (same pattern as HomeController).
+
   Future<void> performSearch(String query) async {
-    if (query.trim().isEmpty) return;
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return;
 
     loading.value = true;
     showResults.value = true;
 
     try {
-      // Call backend search API
-      final response = await _productRepository.getProducts(
-        search: query,
+      final response = await _productRepository.getProductsByCategory(
+        categoryId: null, // search across all categories
         page: 1,
         limit: 50,
       );
 
       if (response != null && response.products.isNotEmpty) {
-        filteredProducts.assignAll(response.products);
-        allProducts.assignAll(response.products);
+        // Client-side name/description filter on top of API results
+        final matched = response.products
+            .where(
+              (p) =>
+                  p.name.toLowerCase().contains(trimmed.toLowerCase()) ||
+                  p.description.toLowerCase().contains(trimmed.toLowerCase()),
+            )
+            .toList();
 
-        // Update suggestions
-        suggestions.value = response.products.take(1).toList();
+        filteredProducts.assignAll(matched);
+        allProducts.assignAll(
+          response.products,
+        ); // cache full list for suggestions
 
-        // Add to recent searches
-        addToRecentSearches(query);
+        // Top suggestion is the closest name match
+        suggestions.assignAll(
+          matched
+              .where(
+                (p) => p.name.toLowerCase().startsWith(trimmed.toLowerCase()),
+              )
+              .take(5)
+              .toList(),
+        );
 
-        // Initialize favorites
-        for (var p in response.products) {
-          favouriteMap[p.id] = false;
+        _updateFavouriteMap(matched);
+        addToRecentSearches(trimmed);
+
+        debugPrint('🔍 Search "$trimmed" → ${matched.length} results');
+
+        if (matched.isEmpty) {
+          showResults.value = false;
+          ToastUtil.showToast('No products found for "$trimmed"');
         }
-
-        debugPrint('Search found ${response.products.length} products');
       } else {
         filteredProducts.clear();
         suggestions.clear();
         showResults.value = false;
-        ToastUtil.showToast('No products found for "$query"');
+        ToastUtil.showToast('No products found for "$trimmed"');
       }
     } catch (e) {
-      debugPrint('Search error: $e');
+      debugPrint('❌ Search error: $e');
       ToastUtil.showToast('Search failed. Please try again.');
       filteredProducts.clear();
       suggestions.clear();
@@ -129,229 +147,204 @@ class SearchBarController extends GetxController {
     }
   }
 
-  /// Select a suggestion and perform full search
-  void selectSuggestion(BackendModel.ProductModel product) {
+  // ─── 3. Select a suggestion ───────────────────────────────────────────────
+
+  void selectSuggestion(ProductModel product) {
     textController.text = product.name;
     searchText.value = product.name;
-    performSearch(product.name);
     showSuggestions.value = false;
+    performSearch(product.name);
   }
 
-  /// Clear search
+  // ─── 4. Clear ─────────────────────────────────────────────────────────────
+
   void clearSearch() {
-    searchText.value = "";
     textController.clear();
+    _clearState();
+  }
+
+  void _clearState() {
+    searchText.value = '';
     filteredProducts.clear();
     suggestions.clear();
     showResults.value = false;
     showSuggestions.value = false;
   }
 
-  // ==================== RECENT SEARCHES ====================
+  // ─── 5. Filters ───────────────────────────────────────────────────────────
+  // Applies price / sort on the already-loaded filteredProducts list so
+  // there is no extra API round-trip for simple filter changes.
 
-  /// Recent searches (stored locally)
-  RxList<String> recentSearches = <String>[].obs;
+  void applyFilters({double? minPrice, double? maxPrice, String? sortBy}) {
+    if (allProducts.isEmpty) return;
 
-  RxBool showAll = false.obs;
+    var result = allProducts.toList();
+
+    // Re-apply the current search text filter
+    final query = searchText.value.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      result = result
+          .where(
+            (p) =>
+                p.name.toLowerCase().contains(query) ||
+                p.description.toLowerCase().contains(query),
+          )
+          .toList();
+    }
+
+    // Price — uses product.price computed getter (min variant price)
+    if (minPrice != null) {
+      result = result.where((p) => p.price >= minPrice).toList();
+    }
+    if (maxPrice != null) {
+      result = result.where((p) => p.price <= maxPrice).toList();
+    }
+
+    // Sort
+    switch (sortBy ?? 'newest') {
+      case 'price_asc':
+        result.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case 'price_desc':
+        result.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case 'rating':
+        // averageRating is a direct field on the new ProductModel
+        result.sort((a, b) => b.averageRating.compareTo(a.averageRating));
+        break;
+      case 'newest':
+      default:
+        result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+    }
+
+    filteredProducts.assignAll(result);
+    debugPrint('🎛️ Filtered to ${filteredProducts.length} products');
+  }
+
+  void sortResults(String sortBy) => applyFilters(sortBy: sortBy);
+
+  // ─── 6. Recent searches ───────────────────────────────────────────────────
+
+  final RxList<String> recentSearches = <String>[].obs;
+  final RxBool showAll = false.obs;
 
   List<String> get shownRecentSearches =>
       showAll.value ? recentSearches : recentSearches.take(4).toList();
 
-  /// Load recent searches from storage
   Future<void> loadRecentSearches() async {
     try {
-      // Load from SharedPreferences
+      // Uncomment when SharedPreferences method is ready:
       // final saved = await AppPreferences.getRecentSearches();
-      // if (saved != null) {
-      //   recentSearches.assignAll(saved);
-      // }
+      // if (saved != null) recentSearches.assignAll(saved);
 
-      // Temporary dummy data
+      // Placeholder dummy data
       recentSearches.assignAll([
-        "desk storage",
-        "hanger",
-        "cabinet",
-        "bracket",
+        'desk storage',
+        'hanger',
+        'cabinet',
+        'bracket',
       ]);
     } catch (e) {
-      debugPrint('Error loading recent searches: $e');
+      debugPrint('❌ Error loading recent searches: $e');
     }
   }
 
-  /// Save recent searches to storage
-  Future<void> saveRecentSearches() async {
+  Future<void> _saveRecentSearches() async {
     try {
-      // Save to SharedPreferences
       // await AppPreferences.saveRecentSearches(recentSearches);
-      debugPrint('Recent searches saved');
     } catch (e) {
-      debugPrint('Error saving recent searches: $e');
+      debugPrint('❌ Error saving recent searches: $e');
     }
   }
 
-  /// Add to recent searches
   void addToRecentSearches(String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return;
-
-    // Remove if already exists
     recentSearches.remove(trimmed);
-
-    // Add to beginning
     recentSearches.insert(0, trimmed);
-
-    // Keep only last 10
     if (recentSearches.length > 10) {
       recentSearches.removeRange(10, recentSearches.length);
     }
-
-    saveRecentSearches();
+    _saveRecentSearches();
   }
 
-  /// Delete a recent search
   void deleteRecent(String value) {
     recentSearches.remove(value);
-    saveRecentSearches();
+    _saveRecentSearches();
   }
 
-  /// Toggle see more/less
-  void toggleSeeMore() {
-    showAll.value = !showAll.value;
-  }
+  void toggleSeeMore() => showAll.value = !showAll.value;
 
-  /// Clear all recent searches
   void clearRecentSearches() {
     recentSearches.clear();
-    saveRecentSearches();
+    _saveRecentSearches();
   }
 
-  // ==================== LAST SEEN / RECENTLY VIEWED ====================
+  // ─── 7. Recently viewed ───────────────────────────────────────────────────
 
-  /// Last seen products (from backend)
-  RxList<BackendModel.ProductModel> lastSeenProducts =
-      <BackendModel.ProductModel>[].obs;
+  final RxList<ProductModel> lastSeenProducts = <ProductModel>[].obs;
 
-  /// Last seen images (temporary fallback)
-  List<String> lastSeenImages = [
-    AppImages.sampleProduct,
-    AppImages.sampleProduct,
-    AppImages.sampleProduct,
-    AppImages.sampleProduct,
-    AppImages.sampleProduct,
-    AppImages.sampleProduct,
-  ];
+  /// Fallback images shown before lastSeenProducts loads
+  final List<String> lastSeenImages = List.filled(6, AppImages.sampleProduct);
 
-  /// Load recently viewed products
   Future<void> loadRecentlyViewed() async {
     try {
-      // Load product IDs from storage
-      final productIds = await AppPreferences.getRecentlyViewedProductIds();
-      if (productIds != null && productIds.isNotEmpty) {
-        // Fetch products from backend
-        for (var id in productIds.take(6)) {
-          final product = await _productRepository.getProductById(id);
-          if (product != null) {
-            lastSeenProducts.add(product);
-          }
-        }
+      final ids = await AppPreferences.getRecentlyViewedProductIds();
+      if (ids == null || ids.isEmpty) return;
+
+      for (final id in ids.take(6)) {
+        final product = await _productRepository.getProductById(id);
+        if (product != null) lastSeenProducts.add(product);
       }
     } catch (e) {
-      debugPrint('Error loading recently viewed: $e');
+      debugPrint('❌ Error loading recently viewed: $e');
     }
   }
 
-  /// Add product to recently viewed
   Future<void> addToRecentlyViewed(String productId) async {
     try {
-      // Load existing IDs
       final ids = await AppPreferences.getRecentlyViewedProductIds() ?? [];
       ids.remove(productId);
       ids.insert(0, productId);
-      if (ids.length > 20) {
-        ids.removeRange(20, ids.length);
-      }
+      if (ids.length > 20) ids.removeRange(20, ids.length);
       await AppPreferences.saveRecentlyViewedProductIds(ids);
-      debugPrint('Added to recently viewed: $productId');
     } catch (e) {
-      debugPrint('Error saving recently viewed: $e');
+      debugPrint('❌ Error saving recently viewed: $e');
     }
   }
 
-  // ==================== SEARCH FILTERS ====================
+  // ─── 8. Popular searches ──────────────────────────────────────────────────
 
-  /// Apply filters to search results
-  void applyFilters({
-    String? category,
-    double? minPrice,
-    double? maxPrice,
-    String? sortBy,
-  }) async {
-    if (searchText.value.isEmpty) return;
+  final RxList<String> popularSearches = <String>[].obs;
 
-    loading.value = true;
-
-    try {
-      final response = await _productRepository.getProducts(
-        search: searchText.value,
-        category: category,
-        minPrice: minPrice,
-        maxPrice: maxPrice,
-        sort: sortBy,
-        page: 1,
-        limit: 50,
-      );
-
-      if (response != null) {
-        filteredProducts.assignAll(response.products);
-      }
-    } catch (e) {
-      debugPrint('Filter error: $e');
-      ToastUtil.showToast('Failed to apply filters');
-    } finally {
-      loading.value = false;
-    }
-  }
-
-  /// Sort search results
-  void sortResults(String sortBy) {
-    applyFilters(sortBy: sortBy);
-  }
-
-  // ==================== POPULAR SEARCHES ====================
-
-  /// Get popular/trending searches from backend
   Future<void> loadPopularSearches() async {
+    // Uncomment when endpoint is ready:
     // try {
     //   final popular = await _productRepository.getPopularSearches();
-    //   if (popular != null) {
-    //     popularSearches.assignAll(popular);
-    //   }
+    //   if (popular != null) popularSearches.assignAll(popular);
     // } catch (e) {
     //   debugPrint('Error loading popular searches: $e');
     // }
   }
 
-  /// Popular searches
-  RxList<String> popularSearches = <String>[].obs;
+  // ─── 9. Utilities ─────────────────────────────────────────────────────────
 
-  // ==================== UTILITIES ====================
+  bool isFavorite(String productId) => favouriteMap[productId] ?? false;
 
-  /// Check if a product is favorited
-  bool isFavorite(String productId) {
-    return favouriteMap[productId] ?? false;
-  }
-
-  /// Toggle favorite
   void toggleFavorite(String productId) {
     favouriteMap[productId] = !(favouriteMap[productId] ?? false);
   }
 
-  /// Get total results count
   int get resultsCount => filteredProducts.length;
-
-  /// Check if has results
   bool get hasResults => filteredProducts.isNotEmpty;
-
-  /// Check if search is active
   bool get isSearching => searchText.value.isNotEmpty;
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  void _updateFavouriteMap(List<ProductModel> list) {
+    for (final p in list) {
+      favouriteMap.putIfAbsent(p.id, () => false);
+    }
+  }
 }

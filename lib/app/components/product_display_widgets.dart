@@ -101,29 +101,29 @@ class ProductGridItem extends StatelessWidget {
                 ),
 
                 // Discount Badge
-                if (product.hasDiscount)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '-${product.discountPercentage}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+                // if (product.hasDiscount)
+                //   Positioned(
+                //     top: 8,
+                //     left: 8,
+                //     child: Container(
+                //       padding: const EdgeInsets.symmetric(
+                //         horizontal: 8,
+                //         vertical: 4,
+                //       ),
+                //       decoration: BoxDecoration(
+                //         color: Colors.red,
+                //         borderRadius: BorderRadius.circular(4),
+                //       ),
+                //       child: Text(
+                //         '-${product.discountPercentage}%',
+                //         style: const TextStyle(
+                //           color: Colors.white,
+                //           fontSize: 12,
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
 
                 // Out of Stock Badge
                 if (!product.inStock)
@@ -183,7 +183,7 @@ class ProductGridItem extends StatelessWidget {
                       const Icon(Icons.star, color: Colors.amber, size: 16),
                       const SizedBox(width: 4),
                       Text(
-                        '${product.ratings.average.toStringAsFixed(1)} (${product.ratings.count})',
+                        '${product.totalRatings.toStringAsFixed(1)} (${product.averageRating})',
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
@@ -195,7 +195,7 @@ class ProductGridItem extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '\$${product.actualPrice.toStringAsFixed(2)}',
+                        '\$${product.price.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -203,17 +203,17 @@ class ProductGridItem extends StatelessWidget {
                         ),
                       ),
 
-                      if (product.hasDiscount) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          '\$${product.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                            decoration: TextDecoration.lineThrough,
-                          ),
-                        ),
-                      ],
+                      // if (product.hasDiscount) ...[
+                      //   const SizedBox(width: 8),
+                      //   Text(
+                      //     '\$${product.price.toStringAsFixed(2)}',
+                      //     style: TextStyle(
+                      //       fontSize: 14,
+                      //       color: Colors.grey[600],
+                      //       decoration: TextDecoration.lineThrough,
+                      //     ),
+                      //   ),
+                      // ],
                     ],
                   ),
                 ],

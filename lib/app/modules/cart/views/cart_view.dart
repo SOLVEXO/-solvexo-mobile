@@ -1,10 +1,13 @@
-import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
+import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
 import 'package:book_store_app/app/modules/cart/widgets/bottom_checkout_bar.dart';
 import 'package:book_store_app/app/modules/cart/widgets/cart_item_widget.dart';
 import 'package:book_store_app/app/modules/cart/widgets/empty_cart_text.dart';
+import 'package:book_store_app/app/modules/cart/widgets/wishlist_icon_count.dart';
+import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -13,16 +16,43 @@ import '../controllers/cart_controller.dart';
 
 class CartView extends StatelessWidget {
   CartView({super.key});
-  final controller = Get.put(CartController());
 
+  final controller = Get.put(CartController());
   @override
   Widget build(BuildContext context) {
     // final size = MediaQuery.of(context).size;
     // final cartItem = controller.cartItems[index];
-    return Scaffold(
+    return BaseViewScreen(
+      screenName: "Cart",
+      showCustomAppBar: true,
+      horizontalPadding: false,
+      verticalPadding: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.white,
-      appBar: CustomAppBarTwo(title: "Cart"),
-      body: Obx(() {
+      actions: [WishlistIconCount()],
+      child: Obx(() {
+        if (controller.loginUser.value) {
+          return Column(
+            children: [
+              LoginSignupCard(),
+              Spacer(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: "Featured Items you may like",
+                    fontSize: AppFontSize.regular,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  RecommendedProductList(),
+                ],
+              ),
+            ],
+          );
+        }
+        if (controller.isLoading.value) {
+          return ShimmerEffect(itemCount: 3);
+        }
         if (controller.cartItems.isEmpty) {
           return EmptyCartText();
         }
@@ -60,10 +90,7 @@ class CartView extends StatelessWidget {
               ),
               if (controller.cartItems.length <= 2)
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 10,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -76,6 +103,7 @@ class CartView extends StatelessWidget {
                     ],
                   ),
                 ),
+
               BottomCheckoutBar(),
             ],
           ),
@@ -113,7 +141,10 @@ class CartView extends StatelessWidget {
         CustomText(text: '|', color: AppColors.lightGrey),
         TextButton(
           onPressed: () {
-            controller.showDeleteConfirmation(controller.removeSelectedItems);
+            controller.showDeleteConfirmation(
+              onLeftButtonTap: () => controller.showWishListConformation(),
+              onRightButtonTap: () => controller.clearCart(),
+            );
           },
           child: CustomText(
             text: "Delete",

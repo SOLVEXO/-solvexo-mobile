@@ -4,7 +4,6 @@ import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
-import 'package:book_store_app/app/notification/fcm_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
@@ -253,7 +252,10 @@ class AuthRepository {
   /// Get current user profile
   Future<UserModel?> getMe({required String token}) async {
     try {
-      final response = await _baseClient.get(ApiConstants.getMe);
+      final response = await _baseClient.get(
+        ApiConstants.getMe,
+        requiresAuth: true,
+      );
 
       debugPrint("========== GET ME DEBUG ==========");
       debugPrint("Status: ${response.statusCode}");
@@ -277,7 +279,10 @@ class AuthRepository {
   /// Get user profile
   Future<UserModel?> getUserProfile({required String token}) async {
     try {
-      final response = await _baseClient.get(ApiConstants.getUserProfile);
+      final response = await _baseClient.get(
+        ApiConstants.getUserProfile,
+        requiresAuth: true,
+      );
 
       debugPrint("Get Profile Response --> ${response.data}");
 

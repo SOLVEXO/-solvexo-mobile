@@ -35,7 +35,7 @@ class TabHeader extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   c.tabIndex.value = i;
-                  c.filterProducts();
+                  c.filteredProducts;
                 },
 
                 child: Column(

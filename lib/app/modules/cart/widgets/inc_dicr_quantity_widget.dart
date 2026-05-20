@@ -1,6 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
-import 'package:book_store_app/app/modules/cart/models/cart_item_model.dart';
+import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +33,10 @@ class IncDicrQuantityWidget extends StatelessWidget {
                 ),
               ),
               child: InkWell(
-                onTap: () => controller.decreaseQuantity(item.productId!),
+                onTap: () => controller.decreaseQuantity(
+                  item.productId,
+                  item.productVariantId,
+                ),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: Icon(Icons.remove, color: AppColors.grey, size: 18),
@@ -65,7 +68,10 @@ class IncDicrQuantityWidget extends StatelessWidget {
                 ),
               ),
               child: InkWell(
-                onTap: () => controller.increaseQuantity(item.productId!),
+                onTap: () => controller.increaseQuantity(
+                  item.productId,
+                  item.productVariantId,
+                ),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
                   child: Icon(

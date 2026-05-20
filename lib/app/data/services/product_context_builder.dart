@@ -13,7 +13,7 @@ class ProductContextBuilder {
 
     for (final p in products) {
       buffer.writeln(
-        '- [ID:${p.id}] "${p.name}" by ${p.sellerName} | '
+        '- [ID:${p.id}] "${p.name}" by ${p.sellerId} | '
         '\$${p.price} | ${p.category} | '
         'Stock: ${p.inStock ? "available" : "out of stock"}',
       );

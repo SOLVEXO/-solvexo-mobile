@@ -10,9 +10,9 @@ import 'package:book_store_app/app/modules/category/models/category_model.dart'
     as BackendModel;
 import 'package:book_store_app/app/modules/category/models/product_model.dart'
     as BackendModel;
-import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
-import 'package:book_store_app/app/modules/category/widgets/filter_bottom_sheet.dart';
+import 'package:book_store_app/app/modules/sub_category/widgets/filter_bottom_sheet.dart';
+import 'package:book_store_app/app/modules/product_details/controller/product_detail_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -27,66 +27,56 @@ class ProductController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isFetchingProducts = false.obs;
 
-  // Pagination
+  // ─── Pagination ───────────────────────────────────────────────────────────
   RxInt currentPage = 1.obs;
   RxInt totalPages = 1.obs;
   RxBool hasMoreProducts = true.obs;
 
-  // ---------------- Filter -----------------
-
+  // ─── Filters ──────────────────────────────────────────────────────────────
   RxDouble minPrice = 0.0.obs;
   RxDouble maxPrice = 1000.0.obs;
-
   RxDouble currentMinFilter = 0.0.obs;
   RxDouble currentMaxFilter = 1000.0.obs;
-
-  RxString selectedBrand = "".obs;
+  RxString selectedBrand = ''.obs;
   RxDouble selectedRating = 0.0.obs;
-
-  // Get unique brands from products
-  List<String> get brands {
-    final uniqueBrands = products
-        .where((p) => p.brand != null && p.brand!.isNotEmpty)
-        .map((p) => p.brand!)
-        .toSet()
-        .toList();
-    return uniqueBrands.isEmpty
-        ? ["Ikea", "HomeZ", "UrbanHouse", "KitchenPro"]
-        : uniqueBrands;
-  }
 
   List<double> ratings = [1, 2, 3, 4, 5];
 
+  // List<String> get brands {
+  //   final uniqueBrands = products
+  //       .where((p) => p.brand != null && p.brand!.isNotEmpty)
+  //       .map((p) => p.brand!)
+  //       .toSet()
+  //       .toList();
+  //   return uniqueBrands.isEmpty
+  //       ? ['Ikea', 'HomeZ', 'UrbanHouse', 'KitchenPro']
+  //       : uniqueBrands;
+  // }
+
   void resetFilters() {
-    selectedBrand.value = "";
+    selectedBrand.value = '';
     selectedRating.value = 0;
     currentMinFilter.value = minPrice.value;
     currentMaxFilter.value = maxPrice.value;
-
-    // Fetch products without filters
     fetchProducts();
   }
 
   void applyFilters() {
     currentMinFilter.value = minPrice.value;
     currentMaxFilter.value = maxPrice.value;
-
-    // Fetch products with filters
     fetchProducts();
   }
 
   Future bottomsheet(context) {
     return Get.bottomSheet(
       CustomBottomSheet(
-        title: "Filter",
-        widget: FilterBottomSheet(),
-        // height: Get.height / 2,
+        title: 'Filter',
+        widget: FilterBottomSheetSubCategory(),
       ),
     );
   }
 
-  // ---------------- Category Model -----------------
-
+  // ─── Categories ───────────────────────────────────────────────────────────
   final RxList<BackendModel.CategoryModel> categories =
       <BackendModel.CategoryModel>[].obs;
 
@@ -96,13 +86,11 @@ class ProductController extends GetxController {
     initializeData();
   }
 
-  /// Initialize categories and products
   Future<void> initializeData() async {
     isLoading.value = true;
-
     try {
       await fetchCategories();
-      await fetchProducts();
+      await fetchProducts(); // fetch all products (no category filter)
     } catch (e) {
       debugPrint('Error initializing data: $e');
     } finally {
@@ -110,11 +98,9 @@ class ProductController extends GetxController {
     }
   }
 
-  /// Fetch categories from backend
   Future<void> fetchCategories() async {
     try {
       final fetchedCategories = await _productRepository.getCategories();
-
       if (fetchedCategories != null) {
         categories.assignAll(fetchedCategories);
         debugPrint('Fetched ${fetchedCategories.length} categories');
@@ -125,16 +111,21 @@ class ProductController extends GetxController {
     }
   }
 
-  // ---------------- Product Model -----------------
-
+  // ─── Products ─────────────────────────────────────────────────────────────
   RxList<BackendModel.ProductModel> products =
       <BackendModel.ProductModel>[].obs;
 
-  /// Fetch products from backend
+  /// Returns the selected category ID, or null when "All" is selected (index 0)
+  String? get _selectedCategoryId {
+    if (selectedCategoryIndex.value == 0) return null;
+    return categories[selectedCategoryIndex.value - 1].id;
+  }
+
+  /// Fetch products using the products-by-category endpoint.
+  /// When no categoryId is provided the backend returns ALL products.
   Future<void> fetchProducts({bool loadMore = false}) async {
     if (isFetchingProducts.value) return;
 
-    // If loading more, increment page
     if (loadMore) {
       if (!hasMoreProducts.value) return;
       currentPage.value++;
@@ -145,119 +136,57 @@ class ProductController extends GetxController {
     isFetchingProducts.value = true;
 
     try {
-      // Build filter parameters
-      final response = await _productRepository.getProducts(
-        category: selectedCategoryIndex.value > 0
-            ? categories[selectedCategoryIndex.value - 1].id
-            : null,
-        minPrice: currentMinFilter.value > 0 ? currentMinFilter.value : null,
-        maxPrice: currentMaxFilter.value < 1000 ? currentMaxFilter.value : null,
-        brand: selectedBrand.value.isNotEmpty ? selectedBrand.value : null,
+      final response = await _productRepository.getProductsByCategory(
+        categoryId: _selectedCategoryId, // null → all products
         page: currentPage.value,
         limit: 20,
       );
 
       if (response != null) {
         if (loadMore) {
-          // Append products
           products.addAll(response.products);
         } else {
-          // Replace products
           products.assignAll(response.products);
         }
 
-        // Update pagination info
         totalPages.value = response.pages;
         hasMoreProducts.value = currentPage.value < totalPages.value;
 
         debugPrint(
-          'Fetched ${response.products.length} products (Page ${currentPage.value}/${totalPages.value})',
+          'Fetched ${response.products.length} products '
+          '(Page ${currentPage.value}/${totalPages.value})',
         );
       }
     } catch (e) {
       debugPrint('Error fetching products: $e');
       ToastUtil.showToast('Failed to load products');
-
-      // Revert page if error
-      if (loadMore) {
-        currentPage.value--;
-      }
+      if (loadMore) currentPage.value--;
     } finally {
       isFetchingProducts.value = false;
-      filterCategoryProducts();
     }
   }
 
-  /// Load more products
   Future<void> loadMoreProducts() async {
     await fetchProducts(loadMore: true);
   }
 
-  // -------------- Get products by category -----------------
-
-  RxList<BackendModel.ProductModel> filteredCategoryProducts =
-      <BackendModel.ProductModel>[].obs;
-
-  void loadProductsByCategory(String categoryName) {
-    filteredCategoryProducts.assignAll(
-      products.where((p) => p.category?.name == categoryName),
-    );
-  }
-
-  void filterCategoryProducts() {
-    if (selectedCategoryIndex.value == 0) {
-      // All categories
-      filteredCategoryProducts.assignAll(products);
-    } else {
-      final selectedCategory = categories[selectedCategoryIndex.value - 1];
-      filteredCategoryProducts.assignAll(
-        products.where((p) => p.category?.id == selectedCategory.id),
-      );
-    }
-
-    // Apply additional filters
-    if (selectedBrand.value.isNotEmpty) {
-      filteredCategoryProducts.assignAll(
-        filteredCategoryProducts.where((p) => p.brand == selectedBrand.value),
-      );
-    }
-
-    if (selectedRating.value > 0) {
-      filteredCategoryProducts.assignAll(
-        filteredCategoryProducts.where(
-          (p) => p.ratings.average >= selectedRating.value,
-        ),
-      );
-    }
-
-    debugPrint('Filtered ${filteredCategoryProducts.length} products');
-  }
-
-  /// Change category
+  // ─── Category selection ───────────────────────────────────────────────────
   void selectCategory(int index) {
     selectedCategoryIndex.value = index;
-    fetchProducts();
+    fetchProducts(); // re-fetches with new (or null) categoryId
   }
 
-  // ---------------- Product Details -----------------
-
-  /// Selected product for detail screen
+  // ─── Product Details ──────────────────────────────────────────────────────
   final Rx<BackendModel.ProductModel?> selectedProduct =
       Rx<BackendModel.ProductModel?>(null);
 
-  /// Quantity
   RxInt productQty = 1.obs;
-
-  /// Selected variant index
   RxInt selectedVariantIndex = 0.obs;
 
-  /// Load product details from backend by ID
   Future<void> loadProductDetails(String productId) async {
     try {
       isLoading.value = true;
-
       final product = await _productRepository.getProductById(productId);
-
       if (product != null) {
         selectedProduct.value = product;
         productQty.value = 1;
@@ -274,101 +203,81 @@ class ProductController extends GetxController {
     }
   }
 
-  /// Open product details safely
   void openProductDetails(dynamic product) {
-    // Handle both old ProductModel and new BackendModel.ProductModel
     if (product is BackendModel.ProductModel) {
       selectedProduct.value = product;
       productQty.value = 1;
       selectedVariantIndex.value = 0;
-      Get.toNamed(Routes.productDetailsView);
+      Get.toNamed(
+        Routes.productDetailsView,
+        arguments: {"productId": product.id},
+      );
     } else if (product is ProductModel) {
-      // For backward compatibility with old model
-      // You might need to convert or fetch from backend
       ToastUtil.showToast('Please refresh and try again');
     }
   }
 
-  /// Increase quantity
   void increaseQty() {
-    if (selectedProduct.value != null) {
-      // Check if stock is available
-      if (productQty.value < selectedProduct.value!.stock) {
-        productQty.value++;
-      } else {
-        ToastUtil.showToast('Maximum stock reached');
-      }
+    if (selectedProduct.value == null) return;
+    if (productQty.value < selectedProduct.value!.stock) {
+      productQty.value++;
+    } else {
+      ToastUtil.showToast('Maximum stock reached');
     }
   }
 
-  /// Decrease quantity
   void decreaseQty() {
-    if (productQty.value > 1) {
-      productQty.value--;
-    }
+    if (productQty.value > 1) productQty.value--;
   }
 
-  /// Select variant
   void selectVariant(int index) {
     selectedVariantIndex.value = index;
   }
 
-  /// Related products (same category, excluding current)
   List<BackendModel.ProductModel> get relatedProducts {
     if (selectedProduct.value == null) return [];
-
     return products
         .where(
           (p) =>
               p.category?.id == selectedProduct.value!.category?.id &&
               p.id != selectedProduct.value!.id,
         )
-        .take(6) // Limit to 6 related products
+        .take(6)
         .toList();
   }
 
-  /// Add to cart
   void addToCart(context, prodImg) {
     if (selectedProduct.value == null) {
       ToastUtil.showToast('Please select a product');
       return;
     }
-
-    // Check stock
     if (!selectedProduct.value!.inStock) {
       ToastUtil.showToast('Product is out of stock');
       return;
     }
-
     if (productQty.value > selectedProduct.value!.stock) {
       ToastUtil.showToast('Not enough stock available');
       return;
     }
 
     final size = MediaQuery.of(context).size;
-    final cartController = Get.put(CartController());
+    final productDetailController = Get.put(ProductDetailController());
 
-    // Convert backend model to your cart model format
-    // You might need to create an adapter here
-    cartController.addToCartBackend(
-      product: selectedProduct.value!,
-      quantity: productQty.value,
-    );
+    productDetailController.addToCart();
 
     Get.bottomSheet(
       CustomBottomSheet(
-        title: "You might like",
+        title: 'You might like',
         height: size.height / 1.5,
         widget: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             RecommendedProductList(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               spacing: 20,
               children: [
-                // Use network image if available
                 selectedProduct.value!.images.isNotEmpty
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
@@ -381,14 +290,14 @@ class ProductController extends GetxController {
                       )
                     : SvgIcon(assetName: prodImg, size: 50),
                 CustomText(
-                  text: "Added to cart",
+                  text: 'Added to cart',
                   fontSize: AppFontSize.regular,
                   fontWeight: FontWeight.w600,
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Expanded(
                   child: AppButton(
-                    label: "Go to Cart",
+                    label: 'Go to Cart',
                     onPressed: () => Get.toNamed(Routes.cartView),
                   ),
                 ),
@@ -398,41 +307,33 @@ class ProductController extends GetxController {
         ),
       ),
     );
+
     CustomAppSnackbar.show(
       soundPath: AppSounds.successSound,
-      title: "Added to Cart",
-      message: "${selectedProduct.value!.name} (x$productQty)",
+      title: 'Added to Cart',
+      message: '${selectedProduct.value!.name} (x$productQty)',
     );
   }
 
-  /// Refresh all data
-  Future<void> refreshData() async {
-    await initializeData();
-  }
-
-  /// Search products
+  // ─── Search ───────────────────────────────────────────────────────────────
   RxString searchQuery = ''.obs;
 
   Future<void> searchProducts(String query) async {
     searchQuery.value = query;
-
     if (query.isEmpty) {
       await fetchProducts();
       return;
     }
 
     isFetchingProducts.value = true;
-
     try {
       final response = await _productRepository.getProducts(
         search: query,
         page: 1,
         limit: 50,
       );
-
       if (response != null) {
         products.assignAll(response.products);
-        filterCategoryProducts();
         debugPrint('Search found ${response.products.length} products');
       }
     } catch (e) {
@@ -443,9 +344,12 @@ class ProductController extends GetxController {
     }
   }
 
-  /// Clear search
   void clearSearch() {
     searchQuery.value = '';
     fetchProducts();
+  }
+
+  Future<void> refreshData() async {
+    await initializeData();
   }
 }

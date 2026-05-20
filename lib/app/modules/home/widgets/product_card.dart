@@ -13,9 +13,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProductCard extends StatelessWidget {
+  final int index;
   final ProductModel product;
 
-  ProductCard({super.key, required this.product});
+  ProductCard({super.key, required this.product, required this.index});
 
   final controller = Get.find<HomeController>();
   final categoryController = Get.put(ProductController());
@@ -45,7 +46,7 @@ class ProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product Image with Favorite Button and Discount Badge
-            ProductImageWithFavoriteButton(product: product),
+            ProductImageWithFavoriteButton(product: product, index: index),
 
             const SizedBox(height: 5),
 
@@ -59,43 +60,43 @@ class ProductCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
 
-            // Brand or Category
-            if (product.brand != null || product.category != null)
-              CustomText(
-                text: product.brand ?? product.category?.name ?? '',
-                fontSize: AppFontSize.small2,
-                color: Colors.grey,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+            // // Brand or Category
+            // if (product.brand != null || product.category != null)
+            //   CustomText(
+            //     text: product.brand ?? product.category?.name ?? '',
+            //     fontSize: AppFontSize.small2,
+            //     color: Colors.grey,
+            //     maxLines: 1,
+            //     overflow: TextOverflow.ellipsis,
+            //   ),
 
             // Rating
             RattingRow(product: product),
             // Price Section
             PricingSection(product: product),
             // Featured Badge (Optional)
-            if (product.isFeatured)
-              Container(
-                margin: EdgeInsets.only(top: 4),
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: CustomText(
-                  text: "Featured",
-                  fontSize: AppFontSize.verySmall,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryColor,
-                ),
-              ),
+            // if (product.)
+            //   Container(
+            //     margin: EdgeInsets.only(top: 4),
+            //     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            //     decoration: BoxDecoration(
+            //       color: AppColors.primaryColor.withOpacity(0.1),
+            //       borderRadius: BorderRadius.circular(4),
+            //     ),
+            //     child: CustomText(
+            //       text: "Featured",
+            //       fontSize: AppFontSize.verySmall,
+            //       fontWeight: FontWeight.w600,
+            //       color: AppColors.primaryColor,
+            //     ),
+            //   ),
 
             // CustomText(
             //   text: "Stock (${product.stock.toString()})",
             //   fontSize: AppFontSize.small2,
             // ),
             const SizedBox(height: 5),
-            SellerNameRow(name: "Seller Name"),
+            SellerNameRow(name: "Jami Raza"),
           ],
         ),
       ),

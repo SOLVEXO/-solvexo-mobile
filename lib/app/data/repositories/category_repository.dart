@@ -2,6 +2,8 @@ import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/category_with_children_response.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
+import 'package:book_store_app/app/network/dio_exception_handler.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class CategoryRepository {
@@ -10,6 +12,28 @@ class CategoryRepository {
   // ─────────────────────────────────────────
   // 1. GET ALL CATEGORY TREES (Full Hierarchy)
   // ─────────────────────────────────────────
+  /// Get all categories
+  Future<List<CategoryModel>?> getCategories() async {
+    try {
+      final response = await _baseClient.get(ApiConstants.categories);
+
+      debugPrint("Get Categories Response --> ${response.data}");
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return (response.data['data'] as List)
+            .map((category) => CategoryModel.fromJson(category))
+            .toList();
+      }
+
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint("Get Categories error --> $e");
+      return null;
+    }
+  }
 
   Future<List<CategoryModel>> getAllCategoryTrees() async {
     try {

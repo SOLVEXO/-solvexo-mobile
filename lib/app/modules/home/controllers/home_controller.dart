@@ -1,65 +1,72 @@
+import 'package:book_store_app/app/base_view/controller/base_view_controller.dart';
 import 'package:book_store_app/app/data/repositories/banners_repository.dart';
+import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/models/banner_model.dart';
 import 'package:book_store_app/app/modules/address/models/address_model.dart';
+import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
 
-class HomeController extends GetxController {
+class HomeController extends BaseController {
   final ProductRepository _productRepository = ProductRepository();
+  final CategoryRepository _categoryRepository = CategoryRepository();
   final BannersRepository _bannersRepository = BannersRepository();
-  // UI State
+
+  // ─── UI State ─────────────────────────────────────────────────────────────
   final RxList<BannerModel> banners = <BannerModel>[].obs;
   final RxInt bannerIndex = 0.obs;
   final RxBool isLoadingBanners = false.obs;
-  RxBool isLoading = true.obs;
-  RxBool isFetchingProducts = false.obs;
-  RxInt selectedCategoryIndex = 0.obs;
-  RxInt tabIndex = 0.obs;
+  final RxBool isLoading = true.obs;
+  final RxBool isFetchingProducts = false.obs;
+  final RxInt selectedCategoryIndex = 0.obs;
+  final RxInt tabIndex = 0.obs;
 
-  // Pagination
-  RxInt currentPage = 1.obs;
-  RxInt totalPages = 1.obs;
-  RxBool hasMoreProducts = true.obs;
+  // ─── Pagination ───────────────────────────────────────────────────────────
+  final RxInt currentPage = 1.obs;
+  final RxInt totalPages = 1.obs;
+  final RxBool hasMoreProducts = true.obs;
 
-  // Products & Categories
-  RxList<ProductModel> products = <ProductModel>[].obs;
-  RxList<ProductModel> featuredProducts = <ProductModel>[].obs;
-  RxList<ProductModel> filteredProducts = <ProductModel>[].obs;
-  RxList<CategoryModel> categories = <CategoryModel>[].obs;
+  // ─── Data ─────────────────────────────────────────────────────────────────
+  // New ProductModel — variants-based, no top-level price/stock/ratings
+  final RxList<ProductModel> products = <ProductModel>[].obs;
+  final RxList<ProductModel> featuredProducts = <ProductModel>[].obs;
+  final RxList<ProductModel> filteredProducts = <ProductModel>[].obs;
 
-  // Favourite handling
-  RxMap<String, bool> favouriteMap = <String, bool>{}.obs;
+  // CategoryModel from getAllCategoryTrees — may have nested children
+  final RxList<CategoryModel> categories = <CategoryModel>[].obs;
 
-  // Search & Filter
-  RxString searchQuery = ''.obs;
-  RxString selectedSort = 'newest'.obs; // newest, price_asc, price_desc, rating
-  Rx<double?> minPrice = Rx<double?>(null);
-  Rx<double?> maxPrice = Rx<double?>(null);
+  // ─── Favourite map ────────────────────────────────────────────────────────
+  final RxMap<String, bool> favouriteMap = <String, bool>{}.obs;
 
+  // ─── Search & Filter ──────────────────────────────────────────────────────
+  final RxString searchQuery = ''.obs;
+  final RxString selectedSort = 'newest'.obs;
+  final Rx<double?> minPrice = Rx<double?>(null);
+  final Rx<double?> maxPrice = Rx<double?>(null);
+
+  // ─── Static address (placeholder) ────────────────────────────────────────
   AddressModel get address => AddressModel(
-    label: "home",
-    fullName: "Jami Raza",
-    phone: "028866372",
-    addressLine1: "flat 1, fb area",
-    state: "sindh",
-    city: "Karachi",
-    zipCode: "21092",
-    country: "Pakistan",
+    label: 'home',
+    recipientName: 'Jami Raza',
+    phoneNumber: '028866372',
+    addressLine1: 'flat 1, fb area',
+    state: 'sindh',
+    city: 'Karachi',
+    zipCode: '21092',
   );
 
-  // -------------------- TABS --------------------
-
+  // ─── Tabs ─────────────────────────────────────────────────────────────────
+  // "All Products" + one tab per root category name
   List<String> get tabs {
-    List<String> tabList = ["All Products"];
-    tabList.addAll(categories.map((cat) => cat.name).toList());
-    return tabList;
+    return ['All Products', ...categories.map((cat) => cat.name)];
   }
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
   void onInit() {
@@ -67,6 +74,8 @@ class HomeController extends GetxController {
     initializeHome();
     fetchBanners();
   }
+
+  // ─── 1. Banners ───────────────────────────────────────────────────────────
 
   Future<void> fetchBanners() async {
     try {
@@ -82,66 +91,59 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Initialize home screen - fetch all data
+  // ─── 2. Initialize ────────────────────────────────────────────────────────
+
   Future<void> initializeHome() async {
     isLoading.value = true;
-
     try {
-      // Fetch categories first
       await fetchCategories();
-
-      // Fetch featured products
       await fetchFeaturedProducts();
-
-      // Fetch all products
       await fetchProducts();
     } catch (e) {
-      debugPrint('Error initializing home: $e');
+      debugPrint('❌ Error initializing home: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Fetch categories from backend
+  // ─── 3. Categories ────────────────────────────────────────────────────────
+  // Uses getAllCategoryTrees() — same source as CategoryController — so the
+  // tab list and CategoryView always show the same categories.
+
   Future<void> fetchCategories() async {
     try {
-      final fetchedCategories = await _productRepository.getCategories();
-
-      if (fetchedCategories != null) {
-        categories.assignAll(fetchedCategories);
-        debugPrint('Fetched ${fetchedCategories.length} categories');
-      }
+      final trees = await _categoryRepository.getAllCategoryTrees();
+      categories.assignAll(trees);
+      debugPrint('✅ Fetched ${trees.length} category trees for home');
     } catch (e) {
-      debugPrint('Error fetching categories: $e');
+      debugPrint('❌ Error fetching categories: $e');
       ToastUtil.showToast('Failed to load categories');
     }
   }
 
-  /// Fetch featured products
+  // ─── 4. Featured Products ─────────────────────────────────────────────────
+
   Future<void> fetchFeaturedProducts() async {
-    try {
-      final fetchedProducts = await _productRepository.getFeaturedProducts();
-
-      if (fetchedProducts != null) {
-        featuredProducts.assignAll(fetchedProducts);
-
-        // Add to favourites map
-        for (var product in fetchedProducts) {
-          favouriteMap[product.id] = false;
-        }
-
-        debugPrint('Fetched ${fetchedProducts.length} featured products');
-      }
-    } catch (e) {
-      debugPrint('Error fetching featured products: $e');
-    }
+    // try {
+    //   // final fetched = await _productRepository.getFeaturedProducts();
+    //   // if (fetched != null) {
+    //   //   featuredProducts.assignAll(fetched);
+    //   //   _updateFavouriteMap(fetched);
+    //   //   debugPrint('✅ Featured products: ${fetched.length}');
+    //   // }
+    // } catch (e) {
+    //   debugPrint('❌ Error fetching featured products: $e');
+    // }
   }
 
-  /// Fetch products with filters
+  // ─── 5. Products ──────────────────────────────────────────────────────────
+  // Uses getProductsByCategory() — same endpoint as SubCategoryController.
+  // When tab is "All Products" no categoryId is sent and the backend returns
+  // everything. When a tab is selected the root category ID is passed.
+
   Future<void> fetchProducts({bool loadMore = false}) async {
     if (isFetchingProducts.value) return;
 
-    // If loading more, increment page
     if (loadMore) {
       if (!hasMoreProducts.value) return;
       currentPage.value++;
@@ -152,119 +154,172 @@ class HomeController extends GetxController {
     isFetchingProducts.value = true;
 
     try {
-      // Get selected category ID if not "All Products"
-      String? categoryId;
-      final selectedTab = tabs[tabIndex.value];
-      if (selectedTab != "All Products") {
-        final selectedCategory = categories.firstWhereOrNull(
-          (cat) => cat.name == selectedTab,
-        );
-        categoryId = selectedCategory?.id;
-      }
+      // Resolve category ID from the selected tab
+      final String? categoryId = _categoryIdForCurrentTab();
 
-      final response = await _productRepository.getProducts(
-        search: searchQuery.value.isNotEmpty ? searchQuery.value : null,
-        category: categoryId,
-        minPrice: minPrice.value,
-        maxPrice: maxPrice.value,
-        sort: selectedSort.value,
+      final response = await _productRepository.getProductsByCategory(
+        categoryId: categoryId,
         page: currentPage.value,
         limit: 10,
       );
 
       if (response != null) {
         if (loadMore) {
-          // Append products
           products.addAll(response.products);
         } else {
-          // Replace products
           products.assignAll(response.products);
         }
 
-        // Update pagination info
         totalPages.value = response.pages;
         hasMoreProducts.value = currentPage.value < totalPages.value;
 
-        // Add to favourites map
-        for (var product in response.products) {
-          favouriteMap[product.id] = false;
-        }
-
-        // Update filtered products
-        filterProducts();
+        _updateFavouriteMap(response.products);
+        _applyLocalFilters(); // search / sort filtering done client-side
 
         debugPrint(
-          'Fetched ${response.products.length} products (Page ${currentPage.value}/${totalPages.value})',
+          '✅ Fetched ${response.products.length} products '
+          '(Page ${currentPage.value}/${totalPages.value})',
         );
       }
     } catch (e) {
-      debugPrint('Error fetching products: $e');
+      debugPrint('❌ Error fetching products: $e');
       ToastUtil.showToast('Failed to load products');
-
-      // Revert page if error
-      if (loadMore) {
-        currentPage.value--;
-      }
+      if (loadMore) currentPage.value--;
     } finally {
       isFetchingProducts.value = false;
     }
   }
 
-  /// Filter products based on selected tab
-  void filterProducts() {
-    final selectedTab = tabs[tabIndex.value];
+  /// Returns the category ID for the active tab, or null for "All Products".
+  String? _categoryIdForCurrentTab() {
+    final index = tabIndex.value;
+    if (index == 0) return null; // "All Products"
 
-    if (selectedTab == "All Products") {
-      filteredProducts.assignAll(products);
-    } else {
-      // Filter by category name
-      filteredProducts.assignAll(
-        products.where((p) => p.category?.name == selectedTab),
-      );
+    // Tab index maps to categories list with offset of 1
+    final catIndex = index - 1;
+    if (catIndex < categories.length) {
+      return categories[catIndex].id;
+    }
+    return null;
+  }
+
+  // ─── 6. Local filtering (search + sort) ──────────────────────────────────
+  // Applied after every fetch so the displayed list is always up to date.
+  // Heavy filtering (price, category) is handled server-side by the API.
+
+  void _applyLocalFilters() {
+    var result = products.toList();
+
+    // Search filter — matches product name or description
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      result = result
+          .where(
+            (p) =>
+                p.name.toLowerCase().contains(query) ||
+                p.description.toLowerCase().contains(query),
+          )
+          .toList();
     }
 
-    debugPrint('Filtered ${filteredProducts.length} products for $selectedTab');
+    // Price filter — uses computed product.price (min variant price)
+    if (minPrice.value != null) {
+      result = result.where((p) => p.price >= minPrice.value!).toList();
+    }
+    if (maxPrice.value != null) {
+      result = result.where((p) => p.price <= maxPrice.value!).toList();
+    }
+
+    // Sort
+    switch (selectedSort.value) {
+      case 'price_asc':
+        result.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case 'price_desc':
+        result.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case 'rating':
+        result.sort((a, b) => b.averageRating.compareTo(a.averageRating));
+        break;
+      case 'newest':
+      default:
+        result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+    }
+
+    filteredProducts.assignAll(result);
+    debugPrint('🔍 Filtered to ${filteredProducts.length} products');
   }
 
-  /// Change tab and reload products
+  // ─── 7. Public actions ────────────────────────────────────────────────────
+
+  /// Change tab — re-fetches products for the selected category
   void onTabChanged(int index) {
     tabIndex.value = index;
-    fetchProducts(); // Reload products for new category
-  }
-
-  /// Toggle favourite status
-  void toggleFavourite(String productId) {
-    favouriteMap[productId] = !(favouriteMap[productId] ?? false);
-
-    // For now just updating locally
-  }
-
-  /// Search products
-  void searchProducts(String query) {
-    searchQuery.value = query;
     fetchProducts();
   }
 
-  /// Clear search
+  final wishlistController = Get.put(WishlistController());
+
+  /// Toggle favourite (local only for now)
+  // void toggleFavourite(String productId) {
+  //   favouriteMap[productId] = !(favouriteMap[productId] ?? false);
+  // }
+
+  bool isFavourite(String productId) => favouriteMap[productId] ?? false;
+
+  Future<void> addorRemoveWishList(
+    String productId,
+    String productVariantId,
+  ) async {
+    try {
+      if (isFavourite(productId)) {
+        wishlistController.removeFromWishlist(
+          productVariantId: productVariantId,
+        );
+        ToastUtil.showToast("Item removed From Wishlist");
+      }
+      await wishlistController.addToWishlist(
+        productId: productId,
+        productVariantId: productVariantId,
+      );
+      favouriteMap[productId] = !(favouriteMap[productId] ?? false);
+      ToastUtil.showToast("Item Added to Wishlist");
+    } catch (e) {
+      ToastUtil.showToast("$e");
+    }
+  }
+
+  /// Search — filters the already-loaded list instantly;
+  /// fetches fresh results from the server after a tab reset
+  void searchProducts(String query) {
+    searchQuery.value = query;
+    if (query.isEmpty) {
+      fetchProducts();
+    } else {
+      _applyLocalFilters();
+    }
+  }
+
   void clearSearch() {
     searchQuery.value = '';
     fetchProducts();
   }
 
-  /// Change sort order
+  /// Sort
   void changeSortOrder(String sort) {
     selectedSort.value = sort;
-    fetchProducts();
+    _applyLocalFilters(); // sort is local — no need to re-fetch
   }
 
-  /// Apply price filter
+  /// Price filter
   void applyPriceFilter(double? min, double? max) {
     minPrice.value = min;
     maxPrice.value = max;
-    fetchProducts();
+    _applyLocalFilters();
   }
 
-  /// Clear all filters
+  /// Clear all filters and reset to "All Products"
   void clearFilters() {
     searchQuery.value = '';
     selectedSort.value = 'newest';
@@ -274,75 +329,93 @@ class HomeController extends GetxController {
     fetchProducts();
   }
 
+  /// Load more (pagination)
+  Future<void> loadMoreProducts() => fetchProducts(loadMore: true);
+
+  /// Full refresh
   final categoryController = Get.put(CategoryController());
 
-  /// Refresh all data
+  // ─── Replace refreshHome in HomeController ────────────────────────────────
+  // Both home data and category data reset at the same time so
+  // isLoading fires once for both, showing shimmer for all sections together.
+
   Future<void> refreshHome() async {
-    await categoryController.refresh();
-    await initializeHome();
+    // Set both loading states true simultaneously before any await
+    isLoading.value = true;
+    categoryController.isLoading.value = true;
+
+    try {
+      // Run both refreshes in parallel
+      await Future.wait([initializeHome(), categoryController.refresh()]);
+    } finally {
+      // Both will set their own loading to false inside their methods,
+      // but guard here just in case
+      isLoading.value = false;
+      categoryController.isLoading.value = false;
+    }
   }
 
-  /// Load more products (for pagination)
-  Future<void> loadMoreProducts() async {
-    await fetchProducts(loadMore: true);
-  }
-
-  /// Get product by ID
+  /// Fetch single product by ID
   Future<ProductModel?> getProductById(String productId) async {
     try {
       final product = await _productRepository.getProductById(productId);
-
       if (product != null) {
-        debugPrint('Fetched product: ${product.name}');
+        debugPrint('✅ Fetched product: ${product.name}');
       }
-
       return product;
     } catch (e) {
-      debugPrint('Error fetching product: $e');
+      debugPrint('❌ Error fetching product: $e');
       ToastUtil.showToast('Failed to load product details');
       return null;
     }
   }
 
-  /// Check if product is favourite
-  bool isFavourite(String productId) {
-    return favouriteMap[productId] ?? false;
+  /// Product count per category tab (uses filteredProducts)
+  int getProductCount(String categoryName) {
+    if (categoryName == 'All Products') return filteredProducts.length;
+    // category?.name may be null on the new model when not populated,
+    // so fall back to matching categoryId via the categories list
+    final cat = categories.firstWhereOrNull((c) => c.name == categoryName);
+    if (cat == null) return 0;
+    return filteredProducts.where((p) => p.categoryId == cat.id).length;
   }
 
-  /// Get product count for category
-  int getProductCount(String categoryName) {
-    if (categoryName == "All Products") {
-      return products.length;
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  void _updateFavouriteMap(List<ProductModel> list) {
+    for (final p in list) {
+      favouriteMap.putIfAbsent(p.id, () => false);
     }
-    return products.where((p) => p.category?.name == categoryName).length;
   }
+
+  // ─── Static items (home quick-links) ─────────────────────────────────────
 
   final items = [
     {
-      "title": "Sheet Sets",
-      "price": "\$3.99",
-      "image": "https://www.pngall.com/wp-content/uploads/2/Pillow.png",
-      "color": const Color(0xffE7E6F2),
+      'title': 'Sheet Sets',
+      'price': '\$3.99',
+      'image': 'https://www.pngall.com/wp-content/uploads/2/Pillow.png',
+      'color': const Color(0xffE7E6F2),
     },
     {
-      "title": "Laundry Bags",
-      "price": "\$4.99",
-      "image":
-          "https://www.pngall.com/wp-content/uploads/4/Leather-Bag-PNG.png",
-      "color": const Color(0xffDDF0F1),
+      'title': 'Laundry Bags',
+      'price': '\$4.99',
+      'image':
+          'https://www.pngall.com/wp-content/uploads/4/Leather-Bag-PNG.png',
+      'color': const Color(0xffDDF0F1),
     },
     {
-      "title": "Towel Sets",
-      "price": "\$14.99",
-      "image": "https://pngimg.com/uploads/towel/towel_PNG20.png",
-      "color": const Color(0xffF4DFDF),
+      'title': 'Towel Sets',
+      'price': '\$14.99',
+      'image': 'https://pngimg.com/uploads/towel/towel_PNG20.png',
+      'color': const Color(0xffF4DFDF),
     },
     {
-      "title": "Floor Lamps",
-      "price": "\$7.99",
-      "image":
-          "https://static.vecteezy.com/system/resources/previews/052/648/828/non_2x/gold-floor-lamp-with-pleated-shade-png.png",
-      "color": const Color(0xffF2E8DC),
+      'title': 'Floor Lamps',
+      'price': '\$7.99',
+      'image':
+          'https://static.vecteezy.com/system/resources/previews/052/648/828/non_2x/gold-floor-lamp-with-pleated-shade-png.png',
+      'color': const Color(0xffF2E8DC),
     },
   ];
 }

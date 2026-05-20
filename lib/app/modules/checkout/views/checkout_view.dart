@@ -54,16 +54,16 @@ class CheckoutView extends StatelessWidget {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: CustomText(
-                text: controller.addressController.defaultAddress == null
-                    ? "You don’t have shipping address information"
-                    : "${defaultAddress!.addressLine1.toUpperCase()}, ${defaultAddress.zipCode}, ${defaultAddress.city.toUpperCase()}, ${defaultAddress.state.toUpperCase()}, ${defaultAddress.country.toUpperCase()}",
-                color: AppColors.gray600,
-                fontWeight: FontWeight.w700,
-                fontSize: AppFontSize.small,
-              ),
-            ),
+            // Expanded(
+            //   child: CustomText(
+            //     text: controller.addressController.defaultAddress == null
+            //         ? "You don’t have shipping address information"
+            //         : "${defaultAddress!.addressLine1.toUpperCase()}, ${defaultAddress.zipCode}, ${defaultAddress.city.toUpperCase()}, ${defaultAddress.state.toUpperCase()}",
+            //     color: AppColors.gray600,
+            //     fontWeight: FontWeight.w700,
+            //     fontSize: AppFontSize.small,
+            //   ),
+            // ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(left: 50.0),

@@ -14,6 +14,7 @@ class AppButton extends StatelessWidget {
   final bool isOutlined;
   final Color? backgroundColor;
   final Color? textColor;
+  final double height;
 
   const AppButton({
     super.key,
@@ -22,6 +23,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.iconWidget,
     this.isOutlined = false,
+    this.height = 45,
     this.backgroundColor,
     this.textColor,
   });
@@ -37,7 +39,7 @@ class AppButton extends StatelessWidget {
     final borderColor = backgroundColor;
 
     return SizedBox(
-      width: double.infinity,
+      height: height,
       child: ElevatedButton.icon(
         onPressed: onPressed,
         icon:
@@ -50,7 +52,6 @@ class AppButton extends StatelessWidget {
                   )
                 : const SizedBox()),
         label: CustomText(
-          // fontFamily: AppTextStyles.fontFamily,
           text: label,
           color:
               textColor ?? (isOutlined ? AppColors.accentColor : Colors.white),
@@ -58,8 +59,19 @@ class AppButton extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
         style: ElevatedButton.styleFrom(
+          minimumSize: const Size.fromHeight(45),
+          disabledBackgroundColor: AppColors.buttonDisableColor,
+          disabledForegroundColor: AppColors.buttonDisableColor,
           backgroundColor: btnColor,
-          padding: EdgeInsets.symmetric(vertical: isTablet ? 20 : 14),
+          foregroundColor: btnColor,
+          elevation: 0,
+          side: BorderSide(
+            width: isOutlined ? 0.8 : 0,
+            color: isOutlined
+                ? borderColor ?? AppColors.accentColor
+                : Colors.transparent,
+          ),
+
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimen.borderRadius),
             side: BorderSide(
@@ -69,7 +81,6 @@ class AppButton extends StatelessWidget {
               width: 1.4,
             ),
           ),
-          elevation: isOutlined ? 0 : 2,
         ),
       ),
     );

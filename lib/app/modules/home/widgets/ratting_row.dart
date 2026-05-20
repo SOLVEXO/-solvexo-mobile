@@ -19,7 +19,7 @@ class RattingRow extends StatelessWidget {
           (index) => Padding(
             padding: const EdgeInsets.only(right: 2.0),
             child: SvgIcon(
-              assetName: index < product.ratings.average.floor()
+              assetName: index < product.totalRatings.floor()
                   ? AppIcons.fillStar
                   : AppIcons.starOutlined,
               size: AppFontSize.small,
@@ -29,7 +29,7 @@ class RattingRow extends StatelessWidget {
         const SizedBox(width: 4),
         // Rating Count
         CustomText(
-          text: "(${product.ratings.count})",
+          text: "(${product.totalRatings})",
           fontSize: AppFontSize.small,
           color: Colors.grey,
         ),

@@ -25,7 +25,7 @@ class ProductsGrid extends StatelessWidget {
           final item = controller.filteredProducts[i];
           // Your existing ProductCard widget
           // It will now receive ProductModel from backend
-          return ProductCard(product: item);
+          return ProductCard(product: item, index: i);
         },
       ),
     );
