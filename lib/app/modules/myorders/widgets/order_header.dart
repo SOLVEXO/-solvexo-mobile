@@ -41,7 +41,7 @@ class OrderHeader extends StatelessWidget {
           ),
           backgroundColor: order.orderStatus == "delivered"
               ? AppColors.green2
-              : Colors.orange,
+              : AppColors.orange,
         ),
       ],
     );

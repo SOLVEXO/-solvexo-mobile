@@ -40,4 +40,21 @@ abstract class Routes {
   static const ABOUT = '/about';
   static const CHAT = '/chat';
   static const WISHLIST = '/wishlist';
+
+  // Role-based homes
+  static const sellerHome = '/seller/home';
+  static const posHome = '/pos/home';
+  static const PosMainView = '/pos/mainview';
+
+  // Seller sub-screens
+  static const sellerOrders = '/seller/orders';
+  static const sellerProducts = '/seller/products';
+  static const addSellerProduct = '/seller/products/add';
+  static const sellerAnalytics = '/seller/analytics';
+  static const sellerSettings = '/seller/settings';
+
+  // POS sub-screens
+  static const posOrders = '/pos/orders';
+  static const posProducts = '/pos/products';
+  static const posSettings = '/pos/settings';
 }

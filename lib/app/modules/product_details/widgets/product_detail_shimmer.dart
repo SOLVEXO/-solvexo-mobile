@@ -1,9 +1,10 @@
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-const Color _kBase = Color(0xFFE0E0E0);
-const Color _kHighlight = Color(0xFFF5F5F5);
-const Color _kShape = Color(0xFFD6D6D6);
+const Color _kBase = AppColors.shimmerBase;
+const Color _kHighlight = AppColors.shimmerHighlight;
+const Color _kShape = AppColors.shimmerShapeAlt;
 
 class ProductDetailShimmer extends StatelessWidget {
   const ProductDetailShimmer({super.key});
@@ -11,7 +12,7 @@ class ProductDetailShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF8F8F8),
+      backgroundColor: AppColors.productPageBg,
       body: Shimmer.fromColors(
         baseColor: _kBase,
         highlightColor: _kHighlight,
@@ -26,7 +27,7 @@ class ProductDetailShimmer extends StatelessWidget {
               Container(
                 height: MediaQuery.of(context).size.height / 4,
                 width: double.infinity,
-                color: const Color(0xffF8F8F8),
+                color: AppColors.productPageBg,
                 child: const Center(
                   child: _S(width: 220, height: 180, radius: 16),
                 ),
@@ -35,7 +36,7 @@ class ProductDetailShimmer extends StatelessWidget {
               /// ───────── White Content Area ─────────
               Container(
                 width: double.infinity,
-                color: Colors.white,
+                color: AppColors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 14,
@@ -189,7 +190,7 @@ class ProductDetailShimmer extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xffF5F5F5),
+                        color: AppColors.shimmerHighlight,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Column(
@@ -278,7 +279,7 @@ class ProductDetailShimmer extends StatelessWidget {
 
       /// ───────── Bottom Bar ─────────
       bottomNavigationBar: Container(
-        color: Colors.white,
+        color: AppColors.white,
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
         child: Row(
           children: [

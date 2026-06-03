@@ -67,7 +67,7 @@ class MyOrdersView extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             color: controller.selectedTab.value == i
                                 ? AppColors.primaryColor
-                                : Colors.grey,
+                                : AppColors.greyDefault,
                           ),
                           AnimatedContainer(
                             curve: Curves.bounceInOut,

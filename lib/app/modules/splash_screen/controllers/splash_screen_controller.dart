@@ -1,3 +1,4 @@
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -44,7 +45,17 @@ class SplashScreenController extends GetxController
 
   void _navigate() async {
     await Future.delayed(const Duration(seconds: 3));
-    Get.offAllNamed(Routes.mainHome);
+    final role = await AppPreferences.getUserRole();
+    switch (role) {
+      case 'seller':
+        Get.offAllNamed(Routes.sellerHome);
+        break;
+      case 'pos':
+        Get.offAllNamed(Routes.posHome);
+        break;
+      default:
+        Get.offAllNamed(Routes.mainHome);
+    }
   }
 
   @override

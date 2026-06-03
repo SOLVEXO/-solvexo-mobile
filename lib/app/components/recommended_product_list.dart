@@ -51,8 +51,8 @@ class RecommendedProductList extends StatelessWidget {
 class _RecommendedShimmer extends StatelessWidget {
   const _RecommendedShimmer();
 
-  static const Color _base = Color(0xFFE0E0E0);
-  static const Color _highlight = Color(0xFFF5F5F5);
+  static const Color _base = AppColors.shimmerBase;
+  static const Color _highlight = AppColors.shimmerHighlight;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +89,7 @@ class _ShimmerCard extends StatelessWidget {
 
   const _ShimmerCard({required this.cardWidth, required this.cardHeight});
 
-  static const Color _shape = Color(0xFFD4D4D4);
+  static const Color _shape = AppColors.shimmerShape;
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +188,7 @@ class _S extends StatelessWidget {
 
   const _S({required this.width, required this.height, this.radius = 8});
 
-  static const Color _shape = Color(0xFFD4D4D4);
+  static const Color _shape = AppColors.shimmerShape;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -208,7 +208,7 @@ class _P extends StatelessWidget {
 
   const _P({required this.width, required this.height});
 
-  static const Color _shape = Color(0xFFD4D4D4);
+  static const Color _shape = AppColors.shimmerShape;
 
   @override
   Widget build(BuildContext context) => Container(

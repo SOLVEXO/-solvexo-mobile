@@ -39,6 +39,7 @@ class AddressController extends GetxController {
   void onInit() {
     super.onInit();
     fetchAddresses();
+    fetchDefaultAddress();
   }
 
   @override
@@ -53,6 +54,7 @@ class AddressController extends GetxController {
     super.onClose();
   }
 
+  Future<void> refreshaddress() => fetchAddresses();
   // ─── 1. Fetch ─────────────────────────────────────────────────────────────
 
   Future<void> fetchAddresses() async {

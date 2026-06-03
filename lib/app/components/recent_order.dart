@@ -54,7 +54,7 @@ class RecentOrder extends StatelessWidget {
             ),
           ],
         ),
-        CustomText(text: order.createdAt.toString(), color: Colors.grey),
+        CustomText(text: order.createdAt.toString(), color: AppColors.greyDefault),
 
         Row(
           children: [
@@ -80,7 +80,7 @@ class RecentOrder extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Total Transaction", style: TextStyle(color: Colors.grey)),
+            Text("Total Transaction", style: TextStyle(color: AppColors.greyDefault)),
             Text(
               "\$${orderItem.price}",
               style: TextStyle(

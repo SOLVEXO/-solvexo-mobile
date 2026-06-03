@@ -132,7 +132,7 @@ class Util {
               hintColor: AppColors.appBarColor,
               colorScheme: const ColorScheme.light(
                 primary: AppColors.appBarColor,
-                surface: Colors.white,
+                surface: AppColors.white,
                 onSurface: AppColors.black,
               ),
               buttonTheme: const ButtonThemeData(
@@ -151,8 +151,8 @@ class Util {
                 ),
                 dayPeriodTextColor: WidgetStateColor.resolveWith(
                   (states) => states.contains(WidgetState.selected)
-                      ? Colors.white
-                      : Colors.black,
+                      ? AppColors.white
+                      : AppColors.black,
                 ),
                 hourMinuteShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

@@ -1,5 +1,24 @@
 import 'package:get/get.dart';
-
+import '../modules/add_seller_product/bindings/add_seller_product_binding.dart';
+import '../modules/add_seller_product/views/add_seller_product_view.dart';
+import '../modules/pos/bindings/pos_binding.dart';
+import '../modules/pos_orders/bindings/pos_orders_binding.dart';
+import '../modules/pos_products/bindings/pos_products_binding.dart';
+import '../modules/pos_settings/bindings/pos_settings_binding.dart';
+import '../modules/pos/views/pos_main_view.dart';
+import '../modules/pos_orders/views/pos_orders_view.dart';
+import '../modules/pos_products/views/pos_products_view.dart';
+import '../modules/pos_settings/views/pos_settings_view.dart';
+import '../modules/seller_analytics/bindings/seller_analytics_binding.dart';
+import '../modules/seller/bindings/seller_binding.dart';
+import '../modules/seller_orders/bindings/seller_orders_binding.dart';
+import '../modules/seller_products/bindings/seller_products_binding.dart';
+import '../modules/seller_settings/bindings/seller_settings_binding.dart';
+import '../modules/seller_analytics/views/seller_analytics_view.dart';
+import '../modules/seller/views/seller_main_view.dart';
+import '../modules/seller_orders/views/seller_orders_view.dart';
+import '../modules/seller_products/views/seller_products_view.dart';
+import '../modules/seller_settings/views/seller_settings_view.dart';
 import '../modules/about/bindings/about_binding.dart';
 import '../modules/about/views/about_view.dart';
 import '../modules/address/bindings/address_binding.dart';
@@ -245,6 +264,57 @@ class AppPages {
       name: Routes.WISHLIST,
       page: () => const WishlistView(),
       binding: WishlistBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerHome,
+      page: () => SellerMainView(),
+      binding: SellerBinding(),
+    ),
+    GetPage(
+      name: Routes.posHome,
+      page: () => PosMainView(),
+      binding: PosBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerOrders,
+      page: () => SellerOrdersView(),
+      binding: SellerOrdersBinding(),
+    ),
+    GetPage(
+      name: Routes.addSellerProduct,
+      page: () => AddSellerProductView(),
+      binding: AddSellerProductBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerProducts,
+      page: () => SellerProductsView(),
+      binding: SellerProductsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerAnalytics,
+      page: () => SellerAnalyticsView(),
+      binding: SellerAnalyticsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerSettings,
+      page: () => SellerSettingsView(),
+      binding: SellerSettingsBinding(),
+    ),
+    GetPage(
+      name: Routes.posOrders,
+      page: () => PosOrdersView(),
+      binding: PosOrdersBinding(),
+    ),
+    GetPage(name: Routes.PosMainView, page: () => PosMainView()),
+    GetPage(
+      name: Routes.posProducts,
+      page: () => PosProductsView(),
+      binding: PosProductsBinding(),
+    ),
+    GetPage(
+      name: Routes.posSettings,
+      page: () => PosSettingsView(),
+      binding: PosSettingsBinding(),
     ),
   ];
 }

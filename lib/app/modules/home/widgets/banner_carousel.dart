@@ -53,7 +53,7 @@ class BannerCarousel extends StatelessWidget {
               dotWidth: 6,
               spacing: 6,
               activeDotColor: AppColors.primaryColor,
-              dotColor: Colors.grey.shade300,
+              dotColor: AppColors.shimmerBase,
             ),
             size: Size(Get.width * 0.18, 20),
           ),

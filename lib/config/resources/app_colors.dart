@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const Gradient appbarGradient = LinearGradient(
-    colors: [AppColors.primaryColorLight, AppColors.secondryColorLight],
+    colors: [AppColors.primaryColor, AppColors.primaryColorLight],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
-  static const Color primaryColor = Color(0xFF1F4E79);
+  static const Color primaryColor = Color(0xFFd97757);
   // static const Color primaryColor = Color(0xFF7a73ff);
   // static const Color primaryColorLight = Color.fromARGB(168, 122, 115, 255);
-  static const Color primaryColorLight = Color.fromARGB(193, 31, 78, 121);
+  static const Color primaryColorLight = Color.fromARGB(179, 234, 140, 109);
   static const Color secondryColor = Color(0xFF6FBF4A);
   static const Color secondryColorLight = Color.fromARGB(179, 111, 191, 74);
-  static const Color accentColor = Color(0xFFD4AF37); // Gold
+  static const Color accentColor = Color(0xFFd97757); // Gold
   // purple
   static const Color white = Color(0xFFFFFFFF);
   static const Color white2 = Color(0xFFF0F0F0);
@@ -98,4 +98,62 @@ class AppColors {
   static const Color multiSelectColor = Color(0xFFB7B7B7);
 
   static const Color dottedBorderColor = Color(0xFF707581);
+
+  // Dark theme (seller / POS modules)
+  // static const Color darkBackground = Color(0xFF1C1C1E);
+  static const Color darkCard = Color(0xFF2C2C2E);
+  static const Color iosGrey = Color(0xFF8E8E93);
+  static const Color greenSuccess = Color(0xFF34C759);
+  static const Color darkDivider = Color(0xFF3A3A3C);
+  static const Color lightBorder = Color(0xFFE5E5EA);
+  static const Color iosBlue = Color(0xFF007AFF);
+  static const Color iosOrange = Color(0xFFFF9500);
+  static const Color inactiveGrey = Color(0xFF636366);
+
+  // Alert / warning
+  static const Color yellowBg = Color(0xFFFFF8E7);
+  static const Color yellow = Color(0xFFFFCC00);
+  static const Color amberDark = Color(0xFFD97706);
+
+  // Black opacity shortcuts
+  static const Color black12 = Color(0x1F000000);
+  static const Color black38 = Color(0x61000000);
+  static const Color black54 = Color(0x8A000000);
+  static const Color black87 = Color(0xDD000000);
+  static const Color blackOverlay5 = Color(0x0D000000);
+  static const Color blackOverlay10 = Color(0x1A000000);
+
+  // Dark nav bar color (seller / POS bottom nav)
+  static const Color darkNavBar = Color(0xFF1A1A1A);
+
+  // Shimmer / skeleton
+  static const Color shimmerBase = Color(0xFFE0E0E0);
+  static const Color shimmerHighlight = Color(0xFFF5F5F5);
+  static const Color shimmerShape = Color(0xFFD4D4D4);
+  static const Color shimmerShapeAlt = Color(0xFFD6D6D6);
+  static const Color productPageBg = Color(0xFFF8F8F8);
+
+  // Material grey swatches
+  static const Color greyDefault = Color(0xFF9E9E9E);
+  static const Color greySwatch200 = Color(0xFFEEEEEE);
+  static const Color greySwatch400 = Color(0xFFBDBDBD);
+  static const Color greySwatch600 = Color(0xFF757575);
+
+  // Category level accent colors
+  static const Color categoryBlue = Color(0xFF4F7CFE);
+  static const Color categoryPurple = Color(0xFF6B4EFF);
+  static const Color categoryTeal = Color(0xFF00BFA5);
+  static const Color categoryCoral = Color(0xFFFF6B6B);
+
+  // Category item background colors
+  static const Color categoryBg1 = Color(0xFFE7E6F2);
+  static const Color categoryBg2 = Color(0xFFDDF0F1);
+  static const Color categoryBg3 = Color(0xFFF4DFDF);
+  static const Color categoryBg4 = Color(0xFFF2E8DC);
+
+  // Social / brand colors
+  static const Color facebookBlue = Color(0xFF1877F2);
+
+  // Material color equivalents
+  static const Color materialAmber = Color(0xFFFFC107);
 }

@@ -126,7 +126,7 @@ class SignUpView extends StatelessWidget {
             CustomText(
               text:
                   "By continuing with sign up process, you agree to our Terms & Conditions and Privacy Policy.",
-              color: Colors.grey.shade700,
+              color: AppColors.greySwatch600,
             ),
 
             SizedBox(height: AppDimen.borderRadius),

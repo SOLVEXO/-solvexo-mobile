@@ -27,7 +27,7 @@ class TrackingTile extends StatelessWidget {
                 color: AppColors.primaryColor,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check, size: 14, color: Colors.white),
+              child: const Icon(Icons.check, size: 14, color: AppColors.white),
             ),
             if (!isLast)
               Container(width: 2, height: 60, color: AppColors.primaryColor),
@@ -46,7 +46,7 @@ class TrackingTile extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 event.description,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                style: TextStyle(color: AppColors.greySwatch600, fontSize: 12),
               ),
               const SizedBox(height: 6),
             ],

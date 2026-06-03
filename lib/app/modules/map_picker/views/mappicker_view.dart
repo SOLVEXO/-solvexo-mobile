@@ -179,7 +179,7 @@ class MapPickerScreen extends StatelessWidget {
             top: 140,
             right: 20,
             child: FloatingActionButton(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.white,
               onPressed: controller.getCurrentLocation,
               child: Icon(
                 Icons.my_location,

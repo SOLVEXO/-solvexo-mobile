@@ -16,10 +16,10 @@ class CategoryTile extends StatelessWidget {
 
   // Rotating accent colours per depth level
   static const _levelColors = [
-    Color(0xFF4F7CFE), // level 0 — primary blue
-    Color(0xFF6B4EFF), // level 1 — purple
-    Color(0xFF00BFA5), // level 2 — teal
-    Color(0xFFFF6B6B), // level 3 — coral
+    AppColors.categoryBlue,   // level 0 — primary blue
+    AppColors.categoryPurple, // level 1 — purple
+    AppColors.categoryTeal,   // level 2 — teal
+    AppColors.categoryCoral,  // level 3 — coral
   ];
 
   Color get _accentColor => _levelColors[level.clamp(0, 3)];

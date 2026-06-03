@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,7 +24,7 @@ class PaymentSuccessView extends StatelessWidget {
                     scale: value,
                     child: const Icon(
                       Icons.check_circle,
-                      color: Colors.green,
+                      color: AppColors.seaGreen,
                       size: 120,
                     ),
                   );

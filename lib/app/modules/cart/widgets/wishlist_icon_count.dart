@@ -38,11 +38,11 @@ class WishlistIconCount extends StatelessWidget {
                       minHeight: 15,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: AppColors.red,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: AppColors.black.withOpacity(0.2),
                           blurRadius: 4,
                         ),
                       ],

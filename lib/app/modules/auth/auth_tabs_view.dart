@@ -78,12 +78,12 @@ class AuthTabsView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: active ? primary : Colors.transparent,
+              color: active ? primary : AppColors.transparent,
             ),
             alignment: Alignment.center,
             child: CustomText(
               text: text,
-              color: active ? Colors.white : Colors.black87,
+              color: active ? AppColors.white : AppColors.black87,
               fontWeight: FontWeight.w600,
             ),
           );

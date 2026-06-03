@@ -3,6 +3,7 @@ import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
 
@@ -106,7 +107,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(Colors.white),
+                          valueColor: AlwaysStoppedAnimation(AppColors.white),
                         ),
                       )
                     : null,

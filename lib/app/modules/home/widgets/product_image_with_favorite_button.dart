@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -34,10 +35,10 @@ class ProductImageWithFavoriteButton extends StatelessWidget {
                       fit: BoxFit.contain,
                     )
                   : Container(
-                      color: Colors.grey[200],
+                      color: AppColors.greySwatch200,
                       child: Icon(
                         Icons.shopping_bag,
-                        color: Colors.grey,
+                        color: AppColors.greyDefault,
                         size: 40,
                       ),
                     ),

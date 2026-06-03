@@ -117,6 +117,12 @@ class AppPreferences {
     return prefs.getString(_userEmailKey);
   }
 
+  // Get user role
+  static Future<String?> getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userRoleKey);
+  }
+
   // Clear all user data
   static Future<void> clearUserData() async {
     final prefs = await SharedPreferences.getInstance();

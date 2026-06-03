@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class Skeleton extends StatefulWidget {
@@ -59,14 +60,14 @@ class _SkeletonState extends State<Skeleton>
           end: const Alignment(-1, 0),
           colors: [
             widget.switchColor
-                ? const Color(0x0D000000)
-                : Colors.white.withOpacity(0.2),
+                ? AppColors.blackOverlay5
+                : AppColors.white.withOpacity(0.2),
             widget.switchColor
-                ? const Color(0x1A000000)
-                : Colors.white.withOpacity(0.3),
+                ? AppColors.blackOverlay10
+                : AppColors.white.withOpacity(0.3),
             widget.switchColor
-                ? const Color(0x0D000000)
-                : Colors.white.withOpacity(0.5),
+                ? AppColors.blackOverlay5
+                : AppColors.white.withOpacity(0.5),
           ],
         ),
       ),

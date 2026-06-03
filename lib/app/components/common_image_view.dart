@@ -152,14 +152,14 @@ class CommonImageView extends StatelessWidget {
         placeholder: (context, url) => Container(
           height: height,
           width: width,
-          color: Colors.grey[200],
+          color: AppColors.greySwatch200,
           child: Center(
             child: SizedBox(
               height: 30,
               width: 30,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Colors.grey.shade400,
+                color: AppColors.greySwatch400,
               ),
             ),
           ),

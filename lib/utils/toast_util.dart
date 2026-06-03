@@ -9,7 +9,7 @@ class ToastUtil {
     String message, {
     String? imagePath,
     Color bgColor = AppColors.black2,
-    Color textColor = Colors.white,
+    Color textColor = AppColors.white,
     Duration duration = const Duration(seconds: 2),
   }) {
     final context = Get.overlayContext;

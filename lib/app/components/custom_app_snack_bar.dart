@@ -23,7 +23,7 @@ class CustomAppSnackbar {
   }) {
     Get.rawSnackbar(
       snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.transparent,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       padding: EdgeInsets.zero,
       duration: const Duration(seconds: 3),
@@ -39,7 +39,7 @@ class CustomAppSnackbar {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.25),
+              color: AppColors.black.withOpacity(0.25),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -55,7 +55,7 @@ class CustomAppSnackbar {
               margin: const EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                color: Colors.white.withOpacity(0.1),
+                color: AppColors.white.withOpacity(0.1),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
@@ -123,7 +123,7 @@ class CustomAppSnackbar {
     show(
       title: "Success",
       message: message,
-      accentColor: Colors.green,
+      accentColor: AppColors.seaGreen,
       soundPath: AppSounds.iphoneSuccessSound,
     );
   }
@@ -132,7 +132,7 @@ class CustomAppSnackbar {
     show(
       title: "Error",
       message: message,
-      accentColor: Colors.red,
+      accentColor: AppColors.red,
       soundPath: AppSounds.errorSound,
     );
   }
@@ -141,7 +141,7 @@ class CustomAppSnackbar {
     show(
       title: "Warning",
       message: message,
-      accentColor: Colors.orange,
+      accentColor: AppColors.orange,
       soundPath: AppSounds.warningSound,
     );
   }

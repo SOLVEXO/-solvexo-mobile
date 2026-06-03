@@ -266,7 +266,7 @@ class _StrikethroughPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey.shade400
+      ..color = AppColors.greySwatch400
       ..strokeWidth = 1.5;
     canvas.drawLine(
       Offset(0, size.height / 2),

@@ -169,7 +169,7 @@ class RefundRequestView extends StatelessWidget {
                   height: 70,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey),
+                    border: Border.all(color: AppColors.greyDefault),
                   ),
                   child: const Icon(Icons.camera_alt),
                 ),

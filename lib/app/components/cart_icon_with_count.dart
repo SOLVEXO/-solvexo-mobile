@@ -35,11 +35,11 @@ class CartIconWithCount extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: AppColors.red,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: AppColors.black.withOpacity(0.2),
                     blurRadius: 4,
                   ),
                 ],

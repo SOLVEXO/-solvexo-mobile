@@ -184,8 +184,15 @@ class AuthController extends GetxController {
         refreshToken: refreshToken,
       );
 
-      // 4. Navigate to home
-      Get.offAllNamed(Routes.mainHome);
+      final userRole = response['data']['user']?['role'] as String? ?? 'user';
+      await AppPreferences.saveUserData(
+        userId: response['data']['user']?['_id'] as String? ?? '',
+        name: dto.userName,
+        email: dto.email,
+        role: userRole,
+      );
+
+      _navigateByRole(userRole);
       _showSuccess('Welcome ${dto.userName}!');
     } catch (e) {
       debugPrint('❌ Google sign in error: $e');
@@ -216,8 +223,14 @@ class AuthController extends GetxController {
         accessToken: token,
         refreshToken: refreshToken,
       );
-
-      Get.offAllNamed(Routes.mainHome);
+      final fbRole = response['data']['user']?['role'] as String? ?? 'user';
+      await AppPreferences.saveUserData(
+        userId: response['data']['user']?['_id'] as String? ?? '',
+        name: dto.userName,
+        email: dto.email,
+        role: fbRole,
+      );
+      _navigateByRole(fbRole);
       _showSuccess('Welcome ${dto.userName}!');
     } catch (e) {
       debugPrint('❌ Facebook sign in error: $e');
@@ -248,8 +261,14 @@ class AuthController extends GetxController {
         accessToken: token,
         refreshToken: refreshToken,
       );
-
-      Get.offAllNamed(Routes.mainHome);
+      final appleRole = response['data']['user']?['role'] as String? ?? 'user';
+      await AppPreferences.saveUserData(
+        userId: response['data']['user']?['_id'] as String? ?? '',
+        name: dto.userName,
+        email: dto.email,
+        role: appleRole,
+      );
+      _navigateByRole(appleRole);
       _showSuccess('Welcome!');
     } catch (e) {
       debugPrint('❌ Apple sign in error: $e');
@@ -315,22 +334,21 @@ class AuthController extends GetxController {
       debugPrint("auth response: $authResponse");
 
       if (authResponse != null) {
-        // Save user data and token
         currentUser.value = authResponse.user;
         await AppPreferences.setTokens(
           accessToken: authResponse.token.accessToken,
           refreshToken: authResponse.token.refreshToken,
         );
+        await AppPreferences.saveUserData(
+          userId: authResponse.user.id,
+          name: authResponse.user.name,
+          email: authResponse.user.email,
+          role: authResponse.user.role,
+        );
 
-        // Show success message
         ToastUtil.showToast('Login successful!');
-
-        // Clear form
         clearLoginForm();
-
-        // Navigate to home (uncomment and update route)
-        Get.offAllNamed(Routes.mainHome);
-
+        _navigateByRole(authResponse.user.role);
         debugPrint('User logged in successfully: ${authResponse.user.email}');
       }
     } catch (e) {
@@ -387,6 +405,19 @@ class AuthController extends GetxController {
   // ─────────────────────────────────────────
   // UI HELPERS
   // ─────────────────────────────────────────
+
+  void _navigateByRole(String role) {
+    switch (role) {
+      case 'seller':
+        Get.offAllNamed(Routes.sellerHome);
+        break;
+      case 'pos':
+        Get.offAllNamed(Routes.posHome);
+        break;
+      default:
+        Get.offAllNamed(Routes.mainHome);
+    }
+  }
 
   void _showSuccess(String message) {
     CustomAppSnackbar.success(message);

@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class DropdownField extends StatelessWidget {
@@ -22,7 +23,7 @@ class DropdownField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: label,
         filled: true,
-        fillColor: Colors.grey.shade100,
+        fillColor: AppColors.shimmerHighlight,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,

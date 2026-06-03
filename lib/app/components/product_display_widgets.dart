@@ -24,11 +24,11 @@ class ProductGridItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: AppColors.greyDefault.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 5,
               offset: const Offset(0, 2),
@@ -52,22 +52,22 @@ class ProductGridItem extends StatelessWidget {
                             imageUrl: product.images.first,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: Colors.grey[200],
+                              color: AppColors.greySwatch200,
                               child: const Center(
                                 child: CircularProgressIndicator(),
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[200],
+                              color: AppColors.greySwatch200,
                               child: const Icon(Icons.image_not_supported),
                             ),
                           )
                         : Container(
-                            color: Colors.grey[200],
+                            color: AppColors.greySwatch200,
                             child: const Icon(
                               Icons.image,
                               size: 50,
-                              color: Colors.grey,
+                              color: AppColors.greyDefault,
                             ),
                           ),
                   ),
@@ -82,18 +82,18 @@ class ProductGridItem extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.white,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: AppColors.black.withOpacity(0.1),
                             blurRadius: 4,
                           ),
                         ],
                       ),
                       child: Icon(
                         isFavourite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavourite ? Colors.red : Colors.grey,
+                        color: isFavourite ? AppColors.red : AppColors.greyDefault,
                         size: 20,
                       ),
                     ),
@@ -130,7 +130,7 @@ class ProductGridItem extends StatelessWidget {
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: AppColors.black.withOpacity(0.5),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(12),
                         ),
@@ -139,7 +139,7 @@ class ProductGridItem extends StatelessWidget {
                         child: Text(
                           'Out of Stock',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -172,7 +172,7 @@ class ProductGridItem extends StatelessWidget {
                   if (product.category != null)
                     Text(
                       product.category!.name,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 12, color: AppColors.greySwatch600),
                     ),
 
                   const SizedBox(height: 8),
@@ -180,11 +180,11 @@ class ProductGridItem extends StatelessWidget {
                   // Rating
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 16),
+                      const Icon(Icons.star, color: AppColors.materialAmber, size: 16),
                       const SizedBox(width: 4),
                       Text(
                         '${product.totalRatings.toStringAsFixed(1)} (${product.averageRating})',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 12, color: AppColors.greySwatch600),
                       ),
                     ],
                   ),
@@ -234,7 +234,7 @@ class ProductLoadingShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: AppColors.greySwatch200,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -245,7 +245,7 @@ class ProductLoadingShimmer extends StatelessWidget {
             aspectRatio: 1.2,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppColors.shimmerBase,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12),
                 ),
@@ -262,7 +262,7 @@ class ProductLoadingShimmer extends StatelessWidget {
                   height: 14,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.shimmerBase,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -271,7 +271,7 @@ class ProductLoadingShimmer extends StatelessWidget {
                   height: 12,
                   width: 100,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.shimmerBase,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -280,7 +280,7 @@ class ProductLoadingShimmer extends StatelessWidget {
                   height: 16,
                   width: 80,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.shimmerBase,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -310,11 +310,11 @@ class EmptyProductsWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_bag_outlined, size: 80, color: Colors.grey[400]),
+          Icon(Icons.shopping_bag_outlined, size: 80, color: AppColors.greySwatch400),
           const SizedBox(height: 16),
           Text(
             message,
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 16, color: AppColors.greySwatch600),
           ),
           if (onRetry != null) ...[
             const SizedBox(height: 16),

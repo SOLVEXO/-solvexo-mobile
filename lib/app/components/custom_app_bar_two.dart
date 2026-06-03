@@ -47,7 +47,7 @@ class CustomAppBarTwo extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: centerTitle,
       scrolledUnderElevation: 0, // ← add this line
       elevation: 0,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: AppColors.transparent,
       leading: showBackButton
           ? IconButton(
               onPressed: onBack ?? () => Get.back(),

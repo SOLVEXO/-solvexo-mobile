@@ -7,6 +7,7 @@ import 'package:book_store_app/app/modules/cart/widgets/bottom_checkout_bar.dart
 import 'package:book_store_app/app/modules/cart/widgets/cart_item_widget.dart';
 import 'package:book_store_app/app/modules/cart/widgets/empty_cart_text.dart';
 import 'package:book_store_app/app/modules/cart/widgets/wishlist_icon_count.dart';
+import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -18,6 +19,7 @@ class CartView extends StatelessWidget {
   CartView({super.key});
 
   final controller = Get.put(CartController());
+  final profileController = Get.put(ProfileController());
   @override
   Widget build(BuildContext context) {
     // final size = MediaQuery.of(context).size;
@@ -31,23 +33,27 @@ class CartView extends StatelessWidget {
       backgroundColor: AppColors.white,
       actions: [WishlistIconCount()],
       child: Obx(() {
-        if (controller.loginUser.value) {
-          return Column(
-            children: [
-              LoginSignupCard(),
-              Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    text: "Featured Items you may like",
-                    fontSize: AppFontSize.regular,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  RecommendedProductList(),
-                ],
-              ),
-            ],
+        if (profileController.user.isNull) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              children: [
+                SizedBox(height: Get.height / 12),
+                LoginSignupCard(),
+                Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText(
+                      text: "Featured Items you may like",
+                      fontSize: AppFontSize.regular,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    RecommendedProductList(),
+                  ],
+                ),
+              ],
+            ),
           );
         }
         if (controller.isLoading.value) {

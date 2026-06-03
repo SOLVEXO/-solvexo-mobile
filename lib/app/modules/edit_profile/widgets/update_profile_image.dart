@@ -49,9 +49,9 @@ class UpdateProfileImage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.primaryColor,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: AppColors.white, width: 2),
                   ),
-                  child: Icon(Icons.camera_alt, color: Colors.white, size: 10),
+                  child: Icon(Icons.camera_alt, color: AppColors.white, size: 10),
                 ),
               ),
             ),

@@ -23,7 +23,7 @@ class DynamicShimmer extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(.1),
+        color: AppColors.black.withOpacity(.1),
         borderRadius: BorderRadius.circular(14),
       ),
     );

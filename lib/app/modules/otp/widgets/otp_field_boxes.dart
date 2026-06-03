@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/otp_controller.dart';
@@ -16,8 +17,8 @@ class OtpFieldBox extends StatelessWidget {
       height: size.width * 0.13,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: Colors.grey.shade100,
-        border: Border.all(color: Colors.grey.shade400, width: 1),
+        color: AppColors.shimmerHighlight,
+        border: Border.all(color: AppColors.greySwatch400, width: 1),
       ),
       child: TextField(
         controller: controller.textControllers[index],

@@ -1,12 +1,14 @@
+import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/checkout/widgets/coupon_code_list_tile.dart';
 import 'package:book_store_app/app/modules/map_picker/controllers/mappicker_controller.dart';
 import 'package:book_store_app/app/modules/payment/controllers/payment_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,14 +24,14 @@ class CheckoutView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return Scaffold(
+    return BaseViewScreen(
+      resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.white,
-      appBar: CustomAppBarTwo(title: "Checkout"),
-
-      bottomNavigationBar: _bottomBar(size),
-
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 15),
+      screenName: "Checkout",
+      showCustomAppBar: true,
+      customBottomBar: _bottomBar(size),
+      horizontalPadding: false,
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -50,41 +52,109 @@ class CheckoutView extends StatelessWidget {
     return _section(
       title: "Delivery Address",
       child: Obx(() {
-        final defaultAddress = controller.addressController.defaultAddress;
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Expanded(
-            //   child: CustomText(
-            //     text: controller.addressController.defaultAddress == null
-            //         ? "You don’t have shipping address information"
-            //         : "${defaultAddress!.addressLine1.toUpperCase()}, ${defaultAddress.zipCode}, ${defaultAddress.city.toUpperCase()}, ${defaultAddress.state.toUpperCase()}",
-            //     color: AppColors.gray600,
-            //     fontWeight: FontWeight.w700,
-            //     fontSize: AppFontSize.small,
-            //   ),
-            // ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 50.0),
-                child: AppButton(
-                  isOutlined: true,
-                  onPressed: () {
-                    Get.toNamed(Routes.addAddressView);
-                    // controller.addAddress(
-                    //   mapPickerController.selectedAddress.value,
-                    // );
-                  },
-                  label: "Add",
-                ),
-              ),
+        final address = controller
+            .addressController
+            .defaultAddress
+            .value; // ✅ .value to unwrap
+
+        if (address == null) {
+          return Container(
+            // ✅ return added
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+            decoration: BoxDecoration(
+              border: Border.all(width: 0.3),
+              borderRadius: BorderRadius.circular(15),
             ),
-          ],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: CustomText(
+                    text: "Please select the address",
+                    color: AppColors.gray600,
+                    fontWeight: FontWeight.w700,
+                    fontSize: AppFontSize.small,
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 30.0),
+                    child: AppButton(
+                      isOutlined: true,
+                      onPressed: () => Get.toNamed(Routes.addressView),
+                      label: "Add",
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+          decoration: BoxDecoration(
+            border: Border.all(width: 0.3),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 6,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    spacing: 6,
+                    children: [
+                      SvgIcon(assetName: AppIcons.locationIcon, size: 16),
+                      CustomText(
+                        text: address.label, // ✅ e.g. "Home", "Office"
+                        fontSize: AppFontSize.small,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () => Get.toNamed(Routes.addressView),
+                    child: const CustomText(
+                      text: "Change",
+                      color: AppColors.primaryColor,
+                      fontSize: AppFontSize.small2,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              CustomText(
+                text: address.recipientName, // ✅ "Jami Raza"
+                fontSize: AppFontSize.small,
+                fontWeight: FontWeight.w600,
+              ),
+              CustomText(
+                text: address.phoneNumber,
+                color: AppColors.gray600,
+                fontSize: AppFontSize.small2,
+              ),
+              CustomText(
+                text: [
+                  address.addressLine1,
+                  if (address.addressLine2 != null &&
+                      address.addressLine2!.isNotEmpty)
+                    address.addressLine2!,
+                  address.city,
+                  address.state,
+                  address.zipCode,
+                ].join(', '), // ✅ "Street 5, Karachi, Sindh, 75000"
+                color: AppColors.gray600,
+                fontSize: AppFontSize.small2,
+              ),
+            ],
+          ),
         );
       }),
     );
   }
-
   // ---------------- VOUCHER ----------------
 
   Widget _voucherSection(size) {
@@ -128,23 +198,32 @@ class CheckoutView extends StatelessWidget {
       title: "Your Order",
       child: Obx(
         () => Column(
+          spacing: 2,
           children: controller.orderItems
               .map(
-                (item) => ListTile(
-                  leading: CommonImageView(url: item.image, width: 60),
-                  title: CustomText(
-                    text: item.name,
-                    fontSize: AppFontSize.small,
+                (item) => Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  subtitle: CustomText(
-                    text: "Color : ${item.color}\n${item.quantity} Item",
-                    fontSize: AppFontSize.small,
-                  ),
-                  trailing: CustomText(
-                    text:
-                        "\$${(item.price * item.quantity).toStringAsFixed(2)}",
-                    fontWeight: FontWeight.bold,
-                    fontSize: AppFontSize.small,
+                  child: ListTile(
+                    leading: CommonImageView(url: item.image, width: 60),
+                    title: CustomText(
+                      text: item.name,
+                      fontSize: AppFontSize.small,
+                    ),
+                    subtitle: CustomText(
+                      text: "${item.quantity} Item",
+                      // Color : ${item.olor}\n
+                      fontSize: AppFontSize.small,
+                    ),
+                    trailing: CustomText(
+                      text:
+                          "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppFontSize.small,
+                    ),
                   ),
                 ),
               )
@@ -272,6 +351,7 @@ class CheckoutView extends StatelessWidget {
   Widget _bottomBar(Size size) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+      color: AppColors.white,
       child: AppButton(
         label: "Select Payment",
         onPressed: () => paymentController.paymentMethodBottomSheet(size),

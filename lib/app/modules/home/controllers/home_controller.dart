@@ -9,6 +9,7 @@ import 'package:book_store_app/app/modules/home/models/banner_model.dart';
 import 'package:book_store_app/app/modules/address/models/address_model.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -395,27 +396,27 @@ class HomeController extends BaseController {
       'title': 'Sheet Sets',
       'price': '\$3.99',
       'image': 'https://www.pngall.com/wp-content/uploads/2/Pillow.png',
-      'color': const Color(0xffE7E6F2),
+      'color': AppColors.categoryBg1,
     },
     {
       'title': 'Laundry Bags',
       'price': '\$4.99',
       'image':
           'https://www.pngall.com/wp-content/uploads/4/Leather-Bag-PNG.png',
-      'color': const Color(0xffDDF0F1),
+      'color': AppColors.categoryBg2,
     },
     {
       'title': 'Towel Sets',
       'price': '\$14.99',
       'image': 'https://pngimg.com/uploads/towel/towel_PNG20.png',
-      'color': const Color(0xffF4DFDF),
+      'color': AppColors.categoryBg3,
     },
     {
       'title': 'Floor Lamps',
       'price': '\$7.99',
       'image':
           'https://static.vecteezy.com/system/resources/previews/052/648/828/non_2x/gold-floor-lamp-with-pleated-shade-png.png',
-      'color': const Color(0xffF2E8DC),
+      'color': AppColors.categoryBg4,
     },
   ];
 }

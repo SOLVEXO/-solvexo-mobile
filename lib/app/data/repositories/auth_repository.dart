@@ -175,7 +175,7 @@ class AuthRepository {
     try {
       final response = await _baseClient.post(
         ApiConstants.login,
-        data: {'email': email, 'password': password, 'role': 'user'},
+        data: {'email': email, 'password': password, 'role': 'seller'},
         requiresAuth: false,
       );
 

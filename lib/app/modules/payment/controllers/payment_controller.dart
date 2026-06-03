@@ -67,7 +67,7 @@ class PaymentController extends GetxController {
                         width: isSelected ? 1.4 : 0.3,
                         color: isSelected
                             ? AppColors.primaryColor
-                            : Colors.grey,
+                            : AppColors.greyDefault,
                       ),
                     ),
                     child: ListTile(

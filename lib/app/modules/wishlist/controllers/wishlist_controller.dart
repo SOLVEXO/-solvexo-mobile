@@ -71,7 +71,7 @@ class WishlistController extends GetxController {
       onLeftButtonTap: () => Get.back(),
       leftButtonName: 'Cancle',
       onRightButtonTap: () => clearWishlist(),
-      rightButtonName: 'Delete',
+      rightButtonName: 'Clear',
     );
   }
   // ─── 3. Add to wishlist ───────────────────────────────────────────────────

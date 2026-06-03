@@ -199,7 +199,7 @@ class _SubCategoryChips extends StatelessWidget {
                     border: Border.all(
                       color: isSelected
                           ? AppColors.primaryColor
-                          : Colors.transparent,
+                          : AppColors.transparent,
                       width: 1.5,
                     ),
                     boxShadow: [

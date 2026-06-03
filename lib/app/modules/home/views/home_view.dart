@@ -3,7 +3,6 @@ import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/dynamic_shimmer.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/delivery_address.dart';
 import 'package:book_store_app/app/components/no_signal_view.dart';
 import 'package:book_store_app/app/components/shimmer/banner_shimmer.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -14,12 +13,13 @@ import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
 import 'package:book_store_app/app/modules/home/widgets/categories_grid.dart';
 import 'package:book_store_app/app/modules/home/widgets/products_grid.dart';
 import 'package:book_store_app/app/modules/home/widgets/sub_category_grid.dart';
-import 'package:book_store_app/app/modules/home/widgets/tab_header.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,7 +27,7 @@ class HomeView extends StatelessWidget {
   HomeView({super.key});
   final controller = Get.put(HomeController());
   final categoryController = Get.put(CategoryController());
-  // final profileController = Get.put(ProfileController());
+  final profileController = Get.put(ProfileController());
   final networkController = Get.put(NetworkController());
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class HomeView extends StatelessWidget {
       backgroundColor: AppColors.background,
       safeAreaTop: true,
       showCustomAppBar: true,
-      height: 80,
+      height: 60,
       mainAppBar: true,
       horizontalPadding: false,
       verticalPadding: false,
@@ -69,21 +69,21 @@ class HomeView extends StatelessWidget {
                 trackVisibility: true,
                 interactive: true,
                 thickness: 4,
-                radius: const Radius.circular(10),
+                radius: const Radius.circular(AppDimen.borderRadius),
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(
-                    parent: ClampingScrollPhysics(),
+                    // parent: ClampingScrollPhysics(),
                   ),
                   children: [
                     // ── Delivery address ─────────────────────────────
-                    DeliveryAddress(),
-                    const SizedBox(height: 15),
+                    // DeliveryAddress(),
+                    const SizedBox(height: AppDimen.allPadding),
 
                     // ── Banner ───────────────────────────────────────
                     isLoading ? BannerShimmer() : BannerCarousel(),
 
-                    const SizedBox(height: 18),
-
+                    const SizedBox(height: AppDimen.allPadding),
+                    titleText("Browse by Category"),
                     // ── Categories ───────────────────────────────────
                     isLoading
                         ? const DynamicShimmer(iscategories: true)
@@ -95,10 +95,10 @@ class HomeView extends StatelessWidget {
                             ),
                           )
                         : CategoriesGrid(),
-
+                    const SizedBox(height: AppDimen.allPadding),
                     // ── White card — subcategories + tabs + products ──
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         color: AppColors.white,
                         borderRadius: const BorderRadius.only(
@@ -107,7 +107,7 @@ class HomeView extends StatelessWidget {
                         ),
                         boxShadow: const [
                           BoxShadow(
-                            color: Colors.black12,
+                            color: AppColors.black12,
                             blurRadius: 12,
                             offset: Offset(0, 3),
                           ),
@@ -115,6 +115,7 @@ class HomeView extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
+                          titleText("Trending Products", viewMore: true),
                           // ── Sub categories ─────────────────────────
                           isLoading
                               ? const DynamicShimmer(issubcategories: true)
@@ -124,12 +125,12 @@ class HomeView extends StatelessWidget {
                           const Divider(thickness: 0.5),
                           const SizedBox(height: 10),
 
-                          // ── Tab header ─────────────────────────────
-                          isLoading
-                              ? const DynamicShimmer(istabs: true)
-                              : TabHeader(),
+                          // // ── Tab header ─────────────────────────────
+                          // isLoading
+                          //     ? const DynamicShimmer(istabs: true)
+                          //     : TabHeader(),
 
-                          const SizedBox(height: 5),
+                          // const SizedBox(height: 5),
 
                           // ── Products ───────────────────────────────
                           isLoading
@@ -142,22 +143,48 @@ class HomeView extends StatelessWidget {
                 ),
               ),
             ),
-
-            // ── Login card overlay ───────────────────────────────────
-            Obx(() {
-              if (controller.loginUser.value) {
-                return Positioned(
-                  left: 12,
-                  right: 12,
-                  bottom: 12,
-                  child: SafeArea(child: LoginSignupCard()),
-                );
-              }
-              return const SizedBox.shrink();
-            }),
+            // // ── Login card overlay ───────────────────────────────────
+            profileController.user.isNull
+                ? Positioned(
+                    left: 12,
+                    right: 12,
+                    bottom: 12,
+                    child: SafeArea(child: LoginSignupCard()),
+                  )
+                : SizedBox.shrink(),
           ],
         );
       }),
+    );
+  }
+
+  Widget titleText(String title, {bool viewMore = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimen.allPadding,
+        vertical: AppDimen.bottomPadding,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CustomText(
+            text: title,
+            fontSize: AppFontSize.small,
+            fontWeight: FontWeight.w600,
+          ),
+          viewMore
+              ? TextButton(
+                  onPressed: () {},
+                  child: CustomText(
+                    text: "See All",
+                    fontSize: AppFontSize.small2,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryColor,
+                  ),
+                )
+              : SizedBox.shrink(),
+        ],
+      ),
     );
   }
 }
@@ -183,7 +210,7 @@ class _ProductsSection extends StatelessWidget {
                 Icon(
                   Icons.shopping_bag_outlined,
                   size: 80,
-                  color: Colors.grey[400],
+                  color: AppColors.greySwatch400,
                 ),
                 const SizedBox(height: 16),
                 CustomText(

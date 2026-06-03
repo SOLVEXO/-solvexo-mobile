@@ -49,7 +49,7 @@ class AddressRepository {
         requiresAuth: true,
       );
 
-      debugPrint('📦 fetchDefaultAddress: ${res.data}');
+      debugPrint('📦 fetchDefaultA ddress: ${res.data}');
 
       final data = res.data?['data'];
       if (data is Map<String, dynamic>) {

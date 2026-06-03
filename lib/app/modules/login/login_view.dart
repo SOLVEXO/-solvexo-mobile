@@ -24,18 +24,22 @@ class LoginView extends StatelessWidget {
       child: Column(
         children: [
           /// Logo
-          CommonImageView(
-            imagePath: AppImages.fullLogo,
-            width: Get.width / 1.5,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 10,
+            children: [
+              CommonImageView(imagePath: AppImages.logoImage, width: 50),
+              CustomText(
+                text: "SOLVEXO",
+                fontSize: AppFontSize.veryLarge,
+                fontWeight: FontWeight.w800,
+                textAlign: TextAlign.center,
+                color: AppColors.black,
+              ),
+            ],
           ),
-          // CustomText(
-          //   text: "EDU\nDEEN",
-          //   fontSize: AppFontSize.veryLarge2,
-          //   fontWeight: FontWeight.w800,
-          //   textAlign: TextAlign.center,
-          //   color: AppColors.primaryColor,
-          // ),
-          SizedBox(height: 10),
+
+          SizedBox(height: 20),
 
           /// Email / phone field
           Form(

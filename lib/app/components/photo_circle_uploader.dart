@@ -129,7 +129,7 @@ class PhotoCircleUploader extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.black.withOpacity(0.3),
+                      color: AppColors.black.withOpacity(0.3),
                     ),
                   ),
                 ),

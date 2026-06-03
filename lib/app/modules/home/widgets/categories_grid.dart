@@ -11,7 +11,7 @@ class CategoriesGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     return SizedBox(
-      height: height / 3.29,
+      height: height / 7,
       child: Scrollbar(
         scrollbarOrientation: ScrollbarOrientation.bottom,
         trackVisibility: true,
@@ -23,10 +23,9 @@ class CategoriesGrid extends StatelessWidget {
           itemCount: controller.categoryTrees.length,
           scrollDirection: Axis.horizontal,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // 2 rows FIXED!
-            mainAxisSpacing: 0,
-            crossAxisSpacing: 0,
-            childAspectRatio: 1.3,
+            crossAxisCount: 1, // 2 rows FIXED!
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.5,
           ),
           itemBuilder: (_, i) {
             final item = controller.categoryTrees[i];

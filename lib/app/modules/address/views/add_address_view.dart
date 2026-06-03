@@ -1,5 +1,5 @@
+import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
-import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
@@ -15,11 +15,12 @@ class AddAddressView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    return Scaffold(
+    return BaseViewScreen(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBarTwo(title: "Add Address"),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      screenName: "Add Address",
+      showCustomAppBar: true,
+      resizeToAvoidBottomInset: true,
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -81,11 +82,12 @@ class AddAddressView extends StatelessWidget {
                 ),
               ),
             ),
-            AppButton(
-              label: "Add Address",
-              onPressed: () {
-                controller.saveAddress();
-              },
+            Obx(
+              () => AppButton(
+                label: controller.isSaving.value ? "Loading..." : "Add Address",
+                onPressed: () =>
+                    controller.isSaving.value ? null : controller.saveAddress(),
+              ),
             ),
           ],
         ),

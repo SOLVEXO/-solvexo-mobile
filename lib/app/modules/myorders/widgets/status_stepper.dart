@@ -57,7 +57,7 @@ class StatusStepper extends StatelessWidget {
                       child: SvgIcon(
                         assetName: steps[index].icon,
                         size: 24,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     ),
                     if (index != steps.length - 1)

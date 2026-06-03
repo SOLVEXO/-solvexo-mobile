@@ -29,7 +29,7 @@ class CustomBreadCrumbs extends StatelessWidget {
 
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 4),
-          child: Icon(Icons.chevron_right, size: 17, color: Colors.black54),
+          child: Icon(Icons.chevron_right, size: 17, color: AppColors.black54),
         ),
 
         CustomText(

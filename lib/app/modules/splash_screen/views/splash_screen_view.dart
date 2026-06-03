@@ -30,20 +30,20 @@ class SplashView extends StatelessWidget {
                     scale: controller.scaleAnim,
                     child: Container(
                       height: 90,
-                      width: 150,
+                      width: 90,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.white,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: AppColors.black.withOpacity(0.2),
                             blurRadius: 15,
                             offset: const Offset(0, 8),
                           ),
                         ],
                       ),
-                      child: Image.asset(AppImages.fullLogo),
+                      child: Image.asset(AppImages.logoImage),
                     ),
                   ),
                 ),
@@ -54,7 +54,7 @@ class SplashView extends StatelessWidget {
                   child: Column(
                     children: [
                       const CustomText(
-                        text: "EduDeen",
+                        text: "Solvexo",
                         fontSize: AppFontSize.medium,
                         fontWeight: FontWeight.bold,
                         color: AppColors.white,

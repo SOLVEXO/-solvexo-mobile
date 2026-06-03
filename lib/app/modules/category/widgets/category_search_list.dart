@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,7 +27,7 @@ class CategorySearchList extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
-            tileColor: Colors.white,
+            tileColor: AppColors.white,
             leading: const Icon(Icons.category),
             title: Text(category.name),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -55,7 +56,7 @@ class CategoryEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(text, style: TextStyle(color: Colors.grey.shade600)),
+      child: Text(text, style: TextStyle(color: AppColors.greySwatch600)),
     );
   }
 }

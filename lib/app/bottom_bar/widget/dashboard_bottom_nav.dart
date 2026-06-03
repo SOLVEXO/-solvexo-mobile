@@ -1,7 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/bottom_bar/controllers/bottom_navbar_controller.dart';
-import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -17,7 +16,7 @@ class DashboardBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       int activeTab = controller.selectedIndex.value;
-      final homeController = Get.put(HomeController());
+      // final homeController = Get.put(HomeController());
       final profileController = Get.put(ProfileController());
       final user = profileController.user.value;
       final userProfile = user?.profileImage ?? "";
@@ -27,7 +26,7 @@ class DashboardBottomNav extends StatelessWidget {
           color: AppColors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(showShadow ? 0.1 : 0),
+              color: AppColors.black.withOpacity(showShadow ? 0.1 : 0),
               blurRadius: 10,
               offset: Offset(0, -2),
             ),
@@ -42,30 +41,37 @@ class DashboardBottomNav extends StatelessWidget {
               isActive: activeTab == 0,
               onTap: () {
                 controller.changeTab(0);
-                homeController.refreshHome();
+                // homeController.refreshHome();
               },
             ),
             _buildNavItem(
               index: 1,
-              icon: AppIcons.billsIcon,
+              icon: AppIcons.searchIcon,
               isActive: activeTab == 1,
               onTap: () => controller.changeTab(1),
-              iconSize: 25,
+              iconSize: 35,
             ),
             _buildNavItem(
               index: 2,
-              icon: AppIcons.cartIcon,
-              isCartIcon: true,
+              icon: AppIcons.billsIcon,
               isActive: activeTab == 2,
               onTap: () => controller.changeTab(2),
+              iconSize: 25,
             ),
             _buildNavItem(
               index: 3,
-              profile: true,
-              url: userProfile.isEmpty ? null : userProfile,
-              icon: activeTab == 3 ? AppIcons.moreFill : AppIcons.more,
+              icon: AppIcons.cartIcon,
+              isCartIcon: true,
               isActive: activeTab == 3,
               onTap: () => controller.changeTab(3),
+            ),
+            _buildNavItem(
+              index: 4,
+              profile: true,
+              url: userProfile.isEmpty ? null : userProfile,
+              icon: activeTab == 4 ? AppIcons.moreFill : AppIcons.more,
+              isActive: activeTab == 4,
+              onTap: () => controller.changeTab(4),
             ),
           ],
         ),
@@ -87,7 +93,7 @@ class DashboardBottomNav extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         splashColor: AppColors.primaryColor.withOpacity(0.1),
-        highlightColor: Colors.transparent,
+        highlightColor: AppColors.transparent,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -127,11 +133,11 @@ class DashboardBottomNav extends StatelessWidget {
                           minHeight: 15,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: AppColors.red,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: AppColors.black.withOpacity(0.2),
                               blurRadius: 4,
                             ),
                           ],

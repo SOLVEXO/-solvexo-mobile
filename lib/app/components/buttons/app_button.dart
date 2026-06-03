@@ -34,7 +34,7 @@ class AppButton extends StatelessWidget {
 
     final btnColor =
         backgroundColor ??
-        (isOutlined ? Colors.transparent : AppColors.accentColor);
+        (isOutlined ? AppColors.transparent : AppColors.accentColor);
 
     final borderColor = backgroundColor;
 
@@ -47,14 +47,14 @@ class AppButton extends StatelessWidget {
             (icon != null
                 ? Icon(
                     icon,
-                    color: textColor ?? Colors.white,
+                    color: textColor ?? AppColors.white,
                     size: isTablet ? 24 : 20,
                   )
                 : const SizedBox()),
         label: CustomText(
           text: label,
           color:
-              textColor ?? (isOutlined ? AppColors.accentColor : Colors.white),
+              textColor ?? (isOutlined ? AppColors.accentColor : AppColors.white),
           fontSize: isTablet ? 20 : 16,
           fontWeight: FontWeight.w600,
         ),
@@ -69,7 +69,7 @@ class AppButton extends StatelessWidget {
             width: isOutlined ? 0.8 : 0,
             color: isOutlined
                 ? borderColor ?? AppColors.accentColor
-                : Colors.transparent,
+                : AppColors.transparent,
           ),
 
           shape: RoundedRectangleBorder(

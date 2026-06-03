@@ -34,7 +34,7 @@ class ProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(radius),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
+              color: AppColors.black12,
               blurRadius: 12,
               offset: Offset(0, 3),
             ),
@@ -55,7 +55,7 @@ class ProductCard extends StatelessWidget {
               text: product.name,
               fontSize: AppFontSize.regular,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: AppColors.black,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

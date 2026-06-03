@@ -5,6 +5,7 @@ import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
@@ -239,10 +240,10 @@ class ProfileController extends GetxController {
             if (user.value?.profileImage != null ||
                 selectedImageFile.value != null)
               ListTile(
-                leading: Icon(Icons.delete, color: Colors.red),
+                leading: Icon(Icons.delete, color: AppColors.red),
                 title: Text(
                   'Remove Photo',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: AppColors.red),
                 ),
                 onTap: () {
                   Get.back();
@@ -505,7 +506,7 @@ class ProfileController extends GetxController {
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     valueColor: AlwaysStoppedAnimation(
-                                      Colors.white,
+                                      AppColors.white,
                                     ),
                                   ),
                                 )
@@ -552,7 +553,7 @@ class ProfileController extends GetxController {
               Get.back();
               await _performDeleteAccount();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
             child: Text('Delete'),
           ),
         ],

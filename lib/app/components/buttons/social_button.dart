@@ -23,7 +23,7 @@ class SocialButton extends StatelessWidget {
   });
 
   factory SocialButton.google(Function() onPressed) => SocialButton(
-    color: Colors.white,
+    color: AppColors.white,
     textColor: AppColors.textPrimary,
     label: "Continue with Google",
     icon: AppIcons.googleIcon,
@@ -31,14 +31,14 @@ class SocialButton extends StatelessWidget {
   );
 
   factory SocialButton.facebook(Function() onPressed) => SocialButton(
-    color: Color(0xFF1877F2),
+    color: AppColors.facebookBlue,
     label: "Continue with Facebook",
     icon: AppIcons.facebookIcon,
     onPressed: onPressed,
   );
 
   factory SocialButton.apple(Function() onPressed) => SocialButton(
-    color: Colors.black,
+    color: AppColors.black,
     label: "Continue with Apple",
     icon: AppIcons.appleIcon,
     iconColor: AppColors.white,

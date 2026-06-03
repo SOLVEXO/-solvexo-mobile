@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/comp_controllers/toast_controller.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,7 +28,7 @@ class CustomToast extends StatelessWidget {
       child: SlideTransition(
         position: controller.slide,
         child: Material(
-          color: Colors.transparent,
+          color: AppColors.transparent,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -37,7 +38,7 @@ class CustomToast extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
+                  color: AppColors.black.withOpacity(0.25),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),

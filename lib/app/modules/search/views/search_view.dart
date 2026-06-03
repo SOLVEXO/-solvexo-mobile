@@ -2,13 +2,11 @@ import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/main_app_bar.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/horizontal_product_card.dart';
 import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -29,7 +27,7 @@ class SearchView extends StatelessWidget {
       backgroundColor: AppColors.white,
       safeAreaTop: true,
       showCustomAppBar: true,
-      height: 80,
+      height: 120,
       mainAppBar: true,
       issearch: true,
       verticalPadding: false,
@@ -50,7 +48,7 @@ class SearchView extends StatelessWidget {
                           Icon(
                             Icons.search_off,
                             size: 80,
-                            color: Colors.grey[300],
+                            color: AppColors.shimmerBase,
                           ),
                           CustomText(
                             text: "No Products Found",
@@ -225,12 +223,16 @@ class SearchView extends StatelessWidget {
                   child: CustomText(
                     text: item,
                     fontSize: AppFontSize.small,
-                    color: Colors.black,
+                    color: AppColors.black,
                   ),
                 ),
                 GestureDetector(
                   onTap: () => c.deleteRecent(item),
-                  child: Icon(Icons.close, size: 25, color: Colors.grey),
+                  child: Icon(
+                    Icons.close,
+                    size: 25,
+                    color: AppColors.greyDefault,
+                  ),
                 ),
               ],
             ),
@@ -279,7 +281,7 @@ class SearchView extends StatelessWidget {
               width: w / 5,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: const Color(0xffF5F5F5),
+                color: AppColors.shimmerHighlight,
               ),
               child: CommonImageView(
                 imagePath: item,
@@ -310,7 +312,7 @@ class SearchView extends StatelessWidget {
               width: w / 5,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: const Color(0xffF5F5F5),
+                color: AppColors.shimmerHighlight,
               ),
               child: CommonImageView(
                 url: product.images.isNotEmpty ? product.images.first : null,
@@ -329,10 +331,10 @@ class SearchView extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(0.1)),
+          BoxShadow(blurRadius: 10, color: AppColors.black.withOpacity(0.1)),
         ],
       ),
       child: ListView.separated(
@@ -358,7 +360,7 @@ class SearchView extends StatelessWidget {
                         CustomText(
                           text: item.name,
                           fontSize: AppFontSize.small,
-                          color: Colors.black,
+                          color: AppColors.black,
                           fontWeight: FontWeight.w500,
                         ),
                         if (item.category != null) ...[
@@ -372,7 +374,11 @@ class SearchView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(Icons.north_west, size: 20, color: Colors.grey[400]),
+                  Icon(
+                    Icons.north_west,
+                    size: 20,
+                    color: AppColors.greySwatch400,
+                  ),
                 ],
               ),
             ),

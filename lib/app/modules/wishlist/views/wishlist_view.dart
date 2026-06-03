@@ -120,7 +120,7 @@ class _WishlistCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: AppColors.black.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -188,15 +188,15 @@ class _WishlistCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: inStock
-                              ? Colors.green.withOpacity(0.10)
-                              : Colors.red.withOpacity(0.10),
+                              ? AppColors.seaGreen.withOpacity(0.10)
+                              : AppColors.red.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: CustomText(
                           text: inStock ? 'In stock' : 'Out of stock',
                           fontSize: AppFontSize.small2,
                           fontWeight: FontWeight.w600,
-                          color: inStock ? Colors.green[700]! : Colors.red,
+                          color: inStock ? AppColors.darkGreen : AppColors.red,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -223,13 +223,13 @@ class _WishlistCard extends StatelessWidget {
                   width: 34,
                   height: 34,
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.08),
+                    color: AppColors.red.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.favorite_rounded,
                     size: 18,
-                    color: Colors.red,
+                    color: AppColors.red,
                   ),
                 ),
               ),
@@ -279,13 +279,13 @@ class _EmptyWishlist extends StatelessWidget {
               width: 90,
               height: 90,
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.08),
+                color: AppColors.red.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.favorite_border_rounded,
                 size: 42,
-                color: Colors.red,
+                color: AppColors.red,
               ),
             ),
             const SizedBox(height: 20),
@@ -318,7 +318,7 @@ class _EmptyWishlist extends StatelessWidget {
                   text: 'Explore Products',
                   fontSize: AppFontSize.regular,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
               ),
             ),

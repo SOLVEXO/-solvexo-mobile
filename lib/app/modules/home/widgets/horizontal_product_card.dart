@@ -4,6 +4,7 @@ import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -24,9 +25,9 @@ class HorizontalProductCard extends StatelessWidget {
         height: 120,
         margin: const EdgeInsets.only(bottom: 13),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 4, spreadRadius: 1),
+            BoxShadow(color: AppColors.black12, blurRadius: 4, spreadRadius: 1),
           ],
           borderRadius: BorderRadius.circular(12),
         ),
@@ -39,7 +40,7 @@ class HorizontalProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
+                    color: AppColors.black12,
                     blurRadius: 4,
                     spreadRadius: 1,
                   ),
@@ -63,7 +64,7 @@ class HorizontalProductCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     fontSize: 12,
-                    color: Colors.black54,
+                    color: AppColors.black54,
                   ),
                   Expanded(
                     child: Row(
@@ -85,7 +86,7 @@ class HorizontalProductCard extends StatelessWidget {
                   ),
                   CustomText(
                     text: "\$ ${prod.price}",
-                    color: Colors.black,
+                    color: AppColors.black,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),

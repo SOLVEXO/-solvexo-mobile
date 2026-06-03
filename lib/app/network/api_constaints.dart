@@ -109,6 +109,8 @@ class ApiConstants {
   static const String getWishlistItem = '$apiPrefix/cart/get-wishlist-item';
   static const String removeFromWishlist =
       '$apiPrefix/cart/remove-from-wishlist';
+  // ============ Checkout / Shipping Endpoints ============
+  static const String getShippingZones = "$apiPrefix/checkout/getShippingZones";
   // ============ Upload Endpoints ============
   // ✅ Upload
   static const String uploadImage = '$apiPrefix/upload/image';

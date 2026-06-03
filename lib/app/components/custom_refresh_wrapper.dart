@@ -1,157 +1,213 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/comp_controllers/refresh_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
-class CustomRefreshWrapper extends StatelessWidget {
+class CustomRefreshWrapper extends StatefulWidget {
   final Widget child;
   final Future<void> Function() onRefresh;
 
-  CustomRefreshWrapper({
+  const CustomRefreshWrapper({
     super.key,
     required this.child,
     required this.onRefresh,
   });
 
-  final refreshController = Get.put(RefreshControllerX());
+  @override
+  State<CustomRefreshWrapper> createState() => _CustomRefreshWrapperState();
+}
 
+class _CustomRefreshWrapperState extends State<CustomRefreshWrapper>
+    with SingleTickerProviderStateMixin {
+  // ─── Constants ─────────────────────────────────────────────────────────────
+  static const double _triggerThreshold = 80.0;
+  static const double _maxPull = 120.0;
+  static const double _resistance = 0.45; // dampen drag so it feels natural
+
+  // ─── State ─────────────────────────────────────────────────────────────────
+  double _pullDistance = 0;
+  bool _isRefreshing = false;
+  bool _isAtTop = true;
+  double? _dragStartY;
+
+  late final AnimationController _snapController;
+  late Animation<double> _snapAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _snapController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 320),
+        )..addListener(() {
+          if (mounted) setState(() => _pullDistance = _snapAnimation.value);
+        });
+  }
+
+  @override
+  void dispose() {
+    _snapController.dispose();
+    super.dispose();
+  }
+
+  // ─── Scroll position tracking ───────────────────────────────────────────────
+  // Determines if the scrollable child is at its very top edge.
+  // Works with any scroll physics because we read metrics, not events.
+  bool _onScrollNotification(ScrollNotification n) {
+    if (n.metrics.axis == Axis.vertical) {
+      _isAtTop = n.metrics.pixels <= 0;
+    }
+    return false;
+  }
+
+  // ─── Pointer tracking ──────────────────────────────────────────────────────
+  // Listener captures raw touch before any ScrollPhysics processes it,
+  // so this works identically on ClampingScrollPhysics, BouncingScrollPhysics,
+  // NeverScrollableScrollPhysics, and AlwaysScrollableScrollPhysics.
+  void _onPointerDown(PointerDownEvent e) {
+    _dragStartY = e.position.dy;
+  }
+
+  void _onPointerMove(PointerMoveEvent e) {
+    if (_isRefreshing || !_isAtTop || _dragStartY == null) return;
+
+    final dragDelta = e.position.dy - _dragStartY!;
+    if (dragDelta <= 0) return; // only downward drag counts
+
+    _snapController.stop();
+    setState(() {
+      _pullDistance = (dragDelta * _resistance).clamp(0, _maxPull);
+    });
+  }
+
+  void _onPointerUp(PointerUpEvent e) {
+    _dragStartY = null;
+    if (_isRefreshing) return;
+    if (_pullDistance >= _triggerThreshold) {
+      _triggerRefresh();
+    } else {
+      _snapBack(to: 0);
+    }
+  }
+
+  void _onPointerCancel(PointerCancelEvent e) {
+    _dragStartY = null;
+    if (!_isRefreshing) _snapBack(to: 0);
+  }
+
+  // ─── Actions ────────────────────────────────────────────────────────────────
+  void _snapBack({required double to}) {
+    _snapAnimation = Tween<double>(
+      begin: _pullDistance,
+      end: to,
+    ).animate(CurvedAnimation(parent: _snapController, curve: Curves.easeOut));
+    _snapController.forward(from: 0);
+  }
+
+  Future<void> _triggerRefresh() async {
+    if (_isRefreshing) return;
+    setState(() {
+      _isRefreshing = true;
+      _pullDistance = _triggerThreshold; // hold indicator at trigger point
+    });
+    await widget.onRefresh();
+    if (!mounted) return;
+    _snapBack(to: 0);
+    setState(() => _isRefreshing = false);
+  }
+
+  // ─── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      onNotification: (scroll) {
-        if (scroll is OverscrollNotification) {
-          if (scroll.overscroll < 0) {
-            refreshController.updatePull(scroll.overscroll.abs());
+      onNotification: _onScrollNotification,
+      child: Listener(
+        onPointerDown: _onPointerDown,
+        onPointerMove: _onPointerMove,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
+        child: Stack(
+          children: [
+            widget.child,
+            if (_pullDistance > 0 || _isRefreshing) _buildIndicator(),
+          ],
+        ),
+      ),
+    );
+  }
 
-            if (refreshController.pullDistance.value > 100) {
-              refreshController.handleRefresh(onRefresh);
-            }
-          }
-        }
+  Widget _buildIndicator() {
+    final progress = (_pullDistance / _triggerThreshold).clamp(0.0, 1.0);
+    final offsetY = (_pullDistance * 0.45) - 15;
 
-        if (scroll is ScrollEndNotification) {
-          refreshController.resetPull();
-        }
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Transform.translate(
+          offset: Offset(0, offsetY),
+          child: Transform.scale(
+            scale: (0.6 + progress * 0.4).clamp(0.0, 1.0),
+            child: SizedBox(
+              width: 60,
+              height: 60,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Gradient progress ring
+                  ShaderMask(
+                    shaderCallback: (rect) => SweepGradient(
+                      startAngle: 0,
+                      endAngle: 6.28,
+                      colors: const [
+                        AppColors.primaryColor,
+                        AppColors.primaryColorLight,
+                        AppColors.accentColor,
+                        AppColors.primaryColorLight,
+                        AppColors.primaryColor,
+                      ],
+                      stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+                    ).createShader(rect),
+                    child: SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        value: _isRefreshing ? null : progress,
+                        // color is masked by ShaderMask
+                        color: AppColors.background,
+                      ),
+                    ),
+                  ),
 
-        return false;
-      },
-      child: Stack(
-        children: [
-          child,
-
-          Obx(() {
-            if (refreshController.pullDistance.value <= 0 &&
-                !refreshController.isRefreshing.value) {
-              return const SizedBox();
-            }
-
-            return Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Obx(() {
-                  final pull = refreshController.pullDistance.value.clamp(
-                    0,
-                    120,
-                  );
-                  final progress = (pull / 100).clamp(0.0, 1.0);
-
-                  return TweenAnimationBuilder(
-                    duration: const Duration(milliseconds: 500),
-                    tween: Tween<double>(begin: 0, end: pull.toDouble()),
-                    curve: Curves.elasticOut, // 🔥 elastic bounce
-                    builder: (context, value, child) {
-                      return Transform.translate(
-                        offset: Offset(0, value * 0.4), // 👈 elastic drop
-                        child: Transform.scale(
-                          scale: 0.7 + (progress * 0.3), // 👈 grow effect
-                          child: SizedBox(
-                            height: 50,
-                            width: 50,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                /// 🔥 GRADIENT LOADER RING
-                                if (refreshController.isRefreshing.value ||
-                                    progress > 0)
-                                  TweenAnimationBuilder(
-                                    tween: Tween<double>(begin: 0, end: 1),
-                                    duration: const Duration(seconds: 1),
-                                    builder: (context, _, __) {
-                                      return ShaderMask(
-                                        shaderCallback: (rect) {
-                                          return SweepGradient(
-                                            startAngle: 0,
-                                            endAngle: 6.3,
-                                            colors: [
-                                              AppColors.primaryColor,
-                                              AppColors.secondryColor,
-                                              AppColors.accentColor,
-                                              AppColors.secondryColor,
-                                              AppColors.primaryColor,
-                                            ],
-                                            stops: const [
-                                              0.0,
-                                              0.4,
-                                              0.6,
-                                              0.8,
-                                              1.0,
-                                            ],
-                                          ).createShader(rect);
-                                        },
-                                        child: SizedBox(
-                                          height: 80,
-                                          width: 80,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 1,
-                                            value:
-                                                refreshController
-                                                    .isRefreshing
-                                                    .value
-                                                ? null
-                                                : progress,
-                                            color: AppColors
-                                                .background, // masked by gradient
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-
-                                Container(
-                                  height: 48,
-                                  width: 48,
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(50),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.15),
-                                        blurRadius: 10,
-                                      ),
-                                    ],
-                                  ),
-                                  child: CommonImageView(
-                                    imagePath: AppImages.logoImage,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                  // Logo bubble
+                  Container(
+                    width: 35,
+                    height: 35,
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.black.withOpacity(0.12),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
                         ),
-                      );
-                    },
-                  );
-                }),
+                      ],
+                    ),
+                    child: CommonImageView(
+                      imagePath: AppImages.logoImage,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
               ),
-            );
-          }),
-        ],
+            ),
+          ),
+        ),
       ),
     );
   }

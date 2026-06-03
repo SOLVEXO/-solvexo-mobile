@@ -2,21 +2,27 @@ import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/components/shimmer/trip_shimmer.dart';
 import 'package:book_store_app/app/data/repositories/order_repository.dart';
+import 'package:book_store_app/app/data/repositories/shipping_repository.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/checkout/models/order_request_model.dart';
 import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
+import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/checkout_item_model.dart';
 
 class CheckoutController extends GetxController {
+  final ShippingRepository _shippingRepository = ShippingRepository();
+
   /// Order Items (coming from Cart)
   RxList<CheckoutItem> orderItems = <CheckoutItem>[].obs;
   final rewardController = TextEditingController();
@@ -34,34 +40,15 @@ class CheckoutController extends GetxController {
   static const double rewardPointDiscount = 0.0; // optional for future
 
   RxDouble shippingCost = 9.0.obs;
-  Rx<ShippingOption?> selectedShipping = Rx<ShippingOption?>(null);
-
-  final List<ShippingOption> shippingOptions = [
-    ShippingOption(
-      type: "Free Delivery",
-      charges: "Free",
-      amount: 0,
-      time: "Flat rate (Estimate delivery: 6 Days)",
-    ),
-    ShippingOption(
-      type: "Standard Delivery",
-      charges: "\$9.90",
-      amount: 9.90,
-      time: "Flat rate (Estimate delivery: 4 Days)",
-    ),
-    ShippingOption(
-      type: "Express Delivery",
-      charges: "\$14.90",
-      amount: 14.90,
-      time: "Flat rate (Estimate delivery: 2 Days)",
-    ),
-  ];
+  final RxList<ShippingOption> shippingOptions = <ShippingOption>[].obs;
+  final Rx<ShippingOption?> selectedShipping = Rx<ShippingOption?>(null);
+  final RxBool isLoadingShipping = false.obs;
   final AddressController addressController = Get.put(AddressController());
 
   @override
   void onInit() {
     super.onInit();
-
+    fetchShippingZones();
     final List<CartItem> cartItems = (Get.arguments as List<CartItem>? ?? []);
 
     orderItems.assignAll(
@@ -78,10 +65,37 @@ class CheckoutController extends GetxController {
           )
           .toList(),
     );
-    // final defaultAddr = addressController.defaultAddress;
-    // if (defaultAddr ) {
-    //   address.value = defaultAddr.addressLine1;
+    // final defaultAddr = addressController.;
+    // if (!defaultAddr.isNull) {
+    //   address.value = defaultAddr;
     // }
+  }
+
+  Future<void> fetchShippingZones() async {
+    try {
+      isLoadingShipping.value = true;
+
+      final zones = await _shippingRepository.getShippingZones();
+
+      // Filter only active zones and map to ShippingOption
+      final options = zones
+          .where((z) => z.status == 'active' && !z.isDelete)
+          .map((z) => z.toShippingOption())
+          .toList();
+
+      shippingOptions.assignAll(options);
+
+      // Auto-select first option
+      if (options.isNotEmpty) {
+        selectedShipping.value = options.first;
+      }
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+    } catch (e) {
+      ToastUtil.showToast('Failed to load shipping options');
+    } finally {
+      isLoadingShipping.value = false;
+    }
   }
 
   final OrderRepository _orderRepository = OrderRepository();
@@ -141,7 +155,7 @@ class CheckoutController extends GetxController {
 
   void selectShippingOption(ShippingOption option) {
     selectedShipping.value = option;
-    shippingCost.value = option.amount;
+    shippingCost.value = selectedShipping.value?.amount ?? 0.0;
     Get.back();
   }
 
@@ -192,12 +206,26 @@ class CheckoutController extends GetxController {
         title: "Shipping Options",
         widget: Padding(
           padding: const EdgeInsets.only(top: 10.0),
-          child: Column(
-            spacing: 15,
-            children: List.generate(shippingOptions.length, (i) {
-              final item = shippingOptions[i];
+          // ✅ Single top-level Obx wraps everything — rebuilds when
+          //    shippingOptions or isLoadingShipping changes
+          child: Obx(() {
+            if (isLoadingShipping.value) {
+              return TripShimmer(itemCount: 3); // ✅ return added
+            }
 
-              return Obx(() {
+            if (shippingOptions.isEmpty) {
+              return const Center(
+                child: CustomText(
+                  text: "No shipping options available",
+                  fontSize: AppFontSize.small,
+                ),
+              );
+            }
+
+            return Column(
+              spacing: 15,
+              children: List.generate(shippingOptions.length, (i) {
+                final item = shippingOptions[i];
                 final isSelected = selectedShipping.value?.type == item.type;
 
                 return GestureDetector(
@@ -208,7 +236,7 @@ class CheckoutController extends GetxController {
                         width: isSelected ? 1.2 : 0.3,
                         color: isSelected
                             ? AppColors.primaryColor
-                            : Colors.grey,
+                            : AppColors.greyDefault,
                       ),
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -232,9 +260,9 @@ class CheckoutController extends GetxController {
                     ),
                   ),
                 );
-              });
-            }),
-          ),
+              }),
+            );
+          }),
         ),
       ),
     );

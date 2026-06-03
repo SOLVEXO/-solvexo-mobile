@@ -19,7 +19,7 @@ class HomeShimmerView extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             height: 160,
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(.1),
+              color: AppColors.black.withOpacity(.1),
               borderRadius: BorderRadius.circular(14),
             ),
           ),
@@ -37,7 +37,7 @@ class HomeShimmerView extends StatelessWidget {
               itemBuilder: (_, __) => Container(
                 width: 65,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(.1),
+                  color: AppColors.black.withOpacity(.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
@@ -60,7 +60,7 @@ class HomeShimmerView extends StatelessWidget {
             ),
             itemBuilder: (_, __) => Container(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(.1),
+                color: AppColors.black.withOpacity(.1),
                 borderRadius: BorderRadius.circular(20),
               ),
             ),

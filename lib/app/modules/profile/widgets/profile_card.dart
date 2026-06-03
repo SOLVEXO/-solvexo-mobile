@@ -32,7 +32,7 @@ class ProfileCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 80, color: Colors.grey),
+              Icon(Icons.error_outline, size: 80, color: AppColors.greyDefault),
               SizedBox(height: AppDimen.bottomPadding),
               CustomText(text: 'Failed to load profile'),
               SizedBox(height: AppDimen.bottomPadding),

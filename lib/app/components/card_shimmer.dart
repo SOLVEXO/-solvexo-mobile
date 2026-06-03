@@ -14,7 +14,7 @@ class CardShimmer extends StatelessWidget {
         height: 50,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.grey.shade300,
+          color: AppColors.shimmerBase,
           borderRadius: BorderRadius.circular(12),
         ),
       ),

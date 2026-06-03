@@ -79,7 +79,7 @@ class OtpView extends StatelessWidget {
                   "\nthis code is expires in 10 minutes",
               fontSize: 14,
               textAlign: TextAlign.center,
-              color: Colors.grey.shade600,
+              color: AppColors.greySwatch600,
             ),
 
             const Spacer(),

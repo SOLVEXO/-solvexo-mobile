@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/skeleton.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 
@@ -12,11 +13,11 @@ class ShimmerVanCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppDimen.allPadding),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(AppDimen.borderRadius),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: AppColors.black.withOpacity(0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -77,19 +78,6 @@ class ShimmerVanCard extends StatelessWidget {
           Skeleton(height: 14, width: 100, cornerRadius: 4),
           SizedBox(width: 8),
           Expanded(child: Skeleton(height: 14, cornerRadius: 4)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildShimmerImagePreview() {
-    return const Padding(
-      padding: EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        children: [
-          Skeleton(height: 14, width: 100, cornerRadius: 4),
-          SizedBox(width: 8),
-          Skeleton(height: 60, width: 100, cornerRadius: 4),
         ],
       ),
     );

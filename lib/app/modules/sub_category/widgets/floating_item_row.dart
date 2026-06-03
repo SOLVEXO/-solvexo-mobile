@@ -19,7 +19,7 @@ class CustomFloatingButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: AppColors.black12,
             blurRadius: 12,
             offset: Offset(0, 3),
           ),

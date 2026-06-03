@@ -24,7 +24,7 @@ class LoginSignupCard extends StatelessWidget {
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: AppColors.black.withOpacity(0.2),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -39,7 +39,7 @@ class LoginSignupCard extends StatelessWidget {
             width: 45,
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: AppColors.white.withOpacity(0.15),
               borderRadius: BorderRadius.circular(AppDimen.borderRadius),
             ),
             child: CommonImageView(
@@ -58,14 +58,14 @@ class LoginSignupCard extends StatelessWidget {
               children: [
                 CustomText(
                   text: "Login to continue",
-                  color: Colors.white,
+                  color: AppColors.white,
                   fontWeight: FontWeight.w600,
                   fontSize: AppFontSize.regular,
                 ),
                 const SizedBox(height: 2),
                 CustomText(
                   text: "Access your cart & orders instantly",
-                  color: Colors.white.withOpacity(0.9),
+                  color: AppColors.white.withOpacity(0.9),
                   fontSize: AppFontSize.small2,
                 ),
               ],
