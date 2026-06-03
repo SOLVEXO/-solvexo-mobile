@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -55,17 +56,17 @@ class SellerSettingsController extends GetxController {
       header: 'STORE',
       tiles: [
         SettingsTile(
-          emoji: '🏪',
+          emoji: AppIcons.profileIcon,
           title: 'Store Profile',
           trailing: storeName.value,
         ),
         SettingsTile(
-          emoji: '💳',
+          emoji: AppIcons.duePayment,
           title: 'Payment Methods',
           trailing: paymentMethods.value,
         ),
         SettingsTile(
-          emoji: '🚚',
+          emoji: AppIcons.truckIcon,
           title: 'Shipping',
           trailing: shippingZones.value,
         ),
@@ -75,17 +76,17 @@ class SellerSettingsController extends GetxController {
       header: 'NOTIFICATIONS',
       tiles: [
         SettingsTile(
-          emoji: '🔔',
+          emoji: AppIcons.notificationIcon,
           title: 'New Orders',
           trailing: newOrdersNotif.value ? 'On' : 'Off',
         ),
         SettingsTile(
-          emoji: '💬',
+          emoji: AppIcons.emailIcon,
           title: 'Customer Messages',
           trailing: customerMessagesNotif.value ? 'On' : 'Off',
         ),
         SettingsTile(
-          emoji: '⚠️',
+          emoji: AppIcons.alertIcon,
           title: 'Low Stock Alerts',
           trailing: lowStockNotif.value ? 'On' : 'Off',
         ),
@@ -94,25 +95,36 @@ class SellerSettingsController extends GetxController {
     SettingsSection(
       header: 'ACCOUNT',
       tiles: [
-        const SettingsTile(emoji: '🔒', title: 'Password & Security'),
+        const SettingsTile(
+          emoji: AppIcons.privacy,
+          title: 'Password & Security',
+        ),
         SettingsTile(
-          emoji: '📱',
+          emoji: AppIcons.phoneIcon,
           title: 'Two-Factor Auth',
           trailing: twoFactorEnabled.value ? 'Enabled' : 'Disabled',
         ),
-        SettingsTile(emoji: '🌐', title: 'Language', trailing: language.value),
+        SettingsTile(
+          emoji: AppIcons.languageIcon,
+          title: 'Language',
+          trailing: language.value,
+        ),
       ],
     ),
     SettingsSection(
       header: 'DANGER ZONE',
       tiles: [
         SettingsTile(
-          emoji: '🚪',
+          emoji: AppIcons.logoutIcon,
           title: 'Sign Out',
           isDanger: true,
           onTap: signOut,
         ),
-        SettingsTile(emoji: '🗑️', title: 'Delete Account', isDanger: true),
+        SettingsTile(
+          emoji: AppIcons.deleteIcon,
+          title: 'Delete Account',
+          isDanger: true,
+        ),
       ],
     ),
   ];
@@ -148,7 +160,7 @@ class SellerSettingsController extends GetxController {
   }
 
   void signOut() {
-    AppPreferences.clearAccessToken();
-    Get.offAllNamed(Routes.authTabView);
+    // AppPreferences.clearAccessToken();
+    Get.offAllNamed(Routes.sellerOnboarding);
   }
 }

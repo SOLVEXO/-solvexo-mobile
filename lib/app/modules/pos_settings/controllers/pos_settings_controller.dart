@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -60,22 +61,22 @@ class PosSettingsController extends GetxController {
       header: 'REGISTER',
       tiles: [
         PosSettingsTile(
-          emoji: '🖥️',
+          emoji: AppIcons.profileIcon,
           title: 'Register Name',
           trailing: registerName.value,
         ),
         PosSettingsTile(
-          emoji: '💰',
+          emoji: AppIcons.taxesIcon,
           title: 'Tax Rate',
           trailing: taxRate.value,
         ),
         PosSettingsTile(
-          emoji: '🖨️',
+          emoji: AppIcons.printerIcon,
           title: 'Receipt Printer',
           trailing: printerStatus.value,
         ),
         PosSettingsTile(
-          emoji: '💳',
+          emoji: AppIcons.cardIcon,
           title: 'Card Reader',
           trailing: cardReaderStatus.value,
         ),
@@ -85,17 +86,18 @@ class PosSettingsController extends GetxController {
       header: 'SHIFT',
       tiles: [
         PosSettingsTile(
-          emoji: '📊',
+          emoji: AppIcons.anylaticsIcon,
           title: "Today's Sales",
           trailing: '\$${todaySales.value.toStringAsFixed(2)}',
+          onTap: () => Get.toNamed(Routes.sellerAnalytics),
         ),
         PosSettingsTile(
-          emoji: '💵',
+          emoji: AppIcons.cashIcon,
           title: 'Opening Float',
           trailing: '\$${openingFloat.value.toStringAsFixed(2)}',
         ),
         PosSettingsTile(
-          emoji: '🔒',
+          emoji: AppIcons.changePassword,
           title: 'Close Shift',
           onTap: () {},
         ),
@@ -105,20 +107,20 @@ class PosSettingsController extends GetxController {
       header: 'PREFERENCES',
       tiles: [
         PosSettingsTile(
-          emoji: '🔊',
+          emoji: AppIcons.notificationIcon,
           title: 'Sound Effects',
           trailing: soundEffects.value ? 'On' : 'Off',
         ),
         PosSettingsTile(
-          emoji: '⏱️',
+          emoji: AppIcons.lockPassword,
           title: 'Auto-Lock',
           trailing: autoLock.value,
         ),
-        PosSettingsTile(
-          emoji: '🌙',
-          title: 'Dark Mode',
-          trailing: darkMode.value ? 'On' : 'Off',
-        ),
+        // PosSettingsTile(
+        //   emoji: '🌙',
+        //   title: 'Dark Mode',
+        //   trailing: darkMode.value ? 'On' : 'Off',
+        // ),
       ],
     ),
   ];
@@ -152,7 +154,7 @@ class PosSettingsController extends GetxController {
   Future<void> refreshData() async => _load();
 
   void closeShiftAndLogOut() {
-    AppPreferences.clearAccessToken();
-    Get.offAllNamed(Routes.authTabView);
+    // AppPreferences.clearAccessToken();
+    Get.offAllNamed(Routes.sellerHome);
   }
 }

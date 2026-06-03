@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,7 @@ class CustomActionCard extends StatelessWidget {
     required this.label,
     this.onTap,
   });
-  final IconData icon;
+  final String icon;
   final String label;
   final Function()? onTap;
 
@@ -40,7 +41,11 @@ class CustomActionCard extends StatelessWidget {
                 color: AppColors.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, size: 18, color: AppColors.primaryColor),
+              child: SvgIcon(
+                assetName: icon,
+                size: 18,
+                color: AppColors.primaryColor,
+              ),
             ),
             const SizedBox(width: 8),
             CustomText(text: label, fontSize: 13, fontWeight: FontWeight.w600),

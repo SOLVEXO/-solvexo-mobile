@@ -1,5 +1,7 @@
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/pos/controllers/pos_bottom_nav_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,26 +9,10 @@ class PosBottomNav extends StatelessWidget {
   const PosBottomNav({super.key});
 
   static const _items = [
-    _NavItem(
-      icon: Icons.shopping_cart_outlined,
-      activeIcon: Icons.shopping_cart,
-      label: 'Sale',
-    ),
-    _NavItem(
-      icon: Icons.list_alt_outlined,
-      activeIcon: Icons.list_alt,
-      label: 'Orders',
-    ),
-    _NavItem(
-      icon: Icons.inventory_2_outlined,
-      activeIcon: Icons.inventory_2,
-      label: 'Products',
-    ),
-    _NavItem(
-      icon: Icons.settings_outlined,
-      activeIcon: Icons.settings,
-      label: 'Settings',
-    ),
+    _NavItem(icon: AppIcons.saleIcon, label: 'Sale'),
+    _NavItem(icon: AppIcons.ordersIcon, label: 'Orders'),
+    _NavItem(icon: AppIcons.shoppingBag, label: 'Products'),
+    _NavItem(icon: AppIcons.settingIcon, label: 'Settings'),
   ];
 
   @override
@@ -64,11 +50,7 @@ class PosBottomNav extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        isActive ? item.activeIcon : item.icon,
-                        color: color,
-                        size: 22,
-                      ),
+                      SvgIcon(assetName: item.icon, color: color, size: 22),
                       const SizedBox(height: 4),
                       AnimatedContainer(
                         height: 4,
@@ -95,12 +77,7 @@ class PosBottomNav extends StatelessWidget {
 }
 
 class _NavItem {
-  final IconData icon;
-  final IconData activeIcon;
+  final String icon;
   final String label;
-  const _NavItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-  });
+  const _NavItem({required this.icon, required this.label});
 }

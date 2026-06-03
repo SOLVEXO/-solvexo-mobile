@@ -53,10 +53,13 @@ class SellerAppBar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.background.withOpacity(0.2),
+              color: AppColors.background.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: SvgIcon(assetName: AppIcons.notificationIcon),
+            child: SvgIcon(
+              assetName: AppIcons.notificationIcon,
+              color: AppColors.white,
+            ),
           ),
           const SizedBox(width: 10),
           Obx(() {

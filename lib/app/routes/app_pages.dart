@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import '../modules/add_seller_product/bindings/add_seller_product_binding.dart';
 import '../modules/add_seller_product/views/add_seller_product_view.dart';
+import '../modules/seller_onboarding/bindings/seller_onboarding_binding.dart';
+import '../modules/seller_onboarding/views/seller_onboarding_view.dart';
 import '../modules/pos/bindings/pos_binding.dart';
 import '../modules/pos_orders/bindings/pos_orders_binding.dart';
 import '../modules/pos_products/bindings/pos_products_binding.dart';
@@ -264,6 +266,11 @@ class AppPages {
       name: Routes.WISHLIST,
       page: () => const WishlistView(),
       binding: WishlistBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerOnboarding,
+      page: () => SellerOnboardingView(),
+      binding: SellerOnboardingBinding(),
     ),
     GetPage(
       name: Routes.sellerHome,

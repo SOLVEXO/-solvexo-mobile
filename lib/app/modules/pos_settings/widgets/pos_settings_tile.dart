@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/pos_settings/controllers/pos_settings_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -32,9 +33,10 @@ class PosSettingsTileWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppDimen.borderRadius),
               ),
               alignment: Alignment.center,
-              child: CustomText(
-                text: tile.emoji,
-                fontSize: AppFontSize.small2,
+              child: SvgIcon(
+                assetName: tile.emoji,
+                size: 22,
+                color: AppColors.black,
               ),
             ),
             const SizedBox(width: 14),

@@ -41,6 +41,9 @@ abstract class Routes {
   static const CHAT = '/chat';
   static const WISHLIST = '/wishlist';
 
+  // Onboarding
+  static const sellerOnboarding = '/seller/onboarding';
+
   // Role-based homes
   static const sellerHome = '/seller/home';
   static const posHome = '/pos/home';

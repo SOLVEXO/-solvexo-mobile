@@ -1,6 +1,8 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/seller_home/controllers/seller_home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,9 +22,9 @@ class CustomLowStockAlert extends StatelessWidget {
             border: Border.all(color: AppColors.yellow.withOpacity(0.4)),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text('⚠️', style: TextStyle(fontSize: 16)),
+              SvgIcon(assetName: AppIcons.alertIcon, size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(

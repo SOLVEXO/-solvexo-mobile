@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/modules/seller_home/widgets/custom_action_card.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,20 +11,20 @@ class SellerQuickActions extends StatelessWidget {
   Widget build(BuildContext context) {
     List actions = [
       (
-        icon: Icons.add_box_outlined,
+        icon: AppIcons.addIcon,
         label: 'Add Product',
         onTap: () => Get.toNamed(Routes.addSellerProduct),
       ),
       (
-        icon: Icons.point_of_sale_outlined,
+        icon: AppIcons.posIcon,
         label: 'Open POS',
         onTap: () {
           Get.toNamed(Routes.posHome);
         },
       ),
-      (icon: Icons.auto_awesome_outlined, label: 'AI Studio', onTap: () {}),
+      (icon: AppIcons.aiStudioIcon, label: 'AI Studio', onTap: () {}),
       (
-        icon: Icons.bar_chart_outlined,
+        icon: AppIcons.anylaticsIcon,
         label: 'Analytics',
         onTap: () => Get.toNamed(Routes.sellerAnalytics),
       ),
