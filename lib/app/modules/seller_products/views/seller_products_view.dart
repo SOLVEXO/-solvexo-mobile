@@ -59,7 +59,13 @@ class SellerProductsView extends StatelessWidget {
                   padding: const EdgeInsets.all(AppDimen.allPadding),
                   itemCount: products.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) => ProductCard(product: products[i]),
+                  itemBuilder: (_, i) => ProductCard(
+                    product: products[i],
+                    onEdit: () => Get.toNamed(
+                      Routes.editSellerProduct,
+                      arguments: products[i],
+                    ),
+                  ),
                 ),
               );
             }),

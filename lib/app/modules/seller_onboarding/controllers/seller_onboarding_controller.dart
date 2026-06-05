@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 // ── Enums ──────────────────────────────────────────────────────────────────────
 
-enum OnboardingStep { account, storeInfo, sellerType, whatYouSell, goLive }
+enum OnboardingStep { storeInfo, sellerType, whatYouSell, goLive }
 
 enum SellerTypeOption {
   creator,
@@ -150,47 +150,32 @@ const kStoreCategories = [
 // ── Controller ─────────────────────────────────────────────────────────────────
 
 class SellerOnboardingController extends GetxController {
-  final Rx<OnboardingStep> step = OnboardingStep.account.obs;
+  // Starts at storeInfo — account creation is handled by AuthController
+  final Rx<OnboardingStep> step = OnboardingStep.storeInfo.obs;
   final RxBool isSaving = false.obs;
 
-  // Step 1 — Account
-  final RxString firstName = ''.obs;
-  final RxString lastName = ''.obs;
-  final RxString email = ''.obs;
-  final RxString password = ''.obs;
-  final RxString country = 'United States'.obs;
-  final RxBool passwordVisible = false.obs;
-
-  // Step 2 — Store Info
+  // Step 1 — Store Info
   final RxString storeName = ''.obs;
   final RxString storeCategory = ''.obs;
   final RxString storeDescription = ''.obs;
 
-  // Step 3 — Seller Type (single-select)
+  // Step 2 — Seller Type (single-select)
   final Rx<SellerTypeOption?> sellerType = Rx(null);
 
-  // Step 4 — What You Sell (multi-select)
+  // Step 3 — What You Sell (multi-select)
   final RxSet<WhatYouSellOption> whatYouSell = <WhatYouSellOption>{}.obs;
 
   // Text controllers
-  late final TextEditingController firstNameCtrl;
-  late final TextEditingController lastNameCtrl;
-  late final TextEditingController emailCtrl;
-  late final TextEditingController passwordCtrl;
   late final TextEditingController storeNameCtrl;
   late final TextEditingController storeDescCtrl;
 
   // ── Computed ─────────────────────────────────────────────────────────────────
 
-  bool get isFirstStep => step.value == OnboardingStep.account;
+  bool get isFirstStep => step.value == OnboardingStep.storeInfo;
   bool get isLastStep => step.value == OnboardingStep.goLive;
 
   bool get canProceed {
     switch (step.value) {
-      case OnboardingStep.account:
-        return firstName.value.trim().isNotEmpty &&
-            email.value.trim().isNotEmpty &&
-            password.value.length >= 8;
       case OnboardingStep.storeInfo:
         return storeName.value.trim().isNotEmpty;
       case OnboardingStep.sellerType:
@@ -204,8 +189,6 @@ class SellerOnboardingController extends GetxController {
 
   String get primaryButtonLabel {
     switch (step.value) {
-      case OnboardingStep.account:
-        return 'Create Free Account';
       case OnboardingStep.sellerType:
         return canProceed ? 'Continue' : 'Select one to continue';
       case OnboardingStep.whatYouSell:
@@ -271,18 +254,6 @@ class SellerOnboardingController extends GetxController {
     }
   }
 
-  void pickCountry() {
-    Get.bottomSheet(
-      _PickerSheet(
-        title: 'Select Country',
-        items: kCountries,
-        selected: country.value,
-        onSelect: (v) => country.value = v,
-      ),
-      backgroundColor: Colors.transparent,
-    );
-  }
-
   void pickCategory() {
     Get.bottomSheet(
       _PickerSheet(
@@ -308,20 +279,12 @@ class SellerOnboardingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    firstNameCtrl = TextEditingController();
-    lastNameCtrl = TextEditingController();
-    emailCtrl = TextEditingController();
-    passwordCtrl = TextEditingController();
     storeNameCtrl = TextEditingController();
     storeDescCtrl = TextEditingController();
   }
 
   @override
   void onClose() {
-    firstNameCtrl.dispose();
-    lastNameCtrl.dispose();
-    emailCtrl.dispose();
-    passwordCtrl.dispose();
     storeNameCtrl.dispose();
     storeDescCtrl.dispose();
     super.onClose();

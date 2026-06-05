@@ -38,9 +38,9 @@ class Step4WhatYouSellGrid extends StatelessWidget {
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.9,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1.2,
               children: kWhatYouSell
                   .map(
                     (d) => _SellCard(
@@ -104,7 +104,7 @@ class _SellCard extends StatelessWidget {
                 _CheckBadge(isSelected: isSelected),
               ],
             ),
-            const Spacer(),
+            const SizedBox(height: 10),
             CustomText(
               text: data.name,
               fontSize: AppFontSize.small2,
@@ -116,7 +116,7 @@ class _SellCard extends StatelessWidget {
             const SizedBox(height: 4),
             CustomText(
               text: data.description,
-              fontSize: AppFontSize.tiny,
+              fontSize: AppFontSize.verySmall,
               color: AppColors.grey,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

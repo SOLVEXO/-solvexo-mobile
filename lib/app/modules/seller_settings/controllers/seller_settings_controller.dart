@@ -1,7 +1,6 @@
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -59,16 +58,19 @@ class SellerSettingsController extends GetxController {
           emoji: AppIcons.profileIcon,
           title: 'Store Profile',
           trailing: storeName.value,
+          onTap: () => Get.toNamed(Routes.sellerStoreProfile),
         ),
         SettingsTile(
           emoji: AppIcons.duePayment,
           title: 'Payment Methods',
           trailing: paymentMethods.value,
+          onTap: () => Get.toNamed(Routes.sellerPaymentMethods),
         ),
         SettingsTile(
           emoji: AppIcons.truckIcon,
           title: 'Shipping',
           trailing: shippingZones.value,
+          onTap: () => Get.toNamed(Routes.sellerShipping),
         ),
       ],
     ),
@@ -79,35 +81,41 @@ class SellerSettingsController extends GetxController {
           emoji: AppIcons.notificationIcon,
           title: 'New Orders',
           trailing: newOrdersNotif.value ? 'On' : 'Off',
+          onTap: () => Get.toNamed(Routes.sellerNotifications),
         ),
         SettingsTile(
           emoji: AppIcons.emailIcon,
           title: 'Customer Messages',
           trailing: customerMessagesNotif.value ? 'On' : 'Off',
+          onTap: () => Get.toNamed(Routes.sellerNotifications),
         ),
         SettingsTile(
           emoji: AppIcons.alertIcon,
           title: 'Low Stock Alerts',
           trailing: lowStockNotif.value ? 'On' : 'Off',
+          onTap: () => Get.toNamed(Routes.sellerNotifications),
         ),
       ],
     ),
     SettingsSection(
       header: 'ACCOUNT',
       tiles: [
-        const SettingsTile(
+        SettingsTile(
           emoji: AppIcons.privacy,
           title: 'Password & Security',
+          onTap: () => Get.toNamed(Routes.sellerPasswordSecurity),
         ),
         SettingsTile(
           emoji: AppIcons.phoneIcon,
           title: 'Two-Factor Auth',
           trailing: twoFactorEnabled.value ? 'Enabled' : 'Disabled',
+          onTap: () => Get.toNamed(Routes.sellerTwoFactor),
         ),
         SettingsTile(
           emoji: AppIcons.languageIcon,
           title: 'Language',
           trailing: language.value,
+          onTap: () => Get.toNamed(Routes.sellerLanguage),
         ),
       ],
     ),
@@ -160,7 +168,6 @@ class SellerSettingsController extends GetxController {
   }
 
   void signOut() {
-    // AppPreferences.clearAccessToken();
-    Get.offAllNamed(Routes.sellerOnboarding);
+    Get.offAllNamed(Routes.sellerStores);
   }
 }

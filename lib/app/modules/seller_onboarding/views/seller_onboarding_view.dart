@@ -3,12 +3,10 @@ import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/controllers/seller_onboarding_controller.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/onboarding_bottom_bar.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/onboarding_step_bar.dart';
-import 'package:book_store_app/app/modules/seller_onboarding/widgets/step1_account_form.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/step2_store_info_form.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/step3_seller_type_grid.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/step4_what_you_sell_grid.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/step5_go_live.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -61,28 +59,23 @@ class SellerOnboardingView extends StatelessWidget {
 
   Widget _stepContent(OnboardingStep step) {
     switch (step) {
-      case OnboardingStep.account:
-        return Step1AccountForm(
-          key: const ValueKey('s1'),
-          controller: controller,
-        );
       case OnboardingStep.storeInfo:
         return Step2StoreInfoForm(
-          key: const ValueKey('s2'),
+          key: const ValueKey('s1'),
           controller: controller,
         );
       case OnboardingStep.sellerType:
         return Step3SellerTypeGrid(
-          key: const ValueKey('s3'),
+          key: const ValueKey('s2'),
           controller: controller,
         );
       case OnboardingStep.whatYouSell:
         return Step4WhatYouSellGrid(
-          key: const ValueKey('s4'),
+          key: const ValueKey('s3'),
           controller: controller,
         );
       case OnboardingStep.goLive:
-        return Step5GoLive(key: const ValueKey('s5'), controller: controller);
+        return Step5GoLive(key: const ValueKey('s4'), controller: controller);
     }
   }
 }
@@ -116,32 +109,11 @@ class _TopHeader extends StatelessWidget {
             color: AppColors.primaryColor,
           ),
           const Spacer(),
-          Obx(() {
-            if (controller.step.value != OnboardingStep.account) {
-              return const SizedBox.shrink();
-            }
-            return GestureDetector(
-              onTap: () => Get.toNamed(Routes.authTabView),
-              child: Row(
-                children: [
-                  CustomText(
-                    text: 'Already have an account? ',
-                    fontSize: AppFontSize.tiny,
-                    color: AppColors.grey,
-                  ),
-                  TextButton(
-                    onPressed: () => Get.offAndToNamed(Routes.authTabView),
-                    child: CustomText(
-                      text: 'Sign In',
-                      fontSize: AppFontSize.verySmall,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
+          const CustomText(
+            text: 'Set up your store',
+            fontSize: AppFontSize.tiny,
+            color: AppColors.grey,
+          ),
         ],
       ),
     );

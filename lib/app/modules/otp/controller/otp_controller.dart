@@ -1,3 +1,4 @@
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
@@ -112,13 +113,18 @@ class OtpController extends GetxController
     isLoading.value = true;
 
     if (otpType == "verify_email") {
-      final auth = await _authRepository.verifyEmailOtp(
-        email: email,
-        otp: otpCode,
-      );
-
+      await _authRepository.verifyEmailOtp(email: email, otp: otpCode);
       isLoading.value = false;
-      Get.offAllNamed(Routes.mainHome);
+
+      // Route based on the role the user chose on the Welcome screen
+      final intentRole = await AppPreferences.getIntentRole();
+      await AppPreferences.clearIntentRole();
+
+      if (intentRole == 'seller') {
+        Get.offAllNamed(Routes.sellerOnboarding);
+      } else {
+        Get.offAllNamed(Routes.mainHome);
+      }
       // if (auth != null) {
 
       // } else {

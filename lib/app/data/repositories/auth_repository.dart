@@ -127,6 +127,7 @@ class AuthRepository {
     required String name,
     required String email,
     required String password,
+    required String role,
     String? phone,
     String? address,
   }) async {
@@ -137,7 +138,7 @@ class AuthRepository {
           'name': name,
           'email': email,
           'password': password,
-          'role': 'user', // ✅ REQUIRED
+          'role': role, // ✅ REQUIRED
           if (phone != null) 'phone': phone,
           if (address != null) 'address': address,
         },
@@ -164,6 +165,7 @@ class AuthRepository {
   Future<AuthResponseModel?> login({
     required String email,
     required String password,
+    required String role,
   }) async {
     // String fcmToken = "";
 
@@ -175,7 +177,7 @@ class AuthRepository {
     try {
       final response = await _baseClient.post(
         ApiConstants.login,
-        data: {'email': email, 'password': password, 'role': 'seller'},
+        data: {'email': email, 'password': password, 'role': role},
         requiresAuth: false,
       );
 

@@ -1,8 +1,33 @@
 import 'package:get/get.dart';
 import '../modules/add_seller_product/bindings/add_seller_product_binding.dart';
 import '../modules/add_seller_product/views/add_seller_product_view.dart';
+import '../modules/edit_seller_product/bindings/edit_seller_product_binding.dart';
+import '../modules/edit_seller_product/views/edit_seller_product_view.dart';
+import '../modules/seller_store_profile/bindings/seller_store_profile_binding.dart';
+import '../modules/seller_store_profile/views/seller_store_profile_view.dart';
+import '../modules/seller_payment_methods/bindings/seller_payment_methods_binding.dart';
+import '../modules/seller_payment_methods/views/seller_payment_methods_view.dart';
+import '../modules/seller_shipping/bindings/seller_shipping_binding.dart';
+import '../modules/seller_shipping/views/seller_shipping_view.dart';
+import '../modules/seller_notifications/bindings/seller_notifications_binding.dart';
+import '../modules/seller_notifications/views/seller_notifications_view.dart';
+import '../modules/seller_password_security/bindings/seller_password_security_binding.dart';
+import '../modules/seller_password_security/views/seller_password_security_view.dart';
+import '../modules/seller_two_factor/bindings/seller_two_factor_binding.dart';
+import '../modules/seller_two_factor/views/seller_two_factor_view.dart';
+import '../modules/seller_language/bindings/seller_language_binding.dart';
+import '../modules/seller_language/views/seller_language_view.dart';
+import '../modules/seller_ai_studio/bindings/seller_ai_studio_binding.dart';
+import '../modules/seller_ai_studio/views/seller_ai_studio_view.dart';
+import '../modules/seller_messages/bindings/seller_chat_binding.dart';
+import '../modules/seller_messages/bindings/seller_messages_binding.dart';
+import '../modules/seller_messages/views/seller_chat_view.dart';
+import '../modules/seller_messages/views/seller_messages_view.dart';
 import '../modules/seller_onboarding/bindings/seller_onboarding_binding.dart';
 import '../modules/seller_onboarding/views/seller_onboarding_view.dart';
+import '../modules/seller_stores/bindings/seller_stores_binding.dart';
+import '../modules/seller_stores/views/seller_stores_view.dart';
+import '../modules/welcome/views/welcome_view.dart';
 import '../modules/pos/bindings/pos_binding.dart';
 import '../modules/pos_orders/bindings/pos_orders_binding.dart';
 import '../modules/pos_products/bindings/pos_products_binding.dart';
@@ -98,6 +123,15 @@ class AppPages {
       name: Routes.splashScreen,
       page: () => SplashView(),
       binding: SplashScreenBinding(),
+    ),
+    GetPage(
+      name: Routes.welcome,
+      page: () => const WelcomeView(),
+    ),
+    GetPage(
+      name: Routes.sellerStores,
+      page: () => SellerStoresView(),
+      binding: SellerStoresBinding(),
     ),
     GetPage(
       name: Routes.authTabView,
@@ -283,6 +317,16 @@ class AppPages {
       binding: PosBinding(),
     ),
     GetPage(
+      name: Routes.sellerMessages,
+      page: () => SellerMessagesView(),
+      binding: SellerMessagesBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerChat,
+      page: () => SellerChatView(),
+      binding: SellerChatBinding(),
+    ),
+    GetPage(
       name: Routes.sellerOrders,
       page: () => SellerOrdersView(),
       binding: SellerOrdersBinding(),
@@ -291,6 +335,11 @@ class AppPages {
       name: Routes.addSellerProduct,
       page: () => AddSellerProductView(),
       binding: AddSellerProductBinding(),
+    ),
+    GetPage(
+      name: Routes.editSellerProduct,
+      page: () => EditSellerProductView(),
+      binding: EditSellerProductBinding(),
     ),
     GetPage(
       name: Routes.sellerProducts,
@@ -303,9 +352,49 @@ class AppPages {
       binding: SellerAnalyticsBinding(),
     ),
     GetPage(
+      name: Routes.sellerAiStudio,
+      page: () => SellerAiStudioView(),
+      binding: SellerAiStudioBinding(),
+    ),
+    GetPage(
       name: Routes.sellerSettings,
       page: () => SellerSettingsView(),
       binding: SellerSettingsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerStoreProfile,
+      page: () => SellerStoreProfileView(),
+      binding: SellerStoreProfileBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerPaymentMethods,
+      page: () => SellerPaymentMethodsView(),
+      binding: SellerPaymentMethodsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerShipping,
+      page: () => SellerShippingView(),
+      binding: SellerShippingBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerNotifications,
+      page: () => SellerNotificationsView(),
+      binding: SellerNotificationsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerPasswordSecurity,
+      page: () => SellerPasswordSecurityView(),
+      binding: SellerPasswordSecurityBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerTwoFactor,
+      page: () => SellerTwoFactorView(),
+      binding: SellerTwoFactorBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerLanguage,
+      page: () => SellerLanguageView(),
+      binding: SellerLanguageBinding(),
     ),
     GetPage(
       name: Routes.posOrders,

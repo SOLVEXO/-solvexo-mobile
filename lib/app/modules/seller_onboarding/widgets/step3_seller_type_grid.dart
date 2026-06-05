@@ -38,9 +38,9 @@ class Step3SellerTypeGrid extends StatelessWidget {
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.85,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1.2,
               children: kSellerTypes
                   .map(
                     (t) => _TypeCard(
@@ -98,7 +98,7 @@ class _TypeCard extends StatelessWidget {
                 _RadioDot(isSelected: isSelected),
               ],
             ),
-            const Spacer(),
+            const SizedBox(height: 10),
             CustomText(
               text: data.name,
               fontSize: AppFontSize.small2,
@@ -108,7 +108,7 @@ class _TypeCard extends StatelessWidget {
             const SizedBox(height: 4),
             CustomText(
               text: data.description,
-              fontSize: AppFontSize.tiny,
+              fontSize: AppFontSize.verySmall,
               color: AppColors.grey,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

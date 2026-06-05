@@ -22,7 +22,11 @@ class SellerQuickActions extends StatelessWidget {
           Get.toNamed(Routes.posHome);
         },
       ),
-      (icon: AppIcons.aiStudioIcon, label: 'AI Studio', onTap: () {}),
+      (
+        icon: AppIcons.aiStudioIcon,
+        label: 'AI Studio',
+        onTap: () => Get.toNamed(Routes.sellerAiStudio),
+      ),
       (
         icon: AppIcons.anylaticsIcon,
         label: 'Analytics',

@@ -24,19 +24,26 @@ class LoginView extends StatelessWidget {
       child: Column(
         children: [
           /// Logo
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 10,
-            children: [
-              CommonImageView(imagePath: AppImages.logoImage, width: 50),
-              CustomText(
-                text: "SOLVEXO",
-                fontSize: AppFontSize.veryLarge,
-                fontWeight: FontWeight.w800,
-                textAlign: TextAlign.center,
-                color: AppColors.black,
-              ),
-            ],
+          Container(
+            padding: EdgeInsets.all(AppDimen.allPadding),
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 5,
+              children: [
+                CommonImageView(imagePath: AppImages.logoImage, width: 50),
+                CustomText(
+                  text: "SOLVEXO",
+                  fontSize: AppFontSize.veryLarge,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.white,
+                ),
+              ],
+            ),
           ),
 
           SizedBox(height: 20),

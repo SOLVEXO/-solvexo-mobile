@@ -8,6 +8,7 @@ class AppPreferences {
   static const String _userNameKey = 'user_name';
   static const String _userRoleKey = 'user_role';
   static const String _userEmailKey = 'user_email';
+  static const String _intentRoleKey = 'intent_role';
   static const String _recentSearchesKey = 'recent_searches';
   static const String _recentlyViewedKey = 'recently_viewed_products';
 
@@ -121,6 +122,22 @@ class AppPreferences {
   static Future<String?> getUserRole() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userRoleKey);
+  }
+
+  // ── Intent role (selected on Welcome screen before auth) ─────────────────────
+  static Future<void> saveIntentRole(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_intentRoleKey, role);
+  }
+
+  static Future<String?> getIntentRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_intentRoleKey);
+  }
+
+  static Future<void> clearIntentRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_intentRoleKey);
   }
 
   // Clear all user data

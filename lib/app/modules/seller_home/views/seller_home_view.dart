@@ -8,6 +8,7 @@ import 'package:book_store_app/app/modules/seller/widgets/seller_app_bar.dart';
 import 'package:book_store_app/app/modules/seller_home/widgets/seller_home_shimmer.dart';
 import 'package:book_store_app/app/modules/seller_home/widgets/seller_quick_actions.dart';
 import 'package:book_store_app/app/modules/seller_home/widgets/seller_status_card.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -96,7 +97,7 @@ class SellerHomeView extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () => Get.toNamed(Routes.sellerOrders),
             child: CustomText(
               text: 'View all →',
               fontSize: 13,

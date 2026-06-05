@@ -41,8 +41,12 @@ abstract class Routes {
   static const CHAT = '/chat';
   static const WISHLIST = '/wishlist';
 
-  // Onboarding
+  // Entry
+  static const welcome = '/welcome';
+
+  // Seller setup
   static const sellerOnboarding = '/seller/onboarding';
+  static const sellerStores = '/seller/stores';
 
   // Role-based homes
   static const sellerHome = '/seller/home';
@@ -50,10 +54,22 @@ abstract class Routes {
   static const PosMainView = '/pos/mainview';
 
   // Seller sub-screens
+  static const sellerMessages = '/seller/messages';
+  static const sellerChat = '/seller/chat';
   static const sellerOrders = '/seller/orders';
+  // Seller settings sub-screens
+  static const sellerStoreProfile = '/seller/settings/store-profile';
+  static const sellerPaymentMethods = '/seller/settings/payment-methods';
+  static const sellerShipping = '/seller/settings/shipping';
+  static const sellerNotifications = '/seller/settings/notifications';
+  static const sellerPasswordSecurity = '/seller/settings/password-security';
+  static const sellerTwoFactor = '/seller/settings/two-factor';
+  static const sellerLanguage = '/seller/settings/language';
   static const sellerProducts = '/seller/products';
   static const addSellerProduct = '/seller/products/add';
+  static const editSellerProduct = '/seller/products/edit';
   static const sellerAnalytics = '/seller/analytics';
+  static const sellerAiStudio = '/seller/ai-studio';
   static const sellerSettings = '/seller/settings';
 
   // POS sub-screens

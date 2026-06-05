@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_home/controllers/seller_home_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,7 @@ class SellerMessagesSection extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () => Get.toNamed(Routes.sellerMessages),
             child: CustomText(
               text: 'View all →',
               fontSize: 13,

@@ -290,7 +290,7 @@ class AuthController extends GetxController {
       // Combine first and last name
       final fullName =
           '${registerFirstNameController.text.trim()} ${registerLastNameController.text.trim()}';
-
+      final role = await AppPreferences.getIntentRole();
       final success = await _authRepository.register(
         name: fullName,
         email: registerEmailController.text.trim().toLowerCase(),
@@ -298,6 +298,7 @@ class AuthController extends GetxController {
         phone: registerPhoneController.text.trim().isNotEmpty
             ? registerPhoneController.text.trim()
             : null,
+        role: role ?? "user",
       );
       if (success) {
         ToastUtil.showToast("OTP sent to your email");
@@ -327,9 +328,11 @@ class AuthController extends GetxController {
     isLoading.value = true;
 
     try {
+      final role = await AppPreferences.getIntentRole();
       final authResponse = await _authRepository.login(
         email: loginEmailController.text.trim().toLowerCase(),
         password: loginPasswordController.text,
+        role: role ?? "user",
       );
       debugPrint("auth response: $authResponse");
 
@@ -345,7 +348,6 @@ class AuthController extends GetxController {
           email: authResponse.user.email,
           role: authResponse.user.role,
         );
-
         ToastUtil.showToast('Login successful!');
         clearLoginForm();
         _navigateByRole(authResponse.user.role);
@@ -365,7 +367,7 @@ class AuthController extends GetxController {
     currentUser.value = null;
 
     _authRepository.logout();
-    Get.offAllNamed(Routes.authTabView);
+    Get.offAllNamed(Routes.welcome);
     ToastUtil.showToast('Logged out successfully');
   }
 
@@ -409,10 +411,8 @@ class AuthController extends GetxController {
   void _navigateByRole(String role) {
     switch (role) {
       case 'seller':
-        Get.offAllNamed(Routes.sellerHome);
-        break;
-      case 'pos':
-        Get.offAllNamed(Routes.posHome);
+        // SellerStoresController handles redirect to onboarding if no stores
+        Get.offAllNamed(Routes.sellerStores);
         break;
       default:
         Get.offAllNamed(Routes.mainHome);

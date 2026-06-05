@@ -45,10 +45,19 @@ class SplashScreenController extends GetxController
 
   void _navigate() async {
     await Future.delayed(const Duration(seconds: 3));
+    final token = await AppPreferences.getAccessTokenAsync();
+
+    // Not logged in → Welcome screen
+    if (token == null || token.isEmpty) {
+      Get.offAllNamed(Routes.welcome);
+      return;
+    }
+
+    // Logged in → navigate by saved role
     final role = await AppPreferences.getUserRole();
     switch (role) {
       case 'seller':
-        Get.offAllNamed(Routes.sellerHome);
+        Get.offAllNamed(Routes.sellerStores);
         break;
       case 'pos':
         Get.offAllNamed(Routes.posHome);
