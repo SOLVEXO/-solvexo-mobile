@@ -52,19 +52,19 @@ class UploadRepository {
         ),
       });
 
-      final response = await _client.post(
-        ApiConstants.uploadImage,
-        data: formData,
-      );
+      // final response = await _client.post(
+      //   ApiConstants.uploadImage,
+      //   data: formData,
+      // );
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        final url = response.data['data']['url'];
+      // if (response.statusCode == 200 && response.data['success'] == true) {
+      //   final url = response.data['data']['url'];
 
-        debugPrint("✅ Uploaded URL → $url");
-        return url;
-      }
+      //   debugPrint("✅ Uploaded URL → $url");
+      //   return url;
+      // }
 
-      debugPrint("❌ Upload failed: ${response.data}");
+      // debugPrint("❌ Upload failed: ${response.data}");
       return null;
     } on DioException catch (e) {
       debugPrint("❌ Upload Dio error: ${e.response?.data}");

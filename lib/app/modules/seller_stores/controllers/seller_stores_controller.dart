@@ -1,14 +1,19 @@
+import 'package:book_store_app/app/data/models/common_models/store_model.dart';
+import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:get/get.dart';
 
-// ── Model ──────────────────────────────────────────────────────────────────────
+// ── Display model (consumed by StoreCard widget) ───────────────────────────────
 
 class SellerStore {
   final String id;
   final String name;
   final String category;
   final String initials;
+  final String logo;
+  final String plan;
+  final String sellerType;
   final bool isActive;
   final int productCount;
   final double totalSales;
@@ -18,84 +23,116 @@ class SellerStore {
     required this.name,
     required this.category,
     required this.initials,
+    this.logo = '',
+    this.plan = '',
+    this.sellerType = '',
     this.isActive = true,
     this.productCount = 0,
     this.totalSales = 0,
   });
+
+  factory SellerStore.fromModel(StoreModel m) => SellerStore(
+        id:         m.id,
+        name:       m.name,
+        // Use sellerTypeLabel as subtitle until a category-name lookup is available
+        category:   m.sellerTypeLabel,
+        initials:   m.initials,
+        logo:       m.logo,
+        plan:       m.plan,
+        sellerType: m.sellerType,
+        isActive:   m.isActive,
+      );
 }
 
 // ── Controller ─────────────────────────────────────────────────────────────────
 
 class SellerStoresController extends GetxController {
+  final _repo = SellerRepository();
+
   final RxBool isLoading = true.obs;
   final RxList<SellerStore> stores = <SellerStore>[].obs;
 
-  // Profile
-  final RxString userName = 'Seller'.obs;
-  final RxString userEmail = ''.obs;
+  // Profile — populated from preferences first, enriched from API response
+  final RxString userName     = ''.obs;
+  final RxString userEmail    = ''.obs;
   final RxString userInitials = 'S'.obs;
 
-  // Computed stats
-  int get totalProducts => stores.fold(0, (sum, s) => sum + s.productCount);
-  double get totalRevenue => stores.fold(0.0, (sum, s) => sum + s.totalSales);
+  int get storeCount => stores.length;
 
   @override
   void onInit() {
     super.onInit();
-    _loadProfile();
+    _loadProfileFromPrefs();
     _loadStores();
   }
 
-  Future<void> _loadProfile() async {
-    final name = await AppPreferences.getUserName();
+  // ── Profile ───────────────────────────────────────────────────────────────
+
+  Future<void> _loadProfileFromPrefs() async {
+    final name  = await AppPreferences.getUserName();
     final email = await AppPreferences.getUserEmail();
     if (name != null && name.trim().isNotEmpty) {
       userName.value = name.trim();
-      final parts = name.trim().split(' ');
-      userInitials.value = parts.length >= 2
-          ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
-          : parts[0][0].toUpperCase();
+      _updateInitials(name.trim());
     }
     if (email != null) userEmail.value = email;
   }
 
-  Future<void> _loadStores() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(milliseconds: 700));
-
-    // TODO: Replace with real API call — GET /seller/stores
-    // final response = await storeRepository.getMyStores(token);
-    // stores.assignAll(response.map((s) => SellerStore.fromJson(s)));
-
-    // Mock: one existing store (remove this when API is connected)
-    stores.assignAll([
-      const SellerStore(
-        id: 'store_001',
-        name: 'My EduDeen Store',
-        category: 'Education & Learning',
-        initials: 'ME',
-        isActive: true,
-        productCount: 12,
-        totalSales: 842.50,
-      ),
-    ]);
-
-    isLoading.value = false;
-
-    // No stores → go directly to onboarding
-    if (stores.isEmpty) {
-      Get.offAllNamed(Routes.sellerOnboarding);
-    }
+  void _updateInitials(String name) {
+    final parts = name.trim().split(' ');
+    userInitials.value = (parts.length >= 2)
+        ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
+        : parts[0].isNotEmpty
+            ? parts[0][0].toUpperCase()
+            : 'S';
   }
 
-  Future<void> refreshStores() async => _loadStores();
+  // ── API ───────────────────────────────────────────────────────────────────
 
-  void openStore(SellerStore store) {
-    // TODO: save store ID to prefs so SellerHomeController knows which store
+  Future<void> _loadStores() async {
+    isLoading.value = true;
+
+    final models = await _repo.getMyStores();
+
+    if (models.isEmpty) {
+      isLoading.value = false;
+      Get.offAllNamed(Routes.sellerOnboarding);
+      return;
+    }
+
+    stores.assignAll(models.map(SellerStore.fromModel));
+
+    // Enrich profile display from API if prefs were empty
+    final first = models.first;
+    if (userName.value.isEmpty && first.sellerName.isNotEmpty) {
+      userName.value = first.sellerName;
+      _updateInitials(first.sellerName);
+    }
+    if (userEmail.value.isEmpty && first.sellerEmail.isNotEmpty) {
+      userEmail.value = first.sellerEmail;
+    }
+
+    // On first launch, default the active store to the first one returned
+    final savedId = await AppPreferences.getStoreId();
+    if (savedId == null || savedId.isEmpty) {
+      await AppPreferences.saveStoreId(first.id);
+      await AppPreferences.saveStoreName(first.name);
+    }
+
+    isLoading.value = false;
+  }
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+
+  Future<void> refreshStores() => _loadStores();
+
+  /// Saves the selected store ID so the rest of the seller app can use it,
+  /// then navigates to the seller home (dashboard).
+  Future<void> openStore(SellerStore store) async {
+    await AppPreferences.saveStoreId(store.id);
+    await AppPreferences.saveStoreName(store.name);
     Get.offAllNamed(Routes.sellerHome);
   }
 
-  void createNewStore() {
-    Get.toNamed(Routes.sellerOnboarding);
-  }
+  void createNewStore() => Get.toNamed(Routes.sellerOnboarding);
 }

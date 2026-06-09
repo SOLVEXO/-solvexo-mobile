@@ -22,7 +22,7 @@ class SellerSettingsView extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          const SellerAppBar(title: 'Settings', subtitle: 'My Shop'),
+          SellerAppBar(title: 'Settings'),
           const Divider(height: 1, color: AppColors.lightGrey2),
           Expanded(
             child: Obx(() {

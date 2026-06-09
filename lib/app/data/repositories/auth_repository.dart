@@ -41,11 +41,12 @@ class AuthRepository {
   Future<AuthResponseModel?> verifyEmailOtp({
     required String email,
     required String otp,
+    String role = 'user',
   }) async {
     try {
       final response = await _baseClient.post(
         ApiConstants.verifyOtp,
-        data: {"email": email, "otp": otp, 'role': 'user'},
+        data: {"email": email, "otp": otp, 'role': role},
       );
 
       if (response.data['success'] == true) {
@@ -55,10 +56,17 @@ class AuthRepository {
           accessToken: auth.token.accessToken,
           refreshToken: auth.token.refreshToken,
         );
+        await AppPreferences.saveUserData(
+          userId: auth.user.id,
+          name: auth.user.name,
+          email: auth.user.email,
+          role: auth.user.role,
+        );
 
         return auth;
       }
 
+      ToastUtil.showToast(response.data['message'] ?? 'Invalid OTP');
       return null;
     } catch (e) {
       debugPrint("Verify OTP error: $e");
@@ -66,11 +74,11 @@ class AuthRepository {
     }
   }
 
-  Future<bool> resendVerificationOtp(String email) async {
+  Future<bool> resendVerificationOtp(String email, {String role = 'user'}) async {
     try {
       final res = await _baseClient.post(
         ApiConstants.resendOtp,
-        data: {"email": email, 'role': 'user'},
+        data: {"email": email, 'role': role},
       );
 
       if (res.data['success'] == true) {
@@ -85,11 +93,11 @@ class AuthRepository {
     }
   }
 
-  Future<bool> forgotPassword(String email) async {
+  Future<bool> forgotPassword(String email, {String role = 'user'}) async {
     try {
       final res = await _baseClient.post(
         ApiConstants.forgotPassword,
-        data: {"email": email, 'role': 'user'},
+        data: {"email": email, 'role': role},
         requiresAuth: false,
       );
 
@@ -103,6 +111,7 @@ class AuthRepository {
     required String email,
     required String otp,
     required String newPassword,
+    String role = 'user',
   }) async {
     try {
       final res = await _baseClient.post(
@@ -111,7 +120,7 @@ class AuthRepository {
           "email": email,
           "otp": otp,
           "newPassword": newPassword,
-          'role': 'user',
+          'role': role,
         },
         requiresAuth: false,
       );

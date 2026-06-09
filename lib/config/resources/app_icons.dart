@@ -78,6 +78,7 @@ class AppIcons {
   static const String downloadIcon = '${_baseIconsPath}download.svg';
   // static const String addIcon = '${_baseIconsPath}addicon.svg';
   static const String notificationIcon = '${_baseIconsPath}notification.png';
-  static const String messageIcon = '${_baseIconsPath}message.png';
+  static const String messageIcon = '${_baseIconsPath}message.svg';
+  static const String messageSendIcon = '${_baseIconsPath}send-message.svg';
   static const String searchIcon = '${_baseIconsPath}search.svg';
 }

@@ -24,7 +24,7 @@ class SellerHomeView extends StatelessWidget {
       backgroundColor: AppColors.white,
       body: Column(
         children: [
-          const SellerAppBar(),
+          SellerAppBar(),
           Expanded(
             child: CustomRefreshWrapper(
               onRefresh: () => controller.refreshData(),

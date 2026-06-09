@@ -24,7 +24,7 @@ class SellerAnalyticsView extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          const SellerAppBar(title: 'Analytics', subtitle: 'My Shop'),
+          SellerAppBar(title: 'Analytics'),
           AnalyticsPeriodFilter(controller: controller),
           const Divider(height: 1, color: AppColors.lightGrey2),
           Expanded(

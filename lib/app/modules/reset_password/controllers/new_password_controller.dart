@@ -1,3 +1,4 @@
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
@@ -8,8 +9,7 @@ class ResetPasswordController extends GetxController {
   final AuthRepository _authRepository = AuthRepository();
 
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   RxBool isLoading = false.obs;
   RxBool showPassword = false.obs;
@@ -21,7 +21,6 @@ class ResetPasswordController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // coming from OTP screen
     email = Get.arguments["email"];
     otp = Get.arguments["otp"];
   }
@@ -45,19 +44,13 @@ class ResetPasswordController extends GetxController {
     return null;
   }
 
-  void togglePassword() {
-    showPassword.value = !showPassword.value;
-  }
-
-  void toggleConfirmPassword() {
-    showConfirmPassword.value = !showConfirmPassword.value;
-  }
+  void togglePassword() => showPassword.value = !showPassword.value;
+  void toggleConfirmPassword() => showConfirmPassword.value = !showConfirmPassword.value;
 
   // ================= RESET PASSWORD =================
 
   Future<void> resetPassword() async {
-    if (passwordController.text.isEmpty ||
-        confirmPasswordController.text.isEmpty) {
+    if (passwordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
       ToastUtil.showToast("Please fill all fields");
       return;
     }
@@ -67,24 +60,30 @@ class ResetPasswordController extends GetxController {
       return;
     }
 
+    if (passwordController.text.length < 6) {
+      ToastUtil.showToast("Password must be at least 6 characters");
+      return;
+    }
+
     isLoading.value = true;
 
-    await _authRepository.resetPassword(
+    final intentRole = await AppPreferences.getIntentRole();
+    final success = await _authRepository.resetPassword(
       email: email,
       otp: otp,
       newPassword: passwordController.text,
+      role: intentRole ?? 'user',
     );
 
     isLoading.value = false;
-    ToastUtil.showToast("Password reset successful");
 
-    // back to login
+    if (!success) {
+      ToastUtil.showToast("Failed to reset password. OTP may have expired.");
+      return;
+    }
+
+    ToastUtil.showToast("Password reset successfully. Please log in.");
     Get.offAllNamed(Routes.authTabView);
-    // if (success) {
-
-    // } else {
-    //   ToastUtil.showToast("Failed to reset password");
-    // }
   }
 
   @override

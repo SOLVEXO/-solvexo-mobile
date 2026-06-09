@@ -26,12 +26,9 @@ class StoresStatsStrip extends StatelessWidget {
             children: [
               _StatCell(value: '${controller.stores.length}', label: 'Stores'),
               _VertLine(),
-              _StatCell(value: '${controller.totalProducts}', label: 'Products'),
+              _StatCell(value: '10', label: 'Products'),
               _VertLine(),
-              _StatCell(
-                value: '\$${controller.totalRevenue.toStringAsFixed(0)}',
-                label: 'Revenue',
-              ),
+              _StatCell(value: '\$222', label: 'Revenue'),
             ],
           ),
         ),

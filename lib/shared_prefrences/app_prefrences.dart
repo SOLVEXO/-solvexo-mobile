@@ -11,6 +11,8 @@ class AppPreferences {
   static const String _intentRoleKey = 'intent_role';
   static const String _recentSearchesKey = 'recent_searches';
   static const String _recentlyViewedKey = 'recently_viewed_products';
+  static const String _storeIdKey   = 'store_id';
+  static const String _storeNameKey = 'store_name';
 
   // Save access token
   static Future<void> setAccessToken(
@@ -158,6 +160,38 @@ class AppPreferences {
   static Future<bool> isLoggedIn() async {
     final token = await getAccessTokenAsync();
     return token != null && token.isNotEmpty;
+  }
+
+  // ── Store ID ──────────────────────────────────────────────────────────────────
+  static Future<void> saveStoreId(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_storeIdKey, id);
+  }
+
+  static Future<String?> getStoreId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_storeIdKey);
+  }
+
+  static Future<void> clearStoreId() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_storeIdKey);
+  }
+
+  // ── Store Name ────────────────────────────────────────────────────────────────
+  static Future<void> saveStoreName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_storeNameKey, name);
+  }
+
+  static Future<String?> getStoreName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_storeNameKey);
+  }
+
+  static Future<void> clearStoreName() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_storeNameKey);
   }
 
   // Recent Searches

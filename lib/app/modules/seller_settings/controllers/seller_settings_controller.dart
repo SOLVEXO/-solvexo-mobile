@@ -1,6 +1,9 @@
+import 'package:book_store_app/app/data/models/common_models/user_model.dart';
+import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -28,6 +31,7 @@ class SettingsSection {
 }
 
 class SellerSettingsController extends GetxController {
+  final _repo = SellerRepository();
   final RxBool isLoading = false.obs;
 
   // ── Profile ─────────────────────────────────────────────────────────────────
@@ -84,7 +88,7 @@ class SellerSettingsController extends GetxController {
           onTap: () => Get.toNamed(Routes.sellerNotifications),
         ),
         SettingsTile(
-          emoji: AppIcons.emailIcon,
+          emoji: AppIcons.messageIcon,
           title: 'Customer Messages',
           trailing: customerMessagesNotif.value ? 'On' : 'Off',
           onTap: () => Get.toNamed(Routes.sellerNotifications),
@@ -145,20 +149,42 @@ class SellerSettingsController extends GetxController {
 
   Future<void> _loadProfile() async {
     isLoading.value = true;
-    await Future.delayed(const Duration(milliseconds: 500));
-    // Sync with ProfileController if available
+
+    // ── User profile (reactive) ───────────────────────────────────────────
     try {
       final profileCtrl = Get.find<ProfileController>();
-      final user = profileCtrl.user.value;
-      if (user != null) {
-        if (user.name.isNotEmpty) name.value = user.name;
-        if (user.email.isNotEmpty) email.value = user.email;
-      }
+      _applyUser(profileCtrl.user.value);
+      // Keep syncing if data hasn't arrived yet
+      ever(profileCtrl.user, (UserModel? u) { if (u != null) _applyUser(u); });
     } catch (_) {}
+
+    // ── Store data (awaited — ensures sections rebuild with correct name) ──
+    await _loadStoreData();
+
     isLoading.value = false;
   }
 
-  Future<void> refreshData() async => _loadProfile();
+  Future<void> _loadStoreData() async {
+    final storeId = await AppPreferences.getStoreId();
+    if (storeId == null || storeId.isEmpty) return;
+    final store = await _repo.getStoreById(storeId);
+    if (store != null) storeName.value = store.name;
+  }
+
+  void _applyUser(UserModel? user) {
+    if (user == null) return;
+    if (user.name.isNotEmpty) name.value = user.name;
+    if (user.email.isNotEmpty) email.value = user.email;
+  }
+
+  Future<void> refreshData() async {
+    isLoading.value = true;
+    try {
+      _applyUser(Get.find<ProfileController>().user.value);
+    } catch (_) {}
+    await _loadStoreData();
+    isLoading.value = false;
+  }
 
   String get initials {
     final parts = name.value.trim().split(' ');

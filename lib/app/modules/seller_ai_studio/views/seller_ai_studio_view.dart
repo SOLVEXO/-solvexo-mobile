@@ -1,7 +1,6 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/seller/widgets/seller_app_bar.dart';
 import 'package:book_store_app/app/modules/seller_ai_studio/controllers/seller_ai_studio_controller.dart';
 import 'package:book_store_app/app/modules/seller_ai_studio/widgets/ai_credits_banner.dart';
 import 'package:book_store_app/app/modules/seller_ai_studio/widgets/ai_output_panel.dart';

@@ -1,156 +1,88 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/pos_home/controllers/pos_home_controller.dart';
+import 'package:book_store_app/app/modules/pos_home/widgets/pos_cart_bar.dart';
+import 'package:book_store_app/app/modules/pos_home/widgets/pos_category_row.dart';
+import 'package:book_store_app/app/modules/pos_home/widgets/pos_product_card.dart';
+import 'package:book_store_app/app/modules/pos_home/widgets/pos_search_bar.dart';
 import 'package:book_store_app/app/modules/pos/widgets/pos_app_bar.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class PosHomeView extends StatelessWidget {
-  final controller = Get.put(PosHomeController());
+  final c = Get.put(PosHomeController());
 
   PosHomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bottomPad = MediaQuery.of(context).padding.bottom;
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      body: Stack(children: [
+        Column(children: [
           const PosAppBar(),
-          _buildSearchBar(),
+          PosSearchBar(c: c),
           const Divider(height: 1, color: AppColors.lightGrey2),
-          const SizedBox(height: 12),
-          _buildCategoryChips(),
-          const SizedBox(height: 12),
-          Expanded(child: _buildProductGrid()),
-        ],
-      ),
+          PosCategoryRow(c: c),
+          const Divider(height: 1, color: AppColors.lightGrey2),
+          Expanded(child: _ProductGrid(c: c)),
+        ]),
+
+        Obx(() => AnimatedPositioned(
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
+          bottom: c.hasItems ? (bottomPad + 12) : -(100 + bottomPad),
+          left: 16,
+          right: 16,
+          child: PosCartBar(c: c),
+        )),
+      ]),
     );
   }
+}
 
-  Widget _buildSearchBar() {
-    return Container(
-      color: AppColors.white,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimen.allPadding,
-        vertical: 10,
-      ),
-      child: CustomTextField(
-        controller: controller.searchController,
-        onChanged: controller.onSearchChanged,
-        hintText: 'Search or scan barcode...',
-        fillColor: AppColors.textfldFillColor,
-        isborder: true,
+class _ProductGrid extends StatelessWidget {
+  final PosHomeController c;
+  const _ProductGrid({required this.c});
 
-        // isborder: true,
-      ),
-    );
-  }
-
-  Widget _buildCategoryChips() {
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: controller.categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (_, i) {
-          return Obx(() {
-            final cat = controller.categories[i];
-            final isSelected = controller.selectedCategory.value == cat;
-            return GestureDetector(
-              onTap: () => controller.selectCategory(cat),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryColor : AppColors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: CustomText(
-                  text: cat,
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected ? AppColors.white : AppColors.iosGrey,
-                ),
-              ),
-            );
-          });
-        },
-      ),
-    );
-  }
-
-  Widget _buildProductGrid() {
+  @override
+  Widget build(BuildContext context) {
+    final bottomPad = MediaQuery.of(context).padding.bottom;
     return Obx(() {
-      final products = controller.filteredProducts;
+      final products = c.filteredProducts;
       if (products.isEmpty) {
-        return const Center(
-          child: CustomText(
-            text: 'No products found',
-            fontSize: 15,
-            color: AppColors.iosGrey,
-          ),
+        return Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.search_off_rounded, size: 52, color: AppColors.lightGrey2),
+            const SizedBox(height: 12),
+            const CustomText(
+              text: 'No products found',
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.w500,
+              color: AppColors.iosGrey,
+            ),
+            const SizedBox(height: 4),
+            const CustomText(
+              text: 'Try a different search or category',
+              fontSize: AppFontSize.tiny,
+              color: AppColors.lightGrey,
+            ),
+          ]),
         );
       }
       return GridView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: EdgeInsets.fromLTRB(12, 12, 12, c.hasItems ? (bottomPad + 88) : 12),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          childAspectRatio: 0.82,
+          childAspectRatio: 0.72,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
         ),
         itemCount: products.length,
-        itemBuilder: (_, i) => _productCard(products[i]),
+        itemBuilder: (_, i) => PosProductCard(c: c, product: products[i]),
       );
     });
-  }
-
-  Widget _productCard(PosProduct product) {
-    return GestureDetector(
-      onTap: product.inStock ? () {} : null,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(product.emoji, style: const TextStyle(fontSize: 32)),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: CustomText(
-                text: product.name,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: product.inStock ? AppColors.black : AppColors.red,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: 6),
-            CustomText(
-              text: '\$${product.price.toStringAsFixed(0)}',
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: product.inStock
-                  ? AppColors.primaryColor
-                  : AppColors.inactiveGrey,
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

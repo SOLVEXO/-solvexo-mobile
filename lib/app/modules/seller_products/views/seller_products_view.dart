@@ -39,7 +39,7 @@ class SellerProductsView extends StatelessWidget {
       ),
       body: Column(
         children: [
-          const SellerAppBar(title: 'Products', subtitle: 'My Shop'),
+          SellerAppBar(title: 'Products'),
           ProductsSearchBar(),
           ProductFilterBar(controller: controller),
           Expanded(

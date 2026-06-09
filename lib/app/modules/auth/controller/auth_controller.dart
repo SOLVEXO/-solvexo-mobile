@@ -44,15 +44,14 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
-    // Dispose controllers
-    // loginEmailController.dispose();
-    // loginPasswordController.dispose();
-    // registerEmailController.dispose();
-    // registerFirstNameController.dispose();
-    // registerLastNameController.dispose();
-    // registerPhoneController.dispose();
-    // registerPasswordController.dispose();
-    // registerConfirmPasswordController.dispose();
+    loginEmailController.dispose();
+    loginPasswordController.dispose();
+    registerEmailController.dispose();
+    registerFirstNameController.dispose();
+    registerLastNameController.dispose();
+    registerPhoneController.dispose();
+    registerPasswordController.dispose();
+    registerConfirmPasswordController.dispose();
     super.onClose();
   }
 
@@ -60,24 +59,14 @@ class AuthController extends GetxController {
   Future<void> checkAuthStatus() async {
     try {
       final token = await AppPreferences.getAccessTokenAsync();
-
-      if (token == null || token.isEmpty) {
-        return;
-      }
+      if (token == null || token.isEmpty) return;
 
       final user = await _authRepository.getMe(token: token);
-
       if (user != null) {
         currentUser.value = user;
-      } else {
-        // _authRepository.logout();
-        ToastUtil.showToast("User not found please Login your Account");
       }
     } catch (e) {
-      debugPrint('GetMe parsing/network error: $e');
-      // _authRepository.logout();
-      ToastUtil.showToast("User not found please Login your Account");
-      return;
+      debugPrint('Auth status check error: $e');
     }
   }
 
@@ -392,14 +381,10 @@ class AuthController extends GetxController {
 
   /// Get user profile
   Future<void> getUserProfile() async {
-    final token = AppPreferences.getAccessTokenAsync();
+    final token = await AppPreferences.getAccessTokenAsync();
+    if (token == null || token.isEmpty) return;
 
-    if (token.isNull) {
-      return;
-    }
-
-    final user = await _authRepository.getUserProfile(token: token.toString());
-
+    final user = await _authRepository.getUserProfile(token: token);
     if (user != null) {
       currentUser.value = user;
     }

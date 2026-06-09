@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
+import 'package:book_store_app/app/modules/seller/controllers/seller_bottom_nav_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -9,14 +10,11 @@ import 'package:get/get.dart';
 
 class SellerAppBar extends StatelessWidget {
   final String title;
-  final String subtitle;
 
-  const SellerAppBar({
-    super.key,
-    this.title = 'Dashboard',
-    this.subtitle = 'My Shop',
-  });
-
+  SellerAppBar({super.key, this.title = 'Dashboard'});
+  final SellerBottomNavController controller = Get.put(
+    SellerBottomNavController(),
+  );
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,24 +28,28 @@ class SellerAppBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CustomText(
-                  text: subtitle,
-                  fontSize: AppFontSize.small2,
-                  color: AppColors.background,
-                  fontWeight: FontWeight.w400,
-                ),
-                const SizedBox(height: 2),
-                CustomText(
-                  text: title,
-                  fontSize: AppFontSize.large,
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ],
+            child: Obx(
+              () => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (controller.storeName.value.isNotEmpty) ...[
+                    CustomText(
+                      text: controller.storeName.value,
+                      fontSize: AppFontSize.small2,
+                      color: AppColors.background,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    const SizedBox(height: 2),
+                  ],
+                  CustomText(
+                    text: title,
+                    fontSize: AppFontSize.large,
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ],
+              ),
             ),
           ),
           Container(

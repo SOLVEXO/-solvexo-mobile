@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 abstract class BaseController extends GetxController {
@@ -39,7 +40,7 @@ abstract class BaseController extends GetxController {
 
   Future<bool> isUserLogin() async {
     userId = await AppPreferences.getUserId();
-    print("user id check: $userId");
+    debugPrint("user id check: $userId");
     if (userId!.isNotEmpty) {
       loginUser.value = true;
     }

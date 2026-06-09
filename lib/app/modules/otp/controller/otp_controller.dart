@@ -29,10 +29,8 @@ class OtpController extends GetxController
     super.onInit();
 
     textControllers = List.generate(otpLength, (_) => TextEditingController());
-
     focusNodes = List.generate(otpLength, (_) => FocusNode());
 
-    // 🔥 Shake animation for errors
     shakeController = AnimationController(
       vsync: this,
       duration: 300.milliseconds,
@@ -68,7 +66,6 @@ class OtpController extends GetxController
     focusNodes.first.requestFocus();
   }
 
-  // 🔥 Paste full OTP support
   void handlePaste(String value) {
     if (value.length != otpLength) return;
 
@@ -96,7 +93,6 @@ class OtpController extends GetxController
       focusNodes[index + 1].requestFocus();
     }
 
-    // Auto verify
     if (index == otpLength - 1 && otpCode.length == otpLength) {
       submitOtp();
     }
@@ -106,18 +102,29 @@ class OtpController extends GetxController
 
   Future<void> submitOtp() async {
     if (otpCode.length != otpLength) {
-      ToastUtil.showToast("Invalid OTP");
+      ToastUtil.showToast("Please enter all 6 digits");
       return;
     }
 
     isLoading.value = true;
 
     if (otpType == "verify_email") {
-      await _authRepository.verifyEmailOtp(email: email, otp: otpCode);
+      final intentRole = await AppPreferences.getIntentRole();
+
+      final auth = await _authRepository.verifyEmailOtp(
+        email: email,
+        otp: otpCode,
+        role: intentRole ?? 'user',
+      );
+
       isLoading.value = false;
 
-      // Route based on the role the user chose on the Welcome screen
-      final intentRole = await AppPreferences.getIntentRole();
+      if (auth == null) {
+        clearOtp();
+        triggerError();
+        return;
+      }
+
       await AppPreferences.clearIntentRole();
 
       if (intentRole == 'seller') {
@@ -125,18 +132,13 @@ class OtpController extends GetxController
       } else {
         Get.offAllNamed(Routes.mainHome);
       }
-      // if (auth != null) {
-
-      // } else {
-      //   ToastUtil.showToast("Invalid OTP");
-      // }
     } else if (otpType == "password_reset") {
+      // OTP is verified at the reset-password step by the backend
+      isLoading.value = false;
       Get.toNamed(
         Routes.newPasswordView,
         arguments: {"email": email, "otp": otpCode},
       );
-
-      isLoading.value = false;
     }
   }
 
@@ -145,7 +147,11 @@ class OtpController extends GetxController
   Future<void> resendCode() async {
     if (!resendAvailable.value) return;
 
-    final ok = await _authRepository.resendVerificationOtp(email);
+    final intentRole = await AppPreferences.getIntentRole();
+    final ok = await _authRepository.resendVerificationOtp(
+      email,
+      role: intentRole ?? 'user',
+    );
 
     if (ok) {
       ToastUtil.showToast("OTP sent again");

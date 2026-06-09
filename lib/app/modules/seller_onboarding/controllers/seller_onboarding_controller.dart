@@ -1,5 +1,11 @@
+import 'dart:io';
+
+import 'package:book_store_app/app/components/app_image_picker.dart';
+import 'package:book_store_app/app/data/models/common_models/store_model.dart';
+import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -147,17 +153,49 @@ const kStoreCategories = [
   'Services & Consulting', 'Others',
 ];
 
+// ── API value helpers ─────────────────────────────────────────────────────────
+
+extension SellerTypeApi on SellerTypeOption {
+  String get apiValue {
+    switch (this) {
+      case SellerTypeOption.creator:       return 'creator';
+      case SellerTypeOption.educator:      return 'educator';
+      case SellerTypeOption.retailer:      return 'retailer';
+      case SellerTypeOption.brandBusiness: return 'brand_business';
+      case SellerTypeOption.freelancer:    return 'freelancer';
+      case SellerTypeOption.mixOfAbove:    return 'mix_of_above';
+    }
+  }
+}
+
+extension WhatYouSellApi on WhatYouSellOption {
+  String get apiValue {
+    switch (this) {
+      case WhatYouSellOption.physicalProducts:      return 'physical_products';
+      case WhatYouSellOption.digitalDownloads:      return 'digital_downloads';
+      case WhatYouSellOption.educationalResources:  return 'educational_resources';
+      case WhatYouSellOption.servicesBookings:      return 'services_bookings';
+      case WhatYouSellOption.subscriptions:         return 'subscriptions';
+      case WhatYouSellOption.inPersonPos:           return 'in_person_pos';
+    }
+  }
+}
+
 // ── Controller ─────────────────────────────────────────────────────────────────
 
 class SellerOnboardingController extends GetxController {
   // Starts at storeInfo — account creation is handled by AuthController
   final Rx<OnboardingStep> step = OnboardingStep.storeInfo.obs;
   final RxBool isSaving = false.obs;
+  Rx<StoreModel?> createdStore = Rx(null);
+
+  final _sellerRepo = SellerRepository();
 
   // Step 1 — Store Info
-  final RxString storeName = ''.obs;
-  final RxString storeCategory = ''.obs;
-  final RxString storeDescription = ''.obs;
+  final RxString    storeName        = ''.obs;
+  final RxString    storeCategory    = ''.obs;
+  final RxString    storeDescription = ''.obs;
+  final Rx<File?>   logoFile         = Rx<File?>(null);
 
   // Step 2 — Seller Type (single-select)
   final Rx<SellerTypeOption?> sellerType = Rx(null);
@@ -254,6 +292,15 @@ class SellerOnboardingController extends GetxController {
     }
   }
 
+  void pickLogo() {
+    AppImagePicker.show(
+      title: 'Store Logo',
+      canRemove: logoFile.value != null,
+      onPicked: (file) => logoFile.value = file,
+      onRemove: () => logoFile.value = null,
+    );
+  }
+
   void pickCategory() {
     Get.bottomSheet(
       _PickerSheet(
@@ -269,9 +316,25 @@ class SellerOnboardingController extends GetxController {
   Future<void> complete() async {
     if (isSaving.value) return;
     isSaving.value = true;
-    await Future.delayed(const Duration(milliseconds: 800));
+
+    final store = await _sellerRepo.createStore(
+      name:         storeName.value.trim(),
+      sellerType:   sellerType.value?.apiValue ?? 'creator',
+      productTypes: whatYouSell.map((o) => o.apiValue).toList(),
+      description:  storeDescription.value.trim(),
+      categoryId:   storeCategory.value.trim(),
+      logoFile:     logoFile.value,
+    );
+
     isSaving.value = false;
-    Get.offAllNamed(Routes.sellerHome);
+
+    if (store != null) {
+      createdStore.value = store;
+      await AppPreferences.saveStoreId(store.id);
+      await AppPreferences.saveStoreName(store.name);
+      Get.offAllNamed(Routes.sellerHome);
+    }
+    // On failure, _sellerRepo already shows a toast — stay on screen.
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────

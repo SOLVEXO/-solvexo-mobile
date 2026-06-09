@@ -21,7 +21,7 @@ class SellerOrdersView extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          const SellerAppBar(title: 'Orders', subtitle: 'My Shop'),
+          SellerAppBar(title: 'Orders'),
           OrderFilterBar(controller: controller),
           const Divider(height: 1, color: AppColors.lightGrey2),
           Expanded(

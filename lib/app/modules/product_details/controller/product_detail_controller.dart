@@ -212,5 +212,6 @@ class ProductDetailController extends GetxController {
   }
 
   /// Refresh
+  @override
   Future<void> refresh() => fetchProductDetails();
 }

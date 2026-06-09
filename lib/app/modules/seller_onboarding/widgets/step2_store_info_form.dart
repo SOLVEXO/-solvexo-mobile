@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/controllers/seller_onboarding_controller.dart';
@@ -51,7 +52,7 @@ class Step2StoreInfoForm extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _LogoUpload(),
+                _LogoUpload(controller: controller),
                 const SizedBox(height: 20),
                 _FieldLabel(label: 'Store Name', required: true),
                 const SizedBox(height: 6),
@@ -86,6 +87,9 @@ class Step2StoreInfoForm extends StatelessWidget {
 }
 
 class _LogoUpload extends StatelessWidget {
+  final SellerOnboardingController controller;
+  const _LogoUpload({required this.controller});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -94,10 +98,11 @@ class _LogoUpload extends StatelessWidget {
         color: AppColors.background,
         borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
       ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () {},
+      child: Row(children: [
+        Obx(() {
+          final hasFile = controller.logoFile.value != null;
+          return GestureDetector(
+            onTap: controller.pickLogo,
             child: Container(
               width: 70,
               height: 70,
@@ -109,53 +114,60 @@ class _LogoUpload extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.camera_alt_outlined,
-                size: 28,
-                color: AppColors.primaryColor,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CustomText(
-                  text: 'Upload your store logo',
-                  fontSize: AppFontSize.verySmall,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
-                const SizedBox(height: 4),
-                const CustomText(
-                  text: 'PNG or JPG, min 200×200px.\nHelps buyers recognise your brand.',
-                  fontSize: AppFontSize.tiny,
-                  color: AppColors.grey,
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const CustomText(
-                      text: 'Choose File',
-                      fontSize: AppFontSize.tiny,
-                      fontWeight: FontWeight.w600,
+              clipBehavior: Clip.antiAlias,
+              child: hasFile
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+                      child: CommonImageView(
+                        file: controller.logoFile.value,
+                        fit: BoxFit.cover,
+                        width: 70,
+                        height: 70,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 28,
                       color: AppColors.primaryColor,
                     ),
-                  ),
-                ),
-              ],
             ),
-          ),
-        ],
-      ),
+          );
+        }),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const CustomText(
+              text: 'Upload your store logo',
+              fontSize: AppFontSize.verySmall,
+              fontWeight: FontWeight.w600,
+              color: AppColors.black,
+            ),
+            const SizedBox(height: 4),
+            const CustomText(
+              text: 'PNG or JPG, min 200×200px.\nHelps buyers recognise your brand.',
+              fontSize: AppFontSize.tiny,
+              color: AppColors.grey,
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: controller.pickLogo,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Obx(() => CustomText(
+                  text: controller.logoFile.value != null ? 'Change Photo' : 'Choose File',
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryColor,
+                )),
+              ),
+            ),
+          ]),
+        ),
+      ]),
     );
   }
 }

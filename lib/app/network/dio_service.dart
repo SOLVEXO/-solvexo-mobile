@@ -10,9 +10,11 @@ class DioService {
     dio.options.connectTimeout = const Duration(seconds: 30);
     dio.options.receiveTimeout = const Duration(seconds: 30);
 
+    // ✅ DO NOT set Content-Type here — Dio sets it automatically based on
+    // the request body type (FormData → multipart/form-data, Map → application/json).
+    // Hardcoding it here breaks multipart file uploads.
     dio.options.headers = {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
       'Platform': Util.deviceType(),
       if (headers != null) ...headers,
     };
@@ -20,20 +22,19 @@ class DioService {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          /// ✅ Check if request requires auth
           final requiresAuth = options.extra['requiresAuth'] ?? false;
 
           if (requiresAuth) {
             final token = await AppPreferences.getAccessTokenAsync();
-
             if (token != null && token.isNotEmpty) {
               options.headers['Authorization'] = 'Bearer $token';
             }
           }
 
+          // ✅ Let Dio manage Content-Type — only log, never override here.
           debugPrint("➡️ ${options.method} ${options.path}");
-          debugPrint("Headers: ${options.headers}");
-          debugPrint("Auth Required: $requiresAuth");
+          debugPrint("   Content-Type: ${options.headers['Content-Type']}");
+          debugPrint("   Auth Required: $requiresAuth");
 
           handler.next(options);
         },

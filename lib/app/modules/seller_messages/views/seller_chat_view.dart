@@ -1,9 +1,12 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/seller_messages/controllers/seller_chat_controller.dart';
 import 'package:book_store_app/app/modules/seller_messages/widgets/chat_bubble.dart';
 import 'package:book_store_app/app/modules/seller_messages/widgets/chat_input_bar.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -42,19 +45,20 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     final conv = controller.conversation;
     return AppBar(
       backgroundColor: AppColors.primaryColor,
-      elevation: 0,
-      leading: GestureDetector(
-        onTap: Get.back,
-        child: const Icon(Icons.arrow_back_ios_new_rounded,
-            color: AppColors.white, size: 20),
+      // elevation: 0,
+      leading: Container(
+        padding: EdgeInsets.all(AppDimen.allPadding),
+        child: SvgIcon(
+          assetName: AppIcons.chevronLeft,
+          onTap: () => Get.back(),
+          color: AppColors.white,
+          size: 18,
+        ),
       ),
       titleSpacing: 0,
       title: Row(
         children: [
-          _HeaderAvatar(
-            initials: conv.buyerInitials,
-            isOnline: conv.isOnline,
-          ),
+          _HeaderAvatar(initials: conv.buyerInitials, isOnline: conv.isOnline),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,19 +78,6 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.videocam_outlined,
-              color: AppColors.white, size: 22),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.call_outlined,
-              color: AppColors.white, size: 20),
-          onPressed: () {},
-        ),
-        const SizedBox(width: 4),
-      ],
     );
   }
 }
@@ -106,7 +97,10 @@ class _HeaderAvatar extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.white.withOpacity(0.25),
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.white.withOpacity(0.5), width: 1.5),
+            border: Border.all(
+              color: AppColors.white.withOpacity(0.5),
+              width: 1.5,
+            ),
           ),
           alignment: Alignment.center,
           child: CustomText(
@@ -163,9 +157,9 @@ class _MessageList extends StatelessWidget {
           // reverse: true — index 0 = newest message (bottom)
           final msg = msgs[msgs.length - 1 - i];
           final isFirst = i == msgs.length - 1; // oldest message
-          final showDate = isFirst ||
-              msgs[msgs.length - i - 1].date !=
-                  msgs[msgs.length - i - 2].date;
+          final showDate =
+              isFirst ||
+              msgs[msgs.length - i - 1].date != msgs[msgs.length - i - 2].date;
 
           return Column(
             children: [

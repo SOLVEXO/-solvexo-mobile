@@ -1,7 +1,12 @@
+import 'package:book_store_app/app/data/repositories/auth_repository.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SellerPasswordSecurityController extends GetxController {
+  final _authRepository = AuthRepository();
+
   final RxBool isSaving = false.obs;
   final RxBool currentVisible = false.obs;
   final RxBool newVisible = false.obs;
@@ -45,12 +50,26 @@ class SellerPasswordSecurityController extends GetxController {
   Future<void> save() async {
     if (!canSave || isSaving.value) return;
     isSaving.value = true;
-    await Future.delayed(const Duration(milliseconds: 900));
+
+    final token = await AppPreferences.getAccessTokenAsync() ?? '';
+
+    final success = await _authRepository.changePassword(
+      token: token,
+      currentPassword: currentCtrl.text,
+      newPassword: newCtrl.text,
+    );
+
     isSaving.value = false;
+
+    if (!success) {
+      ToastUtil.showToast('Incorrect current password. Please try again.');
+      return;
+    }
+
     currentCtrl.clear(); newCtrl.clear(); confirmCtrl.clear();
     currentPwd.value = ''; newPwd.value = ''; confirmPwd.value = '';
     Get.back();
-    Get.snackbar('', 'Password changed successfully!', snackPosition: SnackPosition.BOTTOM, margin: const EdgeInsets.all(16), borderRadius: 12);
+    ToastUtil.showToast('Password changed successfully!');
   }
 
   @override
@@ -63,7 +82,9 @@ class SellerPasswordSecurityController extends GetxController {
 
   @override
   void onClose() {
-    currentCtrl.dispose(); newCtrl.dispose(); confirmCtrl.dispose();
+    currentCtrl.dispose();
+    newCtrl.dispose();
+    confirmCtrl.dispose();
     super.onClose();
   }
 }

@@ -4,6 +4,7 @@ import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
+import 'package:book_store_app/app/modules/settings/controllers/settings_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -15,38 +16,89 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileController extends GetxController {
-  final List<Map<String, dynamic>> options = [
-    {
-      "title": "My Order",
-      "subtitle": "Check the Order status and history",
-      "icon": AppIcons.billsIcon,
-      "ontap": Routes.myOrdersView,
-    },
-    {
-      "title": "Payment",
-      "subtitle": "Change Payment Option",
-      "icon": AppIcons.duePayment,
-      "ontap": Routes.paymentView,
-    },
-    {
-      "title": "Address",
-      "subtitle": "Delete, Update and add your address",
-      "icon": AppIcons.locationIcon,
-      "ontap": Routes.addressView,
-    },
-    {
-      "title": "Help Center",
-      "subtitle": "Have a problem? you can contact us",
-      "icon": AppIcons.phoneIcon,
-      "ontap": Routes.helpCenterView,
-    },
-    {
-      "title": "Logout",
-      "subtitle": "You can login Again",
-      "icon": AppIcons.logoutIcon,
-      "ontap": Routes.authTabView,
-    },
+  // ── Sections for merged profile/settings UI ──────────────────────────────
+  List<SettingsSection> get sections => [
+    SettingsSection(
+      header: 'MY ORDERS',
+      tiles: [
+        SettingsTile(
+          icon: AppIcons.billsIcon,
+          title: 'My Orders',
+          onTap: () => Get.toNamed(Routes.myOrdersView),
+        ),
+        SettingsTile(
+          icon: AppIcons.duePayment,
+          title: 'Payment Methods',
+          onTap: () => Get.toNamed(Routes.paymentView),
+        ),
+      ],
+    ),
+    SettingsSection(
+      header: 'ACCOUNT',
+      tiles: [
+        SettingsTile(
+          icon: AppIcons.editIcon,
+          title: 'Edit Profile',
+          onTap: () => Get.toNamed(Routes.editProfileView),
+        ),
+        SettingsTile(
+          icon: AppIcons.locationIcon,
+          title: 'My Addresses',
+          onTap: () => Get.toNamed(Routes.addressView),
+        ),
+        SettingsTile(
+          icon: AppIcons.changePassword,
+          title: 'Change Password',
+          onTap: () => Get.toNamed(Routes.CHANGE_PASSWORD),
+        ),
+      ],
+    ),
+    SettingsSection(
+      header: 'SUPPORT',
+      tiles: [
+        SettingsTile(
+          icon: AppIcons.phoneIcon,
+          title: 'Help Center',
+          onTap: () => Get.toNamed(Routes.helpCenterView),
+        ),
+        SettingsTile(
+          icon: AppIcons.privacy,
+          title: 'Privacy Policy',
+          onTap: () => Get.toNamed(Routes.PRIVACY_POLICY),
+        ),
+        SettingsTile(
+          icon: AppIcons.aboutIcon,
+          title: 'About App',
+          onTap: () => Get.toNamed(Routes.ABOUT),
+        ),
+      ],
+    ),
+    SettingsSection(
+      header: 'DANGER ZONE',
+      tiles: [
+        SettingsTile(
+          icon: AppIcons.logoutIcon,
+          title: 'Sign Out',
+          isDanger: true,
+          onTap: logout,
+        ),
+        SettingsTile(
+          icon: AppIcons.deleteIcon,
+          title: 'Delete Account',
+          isDanger: true,
+          onTap: deleteAccount,
+        ),
+      ],
+    ),
   ];
+
+  String get initials {
+    final n = user.value?.name ?? '';
+    final parts = n.trim().split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    if (parts.isNotEmpty && parts[0].isNotEmpty) return parts[0][0].toUpperCase();
+    return 'U';
+  }
 
   final AuthRepository _authRepository = AuthRepository();
   final AuthController _authController = Get.put(AuthController());

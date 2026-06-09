@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_stores/controllers/seller_stores_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -31,7 +32,11 @@ class StoreCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                _StoreAvatar(initials: store.initials, isActive: store.isActive),
+                _StoreAvatar(
+                  store: store,
+                  isActive: store.isActive,
+                  isprofile: store.logo.isNotEmpty,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -93,10 +98,15 @@ class StoreCard extends StatelessWidget {
 // ── Avatar ────────────────────────────────────────────────────────────────────
 
 class _StoreAvatar extends StatelessWidget {
-  final String initials;
+  final SellerStore store;
   final bool isActive;
+  final bool isprofile;
 
-  const _StoreAvatar({required this.initials, required this.isActive});
+  const _StoreAvatar({
+    required this.isActive,
+    required this.isprofile,
+    required this.store,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,12 +122,14 @@ class _StoreAvatar extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       alignment: Alignment.center,
-      child: CustomText(
-        text: initials,
-        fontSize: AppFontSize.small2,
-        fontWeight: FontWeight.bold,
-        color: AppColors.white,
-      ),
+      child: isprofile
+          ? CommonImageView(url: store.logo)
+          : CustomText(
+              text: store.name[0],
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.bold,
+              color: AppColors.white,
+            ),
     );
   }
 }

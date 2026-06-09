@@ -6,6 +6,7 @@ import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_control
 import 'package:book_store_app/config/resources/app_sounds.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
@@ -38,11 +39,11 @@ class CartController extends BaseController {
 
   Future<void> fetchCart() async {
     try {
-      print("Fetching cart....");
+      debugPrint("Fetching cart....");
       isLoading.value = true;
 
       final cart = await _cartRepository.getCart();
-      print("cart: $cart");
+      debugPrint("cart: $cart");
 
       if (cart != null) {
         backendCart.value = cart;

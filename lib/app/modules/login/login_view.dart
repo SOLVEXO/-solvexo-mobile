@@ -58,6 +58,8 @@ class LoginView extends StatelessWidget {
                   hintText: "Email Address or Phone number",
                   isborder: true,
                   borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: authController.validateEmail,
                 ),
 
                 const SizedBox(height: AppDimen.borderRadius),

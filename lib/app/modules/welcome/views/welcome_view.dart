@@ -211,7 +211,7 @@ class _RoleCard extends StatelessWidget {
               child: SvgIcon(
                 assetName: emoji,
                 size: 30,
-                color: isPrimary ? AppColors.yellow : AppColors.iosBlue,
+                color: isPrimary ? AppColors.white10 : AppColors.barrierColor,
               ),
             ),
             const SizedBox(width: 14),

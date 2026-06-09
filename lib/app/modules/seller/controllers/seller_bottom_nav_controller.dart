@@ -3,11 +3,14 @@ import 'package:book_store_app/app/modules/seller_home/views/seller_home_view.da
 import 'package:book_store_app/app/modules/seller_orders/views/seller_orders_view.dart';
 import 'package:book_store_app/app/modules/seller_products/views/seller_products_view.dart';
 import 'package:book_store_app/app/modules/seller_settings/views/seller_settings_view.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SellerBottomNavController extends GetxController {
   RxInt selectedIndex = 0.obs;
+  RxString storeName = "".obs;
 
   void changeTab(int index) => selectedIndex.value = index;
 
@@ -18,4 +21,21 @@ class SellerBottomNavController extends GetxController {
     SellerAnalyticsView(),
     SellerSettingsView(),
   ];
+
+  @override
+  void onInit() {
+    super.onInit();
+    getStoreName();
+  }
+
+  Future<void> getStoreName() async {
+    try {
+      final store = await AppPreferences.getStoreName();
+      if (store!.isNotEmpty) {
+        storeName.value = store;
+      }
+    } catch (e) {
+      ToastUtil.showToast("Store Name not found");
+    }
+  }
 }

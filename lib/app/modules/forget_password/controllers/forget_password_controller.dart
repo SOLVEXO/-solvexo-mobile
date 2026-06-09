@@ -1,3 +1,4 @@
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
@@ -12,15 +13,18 @@ class ForgotPasswordController extends GetxController {
   RxBool isLoading = false.obs;
 
   Future<void> sendOtp() async {
-    if (emailController.text.isEmpty) {
-      ToastUtil.showToast("Enter email");
+    final email = emailController.text.trim();
+    if (email.isEmpty) {
+      ToastUtil.showToast("Please enter your email");
       return;
     }
 
     isLoading.value = true;
 
+    final intentRole = await AppPreferences.getIntentRole();
     final success = await _authRepository.forgotPassword(
-      emailController.text.trim(),
+      email,
+      role: intentRole ?? 'user',
     );
 
     isLoading.value = false;
@@ -31,12 +35,18 @@ class ForgotPasswordController extends GetxController {
       Get.toNamed(
         Routes.otpView,
         arguments: {
-          'email': emailController.text.trim(),
+          'email': email,
           'type': 'password_reset',
         },
       );
     } else {
-      ToastUtil.showToast("Failed to send OTP");
+      ToastUtil.showToast("Failed to send OTP. Check your email and try again.");
     }
+  }
+
+  @override
+  void onClose() {
+    emailController.dispose();
+    super.onClose();
   }
 }

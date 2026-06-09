@@ -1,6 +1,6 @@
 class ApiConstants {
   // static const String baseUrl = "http://localhost:3001";
-  static const String baseUrl = "https://api.edudeen.com";
+  static const String baseUrl = "https://staging.solvexo.store/api";
 
   // static const String baseUrl = "http://192.168.1.113:3001";
 
@@ -111,12 +111,18 @@ class ApiConstants {
       '$apiPrefix/cart/remove-from-wishlist';
   // ============ Checkout / Shipping Endpoints ============
   static const String getShippingZones = "$apiPrefix/checkout/getShippingZones";
+  // ============ Seller / Store Endpoints ============
+  static const String createStore = "$apiPrefix/store/create-store";
+  static const String updateStore = "$apiPrefix/store/update-store";
+  static const String myStores = "$apiPrefix/store/my-stores";
+  static String getStoreById(String id) => "$apiPrefix/store/getStoreById/$id";
+
   // ============ Upload Endpoints ============
   // ✅ Upload
-  static const String uploadImage = '$apiPrefix/upload/image';
-  static const String uploadProductImages = "$apiPrefix/upload/products";
-  static const String uploadCategoryImage = "$apiPrefix/upload/category";
-  static const String uploadProfileImage = "$apiPrefix/upload/profile";
+  // static const String uploadImage = '$apiPrefix/upload/image';
+  // static const String uploadProductImages = "$apiPrefix/upload/products";
+  // static const String uploadCategoryImage = "$apiPrefix/upload/category";
+  // static const String uploadProfileImage = "$apiPrefix/upload/profile";
 
   // static String get cartSync => null;
 
