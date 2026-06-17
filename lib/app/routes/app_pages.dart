@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import '../modules/notifications/bindings/notifications_binding.dart';
+import '../modules/notifications/views/notifications_view.dart';
 import '../modules/add_seller_product/bindings/add_seller_product_binding.dart';
 import '../modules/add_seller_product/views/add_seller_product_view.dart';
 import '../modules/edit_seller_product/bindings/edit_seller_product_binding.dart';
@@ -411,6 +413,11 @@ class AppPages {
       name: Routes.posSettings,
       page: () => PosSettingsView(),
       binding: PosSettingsBinding(),
+    ),
+    GetPage(
+      name: Routes.notifications,
+      page: () => NotificationsView(),
+      binding: NotificationsBinding(),
     ),
   ];
 }

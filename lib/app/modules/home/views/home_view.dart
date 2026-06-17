@@ -1,8 +1,8 @@
 import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
-import 'package:book_store_app/app/components/dynamic_shimmer.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/dynamic_shimmer.dart';
 import 'package:book_store_app/app/components/no_signal_view.dart';
 import 'package:book_store_app/app/components/shimmer/banner_shimmer.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -11,8 +11,11 @@ import 'package:book_store_app/app/modules/category/controllers/category_control
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
 import 'package:book_store_app/app/modules/home/widgets/categories_grid.dart';
+import 'package:book_store_app/app/modules/home/widgets/home_search_bar.dart';
+import 'package:book_store_app/app/modules/home/widgets/home_section_header.dart';
+import 'package:book_store_app/app/modules/home/widgets/home_sort_chips.dart';
+import 'package:book_store_app/app/modules/home/widgets/home_staff_picks.dart';
 import 'package:book_store_app/app/modules/home/widgets/products_grid.dart';
-import 'package:book_store_app/app/modules/home/widgets/sub_category_grid.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -25,10 +28,12 @@ import 'package:get/get.dart';
 
 class HomeView extends StatelessWidget {
   HomeView({super.key});
+
   final controller = Get.put(HomeController());
   final categoryController = Get.put(CategoryController());
   final profileController = Get.put(ProfileController());
   final networkController = Get.put(NetworkController());
+
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
@@ -45,7 +50,7 @@ class HomeView extends StatelessWidget {
       bottomBarShadow: true,
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor,
-        tooltip: 'Here for Help to find Products.',
+        tooltip: 'AI Product Assistant',
         onPressed: () => Get.toNamed(Routes.CHAT),
         child: SvgIcon(
           assetName: AppIcons.assistantIcon,
@@ -54,142 +59,111 @@ class HomeView extends StatelessWidget {
         ),
       ),
       child: Obx(() {
-        // ── No internet ────────────────────────────────────────────────
         if (!networkController.isConnected.value) {
           return const NoSignalView();
         }
+
         final bool isLoading =
             controller.isLoading.value || categoryController.isLoading.value;
 
         return Stack(
           children: [
             CustomRefreshWrapper(
-              onRefresh: () => controller.refreshHome(),
+              onRefresh: controller.refreshHome,
               child: Scrollbar(
                 trackVisibility: true,
                 interactive: true,
-                thickness: 4,
+                thickness: 3,
                 radius: const Radius.circular(AppDimen.borderRadius),
                 child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(
-                    // parent: ClampingScrollPhysics(),
-                  ),
+                  padding: EdgeInsets.zero,
+                  physics: const AlwaysScrollableScrollPhysics(),
                   children: [
-                    // ── Delivery address ─────────────────────────────
-                    // DeliveryAddress(),
-                    const SizedBox(height: AppDimen.allPadding),
+                    const SizedBox(height: 16),
 
-                    // ── Banner ───────────────────────────────────────
-                    isLoading ? BannerShimmer() : BannerCarousel(),
+                    // ── Promotional banner ───────────────────────────────
+                    isLoading
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppDimen.allPadding,
+                            ),
+                            child: BannerShimmer(),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppDimen.allPadding,
+                            ),
+                            child: BannerCarousel(),
+                          ),
 
-                    const SizedBox(height: AppDimen.allPadding),
-                    titleText("Browse by Category"),
-                    // ── Categories ───────────────────────────────────
+                    const SizedBox(height: 22),
+
+                    // ── Browse by Category ───────────────────────────────
+                    const HomeSectionHeader(title: 'Browse by Category'),
+                    const SizedBox(height: 8),
+
                     isLoading
                         ? const DynamicShimmer(iscategories: true)
                         : categoryController.allCategoriesFlat.isEmpty
                         ? SizedBox(
-                            height: height / 3.25,
+                            height: height / 7,
                             child: const Center(
                               child: DynamicShimmer(iscategories: true),
                             ),
                           )
                         : CategoriesGrid(),
-                    const SizedBox(height: AppDimen.allPadding),
-                    // ── White card — subcategories + tabs + products ──
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: AppColors.black12,
-                            blurRadius: 12,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          titleText("Trending Products", viewMore: true),
-                          // ── Sub categories ─────────────────────────
-                          isLoading
-                              ? const DynamicShimmer(issubcategories: true)
-                              : SubCategoryGrid(),
 
-                          const SizedBox(height: 10),
-                          const Divider(thickness: 0.5),
-                          const SizedBox(height: 10),
+                    const SizedBox(height: 24),
 
-                          // // ── Tab header ─────────────────────────────
-                          // isLoading
-                          //     ? const DynamicShimmer(istabs: true)
-                          //     : TabHeader(),
-
-                          // const SizedBox(height: 5),
-
-                          // ── Products ───────────────────────────────
-                          isLoading
-                              ? const DynamicShimmer(isproducts: true)
-                              : _ProductsSection(controller: controller),
-                        ],
-                      ),
+                    // ── Trending Now ─────────────────────────────────────
+                    const HomeSectionHeader(
+                      title: 'Trending Now',
+                      viewMore: true,
                     ),
+
+                    // ── Search bar ───────────────────────────────────────
+                    const HomeSearchBar(),
+                    const SizedBox(height: 12),
+                    // Sort chips
+                    const HomeSortChips(),
+
+                    const SizedBox(height: 12),
+
+                    // Products grid / shimmer / empty
+                    isLoading
+                        ? const DynamicShimmer(isproducts: true)
+                        : _ProductsSection(controller: controller),
+
+                    const SizedBox(height: 24),
+
+                    // ── Staff Picks ──────────────────────────────────────
+                    const HomeSectionHeader(title: 'Staff Picks'),
+                    const SizedBox(height: 12),
+
+                    const HomeStaffPicks(),
+
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
             ),
-            // // ── Login card overlay ───────────────────────────────────
-            profileController.user.isNull
-                ? Positioned(
-                    left: 12,
-                    right: 12,
-                    bottom: 12,
-                    child: SafeArea(child: LoginSignupCard()),
-                  )
-                : SizedBox.shrink(),
+
+            // Login nudge for guests
+            if (profileController.user.isNull)
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 12,
+                child: SafeArea(child: LoginSignupCard()),
+              ),
           ],
         );
       }),
     );
   }
-
-  Widget titleText(String title, {bool viewMore = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimen.allPadding,
-        vertical: AppDimen.bottomPadding,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          CustomText(
-            text: title,
-            fontSize: AppFontSize.small,
-            fontWeight: FontWeight.w600,
-          ),
-          viewMore
-              ? TextButton(
-                  onPressed: () {},
-                  child: CustomText(
-                    text: "See All",
-                    fontSize: AppFontSize.small2,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.primaryColor,
-                  ),
-                )
-              : SizedBox.shrink(),
-        ],
-      ),
-    );
-  }
 }
 
-// ─── Products section (extracted to avoid Obx nesting issues) ─────────────
+// ─── Products section (grid + load-more + empty state) ───────────────────────
 
 class _ProductsSection extends StatelessWidget {
   final HomeController controller;
@@ -198,26 +172,32 @@ class _ProductsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // Empty state
-      if (controller.filteredProducts.isEmpty &&
-          !controller.isFetchingProducts.value) {
+      final isEmpty = controller.filteredProducts.isEmpty;
+      final isFetching = controller.isFetchingProducts.value;
+
+      if (isEmpty && !isFetching) {
         return SizedBox(
-          height: 300,
+          height: 240,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 80,
+                SvgIcon(
+                  assetName: AppIcons.shoppingBag,
+                  size: 64,
                   color: AppColors.greySwatch400,
                 ),
-                const SizedBox(height: 16),
-                CustomText(
-                  text:
-                      'No ${controller.tabs[controller.tabIndex.value]} found',
-                  fontSize: 16,
+                const SizedBox(height: 12),
+                const CustomText(
+                  text: 'No products found',
+                  fontSize: AppFontSize.small,
                   color: AppColors.gray600,
+                ),
+                const SizedBox(height: 4),
+                const CustomText(
+                  text: 'Try a different category or search term',
+                  fontSize: AppFontSize.verySmall,
+                  color: AppColors.lightGrey7,
                 ),
               ],
             ),
@@ -227,22 +207,21 @@ class _ProductsSection extends StatelessWidget {
 
       return Column(
         children: [
-          ProductsGrid(),
-          const SizedBox(height: 20),
+          const ProductsGrid(),
+          const SizedBox(height: 16),
 
-          // Load more button
-          if (controller.hasMoreProducts.value &&
-              !controller.isFetchingProducts.value)
+          if (controller.hasMoreProducts.value && !isFetching)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimen.allPadding,
+              ),
               child: AppButton(
                 onPressed: controller.loadMoreProducts,
                 label: 'Load More Products',
               ),
             ),
 
-          // Fetching more indicator
-          if (controller.isFetchingProducts.value)
+          if (isFetching)
             const Padding(
               padding: EdgeInsets.all(20),
               child: CircularProgressIndicator(),

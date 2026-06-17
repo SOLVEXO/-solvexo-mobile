@@ -40,6 +40,7 @@ abstract class Routes {
   static const ABOUT = '/about';
   static const CHAT = '/chat';
   static const WISHLIST = '/wishlist';
+  static const notifications = '/notifications';
 
   // Entry
   static const welcome = '/welcome';

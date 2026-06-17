@@ -10,7 +10,23 @@ class SellerProduct {
   final String type; // 'Digital' | 'Physical'
   final ProductStatus status;
   final int sold;
-  final int? stock; // null = unlimited (Digital)
+  final int? stock; // null = unlimited
+  // Extended fields (populated from API, used in edit form)
+  final String? variantId;
+  final String? description;
+  final double? compareAtPrice;
+  // Physical-only
+  final String? size;
+  final String? color;
+  final String? shippingWeight;
+  final List<String> tags;
+  // Digital-only
+  final List<Map<String, dynamic>> digitalFiles;
+  final String downloadLimit;        // "unlimited" | number string
+  final int? linkExpiryDays;
+  final bool pdfStampingEnabled;
+  final String licenseType;          // "personal" | "commercial"
+  final String? buyerDeliveryMessage;
 
   const SellerProduct({
     required this.id,
@@ -21,6 +37,19 @@ class SellerProduct {
     required this.status,
     required this.sold,
     this.stock,
+    this.variantId,
+    this.description,
+    this.compareAtPrice,
+    this.size,
+    this.color,
+    this.shippingWeight,
+    this.tags = const [],
+    this.digitalFiles = const [],
+    this.downloadLimit = 'unlimited',
+    this.linkExpiryDays,
+    this.pdfStampingEnabled = false,
+    this.licenseType = 'personal',
+    this.buyerDeliveryMessage,
   });
 
   bool get isUnlimitedStock => stock == null;

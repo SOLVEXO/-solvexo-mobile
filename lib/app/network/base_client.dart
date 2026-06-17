@@ -31,17 +31,15 @@ class BaseClient {
     final dio = await DioService.getDio();
     debugPrint("POST → $url");
 
-    // ✅ When data is FormData, Dio will automatically set
-    // Content-Type: multipart/form-data with the correct boundary.
-    // When data is a Map/JSON, Dio sets Content-Type: application/json.
-    // We must NOT override contentType here — let Dio detect it.
     return dio.post(
       url,
       data: data,
       queryParameters: queryParameters,
       options: Options(
+        // FormData: leave null so Dio auto-sets multipart/form-data + boundary.
+        // Everything else: explicitly application/json.
+        contentType: data is FormData ? null : 'application/json',
         extra: {'requiresAuth': requiresAuth},
-        // ✅ contentType is intentionally NOT set — Dio auto-detects from body
       ),
     );
   }

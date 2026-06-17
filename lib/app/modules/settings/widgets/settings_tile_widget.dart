@@ -20,45 +20,49 @@ class SettingsTileWidget extends StatelessWidget {
           horizontal: AppDimen.allPadding,
           vertical: 14,
         ),
-        child: Row(children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: tile.isDanger ? AppColors.lightRed : AppColors.background,
-              borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: tile.isDanger
+                    ? AppColors.lightRed
+                    : AppColors.background,
+                borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+              ),
+              alignment: Alignment.center,
+              child: SvgIcon(
+                assetName: tile.icon,
+                size: 20,
+                color: tile.isDanger ? AppColors.red : AppColors.primaryColor,
+              ),
             ),
-            alignment: Alignment.center,
-            child: SvgIcon(
-              assetName: tile.icon,
-              size: 20,
-              color: tile.isDanger ? AppColors.red : null,
+            const SizedBox(width: 14),
+            Expanded(
+              child: CustomText(
+                text: tile.title,
+                fontSize: AppFontSize.extraSmall,
+                fontWeight: FontWeight.w500,
+                color: tile.isDanger ? AppColors.red : AppColors.black,
+              ),
             ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: CustomText(
-              text: tile.title,
-              fontSize: AppFontSize.extraSmall,
-              fontWeight: FontWeight.w500,
-              color: tile.isDanger ? AppColors.red : AppColors.black,
-            ),
-          ),
-          if (tile.trailing != null) ...[
-            const SizedBox(width: 8),
-            CustomText(
-              text: tile.trailing!,
-              fontSize: AppFontSize.verySmall,
+            if (tile.trailing != null) ...[
+              const SizedBox(width: 8),
+              CustomText(
+                text: tile.trailing!,
+                fontSize: AppFontSize.verySmall,
+                color: tile.isDanger ? AppColors.red : AppColors.lightGrey5,
+              ),
+            ],
+            const SizedBox(width: 6),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
               color: tile.isDanger ? AppColors.red : AppColors.lightGrey5,
             ),
           ],
-          const SizedBox(width: 6),
-          Icon(
-            Icons.chevron_right_rounded,
-            size: 18,
-            color: tile.isDanger ? AppColors.red : AppColors.lightGrey5,
-          ),
-        ]),
+        ),
       ),
     );
   }

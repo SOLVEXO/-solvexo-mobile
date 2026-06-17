@@ -13,26 +13,33 @@ class RattingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Star Icons
+        // 5 stars — use tiny size so they never overflow on narrow cards
         ...List.generate(
           5,
           (index) => Padding(
             padding: const EdgeInsets.only(right: 2.0),
             child: SvgIcon(
-              assetName: index < product.totalRatings.floor()
+              assetName: index < product.averageRating.floor()
                   ? AppIcons.fillStar
                   : AppIcons.starOutlined,
-              size: AppFontSize.small,
+              size: AppFontSize.tiny, // 12px — was 16px which overflowed
             ),
           ),
         ),
         const SizedBox(width: 4),
-        // Rating Count
-        CustomText(
-          text: "(${product.totalRatings})",
-          fontSize: AppFontSize.small,
-          color: AppColors.greyDefault,
+        // Flexible so the count label shrinks/ellipses instead of overflowing
+        Flexible(
+          child: CustomText(
+            text: product.totalRatings > 0
+                ? '(${product.totalRatings})'
+                : 'No reviews',
+            fontSize: AppFontSize.tiny,
+            color: AppColors.greyDefault,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         ),
       ],
     );

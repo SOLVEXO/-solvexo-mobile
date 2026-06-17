@@ -14,12 +14,13 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17   // ✅ added '='
-        targetCompatibility = JavaVersion.VERSION_17   // ✅ added '='
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "17"   // ✅ must match sourceCompatibility above
+        jvmTarget = "11"
     }
 
     defaultConfig {
@@ -32,8 +33,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false        // ✅ disabled until Play Core issue resolved
-            isShrinkResources = false      // ✅ must be false when minify is false
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -45,4 +46,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

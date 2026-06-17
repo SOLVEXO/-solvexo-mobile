@@ -68,8 +68,11 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                   Spacer(),
-                  iconContainer(
-                    child: SvgIcon(assetName: AppIcons.notificationIcon),
+                  GestureDetector(
+                    onTap: () => Get.toNamed(Routes.notifications),
+                    child: iconContainer(
+                      child: SvgIcon(assetName: AppIcons.notificationIcon),
+                    ),
                   ),
                   SizedBox(width: 5),
                   iconContainer(child: CartIconWithCount()),

@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/seller/controllers/seller_bottom_nav_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -52,15 +53,18 @@ class SellerAppBar extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.background.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: SvgIcon(
-              assetName: AppIcons.notificationIcon,
-              color: AppColors.white,
+          GestureDetector(
+            onTap: () => Get.toNamed(Routes.notifications),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.background.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: SvgIcon(
+                assetName: AppIcons.notificationIcon,
+                color: AppColors.white,
+              ),
             ),
           ),
           const SizedBox(width: 10),

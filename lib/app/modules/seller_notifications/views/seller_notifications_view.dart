@@ -19,7 +19,7 @@ class SellerNotificationsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: CustomAppBarTwo(title: 'Notifications'),
+      appBar: CustomAppBarTwo(title: 'Notification Permissions'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppDimen.allPadding),
         child: Column(

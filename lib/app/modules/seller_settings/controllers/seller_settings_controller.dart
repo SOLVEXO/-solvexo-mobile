@@ -155,12 +155,14 @@ class SellerSettingsController extends GetxController {
       final profileCtrl = Get.find<ProfileController>();
       _applyUser(profileCtrl.user.value);
       // Keep syncing if data hasn't arrived yet
-      ever(profileCtrl.user, (UserModel? u) { if (u != null) _applyUser(u); });
+      ever(profileCtrl.user, (UserModel? u) {
+        if (u != null) _applyUser(u);
+      });
     } catch (_) {}
 
     // ── Store data (awaited — ensures sections rebuild with correct name) ──
     await _loadStoreData();
-
+    _applyUser(Get.find<ProfileController>().user.value);
     isLoading.value = false;
   }
 

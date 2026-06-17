@@ -47,6 +47,7 @@ class HomeController extends BaseController {
   // ─── Search & Filter ──────────────────────────────────────────────────────
   final RxString searchQuery = ''.obs;
   final RxString selectedSort = 'newest'.obs;
+  final TextEditingController searchTextCtrl = TextEditingController();
   final Rx<double?> minPrice = Rx<double?>(null);
   final Rx<double?> maxPrice = Rx<double?>(null);
 
@@ -74,6 +75,12 @@ class HomeController extends BaseController {
     super.onInit();
     initializeHome();
     fetchBanners();
+  }
+
+  @override
+  void onClose() {
+    searchTextCtrl.dispose();
+    super.onClose();
   }
 
   // ─── 1. Banners ───────────────────────────────────────────────────────────
@@ -304,6 +311,7 @@ class HomeController extends BaseController {
 
   void clearSearch() {
     searchQuery.value = '';
+    searchTextCtrl.clear();
     fetchProducts();
   }
 

@@ -1,5 +1,8 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
+import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
+import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
@@ -20,7 +23,9 @@ class ProfileStatsStrip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
             color: AppColors.white,
-            borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+            borderRadius: BorderRadius.circular(
+              AppDimen.serviceCountTileRadius,
+            ),
             boxShadow: [
               BoxShadow(
                 color: AppColors.black.withOpacity(0.05),
@@ -29,19 +34,36 @@ class ProfileStatsStrip extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(children: [
-            _StatCell(value: user != null ? '—' : '0', label: 'Orders'),
-            _vDivider(),
-            _StatCell(value: '—', label: 'Wishlist'),
-            _vDivider(),
-            _StatCell(value: '—', label: 'Addresses'),
-          ]),
+          child: Obx(() {
+            final addressController = Get.put(AddressController());
+            return Row(
+              children: [
+                _StatCell(
+                  value: user != null
+                      ? "${Get.find<MyOrdersController>().orders.length}"
+                      : '0',
+                  label: 'Orders',
+                ),
+                _vDivider(),
+                _StatCell(
+                  value: "${Get.find<WishlistController>().count}",
+                  label: 'Wishlist',
+                ),
+                _vDivider(),
+                _StatCell(
+                  value: "${addressController.addresses.length}",
+                  label: 'Addresses',
+                ),
+              ],
+            );
+          }),
         ),
       );
     });
   }
 
-  Widget _vDivider() => Container(width: 1, height: 36, color: AppColors.lightGrey2);
+  Widget _vDivider() =>
+      Container(width: 1, height: 36, color: AppColors.lightGrey2);
 }
 
 class _StatCell extends StatelessWidget {
@@ -52,16 +74,23 @@ class _StatCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        CustomText(
-          text: value,
-          fontSize: AppFontSize.small,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primaryColor,
-        ),
-        const SizedBox(height: 2),
-        CustomText(text: label, fontSize: AppFontSize.tiny, color: AppColors.grey),
-      ]),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CustomText(
+            text: value,
+            fontSize: AppFontSize.small,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryColor,
+          ),
+          const SizedBox(height: 2),
+          CustomText(
+            text: label,
+            fontSize: AppFontSize.tiny,
+            color: AppColors.grey,
+          ),
+        ],
+      ),
     );
   }
 }

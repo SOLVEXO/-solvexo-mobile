@@ -1,59 +1,120 @@
+import 'dart:async';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 
+const _kSlogans = [
+  'Discover · Buy · Sell',
+  'Your Marketplace, Redefined',
+  'Shop Smart. Sell More.',
+];
+
 class SplashScreenController extends GetxController
-    with GetSingleTickerProviderStateMixin {
-  late AnimationController logoController;
+    with GetTickerProviderStateMixin {
+  // ── Animation controllers ─────────────────────────────────────────────────
+  late AnimationController logoController;   // logo entrance + brand fade
+  late AnimationController glowController;   // repeating logo pulse
+  late AnimationController sloganController; // per-slogan fade in/out
+
+  // ── Animations ────────────────────────────────────────────────────────────
   late Animation<double> scaleAnim;
   late Animation<Offset> slideAnim;
-  late Animation<double> textFade;
+  late Animation<double> brandFade;
+  late Animation<double> glowAnim;
+  late Animation<double> sloganFade;
+
+  // ── Reactive state ────────────────────────────────────────────────────────
+  final RxInt sloganIndex = 0.obs;
+
+  Timer? _sloganTimer;
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   @override
   void onInit() {
     super.onInit();
+    _setupLogoController();
+    _setupGlowController();
+    _setupSloganController();
 
-    logoController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1900),
-    );
-
-    /// 🔥 Slide from bottom
-    slideAnim = Tween<Offset>(begin: const Offset(0, 1.9), end: Offset.zero)
-        .animate(
-          CurvedAnimation(parent: logoController, curve: Curves.easeOutCubic),
-        );
-
-    /// 🔥 Scale small → big
-    scaleAnim = Tween<double>(begin: 0.4, end: 1.0).animate(
-      CurvedAnimation(parent: logoController, curve: Curves.elasticOut),
-    );
-
-    /// 🔥 Text fade (delay)
-    textFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: logoController,
-        curve: const Interval(0.6, 1.0, curve: Curves.easeIn),
-      ),
-    );
-
-    logoController.forward();
-
+    logoController.forward().then((_) => _startSloganCycle());
     _navigate();
   }
 
+  void _setupLogoController() {
+    logoController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+
+    slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.6),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: logoController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
+    ));
+
+    scaleAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: logoController,
+        curve: const Interval(0.0, 0.65, curve: Curves.elasticOut),
+      ),
+    );
+
+    brandFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: logoController,
+        curve: const Interval(0.55, 1.0, curve: Curves.easeIn),
+      ),
+    );
+  }
+
+  void _setupGlowController() {
+    glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat(reverse: true);
+
+    glowAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: glowController, curve: Curves.easeInOut),
+    );
+  }
+
+  void _setupSloganController() {
+    sloganController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    sloganFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: sloganController, curve: Curves.easeInOut),
+    );
+  }
+
+  void _startSloganCycle() {
+    sloganController.forward();
+    _sloganTimer = Timer.periodic(const Duration(milliseconds: 1600), (_) async {
+      await sloganController.reverse();
+      sloganIndex.value = (sloganIndex.value + 1) % _kSlogans.length;
+      sloganController.forward();
+    });
+  }
+
+  String get currentSlogan => _kSlogans[sloganIndex.value];
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+
   void _navigate() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(milliseconds: 5200));
     final token = await AppPreferences.getAccessTokenAsync();
 
-    // Not logged in → Welcome screen
     if (token == null || token.isEmpty) {
       Get.offAllNamed(Routes.welcome);
       return;
     }
 
-    // Logged in → navigate by saved role
     final role = await AppPreferences.getUserRole();
     switch (role) {
       case 'seller':
@@ -69,50 +130,10 @@ class SplashScreenController extends GetxController
 
   @override
   void onClose() {
+    _sloganTimer?.cancel();
     logoController.dispose();
+    glowController.dispose();
+    sloganController.dispose();
     super.onClose();
   }
-
-  // RxInt index = 0.obs;
-
-  // final List<List<Color>> gradients = [
-  //   /// 1️⃣ Brand Blue → Deep Navy
-  //   [Color(0xFF17B1DE), Color(0xFF0B3C5D)],
-
-  //   /// 2️⃣ Aqua → Purple blend
-  //   [Color(0xFF17B1DE), Color(0xFF6C3AFF)],
-
-  //   /// 3️⃣ Sky Blue → Emerald Teal
-  //   [Color(0xFF17B1DE), Color(0xFF0AA175)],
-
-  //   /// 4️⃣ Futuristic Cyan → Dark Space Blue
-  //   [Color(0xFF17B1DE), Color(0xFF00223E)],
-
-  //   /// 5️⃣ Blue → Pink Sunset Glow
-  //   [Color(0xFF17B1DE), Color(0xFFF72585)],
-
-  //   /// 6️⃣ Modern Blue → Indigo
-  //   [Color(0xFF17B1DE), Color(0xFF283593)],
-
-  //   /// 7️⃣ Ocean Blue → Deep Lagoon
-  //   [Color(0xFF17B1DE), Color(0xFF006D77)],
-
-  //   /// 8️⃣ Corporate Blue → Royal Purple
-  //   [Color(0xFF17B1DE), Color(0xFF4A148C)],
-
-  //   /// 9️⃣ Blue → Neon Green (Tech Style)
-  //   [Color(0xFF17B1DE), Color(0xFF00CE61)],
-
-  //   /// 🔟 Cyan → Slate Gray (Luxurious)
-  //   [Color(0xFF17B1DE), Color(0xFF2F3B52)],
-  // ];
-
-  // @override
-  // void onInit() {
-  //   super.onInit();
-
-  //   Timer.periodic(const Duration(seconds: 3), (timer) {
-  //     index.value = (index.value + 1) % gradients.length;
-  //   });
-  // }
 }

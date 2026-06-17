@@ -4,6 +4,7 @@ import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,11 +17,19 @@ class WishlistIconCount extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        CustomIconButton(
-          onPressed: () => Get.toNamed(Routes.WISHLIST),
-          assetName: AppIcons.heartIcon,
-          isPadding: true,
-          size: 22,
+        Container(
+          margin: EdgeInsets.only(right: 12),
+          padding: EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor,
+            borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+          ),
+          child: CustomIconButton(
+            onPressed: () => Get.toNamed(Routes.WISHLIST),
+            assetName: AppIcons.heartIcon,
+            color: AppColors.white,
+            size: 22,
+          ),
         ),
         Obx(
           () => controller.wishlistController.count < 1
@@ -38,7 +47,7 @@ class WishlistIconCount extends StatelessWidget {
                       minHeight: 15,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.red,
+                      color: AppColors.primaryColorLight,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
