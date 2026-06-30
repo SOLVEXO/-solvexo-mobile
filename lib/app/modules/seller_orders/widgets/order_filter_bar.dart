@@ -15,16 +15,18 @@ class OrderFilterBar extends StatelessWidget {
     OrderStatus.all,
     OrderStatus.pending,
     OrderStatus.processing,
-    OrderStatus.fulfilled,
-    OrderStatus.refund,
+    OrderStatus.shipped,
+    OrderStatus.completed,
+    OrderStatus.refunded,
   ];
 
   static const _labels = {
     OrderStatus.all: 'All',
     OrderStatus.pending: 'Pending',
     OrderStatus.processing: 'Processing',
-    OrderStatus.fulfilled: 'Fulfilled',
-    OrderStatus.refund: 'Refund',
+    OrderStatus.shipped: 'Shipped',
+    OrderStatus.completed: 'Completed',
+    OrderStatus.refunded: 'Refunded',
   };
 
   @override

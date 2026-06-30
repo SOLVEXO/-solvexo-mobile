@@ -91,6 +91,7 @@ class CartItem {
   final double price; // unitPrice (get-cart) or price (add/update)
   final int quantity;
   final List<String> images;
+  final String productType; // 'physical' or 'digital'
 
   // UI only
   bool isSelected;
@@ -102,6 +103,7 @@ class CartItem {
     required this.price,
     required this.quantity,
     required this.images,
+    this.productType = 'physical',
     this.isSelected = true,
   });
 
@@ -126,9 +128,16 @@ class CartItem {
         name: json['name'] as String? ?? '',
         price: (rawPrice as num).toDouble(),
         quantity: (json['quantity'] as num?)?.toInt() ?? 1,
-        // images key: "images" in add-to-cart + update response
-        //             "image"  in get-cart response
-        images: parseImages(json['images'] ?? json['image']),
+        // images key: try every field the backend uses across all shapes
+        images: parseImages(
+          json['images'] ??
+          json['image'] ??
+          (json['product'] as Map<String, dynamic>?)?['images'] ??
+          (json['product'] as Map<String, dynamic>?)?['image'] ??
+          (json['productSnapshot'] as Map<String, dynamic>?)?['images'] ??
+          (json['productSnapshot'] as Map<String, dynamic>?)?['image'],
+        ),
+        productType: (json['productType'] as String? ?? 'physical').toLowerCase(),
         isSelected: true,
       );
     } catch (e) {
@@ -157,6 +166,7 @@ class CartItem {
     double? price,
     int? quantity,
     List<String>? images,
+    String? productType,
     bool? isSelected,
   }) => CartItem(
     productId: productId ?? this.productId,
@@ -165,6 +175,7 @@ class CartItem {
     price: price ?? this.price,
     quantity: quantity ?? this.quantity,
     images: images ?? this.images,
+    productType: productType ?? this.productType,
     isSelected: isSelected ?? this.isSelected,
   );
 

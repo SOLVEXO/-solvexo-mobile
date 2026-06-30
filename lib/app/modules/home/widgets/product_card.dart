@@ -38,30 +38,28 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Cream image area (flush to card edges, rounded top) ──
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
-              child: AspectRatio(
-                aspectRatio: 1.05,
+            // ── Image — exactly 50% of card height ───────────────────
+            Expanded(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
                 child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    Container(
-                      width: double.infinity,
-                      color: AppColors.languageBg,
-                      child: product.images.isNotEmpty
-                          ? CommonImageView(
-                              url: product.images.first,
-                              fit: BoxFit.contain,
-                            )
-                          : const Center(
-                              child: Icon(
-                                Icons.image_outlined,
-                                color: AppColors.lightGrey7,
-                                size: 40,
-                              ),
+                    product.images.isNotEmpty
+                        ? CommonImageView(
+                            url: product.images.first,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            color: AppColors.languageBg,
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.image_outlined,
+                              color: AppColors.lightGrey7,
+                              size: 40,
                             ),
-                    ),
+                          ),
                     // Wishlist heart — top right
                     Positioned(
                       top: 8,
@@ -75,8 +73,8 @@ class ProductCard extends StatelessWidget {
                                 : '',
                           ),
                           child: Container(
-                            width: 30,
-                            height: 30,
+                            width: 32,
+                            height: 32,
                             decoration: BoxDecoration(
                               color: AppColors.white.withOpacity(0.88),
                               shape: BoxShape.circle,
@@ -87,14 +85,12 @@ class ProductCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: SvgIcon(
-                                assetName:
-                                    homeController.isFavourite(product.id)
-                                        ? AppIcons.heartFill
-                                        : AppIcons.heartIcon,
-                                size: 14,
-                              ),
+                            alignment: Alignment.center,
+                            child: SvgIcon(
+                              assetName: homeController.isFavourite(product.id)
+                                  ? AppIcons.heartFill
+                                  : AppIcons.heartIcon,
+                              size: 14,
                             ),
                           ),
                         ),
@@ -105,30 +101,32 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // ── Text content ─────────────────────────────────────────
+            // ── Text — exactly 50% of card height ────────────────────
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(11, 9, 11, 10),
+                padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Product name
-                    CustomText(
-                      text: product.name,
-                      fontSize: AppFontSize.extraSmall,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.black2,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    // Name + seller/rating grouped at the top
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text: product.name,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.black2,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        _SellerRatingRow(product: product),
+                      ],
                     ),
-                    const SizedBox(height: 4),
 
-                    // "by Seller · ⭐ rating" row
-                    _SellerRatingRow(product: product),
-
-                    const Spacer(),
-
-                    // Price
+                    // Price pinned to bottom of text zone
                     CustomText(
                       text: product.hasPriceRange
                           ? '\$${product.price.toStringAsFixed(0)} – \$${product.maxPrice.toStringAsFixed(0)}'

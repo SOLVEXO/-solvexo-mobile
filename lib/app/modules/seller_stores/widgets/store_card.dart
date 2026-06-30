@@ -110,27 +110,33 @@ class _StoreAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        gradient: isActive
-            ? AppColors.appbarGradient
-            : const LinearGradient(
-                colors: [AppColors.lightGrey2, AppColors.lightGrey4],
-              ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      alignment: Alignment.center,
-      child: isprofile
-          ? CommonImageView(url: store.logo)
-          : CustomText(
+    return isprofile
+        ? CommonImageView(
+            url: store.logo,
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+            radius: BorderRadius.circular(12),
+          )
+        : Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              gradient: isActive
+                  ? AppColors.appbarGradient
+                  : const LinearGradient(
+                      colors: [AppColors.lightGrey2, AppColors.lightGrey4],
+                    ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: CustomText(
               text: store.name[0],
               fontSize: AppFontSize.small2,
               fontWeight: FontWeight.bold,
               color: AppColors.white,
             ),
-    );
+          );
   }
 }
 

@@ -24,11 +24,11 @@ class OrderItems extends StatelessWidget {
           fontWeight: FontWeight.w800,
         ),
         ListView.builder(
-          itemCount: item.orderItems.length,
+          itemCount: item.allItems.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
-            final orderDetail = item.orderItems[index];
+            final orderDetail = item.allItems[index];
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),

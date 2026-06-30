@@ -9,7 +9,7 @@ class ProductVariant {
   final String? size;
   final String? color;
   final double price;
-  final int stock;
+  final int? stock; // null = unlimited
   final List<String> images;
   final String status;
   final DateTime createdAt;
@@ -29,6 +29,24 @@ class ProductVariant {
     required this.updatedAt,
   });
 
+  // null  → unlimited; int → as-is; "∞"/"unlimited"/"Infinity" → null
+  static int? _parseStock(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is int) return raw;
+    if (raw is double) return raw.toInt();
+    final s = raw.toString().trim().toLowerCase();
+    if (s.isEmpty || s == '∞' || s.startsWith('∞') ||
+        s == 'unlimited' || s == 'infinity' || s == 'infinite') {
+      return null;
+    }
+    return int.tryParse(s);
+  }
+
+  bool get isUnlimited => stock == null;
+  bool get isInStock => stock == null || stock! > 0;
+  // Large sentinel so qty-cap comparisons work without special-casing nulls
+  int get resolvedStock => stock ?? 999999;
+
   factory ProductVariant.fromJson(Map<String, dynamic> json) {
     return ProductVariant(
       id: json['_id'] ?? json['id'] ?? '',
@@ -37,7 +55,7 @@ class ProductVariant {
       size: json['size'],
       color: json['color'],
       price: (json['price'] ?? 0).toDouble(),
-      stock: json['stock'] ?? 0,
+      stock: _parseStock(json['stock']),
       images: List<String>.from(json['images'] ?? []),
       status: json['status'] ?? 'active',
       createdAt: DateTime.parse(
@@ -77,6 +95,7 @@ class ProductModel {
   final CategoryModel? category;
   final List<String> images;
   final List<ProductVariant> variants;
+  final String type; // 'physical' | 'digital'
 
   // Analytics fields
   final int viewCount;
@@ -99,6 +118,7 @@ class ProductModel {
     this.category,
     required this.images,
     required this.variants,
+    this.type = 'physical',
     required this.viewCount,
     required this.wishlistCount,
     required this.purchaseCount,
@@ -135,6 +155,7 @@ class ProductModel {
       variants: (json['variants'] as List? ?? [])
           .map((v) => ProductVariant.fromJson(v as Map<String, dynamic>))
           .toList(),
+      type: json['type'] as String? ?? 'physical',
       viewCount: json['viewCount'] ?? 0,
       wishlistCount: json['wishlistCount'] ?? 0,
       purchaseCount: json['purchaseCount'] ?? 0,
@@ -188,15 +209,20 @@ class ProductModel {
   /// True when there are multiple price points across variants
   bool get hasPriceRange => price != maxPrice;
 
-  /// Total stock across all active variants
+  bool get isDigital => type.toLowerCase() == 'digital';
+
+  /// Total stock across active variants. Returns 999999 if any variant is unlimited.
   int get stock {
-    return variants
-        .where((v) => v.status == 'active')
-        .fold(0, (sum, v) => sum + v.stock);
+    final active = variants.where((v) => v.status == 'active');
+    if (active.any((v) => v.isUnlimited)) return 999999;
+    return active.fold(0, (sum, v) => sum + v.stock!);
   }
 
-  /// True when at least one variant has stock
-  bool get inStock => stock > 0;
+  /// True when at least one active variant is in stock (or product is digital).
+  bool get inStock {
+    if (isDigital) return true;
+    return variants.any((v) => v.status == 'active' && v.isInStock);
+  }
 
   /// True when product and all logic is active
   bool get isActive => status == 'active';

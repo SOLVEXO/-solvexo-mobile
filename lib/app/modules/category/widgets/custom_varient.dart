@@ -102,10 +102,9 @@ class CustomVarient extends StatelessWidget {
                     controller.selectedVariantIndex.value == variantIndex;
 
                 // Check stock for this size
-                final variantStock = variantIndex != -1
-                    ? product.variants[variantIndex].stock
-                    : 0;
-                final outOfStock = variantStock == 0;
+                final outOfStock = variantIndex != -1
+                    ? !product.variants[variantIndex].isInStock
+                    : true;
 
                 return GestureDetector(
                   onTap: outOfStock
@@ -204,18 +203,20 @@ class CustomVarient extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: variant.stock > 0
+                      color: variant.isInStock
                           ? AppColors.green2.withOpacity(0.10)
                           : AppColors.red.withOpacity(0.10),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: CustomText(
-                      text: variant.stock > 0
+                      text: variant.isUnlimited
+                          ? '∞ Unlimited'
+                          : variant.isInStock
                           ? '${variant.stock} in stock'
                           : 'Out of stock',
                       fontSize: AppFontSize.small,
                       fontWeight: FontWeight.w600,
-                      color: variant.stock > 0
+                      color: variant.isInStock
                           ? AppColors.green2
                           : AppColors.red,
                     ),

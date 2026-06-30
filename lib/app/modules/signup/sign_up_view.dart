@@ -1,6 +1,4 @@
-import 'package:book_store_app/app/components/auth_or_row.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
-import 'package:book_store_app/app/components/buttons/social_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -8,7 +6,6 @@ import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart'
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
-import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,36 +20,71 @@ class SignUpView extends StatelessWidget {
       key: authController.registerFormKey,
       child: SingleChildScrollView(
         key: const PageStorageKey("signup"),
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Email Field
+            // ── Heading ───────────────────────────────────────────────────
+            const CustomText(
+              text: 'Create account',
+              fontSize: AppFontSize.veryLarge,
+              fontWeight: FontWeight.w800,
+              color: AppColors.black2,
+            ),
+            const SizedBox(height: 2),
+            const CustomText(
+              text: 'Fill in the details below to get started',
+              fontSize: AppFontSize.small,
+              color: AppColors.grey,
+            ),
+
+            const SizedBox(height: 10),
+
+            // ── Email ─────────────────────────────────────────────────────
             CustomTextField(
-              hintText: "Enter email address",
+              hintText: 'Email address',
               isborder: true,
+              fillColor: AppColors.background,
+              filled: true,
+              prefixIcon: SvgIcon(
+                assetName: AppIcons.emailIcon,
+                color: AppColors.gray600,
+              ),
               controller: authController.registerEmailController,
               keyboardType: TextInputType.emailAddress,
               validator: authController.validateEmail,
             ),
 
-            const SizedBox(height: AppDimen.borderRadius),
+            const SizedBox(height: 8),
 
-            // First Name and Last Name
+            // ── First + Last name ─────────────────────────────────────────
             Row(
               children: [
                 Expanded(
                   child: CustomTextField(
-                    hintText: "First name",
+                    hintText: 'First name',
+                    prefixIcon: SvgIcon(
+                      assetName: AppIcons.profileIcon,
+                      color: AppColors.gray600,
+                    ),
                     isborder: true,
+                    fillColor: AppColors.background,
+                    filled: true,
                     controller: authController.registerFirstNameController,
                     validator: authController.validateName,
                   ),
                 ),
-                const SizedBox(width: AppDimen.borderRadius),
+                const SizedBox(width: 10),
                 Expanded(
                   child: CustomTextField(
-                    hintText: "Last name",
+                    hintText: 'Last name',
+                    prefixIcon: SvgIcon(
+                      assetName: AppIcons.profileIcon,
+                      color: AppColors.gray600,
+                    ),
                     isborder: true,
+                    fillColor: AppColors.background,
+                    filled: true,
                     controller: authController.registerLastNameController,
                     validator: authController.validateName,
                   ),
@@ -60,104 +92,92 @@ class SignUpView extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: AppDimen.borderRadius),
+            const SizedBox(height: 8),
 
-            // Phone Number Field
+            // ── Phone ─────────────────────────────────────────────────────
             CustomTextField(
-              hintText: "Input mobile number",
+              hintText: 'Mobile number',
               isborder: true,
+              fillColor: AppColors.background,
+              filled: true,
               controller: authController.registerPhoneController,
               keyboardType: TextInputType.phone,
               validator: authController.validatePhone,
               prefixIcon: SvgIcon(
                 assetName: AppIcons.phoneIcon,
-                size: AppFontSize.verySmall,
                 color: AppColors.lightGrey,
               ),
             ),
 
-            const SizedBox(height: AppDimen.borderRadius),
+            const SizedBox(height: 8),
 
-            // Password Field
+            // ── Password ──────────────────────────────────────────────────
             Obx(
               () => CustomTextField(
-                hintText: "Enter password",
+                hintText: 'Password',
                 isborder: true,
+                fillColor: AppColors.background,
+                filled: true,
+                prefixIcon: SvgIcon(
+                  assetName: AppIcons.lockPassword,
+                  color: AppColors.gray600,
+                ),
                 controller: authController.registerPasswordController,
                 obscureText: !authController.isPasswordVisible.value,
                 validator: authController.validatePassword,
                 suffixIcon: IconButton(
-                  icon: Icon(
-                    authController.isPasswordVisible.value
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: AppColors.lightGrey,
+                  icon: SvgIcon(
+                    assetName: authController.isPasswordVisible.value
+                        ? AppIcons.hidePassword
+                        : AppIcons.showPassword,
+                    color: AppColors.grey,
                   ),
                   onPressed: authController.togglePasswordVisibility,
                 ),
               ),
             ),
 
-            const SizedBox(height: AppDimen.borderRadius),
+            const SizedBox(height: 8),
 
-            // Confirm Password Field
+            // ── Confirm password ──────────────────────────────────────────
             Obx(
               () => CustomTextField(
-                hintText: "Confirm password",
+                hintText: 'Confirm password',
                 isborder: true,
+                fillColor: AppColors.background,
+                filled: true,
+                prefixIcon: SvgIcon(
+                  assetName: AppIcons.lockPassword,
+                  color: AppColors.gray600,
+                ),
                 controller: authController.registerConfirmPasswordController,
                 obscureText: !authController.isConfirmPasswordVisible.value,
                 validator: authController.validateConfirmPassword,
                 suffixIcon: IconButton(
-                  icon: Icon(
-                    authController.isConfirmPasswordVisible.value
-                        ? Icons.visibility
-                        : Icons.visibility_off,
-                    color: AppColors.lightGrey,
+                  icon: SvgIcon(
+                    assetName: authController.isConfirmPasswordVisible.value
+                        ? AppIcons.hidePassword
+                        : AppIcons.showPassword,
+                    color: AppColors.grey,
                   ),
                   onPressed: authController.toggleConfirmPasswordVisibility,
                 ),
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
-            // Terms Text
-            CustomText(
-              text:
-                  "By continuing with sign up process, you agree to our Terms & Conditions and Privacy Policy.",
-              color: AppColors.greySwatch600,
-            ),
-
-            SizedBox(height: AppDimen.borderRadius),
-
-            // Sign Up Button
+            // ── Sign up button ────────────────────────────────────────────
             Obx(
               () => AppButton(
                 label: authController.isLoading.value
-                    ? 'Signing Up...'
-                    : 'Sign Up',
+                    ? 'Creating Account…'
+                    : 'Create Account',
                 onPressed: authController.isLoading.value
                     ? null
-                    : () {
-                        authController.register();
-                      },
+                    : authController.register,
               ),
             ),
-
-            SizedBox(height: AppDimen.borderRadius),
-
-            const AuthOrRow(),
-
-            const SizedBox(height: AppDimen.borderRadius),
-
-            // Social Login Buttons
-            SocialButton.google(authController.signInWithGoogle),
-            const SizedBox(height: AppDimen.borderRadius),
-            SocialButton.facebook(authController.signInWithFacebook),
-            const SizedBox(height: AppDimen.borderRadius),
-            SocialButton.apple(authController.signInWithApple),
-            SizedBox(height: AppDimen.borderRadius),
           ],
         ),
       ),

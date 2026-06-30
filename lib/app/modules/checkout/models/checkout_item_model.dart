@@ -5,6 +5,7 @@ class CheckoutItem {
   final String image;
   final double price;
   final int quantity;
+  final String productType; // 'physical' or 'digital'
 
   CheckoutItem({
     this.id,
@@ -13,6 +14,7 @@ class CheckoutItem {
     required this.image,
     required this.price,
     required this.quantity,
+    this.productType = 'physical',
   });
 
   factory CheckoutItem.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class CheckoutItem {
       image: json['image'],
       price: double.parse(json['price'].toString()),
       quantity: json['quantity'],
+      productType: json['productType'] as String? ?? 'physical',
     );
   }
 
@@ -33,5 +36,6 @@ class CheckoutItem {
     "image": image,
     "price": price,
     "quantity": quantity,
+    "productType": productType,
   };
 }

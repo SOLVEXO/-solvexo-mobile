@@ -43,19 +43,19 @@ class SellerProductsView extends StatelessWidget {
           ProductsSearchBar(),
           ProductFilterBar(controller: controller),
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) return const ProductsShimmer();
+            child: CustomRefreshWrapper(
+              onRefresh: controller.refreshData,
+              child: Obx(() {
+                if (controller.isLoading.value) return const ProductsShimmer();
 
-              final products = controller.filteredProducts;
-              final isSearch = controller.searchQuery.value.isNotEmpty;
+                final products = controller.filteredProducts;
+                final isSearch = controller.searchQuery.value.isNotEmpty;
 
-              if (products.isEmpty) {
-                return ProductsEmptyState(isSearch: isSearch);
-              }
+                if (products.isEmpty) {
+                  return ProductsEmptyState(isSearch: isSearch);
+                }
 
-              return CustomRefreshWrapper(
-                onRefresh: controller.refreshData,
-                child: ListView.separated(
+                return ListView.separated(
                   padding: const EdgeInsets.all(AppDimen.allPadding),
                   itemCount: products.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -66,9 +66,9 @@ class SellerProductsView extends StatelessWidget {
                       arguments: products[i],
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ],
       ),

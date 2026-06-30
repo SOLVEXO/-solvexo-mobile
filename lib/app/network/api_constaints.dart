@@ -90,7 +90,7 @@ class ApiConstants {
   static const String myRefunds = "$apiPrefix/refunds/my";
   static const String uploadRefundImages = '$apiPrefix/refunds/upload-images';
   static const String orders = "$apiPrefix/orders";
-  static const String myOrders = "$apiPrefix/orders/myorders";
+  static const String myOrders = "$apiPrefix/orders/my-orders";
   static String getOrderById(String id) => "$apiPrefix/orders/$id";
   static String updateOrderToPaid(String id) => "$apiPrefix/orders/$id/pay";
   static String cancelOrder(String id) => "$apiPrefix/orders/$id/cancel";
@@ -110,6 +110,10 @@ class ApiConstants {
   static const String removeFromWishlist =
       '$apiPrefix/cart/remove-from-wishlist';
   // ============ Checkout / Shipping Endpoints ============
+  static const String createCheckout = "$apiPrefix/checkout/create-checkout";
+  static const String addShippingInCheckout =
+      "$apiPrefix/checkout/addShippingInCheckout";
+  static const String codPayment = "$apiPrefix/payment/cod-payment";
   static const String getShippingZones = "$apiPrefix/checkout/getShippingZones";
   // ============ Seller / Store Endpoints ============
   static const String createStore = "$apiPrefix/store/create-store";
@@ -123,14 +127,17 @@ class ApiConstants {
   static const String addDigitalProduct =
       "$apiPrefix/products/add-digital-product";
   static const String editProduct = "$apiPrefix/products/edit-product";
+  static String getStoreInventory(String storeId) =>
+      "$apiPrefix/inventory/getStoreInventory/$storeId";
+  static String sellerOrders(String storeId) =>
+      "$apiPrefix/orders/seller-orders/$storeId";
+  static String markOrderPaid(String orderId) =>
+      "$apiPrefix/orders/mark-paid/$orderId";
+  static const String updateOrderStatus = "$apiPrefix/orders/update-status";
 
   // ============ Upload Endpoints ============
-  // ✅ Upload
-  // static const String uploadImage = '$apiPrefix/upload/image';
-  // static const String uploadProductImages = "$apiPrefix/upload/products";
-  // static const String uploadCategoryImage = "$apiPrefix/upload/category";
-  // static const String uploadProfileImage = "$apiPrefix/upload/profile";
-
+  static const String uploadFile = '$apiPrefix/upload/file';
+  static const String uploadPrivateFile = '$apiPrefix/upload/private-file';
   // static String get cartSync => null;
 
   // ============ Query Parameters Helper ============

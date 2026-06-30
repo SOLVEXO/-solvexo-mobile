@@ -33,8 +33,14 @@ class CartItemWidget extends StatelessWidget {
                 onChanged: (v) => controller.toggleItemSelection(item, v!),
               ),
 
-              /// Product Image — use displayImage getter (images[0] or '')
-              CommonImageView(url: item.displayImage, width: 60),
+              /// Product Image
+              CommonImageView(
+                url: item.displayImage,
+                width: 70,
+                height: 70,
+                fit: BoxFit.cover,
+                radius: BorderRadius.circular(10),
+              ),
 
               const SizedBox(width: 10),
 

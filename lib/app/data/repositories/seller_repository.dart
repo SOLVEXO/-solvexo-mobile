@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -7,7 +5,6 @@ import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http_parser/http_parser.dart';
 
 class SellerRepository {
   final BaseClient _client = BaseClient();
@@ -65,64 +62,23 @@ class SellerRepository {
   Future<StoreModel?> updateStore({
     required String storeId,
     required String name,
-    File? logoFile,
+    String? logoUrl,
     String? categoryId,
     String? description,
     List<String>? productTypes,
   }) async {
     try {
-      final dynamic body;
-
-      if (logoFile != null) {
-        debugPrint('📤 updateStore (multipart) storeId=$storeId');
-
-        final filename = logoFile.path.split('/').last;
-        final ext = filename.split('.').last.toLowerCase();
-        final mimeSubtype = ext == 'jpg' ? 'jpeg' : ext;
-
-        // ✅ Use MapEntry list for FormData so we can have repeated keys
-        // (required for sending arrays like productTypes in multipart)
-        final fields = <MapEntry<String, dynamic>>[
-          MapEntry('storeId', storeId),
-          MapEntry('name', name),
-          MapEntry(
-            'logo',
-            await MultipartFile.fromFile(
-              logoFile.path,
-              filename: filename,
-              contentType: MediaType('image', mimeSubtype),
-            ),
-          ),
-        ];
-
-        if ((categoryId ?? '').isNotEmpty) {
-          fields.add(MapEntry('categoryId', categoryId!));
-        }
-        if ((description ?? '').isNotEmpty) {
-          fields.add(MapEntry('description', description!));
-        }
-        // ✅ Repeated keys = array on the backend (multer / busboy standard)
-        if (productTypes != null && productTypes.isNotEmpty) {
-          for (final type in productTypes) {
-            fields.add(MapEntry('productTypes[]', type));
-          }
-        }
-
-        body = FormData.fromMap(Map.fromEntries(fields));
-        debugPrint('   FormData fields: ${fields.map((e) => e.key).toList()}');
-      } else {
-        // ─── JSON branch ───────────────────────────────────────────────────
-        debugPrint('📤 updateStore (json) storeId=$storeId');
-        body = <String, dynamic>{
-          'storeId': storeId,
-          'name': name,
-          if ((categoryId ?? '').isNotEmpty) 'categoryId': categoryId,
-          if ((description ?? '').isNotEmpty) 'description': description,
-          if (productTypes != null && productTypes.isNotEmpty)
-            'productTypes': productTypes,
-        };
-        debugPrint('   body: $body');
-      }
+      debugPrint('📤 updateStore storeId=$storeId');
+      final body = <String, dynamic>{
+        'storeId': storeId,
+        'name': name,
+        if ((logoUrl ?? '').isNotEmpty) 'logo': logoUrl,
+        if ((categoryId ?? '').isNotEmpty) 'categoryId': categoryId,
+        if ((description ?? '').isNotEmpty) 'description': description,
+        if (productTypes != null && productTypes.isNotEmpty)
+          'productTypes': productTypes,
+      };
+      debugPrint('   body: $body');
 
       final response = await _client.post(
         ApiConstants.updateStore,
@@ -160,55 +116,21 @@ class SellerRepository {
     required String name,
     required String sellerType,
     required List<String> productTypes,
-    File? logoFile,
+    String? logoUrl,
     String? categoryId,
     String? description,
   }) async {
     try {
-      final dynamic body;
-
-      if (logoFile != null) {
-        debugPrint('📤 createStore (multipart) name=$name');
-
-        final filename = logoFile.path.split('/').last;
-        final ext = filename.split('.').last.toLowerCase();
-        final mimeSubtype = ext == 'jpg' ? 'jpeg' : ext;
-
-        final fields = <MapEntry<String, dynamic>>[
-          MapEntry('name', name),
-          MapEntry('sellerType', sellerType),
-          MapEntry(
-            'logo',
-            await MultipartFile.fromFile(
-              logoFile.path,
-              filename: filename,
-              contentType: MediaType('image', mimeSubtype),
-            ),
-          ),
-        ];
-
-        if ((categoryId ?? '').isNotEmpty) {
-          fields.add(MapEntry('categoryId', categoryId!));
-        }
-        if ((description ?? '').isNotEmpty) {
-          fields.add(MapEntry('description', description!));
-        }
-        for (final type in productTypes) {
-          fields.add(MapEntry('productTypes[]', type));
-        }
-
-        body = FormData.fromMap(Map.fromEntries(fields));
-      } else {
-        debugPrint('📤 createStore (json) name=$name');
-        body = <String, dynamic>{
-          'name': name,
-          'sellerType': sellerType,
-          'productTypes': productTypes,
-          if ((categoryId ?? '').isNotEmpty) 'categoryId': categoryId,
-          if ((description ?? '').isNotEmpty) 'description': description,
-        };
-        debugPrint('   body: $body');
-      }
+      debugPrint('📤 createStore name=$name');
+      final body = <String, dynamic>{
+        'name': name,
+        'sellerType': sellerType,
+        'productTypes': productTypes,
+        if ((logoUrl ?? '').isNotEmpty) 'logo': logoUrl,
+        if ((categoryId ?? '').isNotEmpty) 'categoryId': categoryId,
+        if ((description ?? '').isNotEmpty) 'description': description,
+      };
+      debugPrint('   body: $body');
 
       final response = await _client.post(
         ApiConstants.createStore,

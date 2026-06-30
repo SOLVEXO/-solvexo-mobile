@@ -2,7 +2,6 @@ import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_user_greeting.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -52,15 +51,13 @@ class BottomCheckoutBar extends StatelessWidget {
                   ),
                   Expanded(
                     child: AppButton(
-                      onPressed: controller.subtotal.value == 0
+                      onPressed: (controller.subtotal.value == 0 ||
+                              controller.isCheckingOut.value)
                           ? null
-                          : () {
-                              Get.toNamed(
-                                Routes.checkoutView,
-                                arguments: controller.cartItems,
-                              );
-                            },
-                      label: "Checkout",
+                          : controller.proceedToCheckout,
+                      label: controller.isCheckingOut.value
+                          ? 'Creating checkout…'
+                          : 'Checkout',
                     ),
                   ),
                 ],

@@ -40,7 +40,9 @@ import '../modules/pos_products/views/pos_products_view.dart';
 import '../modules/pos_settings/views/pos_settings_view.dart';
 import '../modules/seller_analytics/bindings/seller_analytics_binding.dart';
 import '../modules/seller/bindings/seller_binding.dart';
+import '../modules/seller_orders/bindings/seller_order_detail_binding.dart';
 import '../modules/seller_orders/bindings/seller_orders_binding.dart';
+import '../modules/seller_orders/views/seller_order_detail_view.dart';
 import '../modules/seller_products/bindings/seller_products_binding.dart';
 import '../modules/seller_settings/bindings/seller_settings_binding.dart';
 import '../modules/seller_analytics/views/seller_analytics_view.dart';
@@ -332,6 +334,11 @@ class AppPages {
       name: Routes.sellerOrders,
       page: () => SellerOrdersView(),
       binding: SellerOrdersBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerOrderDetail,
+      page: () => const SellerOrderDetailView(),
+      binding: SellerOrderDetailBinding(),
     ),
     GetPage(
       name: Routes.addSellerProduct,

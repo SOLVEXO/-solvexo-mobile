@@ -25,20 +25,23 @@ class SellerOrdersView extends StatelessWidget {
           OrderFilterBar(controller: controller),
           const Divider(height: 1, color: AppColors.lightGrey2),
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) return const OrdersShimmer();
-              final orders = controller.filteredOrders;
-              if (orders.isEmpty) return const OrdersEmptyState();
-              return CustomRefreshWrapper(
-                onRefresh: controller.refreshData,
-                child: ListView.separated(
+            child: CustomRefreshWrapper(
+              onRefresh: controller.refreshData,
+              child: Obx(() {
+                if (controller.isLoading.value) return const OrdersShimmer();
+                final orders = controller.filteredOrders;
+                if (orders.isEmpty) return const OrdersEmptyState();
+                return ListView.separated(
                   padding: const EdgeInsets.all(AppDimen.allPadding),
                   itemCount: orders.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) => OrderCard(order: orders[i]),
-                ),
-              );
-            }),
+                  itemBuilder: (_, i) => OrderCard(
+                    order: orders[i],
+                    controller: controller,
+                  ),
+                );
+              }),
+            ),
           ),
         ],
       ),

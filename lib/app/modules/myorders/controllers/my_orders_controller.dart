@@ -95,6 +95,9 @@ class MyOrdersController extends BaseController {
   bool get canRefund => currentStatus.value != OrderDeliveryStatus.delivered;
   bool get canReview => currentStatus.value == OrderDeliveryStatus.delivered;
 
+  bool orderCanCancel(OrderModel order) => order.canCancel;
+  bool orderIsCompleted(OrderModel order) => order.isCompleted;
+
   void updateStatus(OrderDeliveryStatus status) {
     currentStatus.value = status;
   }
@@ -103,19 +106,25 @@ class MyOrdersController extends BaseController {
   List<OrderModel> get filteredOrders {
     switch (selectedTab.value) {
       case 1:
-        return orders.where((e) => e.orderStatus == "pending").toList();
+        return orders.where((e) => e.orderStatus == 'pending').toList();
       case 2:
-        return orders.where((e) => e.orderStatus == "processing").toList();
+        return orders.where((e) => e.orderStatus == 'processing').toList();
       case 3:
-        return orders.where((e) => e.orderStatus == "shipped").toList();
+        return orders
+            .where((e) =>
+                e.orderStatus == 'shipped' ||
+                e.orderStatus == 'partially_shipped')
+            .toList();
       case 4:
-        return orders.where((e) => e.orderStatus == "delivered").toList();
+        return orders.where((e) => e.orderStatus == 'completed').toList();
+      case 5:
+        return orders.where((e) => e.orderStatus == 'cancelled').toList();
       default:
         return orders;
     }
   }
 
-  final tabs = ["All", "Pending", "Processing", "Shipped", "Delivered"];
+  final tabs = ['All', 'Pending', 'Processing', 'Shipped', 'Completed', 'Cancelled'];
 
   void changeTab(int index) {
     selectedTab.value = index;

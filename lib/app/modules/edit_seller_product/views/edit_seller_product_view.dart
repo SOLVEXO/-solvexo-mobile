@@ -2,9 +2,7 @@ import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/edit_seller_product/controllers/edit_seller_product_controller.dart';
 import 'package:book_store_app/app/modules/edit_seller_product/widgets/edit_product_danger_zone.dart';
-import 'package:book_store_app/app/modules/edit_seller_product/widgets/edit_product_emoji_section.dart';
 import 'package:book_store_app/app/modules/edit_seller_product/widgets/edit_product_form.dart';
-import 'package:book_store_app/app/modules/edit_seller_product/widgets/edit_product_status_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
@@ -27,10 +25,7 @@ class EditSellerProductView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            EditProductEmojiSection(controller: controller),
             EditProductForm(controller: controller),
-            const SizedBox(height: 16),
-            EditProductStatusCard(controller: controller),
             const SizedBox(height: 16),
             EditProductDangerZone(controller: controller),
             const SizedBox(height: 32),

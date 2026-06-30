@@ -1,9 +1,11 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart';
+import 'package:book_store_app/app/modules/add_seller_product/widgets/digital_file_upload_tile.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -48,6 +50,10 @@ class AddProductDetailsForm extends StatelessWidget {
               maxLines: 4,
             ),
           ),
+          const SizedBox(height: 16),
+
+          // ── Product Images ──────────────────────────────────────────
+          _ProductImagesSection(controller: controller),
           const SizedBox(height: 16),
 
           // ── Price ───────────────────────────────────────────────────
@@ -256,6 +262,155 @@ class _FormSection extends StatelessWidget {
         const SizedBox(height: 6),
         child,
       ],
+    );
+  }
+}
+
+// ── Product images section ────────────────────────────────────────────────────
+
+class _ProductImagesSection extends StatelessWidget {
+  final AddSellerProductController controller;
+  const _ProductImagesSection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return _FormSection(
+      label: 'Product Images',
+      hint: 'Up to 5 images',
+      child: Obx(() {
+        final images = controller.productImages;
+        final isUploading = controller.isUploadingImage.value;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              ...List.generate(images.length, (i) => Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: _ImageThumbnail(
+                      url: images[i],
+                      onRemove: () => controller.removeImage(i),
+                    ),
+                  )),
+              if (isUploading)
+                const _LoadingThumbnail()
+              else if (images.length < 5)
+                _AddImageButton(onTap: controller.pickAndUploadImage),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _ImageThumbnail extends StatelessWidget {
+  final String url;
+  final VoidCallback onRemove;
+  const _ImageThumbnail({required this.url, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+          child: CachedNetworkImage(
+            imageUrl: url,
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+            placeholder: (_, __) => Container(
+              width: 80,
+              height: 80,
+              color: AppColors.textfldFillColor,
+              child: const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+            errorWidget: (_, __, ___) => Container(
+              width: 80,
+              height: 80,
+              color: AppColors.textfldFillColor,
+              child: const Icon(Icons.broken_image_rounded,
+                  color: AppColors.grey, size: 28),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: const BoxDecoration(
+                color: AppColors.red,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close_rounded,
+                  size: 12, color: AppColors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoadingThumbnail extends StatelessWidget {
+  const _LoadingThumbnail();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: AppColors.textfldFillColor,
+        borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+        border: Border.all(color: AppColors.lightGrey2),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+    );
+  }
+}
+
+class _AddImageButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AddImageButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+          border: Border.all(
+            color: AppColors.primaryColor.withOpacity(0.4),
+          ),
+        ),
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_photo_alternate_rounded,
+                size: 26, color: AppColors.primaryColor),
+            SizedBox(height: 4),
+            CustomText(
+              text: 'Add',
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryColor,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -484,49 +639,11 @@ class _DigitalFields extends StatelessWidget {
           child: Obx(() => Column(
                 children: [
                   ...List.generate(controller.digitalFiles.length, (i) {
-                    final entry = controller.digitalFiles[i];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              children: [
-                                CustomTextField(
-                                  controller: entry.urlCtrl,
-                                  hintText: 'File URL',
-                                  isborder: true,
-                                  fillColor: AppColors.textfldFillColor,
-                                ),
-                                const SizedBox(height: 6),
-                                CustomTextField(
-                                  controller: entry.nameCtrl,
-                                  hintText: 'File name (e.g. guide.pdf)',
-                                  isborder: true,
-                                  fillColor: AppColors.textfldFillColor,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () => controller.removeDigitalFile(i),
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: AppColors.red.withOpacity(0.08),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.remove_rounded,
-                                size: 18,
-                                color: AppColors.red,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    return DigitalFileUploadTile(
+                      key: ValueKey(i),
+                      entry: controller.digitalFiles[i],
+                      onPickFile: () => controller.pickAndUploadDigitalFile(i),
+                      onRemove: () => controller.removeDigitalFile(i),
                     );
                   }),
                   GestureDetector(

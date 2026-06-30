@@ -1,7 +1,6 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -19,14 +18,10 @@ class RecentOrder extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MyOrdersController());
     final order = orders;
-    final orderItem =
-        order.orderItems[controller
-                .orders[controller.orders.length - 1]
-                .orderItems
-                .length -
-            1];
+    final allItems = order.allItems;
+    if (allItems.isEmpty) return const SizedBox.shrink();
+    final orderItem = allItems.first;
     return Column(
       spacing: 5,
       crossAxisAlignment: CrossAxisAlignment.start,

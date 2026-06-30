@@ -31,11 +31,7 @@ class PosCartBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFd97757), Color(0xFFE8956A)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
+            gradient: AppColors.appbarGradient,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(

@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
+import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart'
     show DigitalFileEntry;
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 const List<String> kProductEmojis = [
   '📐', '☕', '🖼️', '➗', '🔬', '🧩', '📚', '📋', '💾', '🎨',
@@ -13,7 +18,8 @@ const List<String> kProductEmojis = [
 ];
 
 class EditSellerProductController extends GetxController {
-  final _repo = SellerProductRepository();
+  final _repo       = SellerProductRepository();
+  final _uploadRepo = UploadRepository();
 
   late SellerProduct product;
 
@@ -42,6 +48,9 @@ class EditSellerProductController extends GetxController {
   final RxBool isActive = true.obs;
   final RxBool isSaving = false.obs;
   final RxBool isDeleting = false.obs;
+  // Product images (shared)
+  final RxList<String> productImages = <String>[].obs;
+  final RxBool isUploadingImage = false.obs;
   // Physical-only
   final RxString stock = ''.obs;
   final RxString size = ''.obs;
@@ -72,6 +81,20 @@ class EditSellerProductController extends GetxController {
       selectedEmoji.value != product.emoji ||
       isActive.value != (product.status == ProductStatus.active);
 
+  // ── Product image management ──────────────────────────────────────────────
+
+  Future<void> pickAndUploadImage() async {
+    if (isUploadingImage.value || productImages.length >= 5) return;
+    isUploadingImage.value = true;
+    final url = await _uploadRepo.pickAndUpload(source: ImageSource.gallery);
+    isUploadingImage.value = false;
+    if (url != null) productImages.add(url);
+  }
+
+  void removeImage(int index) {
+    if (index < productImages.length) productImages.removeAt(index);
+  }
+
   // ── Digital file management ───────────────────────────────────────────────
 
   void addDigitalFile() => digitalFiles.add(DigitalFileEntry());
@@ -81,6 +104,39 @@ class EditSellerProductController extends GetxController {
       digitalFiles[index].dispose();
       digitalFiles.removeAt(index);
     }
+  }
+
+  Future<void> pickAndUploadDigitalFile(int index) async {
+    if (index >= digitalFiles.length) return;
+
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    if (result == null || result.files.isEmpty) return;
+
+    final picked = result.files.first;
+    if (picked.path == null) return;
+
+    final entry = digitalFiles[index];
+    entry.isUploading.value = true;
+
+    final data = await _uploadRepo.uploadPrivateFile(File(picked.path!));
+
+    entry.isUploading.value = false;
+
+    if (data == null) {
+      ToastUtil.showToast('File upload failed. Please try again.');
+      return;
+    }
+
+    entry.publicId.value = data['publicId'] as String? ?? '';
+    entry.fileName.value = data['fileName'] as String? ?? picked.name;
+    entry.fileSize.value = data['fileSize'] as int? ?? 0;
+    entry.mimeType.value = data['mimeType'] as String? ?? '';
+
+    if (entry.nameCtrl.text.trim().isEmpty) {
+      entry.nameCtrl.text = data['fileName'] as String? ?? picked.name;
+    }
+
+    digitalFiles.refresh();
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -145,6 +201,7 @@ class EditSellerProductController extends GetxController {
           ? null
           : shippingWeightCtrl.text.trim(),
       tags: tagList,
+      images: productImages.toList(),
     );
   }
 
@@ -153,7 +210,7 @@ class EditSellerProductController extends GetxController {
 
     final files = digitalFiles
         .map((e) => e.toJson())
-        .where((f) => (f['url'] as String).isNotEmpty)
+        .where((f) => (f['publicId'] as String).isNotEmpty)
         .toList();
 
     final String downloadLimit;
@@ -185,6 +242,7 @@ class EditSellerProductController extends GetxController {
       pdfStampingEnabled: pdfStampingEnabled.value,
       licenseType: licenseType.value,
       buyerDeliveryMessage: msg.isEmpty ? null : msg,
+      images: productImages.toList(),
     );
   }
 
@@ -243,6 +301,7 @@ class EditSellerProductController extends GetxController {
     selectedEmoji.value = product.emoji;
     unlimitedStock.value = product.isUnlimitedStock;
     isActive.value = product.status == ProductStatus.active;
+    productImages.assignAll(product.images);
     unlimitedDownload.value = isUnlimitedDl;
     downloadLimitCount.value = isUnlimitedDl ? '' : product.downloadLimit;
     linkExpiryDays.value = product.linkExpiryDays?.toString() ?? '';
@@ -253,8 +312,12 @@ class EditSellerProductController extends GetxController {
     // Pre-fill digital file entries from existing product data
     for (final f in product.digitalFiles) {
       final entry = DigitalFileEntry();
-      entry.urlCtrl.text = f['url'] as String? ?? '';
-      entry.nameCtrl.text = f['name'] as String? ?? '';
+      // Accept both new 'publicId' and legacy 'url' field
+      entry.publicId.value = f['publicId'] as String? ?? f['url'] as String? ?? '';
+      entry.fileName.value = f['name'] as String? ?? '';
+      entry.mimeType.value = f['mimeType'] as String? ?? '';
+      entry.fileSize.value = f['size'] as int? ?? 0;
+      entry.nameCtrl.text  = f['name'] as String? ?? '';
       digitalFiles.add(entry);
     }
   }

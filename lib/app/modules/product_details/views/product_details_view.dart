@@ -45,13 +45,13 @@ class ProductDetailsView extends StatelessWidget {
             ),
       appBar: CustomAppBarTwo(
         actions: [
-          CustomIconButton(
-            onPressed: () => Get.toNamed(Routes.searchView),
+          SvgIcon(
+            onTap: () => Get.toNamed(Routes.searchView),
             assetName: AppIcons.searchIcon,
-            size: AppFontSize.extraLarge,
+            size: 22,
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 10.0),
+            padding: const EdgeInsets.only(right: 20.0, left: 5),
             child: CartIconWithCount(),
           ),
         ],
@@ -262,7 +262,7 @@ class ProductDetailsView extends StatelessWidget {
                                     final isSelected =
                                         controller.selectedVariant.value?.id ==
                                         v.id;
-                                    final outOfStock = v.stock == 0;
+                                    final outOfStock = !v.isInStock;
                                     return GestureDetector(
                                       onTap: outOfStock
                                           ? null
@@ -355,18 +355,20 @@ class ProductDetailsView extends StatelessWidget {
                                         vertical: 5,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: v.stock > 0
+                                        color: v.isInStock
                                             ? AppColors.green2.withOpacity(0.10)
                                             : AppColors.red.withOpacity(0.10),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: CustomText(
-                                        text: v.stock > 0
+                                        text: v.isUnlimited
+                                            ? '∞ Unlimited'
+                                            : v.isInStock
                                             ? '${v.stock} in stock'
                                             : 'Out of stock',
                                         fontSize: AppFontSize.verySmall,
                                         fontWeight: FontWeight.w600,
-                                        color: v.stock > 0
+                                        color: v.isInStock
                                             ? AppColors.green2
                                             : AppColors.red,
                                       ),

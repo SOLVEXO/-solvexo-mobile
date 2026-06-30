@@ -19,7 +19,7 @@ class OrderTrackingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBarTwo(title: controller.filteredOrders[index].id),
+      appBar: CustomAppBarTwo(title: controller.filteredOrders[index].orderNumber),
       body: SingleChildScrollView(
         physics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
         padding: const EdgeInsets.all(16),

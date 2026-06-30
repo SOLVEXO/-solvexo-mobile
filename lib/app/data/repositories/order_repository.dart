@@ -8,27 +8,29 @@ import 'package:flutter/material.dart';
 class OrderRepository {
   final BaseClient _baseClient = BaseClient();
 
-  /// Get my orders
-  Future<List<OrderModel>> getMyOrders() async {
+  /// GET /api/orders/my-orders
+  Future<List<OrderModel>> getMyOrders({int page = 1, int limit = 20}) async {
     try {
-      // final token = await AppPreferences.getAccessTokenAsync();
+      debugPrint('🔄 Fetching my orders (page $page)...');
 
-      debugPrint('🔄 Fetching my orders...');
+      final response = await _baseClient.get(
+        ApiConstants.myOrders,
+        queryParameters: {'page': page, 'limit': limit},
+        requiresAuth: true,
+      );
 
-      final response = await _baseClient.get(ApiConstants.myOrders);
+      debugPrint('✅ Get My Orders status: ${response.statusCode}');
 
-      debugPrint('✅ Get My Orders Response: ${response.data}');
-
-      // ✅ NestJS returns: { success: true, count: X, data: [...] }
       if (response.data['success'] == true) {
-        final List data = response.data['data'];
-        final orders = data.map((e) => OrderModel.fromJson(e)).toList();
-
-        debugPrint('✅ Parsed ${orders.length} orders');
-        return orders;
+        final data = response.data['data'] as Map<String, dynamic>;
+        final orderList = (data['orders'] as List? ?? [])
+            .map((e) => OrderModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        debugPrint('✅ Parsed ${orderList.length} orders');
+        return orderList;
       }
 
-      debugPrint('⚠️ Response not successful');
+      debugPrint('⚠️ Response not successful: ${response.data}');
       return [];
     } catch (e) {
       debugPrint('❌ Get My Orders error: $e');
@@ -55,7 +57,7 @@ class OrderRepository {
       // ✅ NestJS returns: { success: true, message: "...", data: {...} }
       if (response.statusCode == 201 && response.data['success'] == true) {
         final order = OrderModel.fromJson(response.data['data']);
-        debugPrint('✅ Order created: ${order.id}');
+        debugPrint('✅ Order created: ${order.orderId}');
         return order;
       }
 

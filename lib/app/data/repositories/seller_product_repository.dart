@@ -8,6 +8,61 @@ import 'package:flutter/material.dart';
 class SellerProductRepository {
   final BaseClient _client = BaseClient();
 
+  // ─── GET /api/inventory/getStoreInventory/:storeId ────────────────────────
+
+  Future<({List<Map<String, dynamic>> products, int totalProducts, bool hasMore})>
+      fetchStoreInventory({
+    required String storeId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      final response = await _client.get(
+        ApiConstants.getStoreInventory(storeId),
+        queryParameters: {'page': page, 'limit': limit},
+        requiresAuth: true,
+      );
+
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        final pagination = data['pagination'] as Map<String, dynamic>;
+        final products =
+            (data['products'] as List).cast<Map<String, dynamic>>();
+        final totalProducts = pagination['totalProducts'] as int? ?? 0;
+        final totalPages = pagination['totalPages'] as int? ?? 1;
+        return (
+          products: products,
+          totalProducts: totalProducts,
+          hasMore: page < totalPages,
+        );
+      }
+
+      return (
+        products: <Map<String, dynamic>>[],
+        totalProducts: 0,
+        hasMore: false
+      );
+    } on DioException catch (e) {
+      debugPrint(
+          '❌ fetchStoreInventory DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return (
+        products: <Map<String, dynamic>>[],
+        totalProducts: 0,
+        hasMore: false
+      );
+    } catch (e) {
+      debugPrint('❌ fetchStoreInventory error: $e');
+      ToastUtil.showToast('Failed to load products. Please try again.');
+      return (
+        products: <Map<String, dynamic>>[],
+        totalProducts: 0,
+        hasMore: false
+      );
+    }
+  }
+
   // ─── POST /api/products/edit-product (digital) ───────────────────────────
 
   Future<bool> editDigitalProduct({
@@ -24,6 +79,7 @@ class SellerProductRepository {
     bool pdfStampingEnabled = false,
     String licenseType = 'personal',
     String? buyerDeliveryMessage,
+    List<String> images = const [],
   }) async {
     try {
       final body = <String, dynamic>{
@@ -35,6 +91,7 @@ class SellerProductRepository {
         if (description != null && description.isNotEmpty)
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
+        if (images.isNotEmpty) 'images': images,
         'digital': {
           'files': files,
           'downloadLimit': downloadLimit,
@@ -92,6 +149,7 @@ class SellerProductRepository {
     String? color,
     String? shippingWeight,
     List<String> tags = const [],
+    List<String> images = const [],
   }) async {
     try {
       final body = <String, dynamic>{
@@ -109,6 +167,7 @@ class SellerProductRepository {
         if (shippingWeight != null && shippingWeight.isNotEmpty)
           'shippingWeight': shippingWeight,
         if (tags.isNotEmpty) 'tags': tags,
+        if (images.isNotEmpty) 'images': images,
       };
 
       debugPrint('📤 editPhysicalProduct → ${ApiConstants.editProduct}');
@@ -152,6 +211,7 @@ class SellerProductRepository {
     String? description,
     double? compareAtPrice,
     List<String> tags = const [],
+    List<String> images = const [],
     bool isListedOnSolvexo = false,
     String? subCategoryId,
     // digital object
@@ -170,7 +230,7 @@ class SellerProductRepository {
         'status': status,
         'productType': 'digital',
         'isListedOnSolvexo': isListedOnSolvexo,
-        'images': <String>[],
+        'images': images,
         'subCategoryId': subCategoryId,
         if (description != null && description.isNotEmpty)
           'description': description,
@@ -233,6 +293,7 @@ class SellerProductRepository {
     String? color,
     String? shippingWeight,
     List<String> tags = const [],
+    List<String> images = const [],
     bool isListedOnSolvexo = false,
     String? subCategoryId,
   }) async {
@@ -243,7 +304,7 @@ class SellerProductRepository {
         'price': price,
         'status': status,
         'isListedOnSolvexo': isListedOnSolvexo,
-        'images': <String>[],
+        'images': images,
         if (description != null && description.isNotEmpty)
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,

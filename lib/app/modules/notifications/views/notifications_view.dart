@@ -1,7 +1,6 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
 import 'package:book_store_app/app/components/shimmer/trip_shimmer.dart';
 import 'package:book_store_app/app/modules/notifications/controllers/notifications_controller.dart';
 import 'package:book_store_app/app/modules/notifications/widgets/notification_filter_chips.dart';

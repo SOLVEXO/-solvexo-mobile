@@ -101,7 +101,7 @@ class ProductDetailController extends GetxController {
       if (response != null) {
         selectedVariant.value = response.variant;
         // Reset qty so it doesn't exceed new variant stock
-        if (productQty.value > response.variant.stock) {
+        if (productQty.value > response.variant.resolvedStock) {
           productQty.value = 1;
         }
         debugPrint('✅ Loaded variant: ${response.variant.sku}');
@@ -127,7 +127,8 @@ class ProductDetailController extends GetxController {
   // ─── 4. Quantity controls ─────────────────────────────────────────────────
 
   void increaseQty() {
-    final maxStock = selectedVariant.value?.stock ?? product.value?.stock ?? 0;
+    final maxStock =
+        selectedVariant.value?.resolvedStock ?? product.value?.stock ?? 0;
     if (productQty.value < maxStock) {
       productQty.value++;
     } else {
@@ -149,7 +150,7 @@ class ProductDetailController extends GetxController {
     }
 
     final variant = selectedVariant.value;
-    final stockAvailable = variant?.stock ?? p.stock;
+    final stockAvailable = variant?.resolvedStock ?? p.stock;
 
     if (stockAvailable == 0) {
       ToastUtil.showToast('Product is out of stock');
@@ -200,9 +201,10 @@ class ProductDetailController extends GetxController {
 
   /// Stock from selected variant, fallback to product total stock
   int get displayStock =>
-      selectedVariant.value?.stock ?? product.value?.stock ?? 0;
+      selectedVariant.value?.resolvedStock ?? product.value?.stock ?? 0;
 
-  bool get inStock => displayStock > 0;
+  bool get inStock =>
+      (product.value?.isDigital ?? false) || displayStock > 0;
 
   /// Images: selected variant images first, then product images
   List<String> get displayImages {

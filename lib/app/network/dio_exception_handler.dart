@@ -56,7 +56,9 @@ class DioExceptionHandler {
       // { "success": false, "message": "Error message here" }
       if (response.data is Map && response.data["message"] != null) {
         errorMessage = response.data["message"];
-      } else if (response.data is String) {
+      } else if (response.data is String &&
+          !(response.data as String).trimLeft().startsWith('<')) {
+        // Only use the raw string if it is not an HTML error page (e.g. nginx 413)
         errorMessage = response.data;
       } else {
         errorMessage = _getDefaultErrorMessage(response.statusCode);
@@ -80,6 +82,8 @@ class DioExceptionHandler {
         return "Resource not found";
       case 409:
         return "Conflict. Resource already exists";
+      case 413:
+        return "File is too large. Please upload a smaller file";
       case 422:
         return "Validation error. Please check your input";
       case 500:

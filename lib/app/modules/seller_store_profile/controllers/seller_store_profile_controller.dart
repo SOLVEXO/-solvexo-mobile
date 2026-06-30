@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:book_store_app/app/components/app_image_picker.dart';
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
+import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,8 @@ const List<String> kStoreCategories = [
 ];
 
 class SellerStoreProfileController extends GetxController {
-  final _repo = SellerRepository();
+  final _repo       = SellerRepository();
+  final _uploadRepo = UploadRepository();
 
   // ── Single source of truth ────────────────────────────────────────────────
   final Rx<StoreModel?> store = Rx<StoreModel?>(null);
@@ -145,10 +147,21 @@ class SellerStoreProfileController extends GetxController {
     if (!canSave || isSaving.value) return;
     isSaving.value = true;
 
+    // Upload logo first if a new file was picked, then pass the URL
+    String? logoUrl;
+    if (logoFile.value != null) {
+      logoUrl = await _uploadRepo.uploadFile(logoFile.value!);
+      if (logoUrl == null) {
+        ToastUtil.showToast('Logo upload failed. Please try again.');
+        isSaving.value = false;
+        return;
+      }
+    }
+
     final updated = await _repo.updateStore(
-      storeId:      store.value?.id      ?? '',
+      storeId:      store.value?.id ?? '',
       name:         nameCtrl.text.trim(),
-      logoFile:     logoFile.value,
+      logoUrl:      logoUrl,
       categoryId:   editCategory.value,
       description:  descCtrl.text.trim(),
       productTypes: store.value?.productTypes ?? [],

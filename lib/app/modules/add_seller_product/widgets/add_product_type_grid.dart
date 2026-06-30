@@ -1,10 +1,12 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/skeleton.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AddProductTypeGrid extends StatelessWidget {
   final AddSellerProductController controller;
@@ -25,15 +27,18 @@ class AddProductTypeGrid extends StatelessWidget {
             color: AppColors.black,
           ),
           const SizedBox(height: 16),
-          Obx(
-            () => GridView.count(
+          Obx(() {
+            if (controller.isLoadingTypes.value) {
+              return const _TypeGridShimmer();
+            }
+            return GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               childAspectRatio: 1.05,
-              children: kProductTypes
+              children: controller.availableTypes
                   .map(
                     (t) => _TypeCard(
                       data: t,
@@ -42,8 +47,55 @@ class AddProductTypeGrid extends StatelessWidget {
                     ),
                   )
                   .toList(),
-            ),
-          ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Shimmer skeleton for the type grid ───────────────────────────────────────
+
+class _TypeGridShimmer extends StatelessWidget {
+  const _TypeGridShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: AppColors.shimmerBase,
+      highlightColor: AppColors.shimmerHighlight,
+      child: GridView.count(
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.05,
+        children: List.generate(4, (_) => const _ShimmerTypeCard()),
+      ),
+    );
+  }
+}
+
+class _ShimmerTypeCard extends StatelessWidget {
+  const _ShimmerTypeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Skeleton(height: 40, width: 40, cornerRadius: 8),
+          SizedBox(height: 10),
+          Skeleton(height: 14, width: 70),
+          SizedBox(height: 6),
+          Skeleton(height: 11, width: 90),
         ],
       ),
     );

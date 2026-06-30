@@ -25,13 +25,10 @@ class HomeSearchBar extends StatelessWidget {
         hintText: 'Search products…',
         borderBorderradius: AppDimen.borderRadius,
         borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-        prefixIcon: Padding(
-          padding: const EdgeInsets.all(5),
-          child: SvgIcon(
-            assetName: AppIcons.searchIcon,
-            size: 20,
-            color: AppColors.iosGrey,
-          ),
+        prefixIcon: SvgIcon(
+          assetName: AppIcons.searchIcon,
+          size: 20,
+          color: AppColors.iosGrey,
         ),
         suffixIcon: Obx(
           () => controller.searchQuery.value.isNotEmpty

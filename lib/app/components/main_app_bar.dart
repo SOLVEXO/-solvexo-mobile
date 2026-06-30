@@ -1,6 +1,5 @@
 import 'package:book_store_app/app/components/cart_icon_with_count.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -110,10 +109,10 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
                               borderRadius: BorderRadius.circular(
                                 AppDimen.borderRadius,
                               ),
-                              prefixIcon: CustomIconButton(
-                                onPressed: () => Get.toNamed(Routes.searchView),
+                              prefixIcon: SvgIcon(
                                 assetName: AppIcons.searchIcon,
                                 color: AppColors.lightGrey,
+                                size: 22,
                               ),
                               // isborder: true,
                               borderBorderradius: 15,

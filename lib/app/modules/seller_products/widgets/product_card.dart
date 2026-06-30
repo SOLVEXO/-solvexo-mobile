@@ -5,6 +5,7 @@ import 'package:book_store_app/app/modules/seller_products/widgets/product_type_
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ProductCard extends StatelessWidget {
@@ -31,7 +32,11 @@ class ProductCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _ProductImage(emoji: product.emoji),
+          _ProductImage(
+            emoji: product.emoji,
+            images: product.images,
+            imageFallback: product.image,
+          ),
           const SizedBox(width: 12),
           Expanded(child: _ProductInfo(product: product)),
           const SizedBox(width: 10),
@@ -45,20 +50,63 @@ class ProductCard extends StatelessWidget {
 // ── Product image box ────────────────────────────────────────────────────────
 class _ProductImage extends StatelessWidget {
   final String emoji;
+  final List<String> images;
+  final String? imageFallback;
 
-  const _ProductImage({required this.emoji});
+  const _ProductImage({
+    required this.emoji,
+    required this.images,
+    this.imageFallback,
+  });
+
+  String? get _imageUrl {
+    if (images.isNotEmpty) return images.first;
+    if (imageFallback != null && imageFallback!.isNotEmpty) return imageFallback;
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final url = _imageUrl;
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        color: AppColors.languageBg,
+        borderRadius: BorderRadius.circular(AppDimen.borderRadius + 4),
+        border: Border.all(color: AppColors.lightGrey2),
+      ),
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.center,
+      child: url != null
+          ? CachedNetworkImage(
+              imageUrl: url,
+              width: 72,
+              height: 72,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => const _ImagePlaceholder(),
+              errorWidget: (_, __, ___) => const _ImagePlaceholder(),
+            )
+          : const _ImagePlaceholder(),
+    );
+  }
+}
+
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 68,
-      height: 68,
-      decoration: BoxDecoration(
-        color: AppColors.languageBg,
-        borderRadius: BorderRadius.circular(AppDimen.borderRadius + 4),
-      ),
+      width: 72,
+      height: 72,
+      color: AppColors.languageBg,
       alignment: Alignment.center,
-      child: CustomText(text: emoji, fontSize: AppFontSize.veryLarge3),
+      child: const Icon(
+        Icons.image_outlined,
+        size: 28,
+        color: AppColors.lightGrey5,
+      ),
     );
   }
 }

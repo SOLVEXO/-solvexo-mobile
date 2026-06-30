@@ -1,8 +1,10 @@
 import 'package:book_store_app/app/base_view/controller/base_view_controller.dart';
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
+import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -12,11 +14,13 @@ import 'package:get/get.dart';
 
 class CartController extends BaseController {
   final CartRepository _cartRepository = CartRepository();
+  final CheckoutRepository _checkoutRepository = CheckoutRepository();
 
   // ─── State ────────────────────────────────────────────────────────────────
   final RxList<CartItem> cartItems = <CartItem>[].obs;
   final RxBool selectAll = false.obs;
   final RxBool isLoading = false.obs;
+  final RxBool isCheckingOut = false.obs;
 
   final Rx<double> subtotal = 0.0.obs;
   final Rx<double> shipping = 0.0.obs;
@@ -243,6 +247,19 @@ class CartController extends BaseController {
   bool get hasSelectedItems => cartItems.any((item) => item.isSelected);
 
   // ─── 9. Checkout ──────────────────────────────────────────────────────────
+
+  Future<void> proceedToCheckout() async {
+    if (isCheckingOut.value) return;
+    isCheckingOut.value = true;
+    try {
+      final result = await _checkoutRepository.createCheckout();
+      if (result != null) {
+        Get.toNamed(Routes.checkoutView, arguments: result);
+      }
+    } finally {
+      isCheckingOut.value = false;
+    }
+  }
 
   List<Map<String, dynamic>> getOrderItems() {
     return cartItems

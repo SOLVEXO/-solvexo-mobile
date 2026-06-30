@@ -48,12 +48,12 @@ class RefundRequestController extends GetxController {
       isLoading.value = true;
 
       // Extract all product IDs from the order automatically
-      final productIds = order.orderItems
+      final productIds = order.allItems
           .map((item) => item.productId)
           .toList();
 
       final refund = await _refundRepo.createRefund(
-        orderId: order.id,
+        orderId: order.orderId,
         productIds: productIds, // automatically included
         reason: selectedIssue.value!.apiValue, // use extension for backend
         description: messageController.text.trim(),

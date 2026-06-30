@@ -21,11 +21,11 @@ class ProductDetailSummary extends StatelessWidget {
           fontSize: AppFontSize.medium,
           fontWeight: FontWeight.w800,
         ),
-        _row("Sub Total", order.itemsPrice),
-        _row("Shipping", order.shippingPrice),
-
+        _row("Sub Total", order.subtotal),
+        _row("Shipping", order.shippingFee),
+        if (order.taxAmount > 0) _row("Tax", order.taxAmount),
         const Divider(),
-        _row("Total", order.itemsPrice + order.shippingPrice, bold: true),
+        _row("Total", order.totalAmount, bold: true),
       ],
     );
   }

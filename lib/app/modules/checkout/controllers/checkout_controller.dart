@@ -4,10 +4,11 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/shimmer/trip_shimmer.dart';
 import 'package:book_store_app/app/data/repositories/order_repository.dart';
+import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
 import 'package:book_store_app/app/data/repositories/shipping_repository.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
-import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
+import 'package:book_store_app/app/modules/checkout/models/create_checkout_response.dart';
 import 'package:book_store_app/app/modules/checkout/models/order_request_model.dart';
 import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -22,6 +23,9 @@ import '../models/checkout_item_model.dart';
 
 class CheckoutController extends GetxController {
   final ShippingRepository _shippingRepository = ShippingRepository();
+  final CheckoutRepository _checkoutRepository = CheckoutRepository();
+
+  String _checkoutId = '';
 
   /// Order Items (coming from Cart)
   RxList<CheckoutItem> orderItems = <CheckoutItem>[].obs;
@@ -39,36 +43,57 @@ class CheckoutController extends GetxController {
   static const double voucherDiscount = 5.0;
   static const double rewardPointDiscount = 0.0; // optional for future
 
-  RxDouble shippingCost = 9.0.obs;
+  RxDouble shippingCost = 0.0.obs;
   final RxList<ShippingOption> shippingOptions = <ShippingOption>[].obs;
   final Rx<ShippingOption?> selectedShipping = Rx<ShippingOption?>(null);
   final RxBool isLoadingShipping = false.obs;
+  final RxBool isLoading = true.obs;
   final AddressController addressController = Get.put(AddressController());
+
+  // Allowed payment methods from the create-checkout API response
+  final RxList<String> _allowedPaymentMethods = <String>[].obs;
+
+  bool get canPayCOD =>
+      _allowedPaymentMethods.isEmpty ||
+      _allowedPaymentMethods.contains('cash_on_delivery');
+
+  bool get canPayOnline =>
+      _allowedPaymentMethods.isEmpty ||
+      _allowedPaymentMethods.contains('stripe');
+
+  /// True when every item is digital (kept for fallback display logic).
+  bool get isAllDigital =>
+      orderItems.isNotEmpty &&
+      orderItems.every((item) => item.productType == 'digital');
 
   @override
   void onInit() {
     super.onInit();
-    fetchShippingZones();
-    final List<CartItem> cartItems = (Get.arguments as List<CartItem>? ?? []);
+    _loadInitialData();
+  }
 
-    orderItems.assignAll(
-      cartItems
-          .map(
-            (item) => CheckoutItem(
-              id: item.productId,
-              name: item.name,
-              color: item.productVariantId,
-              image: item.images.first,
-              price: item.price,
-              quantity: item.quantity,
-            ),
-          )
-          .toList(),
-    );
-    // final defaultAddr = addressController.;
-    // if (!defaultAddr.isNull) {
-    //   address.value = defaultAddr;
-    // }
+  Future<void> _loadInitialData() async {
+    isLoading.value = true;
+
+    final response = Get.arguments as CreateCheckoutResponse?;
+    if (response != null) {
+      _checkoutId = response.checkout.id;
+      orderItems.assignAll(
+        response.checkout.items.map((e) => e.toCheckoutItem()).toList(),
+      );
+      shippingCost.value = response.checkout.shippingFee;
+      _allowedPaymentMethods.assignAll(response.allowedPaymentMethods);
+    }
+
+    await fetchShippingZones();
+    isLoading.value = false;
+  }
+
+  @override
+  Future<void> refresh() async {
+    isLoading.value = true;
+    await fetchShippingZones();
+    isLoading.value = false;
   }
 
   Future<void> fetchShippingZones() async {
@@ -85,9 +110,10 @@ class CheckoutController extends GetxController {
 
       shippingOptions.assignAll(options);
 
-      // Auto-select first option
+      // Auto-select first option and apply its price
       if (options.isNotEmpty) {
         selectedShipping.value = options.first;
+        shippingCost.value = options.first.amount;
       }
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -101,6 +127,90 @@ class CheckoutController extends GetxController {
   final OrderRepository _orderRepository = OrderRepository();
 
   RxBool isPlacingOrder = false.obs;
+
+  /// Shows a confirmation dialog then calls POST /api/payment/cod-payment.
+  Future<void> placeCodOrder() async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        title: const CustomText(
+          text: 'Confirm Order',
+          fontSize: AppFontSize.small,
+          fontWeight: FontWeight.w700,
+          color: AppColors.black2,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.local_shipping_outlined,
+                color: AppColors.primaryColor,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const CustomText(
+              text: 'Cash on Delivery',
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.w700,
+              color: AppColors.black2,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const CustomText(
+              text:
+                  'Your order will be placed immediately on your one tap. The delivery agent will collect payment on arrival.',
+              fontSize: AppFontSize.verySmall,
+              color: AppColors.grey,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: 'Cancel',
+                  isOutlined: true,
+                  onPressed: () => Get.back(result: false),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: AppButton(
+                  label: 'Place Order',
+                  onPressed: () => Get.back(result: true),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    isPlacingOrder.value = true;
+    try {
+      final success = await _checkoutRepository.placeCodOrder(_checkoutId);
+      if (success) {
+        Get.find<CartController>().clearCart();
+        Get.offAllNamed(Routes.paymentSuccessView);
+      }
+    } finally {
+      isPlacingOrder.value = false;
+    }
+  }
 
   Future<void> placeOrder() async {
     try {
@@ -153,10 +263,26 @@ class CheckoutController extends GetxController {
     }
   }
 
-  void selectShippingOption(ShippingOption option) {
+  Future<void> selectShippingOption(ShippingOption option) async {
+    // Optimistic update — close sheet and reflect selection immediately
     selectedShipping.value = option;
-    shippingCost.value = selectedShipping.value?.amount ?? 0.0;
+    shippingCost.value = option.amount;
     Get.back();
+
+    if (_checkoutId.isEmpty) return;
+
+    isLoadingShipping.value = true;
+    try {
+      final result = await _checkoutRepository.addShippingToCheckout(
+        checkoutId: _checkoutId,
+        shippingZoneId: option.id,
+      );
+      if (result != null) {
+        shippingCost.value = result.shippingFee;
+      }
+    } finally {
+      isLoadingShipping.value = false;
+    }
   }
 
   void useRewardPoints(Size size) {

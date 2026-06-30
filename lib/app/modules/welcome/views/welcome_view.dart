@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/animated_background_circles.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -22,18 +23,24 @@ class WelcomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _LogoSection(),
-              _BottomSection(onSelectRole: _selectRole),
-            ],
+      body: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
           ),
-        ),
+          const AnimatedBackgroundCircles(),
+          SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _LogoSection(),
+                _BottomSection(onSelectRole: _selectRole),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

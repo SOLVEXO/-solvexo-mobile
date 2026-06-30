@@ -1,9 +1,11 @@
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
+import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -196,6 +198,15 @@ class SellerSettingsController extends GetxController {
   }
 
   void signOut() {
-    Get.offAllNamed(Routes.sellerStores);
+    showCustomDialog(
+      title: 'Logout',
+      content: 'Are you sure you want to logout?',
+      leftButtonName: 'Cancel',
+      rightButtonName: 'Logout',
+      onLeftButtonTap: () => Get.back(),
+      onRightButtonTap: () async {
+        await Get.find<AuthController>().logout();
+      },
+    );
   }
 }

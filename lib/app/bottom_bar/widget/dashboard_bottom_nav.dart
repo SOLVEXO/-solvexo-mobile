@@ -49,7 +49,7 @@ class DashboardBottomNav extends StatelessWidget {
               icon: AppIcons.searchIcon,
               isActive: activeTab == 1,
               onTap: () => controller.changeTab(1),
-              iconSize: 35,
+              iconSize: 25,
             ),
             _buildNavItem(
               index: 2,

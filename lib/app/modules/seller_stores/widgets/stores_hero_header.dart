@@ -1,11 +1,11 @@
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/modules/seller_stores/controllers/seller_stores_controller.dart';
 import 'package:book_store_app/app/modules/seller_stores/widgets/stores_profile_section.dart';
 import 'package:book_store_app/app/modules/seller_stores/widgets/stores_stats_strip.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,8 +28,16 @@ class StoresHeroHeader extends StatelessWidget {
               SvgIcon(
                 assetName: AppIcons.logoutIcon,
                 onTap: () {
-                  AppPreferences.clearAccessToken();
-                  Get.offAndToNamed(Routes.welcome);
+                  showCustomDialog(
+                    title: 'Logout',
+                    content: 'Are you sure you want to logout?',
+                    leftButtonName: 'Cancel',
+                    rightButtonName: 'Logout',
+                    onLeftButtonTap: () => Get.back(),
+                    onRightButtonTap: () async {
+                      await Get.find<AuthController>().logout();
+                    },
+                  );
                 },
                 color: AppColors.white,
                 size: 30,

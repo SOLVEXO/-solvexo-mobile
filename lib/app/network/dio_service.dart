@@ -1,7 +1,9 @@
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class DioService {
   static Future<Dio> getDio({Map<String, dynamic>? headers}) async {
@@ -38,9 +40,19 @@ class DioService {
 
           handler.next(options);
         },
-        onError: (e, handler) {
+        onError: (e, handler) async {
           debugPrint("❌ Dio Error: ${e.response?.statusCode}");
           debugPrint("❌ Response: ${e.response?.data}");
+
+          if (e.response?.statusCode == 401) {
+            // Session expired or token invalid — clear local data and kick to welcome
+            await AppPreferences.clearPreference();
+            if (Get.currentRoute != Routes.welcome) {
+              Get.offAllNamed(Routes.welcome);
+            }
+            return;
+          }
+
           handler.next(e);
         },
       ),

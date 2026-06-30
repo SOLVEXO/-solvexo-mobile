@@ -12,36 +12,43 @@ class OrderHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                CustomText(
-                  text: "Order ID: ",
-                  fontSize: AppFontSize.small,
-                  fontWeight: FontWeight.bold,
-                ),
-                CustomText(
-                  text: order.id,
-                  fontSize: AppFontSize.extraSmall,
-                  fontWeight: FontWeight.bold,
-                ),
-              ],
+            CustomText(
+              text: order.orderNumber,
+              fontSize: AppFontSize.small,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black,
             ),
-            CustomText(text: "${order.createdAt}", color: AppColors.gray600),
+            const SizedBox(height: 2),
+            CustomText(
+              text: order.formattedDate,
+              fontSize: AppFontSize.tiny,
+              color: AppColors.gray600,
+            ),
+            const SizedBox(height: 2),
+            CustomText(
+              text: '${order.totalItemCount} item${order.totalItemCount == 1 ? '' : 's'}',
+              fontSize: AppFontSize.tiny,
+              color: AppColors.gray600,
+            ),
           ],
         ),
-        Chip(
-          label: CustomText(
-            text: order.orderStatus,
-            color: AppColors.white,
-            fontWeight: FontWeight.bold,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: order.statusColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(20),
           ),
-          backgroundColor: order.orderStatus == "delivered"
-              ? AppColors.green2
-              : AppColors.orange,
+          child: CustomText(
+            text: order.statusDisplay,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w600,
+            color: order.statusColor,
+          ),
         ),
       ],
     );

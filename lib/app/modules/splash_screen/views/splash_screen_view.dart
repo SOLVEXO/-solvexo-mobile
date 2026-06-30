@@ -1,10 +1,11 @@
 import 'dart:math' as math;
+import 'package:book_store_app/app/components/animated_background_circles.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/splash_screen/controllers/splash_screen_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class SplashView extends StatelessWidget {
@@ -24,8 +25,8 @@ class SplashView extends StatelessWidget {
             decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
           ),
 
-          // ── Decorative background circles ────────────────────────────────
-          const _DecorativeCircles(),
+          // ── Animated background circles ──────────────────────────────────
+          const AnimatedBackgroundCircles(),
 
           // ── Main content ─────────────────────────────────────────────────
           SafeArea(
@@ -61,8 +62,9 @@ class SplashView extends StatelessWidget {
                               ),
                               // Animated glow
                               BoxShadow(
-                                color: AppColors.white
-                                    .withOpacity(0.15 + 0.25 * glow),
+                                color: AppColors.white.withOpacity(
+                                  0.15 + 0.25 * glow,
+                                ),
                                 blurRadius: 20 + 30 * glow,
                                 spreadRadius: 2 + 10 * glow,
                               ),
@@ -132,7 +134,9 @@ class SplashView extends StatelessWidget {
                                         controller.currentSlogan,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                          color: AppColors.white.withOpacity(0.85),
+                                          color: AppColors.white.withOpacity(
+                                            0.85,
+                                          ),
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w400,
                                           letterSpacing: 0.5,
@@ -160,13 +164,15 @@ class SplashView extends StatelessWidget {
                     children: [
                       _AnimatedDots(glowAnim: controller.glowAnim),
                       const SizedBox(height: 20),
-                      SvgPicture.asset(
-                        AppIcons.appLogoSvg,
-                        width: 22,
-                        height: 22,
-                        colorFilter: ColorFilter.mode(
-                          AppColors.white.withOpacity(0.35),
-                          BlendMode.srcIn,
+                      Container(
+                        padding: EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: AppColors.white.withOpacity(0.2),
+                        ),
+                        child: SvgIcon(
+                          assetName: AppIcons.appLogoSvg,
+                          size: 22,
                         ),
                       ),
                     ],
@@ -176,54 +182,6 @@ class SplashView extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ── Decorative background circles ──────────────────────────────────────────
-
-class _DecorativeCircles extends StatelessWidget {
-  const _DecorativeCircles();
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return Stack(
-      children: [
-        Positioned(
-          top: -size.width * 0.35,
-          right: -size.width * 0.2,
-          child: _Circle(diameter: size.width * 0.75, opacity: 0.07),
-        ),
-        Positioned(
-          bottom: -size.width * 0.3,
-          left: -size.width * 0.15,
-          child: _Circle(diameter: size.width * 0.65, opacity: 0.07),
-        ),
-        Positioned(
-          top: size.height * 0.38,
-          right: -size.width * 0.4,
-          child: _Circle(diameter: size.width * 0.55, opacity: 0.05),
-        ),
-      ],
-    );
-  }
-}
-
-class _Circle extends StatelessWidget {
-  const _Circle({required this.diameter, required this.opacity});
-  final double diameter;
-  final double opacity;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: diameter,
-      height: diameter,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.white.withOpacity(opacity),
       ),
     );
   }

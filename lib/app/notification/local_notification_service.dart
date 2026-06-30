@@ -79,7 +79,7 @@ class LocalNotificationService {
 
             // NavigationService.navigateFromNotification(notificationPayload);
           } catch (e) {
-            print("Error parsing notification --> $e");
+            debugPrint("Error parsing notification --> $e");
           }
         }
       },

@@ -58,6 +58,7 @@ abstract class Routes {
   static const sellerMessages = '/seller/messages';
   static const sellerChat = '/seller/chat';
   static const sellerOrders = '/seller/orders';
+  static const sellerOrderDetail = '/seller/orders/detail';
   // Seller settings sub-screens
   static const sellerStoreProfile = '/seller/settings/store-profile';
   static const sellerPaymentMethods = '/seller/settings/payment-methods';

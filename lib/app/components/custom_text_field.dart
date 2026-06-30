@@ -67,7 +67,10 @@ class CustomTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         decoration: InputDecoration(
-          prefixIcon: prefixIcon,
+          prefixIcon: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: prefixIcon,
+          ),
           prefixIconColor: AppColors.grey,
           labelText: label,
           labelStyle: TextStyle(

@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:book_store_app/app/components/app_image_picker.dart';
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
+import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -189,7 +191,8 @@ class SellerOnboardingController extends GetxController {
   final RxBool isSaving = false.obs;
   Rx<StoreModel?> createdStore = Rx(null);
 
-  final _sellerRepo = SellerRepository();
+  final _sellerRepo  = SellerRepository();
+  final _uploadRepo  = UploadRepository();
 
   // Step 1 — Store Info
   final RxString    storeName        = ''.obs;
@@ -317,13 +320,24 @@ class SellerOnboardingController extends GetxController {
     if (isSaving.value) return;
     isSaving.value = true;
 
+    // Upload logo first if one was selected, then pass the URL to createStore
+    String? logoUrl;
+    if (logoFile.value != null) {
+      logoUrl = await _uploadRepo.uploadFile(logoFile.value!);
+      if (logoUrl == null) {
+        ToastUtil.showToast('Logo upload failed. Please try again.');
+        isSaving.value = false;
+        return;
+      }
+    }
+
     final store = await _sellerRepo.createStore(
       name:         storeName.value.trim(),
       sellerType:   sellerType.value?.apiValue ?? 'creator',
       productTypes: whatYouSell.map((o) => o.apiValue).toList(),
       description:  storeDescription.value.trim(),
       categoryId:   storeCategory.value.trim(),
-      logoFile:     logoFile.value,
+      logoUrl:      logoUrl,
     );
 
     isSaving.value = false;
