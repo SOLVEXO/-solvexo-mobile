@@ -10,6 +10,7 @@ class BaseClient {
     Map<String, dynamic>? queryParameters,
     dynamic data,
     bool requiresAuth = false,
+    ResponseType? responseType,
   }) async {
     final dio = await DioService.getDio();
     debugPrint("GET → $url");
@@ -18,7 +19,10 @@ class BaseClient {
       url,
       queryParameters: queryParameters,
       data: data,
-      options: Options(extra: {'requiresAuth': requiresAuth}),
+      options: Options(
+        extra: {'requiresAuth': requiresAuth},
+        responseType: responseType,
+      ),
     );
   }
 
@@ -58,6 +62,26 @@ class BaseClient {
       data: data,
       queryParameters: queryParameters,
       options: Options(extra: {'requiresAuth': requiresAuth}),
+    );
+  }
+
+  Future<Response> patch(
+    String url, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    bool requiresAuth = true,
+  }) async {
+    final dio = await DioService.getDio();
+    debugPrint("PATCH → $url");
+
+    return dio.patch(
+      url,
+      data: data,
+      queryParameters: queryParameters,
+      options: Options(
+        contentType: data is FormData ? null : 'application/json',
+        extra: {'requiresAuth': requiresAuth},
+      ),
     );
   }
 

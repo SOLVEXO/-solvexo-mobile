@@ -359,12 +359,10 @@ class ProfileController extends GetxController {
         imageUrl = await uploadProfileImage();
       }
 
-      final updatedUser = await _authRepository.updateProfile(
-        token: token,
+      final updatedUser = await _authRepository.editProfile(
         name: nameController.text.trim(),
         email: emailController.text.trim(),
-        phone: phoneController.text.trim(),
-        address: addressController.text.trim(),
+        phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
         profileImage: imageUrl ?? user.value?.profileImage,
       );
 

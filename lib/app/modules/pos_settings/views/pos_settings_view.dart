@@ -45,7 +45,7 @@ class PosSettingsView extends StatelessWidget {
                       ),
                     ),
                     PosCloseShiftButton(
-                      onTap: controller.closeShiftAndLogOut,
+                      onTap: controller.showCloseShiftDialog,
                     ),
                     const SizedBox(height: 8),
                   ],

@@ -35,7 +35,7 @@ class StoresHeroHeader extends StatelessWidget {
                     rightButtonName: 'Logout',
                     onLeftButtonTap: () => Get.back(),
                     onRightButtonTap: () async {
-                      await Get.find<AuthController>().logout();
+                      await Get.put(AuthController()).logout();
                     },
                   );
                 },

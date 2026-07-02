@@ -15,7 +15,7 @@ class PosCartItemTile extends StatelessWidget {
     return Obx(() => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        // ── Emoji tile ────────────────────────────────────────────
+        // ── Thumbnail tile ────────────────────────────────────────
         Container(
           width: 46,
           height: 46,
@@ -24,7 +24,19 @@ class PosCartItemTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
-          child: Text(item.product.emoji, style: const TextStyle(fontSize: 24)),
+          child: item.product.displayImage != null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    item.product.displayImage!,
+                    width: 46,
+                    height: 46,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.inventory_2_outlined, size: 22, color: AppColors.primaryColor),
+                  ),
+                )
+              : const Icon(Icons.inventory_2_outlined, size: 22, color: AppColors.primaryColor),
         ),
         const SizedBox(width: 12),
 
@@ -41,7 +53,7 @@ class PosCartItemTile extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             CustomText(
-              text: item.product.sku,
+              text: item.variant?.label ?? item.product.sku,
               fontSize: AppFontSize.tiny,
               color: AppColors.iosGrey,
             ),
@@ -61,7 +73,7 @@ class PosCartItemTile extends StatelessWidget {
               _QtyBtn(icon: Icons.add_rounded, onTap: () => c.increment(item)),
               const SizedBox(width: 8),
               CustomText(
-                text: '× \$${item.product.price.toStringAsFixed(2)}',
+                text: '× \$${item.unitPrice.toStringAsFixed(2)}',
                 fontSize: AppFontSize.tiny,
                 color: AppColors.iosGrey,
               ),

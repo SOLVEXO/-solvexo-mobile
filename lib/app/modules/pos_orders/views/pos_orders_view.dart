@@ -12,10 +12,32 @@ import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class PosOrdersView extends StatelessWidget {
-  PosOrdersView({super.key});
+class PosOrdersView extends StatefulWidget {
+  const PosOrdersView({super.key});
 
+  @override
+  State<PosOrdersView> createState() => _PosOrdersViewState();
+}
+
+class _PosOrdersViewState extends State<PosOrdersView> {
   final PosOrdersController controller = Get.put(PosOrdersController());
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+        controller.loadMore();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +51,16 @@ class PosOrdersView extends StatelessWidget {
               if (controller.isLoading.value) {
                 return const PosTransactionsShimmer();
               }
-              final txns = controller.transactions;
+              final txns = controller.filteredSales;
               if (txns.isEmpty) return const PosTransactionsEmpty();
               return CustomRefreshWrapper(
                 onRefresh: controller.refreshData,
                 child: SingleChildScrollView(
+                  controller: _scrollController,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _DateFilterHeader(controller: controller),
+                      _FilterHeader(controller: controller),
                       PosStatsRow(controller: controller),
                       const Divider(height: 1, color: AppColors.lightGrey2),
                       ListView.separated(
@@ -46,9 +69,22 @@ class PosOrdersView extends StatelessWidget {
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: txns.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (_, i) =>
-                            PosTransactionCard(transaction: txns[i]),
+                        itemBuilder: (_, i) => PosTransactionCard(
+                          sale: txns[i],
+                          controller: controller,
+                        ),
                       ),
+                      if (controller.isLoadingMore.value)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -61,10 +97,11 @@ class PosOrdersView extends StatelessWidget {
   }
 }
 
-class _DateFilterHeader extends StatelessWidget {
+class _FilterHeader extends StatelessWidget {
   final PosOrdersController controller;
+  const _FilterHeader({required this.controller});
 
-  const _DateFilterHeader({required this.controller});
+  static const _filters = ['All', 'cash', 'card', 'other'];
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +121,7 @@ class _DateFilterHeader extends StatelessWidget {
           ),
           Obx(
             () => GestureDetector(
-              onTap: () {},
+              onTap: () => _showFilterSheet(context),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -100,7 +137,10 @@ class _DateFilterHeader extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CustomText(
-                      text: controller.dateFilter.value,
+                      text: controller.paymentFilter.value == 'All'
+                          ? 'All'
+                          : controller.paymentFilter.value.capitalizeFirst ??
+                                '',
                       fontSize: AppFontSize.verySmall,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primaryColor,
@@ -116,7 +156,136 @@ class _DateFilterHeader extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 8),
+          Obx(
+            () => GestureDetector(
+              onTap: () => _showStatusFilterSheet(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(AppDimen.draggableBorderRadius),
+                  border: Border.all(color: AppColors.lightGrey2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CustomText(
+                      text: controller.statusFilter.value == 'All'
+                          ? 'Status'
+                          : controller.statusFilter.value.capitalizeFirst ?? '',
+                      fontSize: AppFontSize.verySmall,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black2,
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppColors.black2),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  void _showStatusFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2)),
+            ),
+            const SizedBox(height: 16),
+            const CustomText(
+              text: 'Filter by Status',
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black2,
+            ),
+            const SizedBox(height: 12),
+            ...PosOrdersController.statusFilters.map(
+              (s) => Obx(
+                () => ListTile(
+                  onTap: () {
+                    controller.setStatusFilter(s);
+                    Navigator.pop(context);
+                  },
+                  title: CustomText(
+                    text: s == 'All' ? 'All Statuses' : (s.capitalizeFirst ?? s).replaceAll('_', ' '),
+                    fontSize: AppFontSize.verySmall,
+                    color: AppColors.black2,
+                  ),
+                  trailing: controller.statusFilter.value == s
+                      ? const Icon(Icons.check_rounded, color: AppColors.primaryColor)
+                      : null,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.lightGrey2,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const CustomText(
+              text: 'Filter by Payment',
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black2,
+            ),
+            const SizedBox(height: 12),
+            ..._filters.map(
+              (f) => Obx(
+                () => ListTile(
+                  onTap: () {
+                    controller.setPaymentFilter(f);
+                    Navigator.pop(context);
+                  },
+                  title: CustomText(
+                    text: f == 'All' ? 'All Methods' : (f.capitalizeFirst ?? f),
+                    fontSize: AppFontSize.verySmall,
+                    color: AppColors.black2,
+                  ),
+                  trailing: controller.paymentFilter.value == f
+                      ? const Icon(
+                          Icons.check_rounded,
+                          color: AppColors.primaryColor,
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

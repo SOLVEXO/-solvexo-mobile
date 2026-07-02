@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_stores/controllers/seller_stores_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -27,13 +28,23 @@ class StoresProfileSection extends StatelessWidget {
                 width: 2.5,
               ),
             ),
-            alignment: Alignment.center,
-            child: CustomText(
-              text: controller.userInitials.value,
-              fontSize: AppFontSize.large,
-              fontWeight: FontWeight.bold,
-              color: AppColors.white,
-            ),
+            child: controller.userProfileImage.value.isNotEmpty
+                ? ClipOval(
+                    child: CommonImageView(
+                      url: controller.userProfileImage.value,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Center(
+                    child: CustomText(
+                      text: controller.userInitials.value,
+                      fontSize: AppFontSize.large,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.white,
+                    ),
+                  ),
           ),
           const SizedBox(height: 12),
           CustomText(

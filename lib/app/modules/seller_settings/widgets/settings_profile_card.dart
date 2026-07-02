@@ -1,5 +1,7 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_settings/controllers/seller_settings_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
@@ -30,7 +32,10 @@ class SettingsProfileCard extends StatelessWidget {
       child: Obx(
         () => Row(
           children: [
-            _Avatar(initials: controller.initials),
+            _ProfileAvatar(
+              imageUrl: controller.profileImage.value,
+              initials: controller.initials,
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -62,14 +67,25 @@ class SettingsProfileCard extends StatelessWidget {
   }
 }
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
-class _Avatar extends StatelessWidget {
+// ── Profile avatar (image or initials fallback) ───────────────────────────────
+class _ProfileAvatar extends StatelessWidget {
+  final String imageUrl;
   final String initials;
 
-  const _Avatar({required this.initials});
+  const _ProfileAvatar({required this.imageUrl, required this.initials});
 
   @override
   Widget build(BuildContext context) {
+    if (imageUrl.isNotEmpty) {
+      return ClipOval(
+        child: CommonImageView(
+          url: imageUrl,
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
     return Container(
       width: 60,
       height: 60,
@@ -87,6 +103,7 @@ class _Avatar extends StatelessWidget {
     );
   }
 }
+
 
 // ── Plan badge ────────────────────────────────────────────────────────────────
 class _PlanBadge extends StatelessWidget {
@@ -118,7 +135,7 @@ class _EditButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => Get.toNamed(Routes.sellerEditProfile),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(

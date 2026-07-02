@@ -14,6 +14,18 @@ class AppPreferences {
   static const String _storeIdKey   = 'store_id';
   static const String _storeNameKey = 'store_name';
 
+  // ── POS employee / session context ────────────────────────────────────────────
+  static const String _posEmployeeIdKey   = 'pos_employee_id';
+  static const String _posEmployeeNameKey = 'pos_employee_name';
+  static const String _posEmployeeRoleKey = 'pos_employee_role';
+  static const String _posSessionIdKey    = 'pos_session_id';
+  static const String _posRegisterIdKey   = 'pos_register_id';
+  static const String _posShiftIdKey      = 'pos_shift_id';
+
+  // ── POS device-local preferences (not backend-tracked) ─────────────────────
+  static const String _posSoundEffectsKey = 'pos_sound_effects';
+  static const String _posAutoLockMinutesKey = 'pos_auto_lock_minutes';
+
   // Save access token
   static Future<void> setAccessToken(
     String accessToken,
@@ -203,6 +215,100 @@ class AppPreferences {
   static Future<List<String>?> getRecentSearches() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList(_recentSearchesKey);
+  }
+
+  // ── POS employee context ──────────────────────────────────────────────────────
+  static Future<void> savePosEmployee({
+    required String id,
+    required String name,
+    required String role,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_posEmployeeIdKey, id);
+    await prefs.setString(_posEmployeeNameKey, name);
+    await prefs.setString(_posEmployeeRoleKey, role);
+  }
+
+  static Future<String?> getPosEmployeeId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_posEmployeeIdKey);
+  }
+
+  static Future<String?> getPosEmployeeName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_posEmployeeNameKey);
+  }
+
+  static Future<String?> getPosEmployeeRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_posEmployeeRoleKey);
+  }
+
+  static Future<void> clearPosEmployee() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_posEmployeeIdKey);
+    await prefs.remove(_posEmployeeNameKey);
+    await prefs.remove(_posEmployeeRoleKey);
+  }
+
+  // ── POS active session context ────────────────────────────────────────────────
+  static Future<void> savePosSession({
+    required String sessionId,
+    required String registerId,
+    required String shiftId,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_posSessionIdKey, sessionId);
+    await prefs.setString(_posRegisterIdKey, registerId);
+    await prefs.setString(_posShiftIdKey, shiftId);
+  }
+
+  static Future<String?> getPosSessionId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_posSessionIdKey);
+  }
+
+  static Future<String?> getPosRegisterId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_posRegisterIdKey);
+  }
+
+  static Future<String?> getPosShiftId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_posShiftIdKey);
+  }
+
+  static Future<void> clearPosSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_posSessionIdKey);
+    await prefs.remove(_posRegisterIdKey);
+    await prefs.remove(_posShiftIdKey);
+  }
+
+  static Future<bool> hasPosSession() async {
+    final id = await getPosSessionId();
+    return id != null && id.isNotEmpty;
+  }
+
+  // ── POS device-local preferences ──────────────────────────────────────────
+  static Future<void> setPosSoundEffects(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_posSoundEffectsKey, enabled);
+  }
+
+  static Future<bool> getPosSoundEffects() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_posSoundEffectsKey) ?? true;
+  }
+
+  static Future<void> setPosAutoLockMinutes(int minutes) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_posAutoLockMinutesKey, minutes);
+  }
+
+  static Future<int> getPosAutoLockMinutes() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_posAutoLockMinutesKey) ?? 5;
   }
 
   // Recently Viewed Products

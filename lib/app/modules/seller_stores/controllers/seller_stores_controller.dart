@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
+import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:get/get.dart';
@@ -32,16 +33,16 @@ class SellerStore {
   });
 
   factory SellerStore.fromModel(StoreModel m) => SellerStore(
-        id:         m.id,
-        name:       m.name,
-        // Use sellerTypeLabel as subtitle until a category-name lookup is available
-        category:   m.sellerTypeLabel,
-        initials:   m.initials,
-        logo:       m.logo,
-        plan:       m.plan,
-        sellerType: m.sellerType,
-        isActive:   m.isActive,
-      );
+    id: m.id,
+    name: m.name,
+    // Use sellerTypeLabel as subtitle until a category-name lookup is available
+    category: m.sellerTypeLabel,
+    initials: m.initials,
+    logo: m.logo,
+    plan: m.plan,
+    sellerType: m.sellerType,
+    isActive: m.isActive,
+  );
 }
 
 // ── Controller ─────────────────────────────────────────────────────────────────
@@ -53,9 +54,10 @@ class SellerStoresController extends GetxController {
   final RxList<SellerStore> stores = <SellerStore>[].obs;
 
   // Profile — populated from preferences first, enriched from API response
-  final RxString userName     = ''.obs;
-  final RxString userEmail    = ''.obs;
+  final RxString userName = ''.obs;
+  final RxString userEmail = ''.obs;
   final RxString userInitials = 'S'.obs;
+  final RxString userProfileImage = ''.obs;
 
   int get storeCount => stores.length;
 
@@ -63,13 +65,14 @@ class SellerStoresController extends GetxController {
   void onInit() {
     super.onInit();
     _loadProfileFromPrefs();
+    _syncProfileImage();
     _loadStores();
   }
 
   // ── Profile ───────────────────────────────────────────────────────────────
 
   Future<void> _loadProfileFromPrefs() async {
-    final name  = await AppPreferences.getUserName();
+    final name = await AppPreferences.getUserName();
     final email = await AppPreferences.getUserEmail();
     if (name != null && name.trim().isNotEmpty) {
       userName.value = name.trim();
@@ -78,13 +81,25 @@ class SellerStoresController extends GetxController {
     if (email != null) userEmail.value = email;
   }
 
+  void _syncProfileImage() {
+    try {
+      final profileCtrl = Get.find<ProfileController>();
+      final img = profileCtrl.user.value?.profileImage ?? '';
+      if (img.isNotEmpty) userProfileImage.value = img;
+      ever(profileCtrl.user, (user) {
+        final url = user?.profileImage ?? '';
+        if (url.isNotEmpty) userProfileImage.value = url;
+      });
+    } catch (_) {}
+  }
+
   void _updateInitials(String name) {
     final parts = name.trim().split(' ');
     userInitials.value = (parts.length >= 2)
         ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
         : parts[0].isNotEmpty
-            ? parts[0][0].toUpperCase()
-            : 'S';
+        ? parts[0][0].toUpperCase()
+        : 'S';
   }
 
   // ── API ───────────────────────────────────────────────────────────────────

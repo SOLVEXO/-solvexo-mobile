@@ -311,6 +311,42 @@ class AuthRepository {
     }
   }
 
+  /// Edit user profile (PATCH /auth/edit-profile) — works for both user and seller
+  Future<UserModel?> editProfile({
+    String? name,
+    String? email,
+    String? phone,
+    String? profileImage,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {};
+      if (name != null) data['name'] = name;
+      if (email != null) data['email'] = email;
+      if (phone != null) data['phone'] = phone;
+      if (profileImage != null) data['profileImage'] = profileImage;
+
+      final response = await _baseClient.patch(
+        ApiConstants.editProfile,
+        data: data,
+      );
+
+      debugPrint("Edit Profile Response --> ${response.data}");
+
+      if (response.data['success'] == true) {
+        return UserModel.fromJson(response.data['data']);
+      }
+
+      ToastUtil.showToast(response.data['message'] ?? 'Update failed');
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint("Edit Profile error: $e");
+      return null;
+    }
+  }
+
   /// Update user profile
   Future<UserModel?> updateProfile({
     required String token,

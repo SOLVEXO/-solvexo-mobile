@@ -1,5 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/pos_products/controllers/pos_products_controller.dart';
+import 'package:book_store_app/app/data/models/pos/pos_product_model.dart';
 import 'package:book_store_app/app/modules/pos_products/widgets/pos_stock_badge.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -7,7 +7,7 @@ import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 
 class PosProductTile extends StatelessWidget {
-  final PosProductItem product;
+  final PosProductModel product;
 
   const PosProductTile({super.key, required this.product});
 
@@ -28,17 +28,18 @@ class PosProductTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _emojiBox(),
+          _thumbnail(),
           const SizedBox(width: 12),
           Expanded(child: _productInfo()),
           const SizedBox(width: 12),
-          PosStockBadge(stockCount: product.stockCount),
+          PosStockBadge(stockCount: product.totalStock),
         ],
       ),
     );
   }
 
-  Widget _emojiBox() {
+  Widget _thumbnail() {
+    final image = product.displayImage;
     return Container(
       width: 52,
       height: 52,
@@ -47,10 +48,17 @@ class PosProductTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
       ),
       alignment: Alignment.center,
-      child: Text(
-        product.emoji,
-        style: const TextStyle(fontSize: 26),
-      ),
+      clipBehavior: Clip.antiAlias,
+      child: image != null
+          ? Image.network(
+              image,
+              width: 52,
+              height: 52,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.inventory_2_outlined, size: 24, color: AppColors.grey),
+            )
+          : const Icon(Icons.inventory_2_outlined, size: 24, color: AppColors.grey),
     );
   }
 
@@ -68,7 +76,7 @@ class PosProductTile extends StatelessWidget {
         ),
         const SizedBox(height: 3),
         CustomText(
-          text: '${product.sku} · ${product.category}',
+          text: product.hasMultipleVariants ? '${product.sku} · ${product.variants.length} variants' : product.sku,
           fontSize: AppFontSize.tiny,
           color: AppColors.grey,
         ),

@@ -1,11 +1,10 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/pos_orders/controllers/pos_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class PosPaymentBadge extends StatelessWidget {
-  final PosPaymentMethod method;
+  final String method;
 
   const PosPaymentBadge({super.key, required this.method});
 
@@ -28,25 +27,25 @@ class PosPaymentBadge extends StatelessWidget {
     );
   }
 
-  static _BadgeStyle _resolve(PosPaymentMethod method) {
-    switch (method) {
-      case PosPaymentMethod.card:
+  static _BadgeStyle _resolve(String method) {
+    switch (method.toLowerCase()) {
+      case 'card':
         return const _BadgeStyle(
           label: 'Card',
           fg: AppColors.black2,
           bg: AppColors.white,
           border: AppColors.lightGrey2,
         );
-      case PosPaymentMethod.cash:
+      case 'cash':
         return const _BadgeStyle(
           label: 'Cash',
           fg: AppColors.darkGreen,
           bg: AppColors.greenContainerInnerColor,
           border: AppColors.darkGreen,
         );
-      case PosPaymentMethod.tap:
+      default:
         return const _BadgeStyle(
-          label: 'Tap',
+          label: 'Other',
           fg: AppColors.primaryColor,
           bg: AppColors.languageBg,
           border: AppColors.primaryColor,

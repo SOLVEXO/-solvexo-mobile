@@ -1,9 +1,8 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class PosAppBar extends StatelessWidget {
   final String title;
@@ -48,28 +47,30 @@ class PosAppBar extends StatelessWidget {
               ],
             ),
           ),
-          Obx(() {
-            final profileController = Get.put(ProfileController());
-            final name = profileController.user.value?.name ?? '';
-            final initial = name.trim().isNotEmpty
-                ? name.trim()[0].toUpperCase()
-                : 'A';
-            return Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              alignment: Alignment.center,
-              child: CustomText(
-                text: initial,
-                fontSize: 15,
-                color: AppColors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            );
-          }),
+          FutureBuilder<String?>(
+            future: AppPreferences.getPosEmployeeName(),
+            builder: (context, snapshot) {
+              final name = snapshot.data ?? '';
+              final initial = name.trim().isNotEmpty
+                  ? name.trim()[0].toUpperCase()
+                  : 'P';
+              return Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                alignment: Alignment.center,
+                child: CustomText(
+                  text: initial,
+                  fontSize: 15,
+                  color: AppColors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

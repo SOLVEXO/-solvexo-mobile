@@ -52,7 +52,6 @@ abstract class Routes {
   // Role-based homes
   static const sellerHome = '/seller/home';
   static const posHome = '/pos/home';
-  static const PosMainView = '/pos/mainview';
 
   // Seller sub-screens
   static const sellerMessages = '/seller/messages';
@@ -71,6 +70,8 @@ abstract class Routes {
   static const addSellerProduct = '/seller/products/add';
   static const editSellerProduct = '/seller/products/edit';
   static const sellerAnalytics = '/seller/analytics';
+  static const sellerFinance = '/seller/finance';
+  static const sellerEditProfile = '/seller/edit-profile';
   static const sellerAiStudio = '/seller/ai-studio';
   static const sellerSettings = '/seller/settings';
 
@@ -78,4 +79,20 @@ abstract class Routes {
   static const posOrders = '/pos/orders';
   static const posProducts = '/pos/products';
   static const posSettings = '/pos/settings';
+
+  // Seller POS management
+  static const sellerPosManagement = '/seller/pos-management';
+
+  // POS entry flow
+  static const posPinLogin = '/pos/pin-login';
+  static const posOpenRegister = '/pos/open-register';
+
+  // POS operational screens
+  static const posHeldSales = '/pos/held-sales';
+  static const posSaleDetail = '/pos/sale-detail';
+  static const posSessionReport = '/pos/session-report';
+  static const posDailyReport = '/pos/daily-report';
+  static const posSessionHistory = '/pos/session-history';
+  static const posAuditLog = '/pos/audit-log';
+  static const posRangeReport = '/pos/range-report';
 }

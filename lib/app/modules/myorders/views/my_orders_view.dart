@@ -50,42 +50,55 @@ class MyOrdersView extends StatelessWidget {
           children: [
             Obx(
               () => Container(
-                padding: EdgeInsets.only(top: 20),
                 color: AppColors.white,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(
-                    controller.tabs.length,
-                    (i) => GestureDetector(
-                      onTap: () => controller.changeTab(i),
-                      child: Column(
-                        spacing: 5,
-                        children: [
-                          CustomText(
-                            text: controller.tabs[i],
-                            fontSize: AppFontSize.small,
-                            fontWeight: FontWeight.bold,
-                            color: controller.selectedTab.value == i
-                                ? AppColors.primaryColor
-                                : AppColors.greyDefault,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: List.generate(controller.tabs.length, (i) {
+                      final isActive = controller.selectedTab.value == i;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: () => controller.changeTab(i),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isActive
+                                  ? AppColors.primaryColor
+                                  : AppColors.background,
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(
+                                color: isActive
+                                    ? AppColors.primaryColor
+                                    : AppColors.lightGrey2,
+                              ),
+                            ),
+                            child: CustomText(
+                              text: controller.tabs[i],
+                              fontSize: AppFontSize.verySmall,
+                              fontWeight: isActive
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isActive
+                                  ? AppColors.white
+                                  : AppColors.greyDefault,
+                            ),
                           ),
-                          AnimatedContainer(
-                            curve: Curves.bounceInOut,
-                            duration: Duration(milliseconds: 200),
-                            height: 7,
-                            width: 40,
-                            color: controller.selectedTab.value == i
-                                ? AppColors.primaryColor
-                                : AppColors.white,
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    }),
                   ),
                 ),
               ),
             ),
-            Divider(height: 0, thickness: 3, color: AppColors.background),
+            Divider(height: 0, thickness: 1, color: AppColors.background),
             Obx(() {
               if (!controller.loginUser.value) {
                 Column(

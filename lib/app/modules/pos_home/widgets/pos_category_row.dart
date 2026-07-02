@@ -21,11 +21,11 @@ class PosCategoryRow extends StatelessWidget {
           itemCount: c.categories.length,
           separatorBuilder: (_, __) => const SizedBox(width: 8),
           itemBuilder: (_, i) {
-            final cat = c.categories[i];
+            final catId = c.categories[i];
             return Obx(() {
-              final isSelected = c.selectedCategory.value == cat;
+              final isSelected = c.selectedCategoryId.value == catId;
               return GestureDetector(
-                onTap: () => c.selectCategory(cat),
+                onTap: () => c.selectCategory(catId),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
                   padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -38,7 +38,7 @@ class PosCategoryRow extends StatelessWidget {
                   ),
                   alignment: Alignment.center,
                   child: CustomText(
-                    text: cat,
+                    text: c.categoryLabel(catId),
                     fontSize: AppFontSize.verySmall,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: isSelected ? AppColors.white : AppColors.iosGrey,

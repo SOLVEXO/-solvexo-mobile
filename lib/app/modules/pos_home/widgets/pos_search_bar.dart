@@ -1,9 +1,11 @@
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/pos_home/controllers/pos_home_controller.dart';
+import 'package:book_store_app/app/modules/pos_home/widgets/pos_barcode_sheet.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class PosSearchBar extends StatelessWidget {
   final PosHomeController c;
@@ -27,7 +29,11 @@ class PosSearchBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           GestureDetector(
-            onTap: () {},
+            onTap: () => Get.bottomSheet(
+              PosBarcodeSheet(c: c),
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+            ),
             child: Container(
               width: 46,
               height: 46,

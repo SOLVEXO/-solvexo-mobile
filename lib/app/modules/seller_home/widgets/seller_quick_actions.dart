@@ -12,7 +12,7 @@ class SellerQuickActions extends StatelessWidget {
 
   void _onPosActionTap(SellerHomeController controller) {
     if (controller.hasPosSubscription.value) {
-      Get.toNamed(Routes.posHome);
+      Get.toNamed(Routes.sellerPosManagement);
     } else {
       _showPosOfferSheet();
     }
@@ -117,7 +117,7 @@ class _PosOfferSheet extends StatelessWidget {
             isOutlined: true,
             onPressed: () {
               Get.back();
-              Get.toNamed(Routes.posHome);
+              Get.toNamed(Routes.sellerPosManagement);
             },
           ),
         ],

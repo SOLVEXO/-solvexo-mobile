@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/pos_home/controllers/pos_home_controller.dart';
 import 'package:book_store_app/app/modules/pos_home/widgets/pos_cart_item_tile.dart';
@@ -15,17 +16,15 @@ class PosCartSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.88,
+      height: MediaQuery.of(context).size.height * 0.92,
       decoration: const BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
       child: Column(children: [
-        // ── Handle ────────────────────────────────────────────────
         const SizedBox(height: 10),
         Container(
-          width: 40,
-          height: 4,
+          width: 40, height: 4,
           decoration: BoxDecoration(
             color: AppColors.lightGrey2,
             borderRadius: BorderRadius.circular(2),
@@ -42,15 +41,12 @@ class PosCartSheet extends StatelessWidget {
                 color: AppColors.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(
-                Icons.shopping_bag_rounded,
-                color: AppColors.primaryColor,
-                size: 20,
-              ),
+              child: const Icon(Icons.shopping_bag_rounded,
+                  color: AppColors.primaryColor, size: 20),
             ),
             const SizedBox(width: 10),
             const CustomText(
-              text: 'Cart Summary',
+              text: 'Cart',
               fontSize: AppFontSize.regular,
               fontWeight: FontWeight.bold,
               color: AppColors.black2,
@@ -79,7 +75,7 @@ class PosCartSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const CustomText(
-                  text: 'Clear All',
+                  text: 'Clear',
                   fontSize: AppFontSize.tiny,
                   color: AppColors.red,
                   fontWeight: FontWeight.w600,
@@ -97,17 +93,13 @@ class PosCartSheet extends StatelessWidget {
               return Center(
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   Container(
-                    width: 72,
-                    height: 72,
+                    width: 72, height: 72,
                     decoration: BoxDecoration(
                       color: AppColors.primaryColor.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Icon(
-                      Icons.shopping_bag_outlined,
-                      size: 36,
-                      color: AppColors.primaryColor,
-                    ),
+                    child: const Icon(Icons.shopping_bag_outlined,
+                        size: 36, color: AppColors.primaryColor),
                   ),
                   const SizedBox(height: 14),
                   const CustomText(
@@ -116,12 +108,6 @@ class PosCartSheet extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: AppColors.black2,
                   ),
-                  const SizedBox(height: 5),
-                  const CustomText(
-                    text: 'Tap a product to add it',
-                    fontSize: AppFontSize.tiny,
-                    color: AppColors.iosGrey,
-                  ),
                 ]),
               );
             }
@@ -129,12 +115,10 @@ class PosCartSheet extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 6),
               itemCount: c.cartItems.length,
               separatorBuilder: (_, __) => const Divider(
-                height: 1,
-                color: AppColors.lightGrey2,
-                indent: 16,
-                endIndent: 16,
+                height: 1, color: AppColors.lightGrey2, indent: 16, endIndent: 16,
               ),
-              itemBuilder: (_, i) => PosCartItemTile(c: c, item: c.cartItems[i]),
+              itemBuilder: (_, i) =>
+                  PosCartItemTile(c: c, item: c.cartItems[i]),
             );
           }),
         ),
@@ -145,17 +129,15 @@ class PosCartSheet extends StatelessWidget {
   }
 }
 
-// ── Footer ────────────────────────────────────────────────────────────────────
-
+// ── Footer ─────────────────────────────────────────────────────────────────────
 class _CartFooter extends StatelessWidget {
   final PosHomeController c;
   const _CartFooter({required this.c});
 
   static const Map<String, String> _payIcons = {
-    'Card': AppIcons.cardIcon,
-    'Cash': AppIcons.cashIcon,
-    'Tap': AppIcons.barcodeIcon,
-    'Split': AppIcons.bankIcon,
+    'cash':  AppIcons.cashIcon,
+    'card':  AppIcons.cardIcon,
+    'other': AppIcons.bankIcon,
   };
 
   @override
@@ -166,12 +148,51 @@ class _CartFooter extends StatelessWidget {
         border: Border(top: BorderSide(color: AppColors.lightGrey2)),
       ),
       padding: EdgeInsets.fromLTRB(
-        16, 14, 16, 14 + MediaQuery.of(context).padding.bottom,
-      ),
+          16, 14, 16, 14 + MediaQuery.of(context).padding.bottom),
       child: Obx(() => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Order summary ───────────────────────────────────────
+          // ── Customer name ────────────────────────────────────────
+          CustomTextField(
+            controller: c.customerController,
+            hintText: 'Customer name (optional)',
+            fillColor: AppColors.background,
+            prefixIcon: const Icon(Icons.person_outline_rounded,
+                color: AppColors.iosGrey, size: 18),
+          ),
+          const SizedBox(height: 8),
+
+          // ── Discount & Tax ───────────────────────────────────────
+          Row(children: [
+            Expanded(
+              child: CustomTextField(
+                controller: c.discountController,
+                hintText: 'Discount (\$)',
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                fillColor: AppColors.background,
+                onChanged: (_) => c.cartItems.refresh(),
+                prefixIcon: const Icon(Icons.local_offer_outlined,
+                    color: AppColors.iosGrey, size: 18),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: CustomTextField(
+                controller: c.taxController,
+                hintText: 'Tax (%)',
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                fillColor: AppColors.background,
+                onChanged: (_) => c.cartItems.refresh(),
+                prefixIcon: const Icon(Icons.percent_rounded,
+                    color: AppColors.iosGrey, size: 18),
+              ),
+            ),
+          ]),
+          const SizedBox(height: 10),
+
+          // ── Order summary ────────────────────────────────────────
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -179,17 +200,18 @@ class _CartFooter extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(children: [
-              _TotalRow(
-                label: 'Subtotal',
-                value: '\$${c.subtotal.toStringAsFixed(2)}',
-                bold: false,
-              ),
-              const SizedBox(height: 6),
-              _TotalRow(
-                label: 'Tax (${(PosHomeController.taxRate * 100).toStringAsFixed(0)}%)',
-                value: '\$${c.tax.toStringAsFixed(2)}',
-                bold: false,
-              ),
+              _TotalRow(label: 'Subtotal',
+                  value: '\$${c.subtotal.toStringAsFixed(2)}'),
+              if (c.discountValue > 0) ...[
+                const SizedBox(height: 5),
+                _TotalRow(label: 'Discount',
+                    value: '-\$${c.discountValue.toStringAsFixed(2)}',
+                    valueColor: AppColors.green2),
+              ],
+              if (c.taxValue > 0) ...[
+                const SizedBox(height: 5),
+                _TotalRow(label: 'Tax', value: '+\$${c.taxValue.toStringAsFixed(2)}'),
+              ],
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
                 child: Divider(height: 1, color: AppColors.lightGrey2),
@@ -218,11 +240,11 @@ class _CartFooter extends StatelessWidget {
               ]),
             ]),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // ── Payment methods ─────────────────────────────────────
+          // ── Payment selector ─────────────────────────────────────
           Row(
-            children: c.paymentMethods.map((method) {
+            children: PosPaymentMethod.all.map((method) {
               final isSelected = c.selectedPayment.value == method;
               return Expanded(
                 child: Padding(
@@ -231,26 +253,34 @@ class _CartFooter extends StatelessWidget {
                     onTap: () => c.selectPayment(method),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 160),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primaryColor : AppColors.background,
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : AppColors.background,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isSelected ? AppColors.primaryColor : AppColors.lightGrey2,
+                          color: isSelected
+                              ? AppColors.primaryColor
+                              : AppColors.lightGrey2,
                         ),
                       ),
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
                         SvgIcon(
                           assetName: _payIcons[method] ?? AppIcons.duePayment,
                           size: 18,
-                          color: isSelected ? AppColors.white : AppColors.iosGrey,
+                          color: isSelected
+                              ? AppColors.white
+                              : AppColors.iosGrey,
                         ),
                         const SizedBox(height: 3),
                         CustomText(
-                          text: method,
+                          text: PosPaymentMethod.label(method),
                           fontSize: AppFontSize.tiny,
                           fontWeight: FontWeight.w600,
-                          color: isSelected ? AppColors.white : AppColors.iosGrey,
+                          color: isSelected
+                              ? AppColors.white
+                              : AppColors.iosGrey,
                         ),
                       ]),
                     ),
@@ -259,45 +289,77 @@ class _CartFooter extends StatelessWidget {
               );
             }).toList(),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
-          // ── Charge button ───────────────────────────────────────
-          GestureDetector(
-            onTap: c.hasItems ? () {} : null,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              height: 54,
-              decoration: BoxDecoration(
-                gradient: c.hasItems
-                    ? const LinearGradient(
-                        colors: [Color(0xFFd97757), Color(0xFFE8956A)],
-                      )
-                    : null,
-                color: c.hasItems ? null : AppColors.buttonDisableColor,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: c.hasItems
-                    ? [BoxShadow(color: AppColors.primaryColor.withOpacity(0.35), blurRadius: 10, offset: const Offset(0, 4))]
-                    : [],
+          // ── Hold + Charge buttons ─────────────────────────────────
+          Row(children: [
+            // Hold
+            Expanded(
+              child: GestureDetector(
+                onTap: c.isChargingOrHolding.value ? null : c.holdSale,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.lightGrey2),
+                  ),
+                  alignment: Alignment.center,
+                  child: const CustomText(
+                    text: 'Hold',
+                    fontSize: AppFontSize.verySmall,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.black2,
+                  ),
+                ),
               ),
-              alignment: Alignment.center,
-              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                SvgIcon(
-                  assetName: _payIcons[c.selectedPayment.value] ?? AppIcons.duePayment,
-                  color: AppColors.white,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                CustomText(
-                  text: c.hasItems
-                      ? 'Charge \$${c.total.toStringAsFixed(2)} · ${c.selectedPayment.value}'
-                      : 'Add items to charge',
-                  color: AppColors.white,
-                  fontSize: AppFontSize.small2,
-                  fontWeight: FontWeight.bold,
-                ),
-              ]),
             ),
-          ),
+            const SizedBox(width: 10),
+            // Charge
+            Expanded(
+              flex: 2,
+              child: GestureDetector(
+                onTap: (c.hasItems && !c.isChargingOrHolding.value)
+                    ? c.completeSale
+                    : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: c.hasItems
+                        ? const LinearGradient(
+                            colors: [Color(0xFFd97757), Color(0xFFE8956A)],
+                          )
+                        : null,
+                    color: c.hasItems ? null : AppColors.buttonDisableColor,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: c.hasItems
+                        ? [BoxShadow(
+                            color: AppColors.primaryColor.withOpacity(0.35),
+                            blurRadius: 10, offset: const Offset(0, 4),
+                          )]
+                        : [],
+                  ),
+                  alignment: Alignment.center,
+                  child: c.isChargingOrHolding.value
+                      ? const SizedBox(
+                          width: 20, height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2, color: AppColors.white),
+                        )
+                      : CustomText(
+                          text: c.hasItems
+                              ? 'Charge \$${c.total.toStringAsFixed(2)}'
+                              : 'Add items',
+                          color: AppColors.white,
+                          fontSize: AppFontSize.verySmall,
+                          fontWeight: FontWeight.bold,
+                        ),
+                ),
+              ),
+            ),
+          ]),
         ],
       )),
     );
@@ -307,8 +369,8 @@ class _CartFooter extends StatelessWidget {
 class _TotalRow extends StatelessWidget {
   final String label;
   final String value;
-  final bool bold;
-  const _TotalRow({required this.label, required this.value, required this.bold});
+  final Color? valueColor;
+  const _TotalRow({required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
@@ -316,15 +378,14 @@ class _TotalRow extends StatelessWidget {
       CustomText(
         text: label,
         fontSize: AppFontSize.verySmall,
-        color: bold ? AppColors.black2 : AppColors.iosGrey,
-        fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
+        color: AppColors.iosGrey,
       ),
       const Spacer(),
       CustomText(
         text: value,
         fontSize: AppFontSize.verySmall,
         fontWeight: FontWeight.w500,
-        color: bold ? AppColors.primaryColor : AppColors.black2,
+        color: valueColor ?? AppColors.black2,
       ),
     ]);
   }

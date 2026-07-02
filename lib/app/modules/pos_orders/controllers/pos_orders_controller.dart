@@ -1,70 +1,167 @@
+import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
+import 'package:book_store_app/app/data/models/pos/pos_sale_model.dart';
+import 'package:book_store_app/app/data/repositories/pos_repository.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:get/get.dart';
 
-enum PosPaymentMethod { card, cash, tap }
-
-class PosTransaction {
-  final String id;
-  final String customer;
-  final PosPaymentMethod paymentMethod;
-  final double amount;
-  final String time;
-
-  const PosTransaction({
-    required this.id,
-    required this.customer,
-    required this.paymentMethod,
-    required this.amount,
-    required this.time,
-  });
-}
-
 class PosOrdersController extends GetxController {
-  final RxBool isLoading = false.obs;
-  final RxString dateFilter = 'Today'.obs;
+  final _posRepo = PosRepository();
 
-  // 14 txns · total $842.50 · cash $340 · avg $60.18
-  static const List<PosTransaction> _allTransactions = [
-    PosTransaction(id: 'POS-8841', customer: 'David R.', paymentMethod: PosPaymentMethod.card, amount: 52.00, time: '3:05 PM'),
-    PosTransaction(id: 'POS-8840', customer: 'Walk-in', paymentMethod: PosPaymentMethod.cash, amount: 86.00, time: '2:48 PM'),
-    PosTransaction(id: 'POS-8839', customer: 'Lena K.', paymentMethod: PosPaymentMethod.tap, amount: 24.00, time: '2:31 PM'),
-    PosTransaction(id: 'POS-8838', customer: 'Walk-in', paymentMethod: PosPaymentMethod.card, amount: 61.50, time: '1:59 PM'),
-    PosTransaction(id: 'POS-8837', customer: 'Omar T.', paymentMethod: PosPaymentMethod.cash, amount: 120.00, time: '1:22 PM'),
-    PosTransaction(id: 'POS-8836', customer: 'Sarah M.', paymentMethod: PosPaymentMethod.card, amount: 33.00, time: '12:44 PM'),
-    PosTransaction(id: 'POS-8835', customer: 'Walk-in', paymentMethod: PosPaymentMethod.tap, amount: 78.00, time: '12:01 PM'),
-    PosTransaction(id: 'POS-8834', customer: 'Amira L.', paymentMethod: PosPaymentMethod.cash, amount: 134.00, time: '11:30 AM'),
-    PosTransaction(id: 'POS-8833', customer: 'James W.', paymentMethod: PosPaymentMethod.card, amount: 18.00, time: '10:55 AM'),
-    PosTransaction(id: 'POS-8832', customer: 'Walk-in', paymentMethod: PosPaymentMethod.tap, amount: 44.00, time: '10:12 AM'),
-    PosTransaction(id: 'POS-8831', customer: 'Fatima H.', paymentMethod: PosPaymentMethod.card, amount: 62.50, time: '9:44 AM'),
-    PosTransaction(id: 'POS-8830', customer: 'Nina P.', paymentMethod: PosPaymentMethod.tap, amount: 44.50, time: '9:10 AM'),
-    PosTransaction(id: 'POS-8829', customer: 'Walk-in', paymentMethod: PosPaymentMethod.card, amount: 38.00, time: '8:55 AM'),
-    PosTransaction(id: 'POS-8828', customer: 'Yusuf K.', paymentMethod: PosPaymentMethod.tap, amount: 47.00, time: '8:31 AM'),
-  ];
+  final RxBool isLoading    = true.obs;
+  final RxBool isLoadingMore = false.obs;
+  final RxString dateFilter  = 'All time'.obs;
+  final Rx<DateTime?> fromDate = Rx(null);
+  final Rx<DateTime?> toDate   = Rx(null);
 
-  List<PosTransaction> get transactions => _allTransactions;
+  final RxList<PosSaleModel> sales = <PosSaleModel>[].obs;
+  final RxString paymentFilter = 'All'.obs;
+  final RxString statusFilter  = 'All'.obs;
+  final RxString processingId  = ''.obs;
 
-  double get totalSales =>
-      _allTransactions.fold(0.0, (sum, t) => sum + t.amount);
+  String _storeId   = '';
+  String _sessionId = '';
+  int _page = 1;
+  bool _hasMore = true;
 
-  double get avgTransaction =>
-      _allTransactions.isEmpty ? 0.0 : totalSales / _allTransactions.length;
+  static const statusFilters = ['All', 'completed', 'held', 'refunded', 'voided', 'partially_refunded'];
 
-  double get cashTotal => _allTransactions
-      .where((t) => t.paymentMethod == PosPaymentMethod.cash)
-      .fold(0.0, (sum, t) => sum + t.amount);
+  // ── Computed stats (over the currently loaded + filtered page set) ────────
+  double get totalSales  => filteredSales.fold(0.0, (s, t) => s + t.total);
+  double get avgTransaction => filteredSales.isEmpty ? 0.0 : totalSales / filteredSales.length;
+  double get cashTotal  =>
+      filteredSales.where((t) => t.paymentMethod == 'cash').fold(0.0, (s, t) => s + t.total);
+  int    get txnCount   => filteredSales.length;
+  bool   get hasMore    => _hasMore;
 
-  int get txnCount => _allTransactions.length;
+  List<PosSaleModel> get filteredSales {
+    return sales.where((s) {
+      final matchPayment = paymentFilter.value == 'All' || s.paymentMethod == paymentFilter.value;
+      final matchStatus = statusFilter.value == 'All' || s.status == statusFilter.value;
+      return matchPayment && matchStatus;
+    }).toList();
+  }
 
   @override
   void onInit() {
     super.onInit();
-    _load();
+    _loadContext().then((_) => loadSales());
   }
 
-  Future<void> _load() async {
+  Future<void> _loadContext() async {
+    _storeId   = await AppPreferences.getStoreId()      ?? '';
+    _sessionId = await AppPreferences.getPosSessionId() ?? '';
+  }
+
+  String? _fmtDate(DateTime? d) => d?.toIso8601String().split('T').first;
+
+  Future<void> loadSales() async {
     isLoading.value = true;
-    await Future.delayed(const Duration(milliseconds: 600));
-    isLoading.value = false;
+    _page = 1;
+    try {
+      final result = await _posRepo.getSales(
+        storeId: _storeId,
+        sessionId: _sessionId.isEmpty ? null : _sessionId,
+        page: _page,
+        from: _fmtDate(fromDate.value),
+        to: _fmtDate(toDate.value),
+      );
+      sales.assignAll(result.items);
+      _hasMore = result.hasMore;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  Future<void> refreshData() async => _load();
+  Future<void> loadMore() async {
+    if (isLoadingMore.value || !_hasMore) return;
+    isLoadingMore.value = true;
+    try {
+      final result = await _posRepo.getSales(
+        storeId: _storeId,
+        sessionId: _sessionId.isEmpty ? null : _sessionId,
+        page: _page + 1,
+        from: _fmtDate(fromDate.value),
+        to: _fmtDate(toDate.value),
+      );
+      sales.addAll(result.items);
+      _page++;
+      _hasMore = result.hasMore;
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> refreshData() => loadSales();
+
+  void setPaymentFilter(String method) => paymentFilter.value = method;
+  void setStatusFilter(String status) => statusFilter.value = status;
+
+  void setDateRange(DateTime? from, DateTime? to) {
+    fromDate.value = from;
+    toDate.value = to;
+    dateFilter.value = (from == null && to == null)
+        ? 'All time'
+        : '${_fmtDate(from) ?? '…'} → ${_fmtDate(to) ?? '…'}';
+    loadSales();
+  }
+
+  void openSaleDetail(PosSaleModel sale) => Get.toNamed(Routes.posSaleDetail, arguments: sale.id);
+
+  // ── Full refund (from the list quick-action) ─────────────────────────────
+  Future<void> refundSale(PosSaleModel sale) async {
+    processingId.value = sale.id;
+    try {
+      final employeeId = await AppPreferences.getPosEmployeeId();
+      final result = await _posRepo.refundSale(sale.id, actingEmployeeId: employeeId);
+      if (!result.success) {
+        CustomAppSnackbar.error(result.message ?? 'Could not process refund.');
+        return;
+      }
+      final idx = sales.indexWhere((s) => s.id == sale.id);
+      if (idx >= 0) {
+        sales[idx] = _withStatus(sales[idx], result.newStatus ?? 'refunded', refundedAmount: sale.total);
+      }
+      CustomAppSnackbar.success(result.message ?? 'Refund processed.');
+    } finally {
+      processingId.value = '';
+    }
+  }
+
+  Future<void> voidSale(PosSaleModel sale) async {
+    processingId.value = sale.id;
+    try {
+      final employeeId = await AppPreferences.getPosEmployeeId();
+      final ok = await _posRepo.voidSale(sale.id, actingEmployeeId: employeeId);
+      if (!ok) return;
+      final idx = sales.indexWhere((s) => s.id == sale.id);
+      if (idx >= 0) sales[idx] = _withStatus(sales[idx], 'voided');
+      CustomAppSnackbar.success('Sale voided and stock restored.');
+    } finally {
+      processingId.value = '';
+    }
+  }
+
+  PosSaleModel _withStatus(PosSaleModel sale, String status, {double? refundedAmount}) => PosSaleModel(
+        id: sale.id,
+        saleNumber: sale.saleNumber,
+        storeId: sale.storeId,
+        sessionId: sale.sessionId,
+        registerId: sale.registerId,
+        employeeId: sale.employeeId,
+        items: sale.items,
+        discount: sale.discount,
+        tax: sale.tax,
+        subtotal: sale.subtotal,
+        total: sale.total,
+        paymentMethod: sale.paymentMethod,
+        customerName: sale.customerName,
+        customerId: sale.customerId,
+        notes: sale.notes,
+        heldAt: sale.heldAt,
+        status: status,
+        voidedAt: status == 'voided' ? DateTime.now() : sale.voidedAt,
+        refundedAmount: refundedAmount ?? sale.refundedAmount,
+        createdAt: sale.createdAt,
+      );
 }

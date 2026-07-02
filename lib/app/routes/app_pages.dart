@@ -38,7 +38,21 @@ import '../modules/pos/views/pos_main_view.dart';
 import '../modules/pos_orders/views/pos_orders_view.dart';
 import '../modules/pos_products/views/pos_products_view.dart';
 import '../modules/pos_settings/views/pos_settings_view.dart';
+import '../modules/pos_pin_login/bindings/pos_pin_login_binding.dart';
+import '../modules/pos_pin_login/views/pos_pin_login_view.dart';
+import '../modules/pos_open_register/bindings/pos_open_register_binding.dart';
+import '../modules/pos_open_register/views/pos_open_register_view.dart';
+import '../modules/pos_held_sales/bindings/pos_held_sales_binding.dart';
+import '../modules/pos_held_sales/views/pos_held_sales_view.dart';
+import '../modules/pos_daily_report/bindings/pos_daily_report_binding.dart';
+import '../modules/pos_daily_report/views/pos_daily_report_view.dart';
+import '../modules/seller_pos_management/bindings/seller_pos_management_binding.dart';
+import '../modules/seller_pos_management/views/seller_pos_management_view.dart';
 import '../modules/seller_analytics/bindings/seller_analytics_binding.dart';
+import '../modules/seller_finance/bindings/seller_finance_binding.dart';
+import '../modules/seller_finance/views/seller_finance_view.dart';
+import '../modules/seller_edit_profile/bindings/seller_edit_profile_binding.dart';
+import '../modules/seller_edit_profile/views/seller_edit_profile_view.dart';
 import '../modules/seller/bindings/seller_binding.dart';
 import '../modules/seller_orders/bindings/seller_order_detail_binding.dart';
 import '../modules/seller_orders/bindings/seller_orders_binding.dart';
@@ -111,6 +125,17 @@ import '../modules/sub_category/binding/sub_category_binding.dart';
 import '../modules/sub_category/views/sub_category_view.dart';
 import '../modules/wishlist/bindings/wishlist_binding.dart';
 import '../modules/wishlist/views/wishlist_view.dart';
+import '../modules/pos_sale_detail/bindings/pos_sale_detail_binding.dart';
+import '../modules/pos_sale_detail/views/pos_sale_detail_view.dart';
+import '../modules/pos_session_report/bindings/pos_session_report_binding.dart';
+import '../modules/pos_session_report/views/pos_session_report_view.dart';
+import '../modules/pos_session_history/bindings/pos_session_history_binding.dart';
+import '../modules/pos_session_history/views/pos_session_history_view.dart';
+import '../modules/pos_audit_log/bindings/pos_audit_log_binding.dart';
+import '../modules/pos_audit_log/views/pos_audit_log_view.dart';
+import '../modules/pos_range_report/bindings/pos_range_report_binding.dart';
+import '../modules/pos_range_report/views/pos_range_report_view.dart';
+import '../middleware/auth_middleware.dart';
 
 part 'app_routes.dart';
 
@@ -319,6 +344,7 @@ class AppPages {
       name: Routes.posHome,
       page: () => PosMainView(),
       binding: PosBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
     ),
     GetPage(
       name: Routes.sellerMessages,
@@ -359,6 +385,16 @@ class AppPages {
       name: Routes.sellerAnalytics,
       page: () => SellerAnalyticsView(),
       binding: SellerAnalyticsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerFinance,
+      page: () => SellerFinanceView(),
+      binding: SellerFinanceBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerEditProfile,
+      page: () => SellerEditProfileView(),
+      binding: SellerEditProfileBinding(),
     ),
     GetPage(
       name: Routes.sellerAiStudio,
@@ -409,17 +445,78 @@ class AppPages {
       name: Routes.posOrders,
       page: () => PosOrdersView(),
       binding: PosOrdersBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
     ),
-    GetPage(name: Routes.PosMainView, page: () => PosMainView()),
+    GetPage(
+      name: Routes.posPinLogin,
+      page: () => PosPinLoginView(),
+      binding: PosPinLoginBinding(),
+      middlewares: [PosAccessMiddleware()],
+    ),
+    GetPage(
+      name: Routes.posOpenRegister,
+      page: () => PosOpenRegisterView(),
+      binding: PosOpenRegisterBinding(),
+      middlewares: [PosAccessMiddleware()],
+    ),
+    GetPage(
+      name: Routes.posHeldSales,
+      page: () => PosHeldSalesView(),
+      binding: PosHeldSalesBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
+    ),
+    GetPage(
+      name: Routes.posDailyReport,
+      page: () => PosDailyReportView(),
+      binding: PosDailyReportBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
+    ),
+    GetPage(
+      name: Routes.sellerPosManagement,
+      page: () => SellerPosManagementView(),
+      binding: SellerPosManagementBinding(),
+    ),
     GetPage(
       name: Routes.posProducts,
       page: () => PosProductsView(),
       binding: PosProductsBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
     ),
     GetPage(
       name: Routes.posSettings,
       page: () => PosSettingsView(),
       binding: PosSettingsBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
+    ),
+    GetPage(
+      name: Routes.posSaleDetail,
+      page: () => PosSaleDetailView(),
+      binding: PosSaleDetailBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
+    ),
+    GetPage(
+      name: Routes.posSessionReport,
+      page: () => PosSessionReportView(),
+      binding: PosSessionReportBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
+    ),
+    GetPage(
+      name: Routes.posSessionHistory,
+      page: () => const PosSessionHistoryView(),
+      binding: PosSessionHistoryBinding(),
+      middlewares: [PosAccessMiddleware(requireActiveSession: true)],
+    ),
+    GetPage(
+      name: Routes.posAuditLog,
+      page: () => const PosAuditLogView(),
+      binding: PosAuditLogBinding(),
+      middlewares: [PosAccessMiddleware()],
+    ),
+    GetPage(
+      name: Routes.posRangeReport,
+      page: () => PosRangeReportView(),
+      binding: PosRangeReportBinding(),
+      middlewares: [PosAccessMiddleware()],
     ),
     GetPage(
       name: Routes.notifications,

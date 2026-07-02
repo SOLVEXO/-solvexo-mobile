@@ -49,7 +49,6 @@ class EditProfileView extends StatelessWidget {
               ),
             ),
             Obx(() {
-              final isEdit = controller.isEditMode.value;
               return Form(
                 key: controller.profileFormKey,
                 child: Column(

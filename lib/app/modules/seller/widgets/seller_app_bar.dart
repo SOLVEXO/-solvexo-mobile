@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
@@ -70,30 +71,39 @@ class SellerAppBar extends StatelessWidget {
           const SizedBox(width: 10),
           Obx(() {
             final profileController = Get.put(ProfileController());
-            final name = profileController.user.value?.name ?? '';
+            final user = profileController.user.value;
+            final imageUrl = user?.profileImage ?? '';
+            final name = user?.name ?? '';
             final initials = name.trim().isNotEmpty
-                ? name
-                      .trim()
-                      .split(' ')
-                      .map((w) => w[0])
-                      .take(2)
-                      .join()
-                      .toUpperCase()
+                ? name.trim().split(' ').map((w) => w[0]).take(2).join().toUpperCase()
                 : 'Me';
-            return Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              alignment: Alignment.center,
-              child: CustomText(
-                text: initials,
-                fontSize: 13,
-                color: AppColors.white,
-                fontWeight: FontWeight.bold,
-              ),
+
+            return GestureDetector(
+              onTap: () => Get.toNamed(Routes.sellerEditProfile),
+              child: imageUrl.isNotEmpty
+                  ? ClipOval(
+                      child: CommonImageView(
+                        url: imageUrl,
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: CustomText(
+                        text: initials,
+                        fontSize: 13,
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             );
           }),
         ],

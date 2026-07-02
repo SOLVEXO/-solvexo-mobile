@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/data/models/pos/pos_product_model.dart';
 import 'package:book_store_app/app/modules/pos_home/controllers/pos_home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -7,18 +8,10 @@ import 'package:get/get.dart';
 
 class PosProductCard extends StatelessWidget {
   final PosHomeController c;
-  final PosProduct product;
+  final PosProductModel product;
   const PosProductCard({super.key, required this.c, required this.product});
 
-  static const Map<String, Color> _bgColors = {
-    'Ceramics':   Color(0xFFFFF3E0),
-    'Accessories': Color(0xFFE8F5E9),
-    'Prints':     Color(0xFFE3F2FD),
-    'Candles':    Color(0xFFFCE4EC),
-    'Stationery': Color(0xFFF3E5F5),
-  };
-
-  Color get _cardBg => _bgColors[product.category] ?? const Color(0xFFF5F5F5);
+  static const Color _cardBg = Color(0xFFF5F5F5);
 
   @override
   Widget build(BuildContext context) {
@@ -60,14 +53,16 @@ class PosProductCard extends StatelessWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Emoji
-                      Text(
-                        product.emoji,
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: isOut ? AppColors.black.withOpacity(0.12) : null,
-                        ),
-                      ),
+                      // Product image, falling back to a generic icon
+                      product.displayImage != null
+                          ? Image.network(
+                              product.displayImage!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (_, __, ___) => _fallbackIcon(isOut),
+                            )
+                          : _fallbackIcon(isOut),
                       // Cart qty badge
                       if (inCart)
                         Positioned(
@@ -101,7 +96,7 @@ class PosProductCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: CustomText(
-                              text: '${product.stock} left',
+                              text: '${product.totalStock} left',
                               fontSize: AppFontSize.tiny,
                               color: AppColors.white,
                               fontWeight: FontWeight.bold,
@@ -163,4 +158,10 @@ class PosProductCard extends StatelessWidget {
       );
     });
   }
+
+  Widget _fallbackIcon(bool isOut) => Icon(
+        Icons.inventory_2_outlined,
+        size: 32,
+        color: isOut ? AppColors.black.withOpacity(0.12) : AppColors.grey,
+      );
 }

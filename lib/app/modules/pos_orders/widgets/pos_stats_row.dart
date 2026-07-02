@@ -4,48 +4,43 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class PosStatsRow extends StatelessWidget {
   final PosOrdersController controller;
-
   const PosStatsRow({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Obx(() => Padding(
       padding: const EdgeInsets.fromLTRB(
-        AppDimen.allPadding,
-        12,
-        AppDimen.allPadding,
-        12,
+        AppDimen.allPadding, 12, AppDimen.allPadding, 12,
       ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: _StatCard(
-              label: 'Sales',
-              value: '\$${controller.totalSales.toStringAsFixed(2)}',
-              subtitle: '${controller.txnCount} txns',
-            ),
+      child: Row(children: [
+        Expanded(
+          flex: 2,
+          child: _StatCard(
+            label: 'Sales',
+            value: '\$${controller.totalSales.toStringAsFixed(2)}',
+            subtitle: '${controller.txnCount} txns',
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _StatCard(
-              label: 'Avg',
-              value: '\$${controller.avgTransaction.toStringAsFixed(2)}',
-            ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _StatCard(
+            label: 'Avg',
+            value: '\$${controller.avgTransaction.toStringAsFixed(2)}',
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _StatCard(
-              label: 'Cash',
-              value: '\$${controller.cashTotal.toStringAsFixed(0)}',
-            ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _StatCard(
+            label: 'Cash',
+            value: '\$${controller.cashTotal.toStringAsFixed(0)}',
           ),
-        ],
-      ),
-    );
+        ),
+      ]),
+    ));
   }
 }
 
@@ -54,11 +49,7 @@ class _StatCard extends StatelessWidget {
   final String value;
   final String? subtitle;
 
-  const _StatCard({
-    required this.label,
-    required this.value,
-    this.subtitle,
-  });
+  const _StatCard({required this.label, required this.value, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +57,8 @@ class _StatCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+        borderRadius:
+            BorderRadius.circular(AppDimen.serviceCountTileRadius),
         boxShadow: [
           BoxShadow(
             color: AppColors.black.withOpacity(0.05),
@@ -75,31 +67,24 @@ class _StatCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        CustomText(text: label, fontSize: AppFontSize.tiny, color: AppColors.grey),
+        const SizedBox(height: 4),
+        CustomText(
+          text: value,
+          fontSize: AppFontSize.small,
+          fontWeight: FontWeight.bold,
+          color: AppColors.black,
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
           CustomText(
-            text: label,
+            text: subtitle!,
             fontSize: AppFontSize.tiny,
-            color: AppColors.grey,
+            color: AppColors.lightGrey5,
           ),
-          const SizedBox(height: 4),
-          CustomText(
-            text: value,
-            fontSize: AppFontSize.small,
-            fontWeight: FontWeight.bold,
-            color: AppColors.black,
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 2),
-            CustomText(
-              text: subtitle!,
-              fontSize: AppFontSize.tiny,
-              color: AppColors.lightGrey5,
-            ),
-          ],
         ],
-      ),
+      ]),
     );
   }
 }

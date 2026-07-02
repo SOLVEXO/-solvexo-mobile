@@ -38,6 +38,7 @@ class SellerSettingsController extends GetxController {
 
   // ── Profile ─────────────────────────────────────────────────────────────────
   final RxString name = 'Alex Chen'.obs;
+  final RxString profileImage = ''.obs;
   final RxString email = 'alex@myshop.com'.obs;
   final RxString plan = 'Professional Plan'.obs;
 
@@ -67,6 +68,11 @@ class SellerSettingsController extends GetxController {
           onTap: () => Get.toNamed(Routes.sellerStoreProfile),
         ),
         SettingsTile(
+          emoji: AppIcons.billsIcon,
+          title: 'Finance & Payouts',
+          onTap: () => Get.toNamed(Routes.sellerFinance),
+        ),
+        SettingsTile(
           emoji: AppIcons.duePayment,
           title: 'Payment Methods',
           trailing: paymentMethods.value,
@@ -77,6 +83,11 @@ class SellerSettingsController extends GetxController {
           title: 'Shipping',
           trailing: shippingZones.value,
           onTap: () => Get.toNamed(Routes.sellerShipping),
+        ),
+        SettingsTile(
+          emoji: AppIcons.posIcon,
+          title: 'POS Management',
+          onTap: () => Get.toNamed(Routes.sellerPosManagement),
         ),
       ],
     ),
@@ -106,6 +117,11 @@ class SellerSettingsController extends GetxController {
     SettingsSection(
       header: 'ACCOUNT',
       tiles: [
+        SettingsTile(
+          emoji: AppIcons.editIcon,
+          title: 'Edit Profile',
+          onTap: () => Get.toNamed(Routes.sellerEditProfile),
+        ),
         SettingsTile(
           emoji: AppIcons.privacy,
           title: 'Password & Security',
@@ -178,6 +194,9 @@ class SellerSettingsController extends GetxController {
   void _applyUser(UserModel? user) {
     if (user == null) return;
     if (user.name.isNotEmpty) name.value = user.name;
+    if (user.profileImage != null && user.profileImage!.isNotEmpty) {
+      profileImage.value = user.profileImage!;
+    }
     if (user.email.isNotEmpty) email.value = user.email;
   }
 
