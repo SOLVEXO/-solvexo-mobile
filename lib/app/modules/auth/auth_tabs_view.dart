@@ -5,19 +5,18 @@ import 'package:book_store_app/app/modules/login/login_view.dart';
 import 'package:book_store_app/app/modules/signup/sign_up_view.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
+import 'package:book_store_app/core/widgets/base_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AuthTabsView extends StatelessWidget {
-  AuthTabsView({super.key});
-
-  final controller = Get.put(AuthTabsController());
+  const AuthTabsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Stack(
+    final controller = Get.find<AuthTabsController>();
+    return BaseViewScreen(
+      child: Stack(
         children: [
           // ── Gradient background ──────────────────────────────────────────
           Container(
@@ -30,22 +29,14 @@ class AuthTabsView extends StatelessWidget {
           const AnimatedBackgroundCircles(),
 
           // ── Content ──────────────────────────────────────────────────────
-          SafeArea(
-            child: Column(
-              children: [
-                // Top: logo + brand
-                Expanded(
-                  flex: 2,
-                  child: const _TopBrand(),
-                ),
+          Column(
+            children: [
+              // Top: logo + brand
+              const Expanded(flex: 2, child: _TopBrand()),
 
-                // Bottom: white card with tabs + form
-                Expanded(
-                  flex: 8,
-                  child: _AuthCard(controller: controller),
-                ),
-              ],
-            ),
+              // Bottom: white card with tabs + form
+              Expanded(flex: 8, child: _AuthCard(controller: controller)),
+            ],
           ),
         ],
       ),
@@ -136,15 +127,20 @@ class _AuthCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.background,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: AppColors.lightGrey2,
-                  width: 0.4,
-                ),
+                border: Border.all(color: AppColors.lightGrey2, width: 0.4),
               ),
               child: Row(
                 children: [
-                  _TabButton(label: 'Sign In', index: 0, controller: controller),
-                  _TabButton(label: 'Sign Up', index: 1, controller: controller),
+                  _TabButton(
+                    label: 'Sign In',
+                    index: 0,
+                    controller: controller,
+                  ),
+                  _TabButton(
+                    label: 'Sign Up',
+                    index: 1,
+                    controller: controller,
+                  ),
                 ],
               ),
             ),
@@ -154,22 +150,24 @@ class _AuthCard extends StatelessWidget {
 
           // ── Form area ──────────────────────────────────────────────────
           Expanded(
-            child: Obx(() => AnimatedSwitcher(
-              duration: const Duration(milliseconds: 280),
-              transitionBuilder: (child, anim) => FadeTransition(
-                opacity: anim,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.04, 0),
-                    end: Offset.zero,
-                  ).animate(anim),
-                  child: child,
+            child: Obx(
+              () => AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                transitionBuilder: (child, anim) => FadeTransition(
+                  opacity: anim,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.04, 0),
+                      end: Offset.zero,
+                    ).animate(anim),
+                    child: child,
+                  ),
                 ),
+                child: controller.tabIndex.value == 0
+                    ? LoginView(key: const ValueKey(0))
+                    : SignUpView(key: const ValueKey(1)),
               ),
-              child: controller.tabIndex.value == 0
-                  ? LoginView(key: const ValueKey(0))
-                  : SignUpView(key: const ValueKey(1)),
-            )),
+            ),
           ),
         ],
       ),
@@ -225,4 +223,3 @@ class _TabButton extends StatelessWidget {
     );
   }
 }
-

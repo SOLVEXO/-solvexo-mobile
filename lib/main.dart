@@ -14,7 +14,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   // Initialize SharedPreferences
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final prefs = await SharedPreferences.getInstance();
+  await SharedPreferences.getInstance();
   runApp(const MyApp());
 }
 
@@ -27,6 +27,10 @@ class MyApp extends StatelessWidget {
       builder: (context, orientation, screenType) {
         return GetMaterialApp(
           theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          // Pinned to light for now — flip to ThemeMode.system once every
+          // screen has been verified against the dark palette.
+          themeMode: ThemeMode.light,
           debugShowCheckedModeBanner: false,
           title: "Book Store",
           initialRoute: AppPages.initialRoute,

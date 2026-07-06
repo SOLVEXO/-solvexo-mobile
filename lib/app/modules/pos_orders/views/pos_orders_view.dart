@@ -12,32 +12,10 @@ import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class PosOrdersView extends StatefulWidget {
-  const PosOrdersView({super.key});
+class PosOrdersView extends StatelessWidget {
+  PosOrdersView({super.key});
 
-  @override
-  State<PosOrdersView> createState() => _PosOrdersViewState();
-}
-
-class _PosOrdersViewState extends State<PosOrdersView> {
   final PosOrdersController controller = Get.put(PosOrdersController());
-  final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-        controller.loadMore();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +34,7 @@ class _PosOrdersViewState extends State<PosOrdersView> {
               return CustomRefreshWrapper(
                 onRefresh: controller.refreshData,
                 child: SingleChildScrollView(
-                  controller: _scrollController,
+                  controller: controller.scrollController,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

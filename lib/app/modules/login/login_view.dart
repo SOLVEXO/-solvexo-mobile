@@ -12,11 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginView extends StatelessWidget {
-  LoginView({super.key});
-  final authController = Get.put(AuthController());
+  const LoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authController = Get.find<AuthController>();
     return SingleChildScrollView(
       key: const PageStorageKey("signin"),
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),

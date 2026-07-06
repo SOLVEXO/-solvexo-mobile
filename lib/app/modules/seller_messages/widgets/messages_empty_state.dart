@@ -1,5 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +21,9 @@ class MessagesEmptyState extends StatelessWidget {
               color: AppColors.background,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.chat_bubble_outline_rounded,
-              size: 52,
+            child: const SvgIcon(
+              assetName: AppIcons.messageIcon,
+              size: 44,
               color: AppColors.lightGrey,
             ),
           ),

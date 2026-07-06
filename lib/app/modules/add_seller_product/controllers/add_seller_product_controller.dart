@@ -16,6 +16,27 @@ enum ProductTypeOption { physical, digital, educational, subscription }
 
 enum AddProductStep { type, details }
 
+/// How a product should go live. Mirrors the backend's `status` field
+/// ('active' | 'draft' | 'scheduled') — `scheduled` additionally requires
+/// a `scheduledAt` date, enforced both here and server-side.
+enum ProductPublishMode {
+  now,
+  scheduled,
+  draft;
+
+  String get apiStatus => switch (this) {
+        ProductPublishMode.now => 'active',
+        ProductPublishMode.scheduled => 'scheduled',
+        ProductPublishMode.draft => 'draft',
+      };
+
+  static ProductPublishMode fromApiStatus(String? status) => switch (status) {
+        'scheduled' => ProductPublishMode.scheduled,
+        'draft' => ProductPublishMode.draft,
+        _ => ProductPublishMode.now,
+      };
+}
+
 // ── Type metadata ──────────────────────────────────────────────────────────────
 
 class ProductTypeData {
@@ -122,7 +143,8 @@ class AddSellerProductController extends GetxController {
   final RxString price = ''.obs;
   final RxString stock = ''.obs;
   final RxBool unlimitedStock = false.obs;
-  final RxBool saveAsDraft = false.obs;
+  final Rx<ProductPublishMode> publishMode = ProductPublishMode.now.obs;
+  final Rxn<DateTime> scheduledAt = Rxn<DateTime>();
 
   // ── Shared (physical + digital) ───────────────────────────────────────────
   final RxString compareAtPrice = ''.obs;
@@ -184,8 +206,10 @@ class AddSellerProductController extends GetxController {
       case AddProductStep.type:
         return selectedType.value != null;
       case AddProductStep.details:
+        final needsSchedule = publishMode.value == ProductPublishMode.scheduled;
         return productName.value.trim().isNotEmpty &&
-            price.value.trim().isNotEmpty;
+            price.value.trim().isNotEmpty &&
+            (!needsSchedule || scheduledAt.value != null);
     }
   }
 
@@ -322,11 +346,12 @@ class AddSellerProductController extends GetxController {
 
     if (success) {
       Get.back();
-      ToastUtil.showToast(
-        saveAsDraft.value
-            ? 'Product saved as draft'
-            : 'Product published successfully!',
-      );
+      ToastUtil.showToast(switch (publishMode.value) {
+        ProductPublishMode.draft => 'Product saved as draft',
+        ProductPublishMode.scheduled =>
+          'Product scheduled — it will go live automatically.',
+        ProductPublishMode.now => 'Product published successfully!',
+      });
     }
   }
 
@@ -375,7 +400,8 @@ class AddSellerProductController extends GetxController {
       storeId: storeId,
       name: nameCtrl.text.trim(),
       price: parsedPrice,
-      status: saveAsDraft.value ? 'draft' : 'active',
+      status: publishMode.value.apiStatus,
+      scheduledAt: scheduledAt.value?.toIso8601String(),
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
       compareAtPrice: parsedCompare,
       tags: tagList,
@@ -420,7 +446,8 @@ class AddSellerProductController extends GetxController {
       storeId: storeId,
       name: nameCtrl.text.trim(),
       price: parsedPrice,
-      status: saveAsDraft.value ? 'draft' : 'active',
+      status: publishMode.value.apiStatus,
+      scheduledAt: scheduledAt.value?.toIso8601String(),
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
       compareAtPrice: parsedCompare,
       stock: parsedStock,

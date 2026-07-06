@@ -9,6 +9,7 @@ class OrderItem {
   final double price;
   final double totalPrice;
   final String status;
+  final String returnStatus;
 
   const OrderItem({
     required this.itemId,
@@ -21,6 +22,7 @@ class OrderItem {
     required this.price,
     required this.totalPrice,
     required this.status,
+    this.returnStatus = 'none',
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class OrderItem {
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       totalPrice: (json['totalPrice'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'pending',
+      returnStatus: json['returnStatus'] as String? ?? 'none',
     );
   }
 }

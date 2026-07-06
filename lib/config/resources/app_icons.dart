@@ -3,6 +3,8 @@ class AppIcons {
   static const String appLogoSvg = '${_baseIconsPath}favicon.svg';
   static const String googleIcon = '${_baseIconsPath}google.png';
   static const String facebookIcon = '${_baseIconsPath}facebook.png';
+  static const String uploadImageIcon =
+      '${_baseIconsPath}upload_photo_icon.svg';
   static const String appleIcon = '${_baseIconsPath}apple.svg';
   static const String assistantIcon = '${_baseIconsPath}assistant.svg';
   static const String bankIcon = '${_baseIconsPath}bankicon.svg';

@@ -1,4 +1,4 @@
-import 'package:book_store_app/app/base_view/controller/base_view_controller.dart';
+import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
@@ -19,6 +19,7 @@ class CartController extends BaseController {
   // ─── State ────────────────────────────────────────────────────────────────
   final RxList<CartItem> cartItems = <CartItem>[].obs;
   final RxBool selectAll = false.obs;
+  @override
   final RxBool isLoading = false.obs;
   final RxBool isCheckingOut = false.obs;
 

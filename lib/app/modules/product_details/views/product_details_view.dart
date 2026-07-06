@@ -5,8 +5,11 @@ import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/custom_rating_bar.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/data/models/rating/review_model.dart';
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/product_details/controller/product_detail_controller.dart';
 import 'package:book_store_app/app/modules/product_details/widgets/product_detail_shimmer.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
@@ -29,9 +32,6 @@ class ProductDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final date = DateTime.now().day;
-    final month = DateTime.now().month;
-    final year = DateTime.now().year;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -165,23 +165,8 @@ class ProductDetailsView extends StatelessWidget {
 
                     const Divider(),
 
-                    // ── Seller name ─────────────────────────────────────
-                    if (product.sellerId.isNotEmpty)
-                      Row(
-                        children: [
-                          CustomText(
-                            text: 'Sold by: ',
-                            fontSize: AppFontSize.small2,
-                            color: AppColors.gray600,
-                          ),
-                          CustomText(
-                            text: product.sellerId,
-                            fontSize: AppFontSize.small2,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryColor,
-                          ),
-                        ],
-                      ),
+                    // ── Seller / store card ─────────────────────────────
+                    if (product.sellerId.isNotEmpty) _SellerStoreCard(product: product),
 
                     // ── Variants ────────────────────────────────────────
                     Obx(() {
@@ -402,6 +387,11 @@ class ProductDetailsView extends StatelessWidget {
                           fontSize: AppFontSize.small2,
                           fontWeight: FontWeight.w600,
                         ),
+                        CustomText(
+                          text: '(${controller.reviewStats.value.totalReviews})',
+                          fontSize: AppFontSize.small2,
+                          color: AppColors.gray600,
+                        ),
                         const VerticalDivider(
                           color: AppColors.black,
                           width: 1,
@@ -420,41 +410,7 @@ class ProductDetailsView extends StatelessWidget {
                     _expandTile(
                       'Reviews',
                       false.obs,
-                      Column(
-                        children: [
-                          CustomText(
-                            textAlign: TextAlign.center,
-                            color: AppColors.gray600,
-                            fontSize: AppFontSize.small2,
-                            text: '"Very good product — exactly as described!"',
-                          ),
-                          ListTile(
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.person),
-                            ),
-                            title: CustomText(text: 'Ahmed Hussain'),
-                            subtitle: SizedBox(
-                              height: 20,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: 5,
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(left: 2),
-                                    child: SvgIcon(
-                                      assetName: AppIcons.fillStar,
-                                      size: 15,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            trailing: CustomText(
-                              text: 'Order $date-$month-$year',
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildReviewsContent(),
                     ),
 
                     const Divider(),
@@ -479,6 +435,112 @@ class ProductDetailsView extends StatelessWidget {
       color: color,
       fontSize: AppFontSize.medium,
       fontWeight: FontWeight.w800,
+    );
+  }
+
+  Widget _buildReviewsContent() {
+    if (controller.isLoadingReviews.value) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+          ),
+        ),
+      );
+    }
+
+    if (controller.reviews.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: CustomText(
+          textAlign: TextAlign.center,
+          color: AppColors.gray600,
+          fontSize: AppFontSize.small2,
+          text: 'No reviews yet. Be the first to review this product!',
+        ),
+      );
+    }
+
+    return Column(
+      children: controller.reviews.map(_reviewTile).toList(),
+    );
+  }
+
+  Widget _reviewTile(ReviewModel review) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const CircleAvatar(child: Icon(Icons.person)),
+            title: Row(
+              children: [
+                Expanded(
+                  child: CustomText(
+                    text: review.customerName.isEmpty ? 'Anonymous' : review.customerName,
+                    fontWeight: FontWeight.w600,
+                    fontSize: AppFontSize.small2,
+                  ),
+                ),
+                if (review.isVerifiedPurchase)
+                  CustomText(
+                    text: 'Verified Purchase',
+                    fontSize: AppFontSize.tiny,
+                    color: AppColors.green2,
+                    fontWeight: FontWeight.w600,
+                  ),
+              ],
+            ),
+            subtitle: review.rating != null
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: CustomRatingBar(rating: review.rating!, itemSize: 15, ignoreGestures: true),
+                  )
+                : null,
+          ),
+          if (review.commentText.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 4),
+              child: CustomText(
+                text: review.commentText,
+                fontSize: AppFontSize.small2,
+                color: AppColors.gray600,
+              ),
+            ),
+          if (review.sellerReply != null)
+            Container(
+              margin: const EdgeInsets.only(left: 30, right: 16, bottom: 8),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: 'Seller response',
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryColor,
+                  ),
+                  const SizedBox(height: 2),
+                  CustomText(
+                    text: review.sellerReply!.text,
+                    fontSize: AppFontSize.tiny,
+                    color: AppColors.black2,
+                  ),
+                ],
+              ),
+            ),
+          const Divider(),
+        ],
+      ),
     );
   }
 
@@ -559,6 +621,102 @@ class ProductDetailsView extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SellerStoreCard extends StatelessWidget {
+  final ProductModel product;
+  const _SellerStoreCard({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final String? slug = product.storeSlug;
+    final String? name = product.storeName;
+    final String? logo = product.storeLogo;
+    final String? sellerName = product.sellerName;
+    final String displayName = (name != null && name.isNotEmpty)
+        ? name
+        : (sellerName != null && sellerName.isNotEmpty)
+            ? sellerName
+            : 'Store';
+    final String initials = displayName.trim().isNotEmpty
+        ? displayName.trim()[0].toUpperCase()
+        : 'S';
+    final bool canVisit = slug != null && slug.isNotEmpty;
+
+    return GestureDetector(
+      onTap: canVisit
+          ? () => Get.toNamed(Routes.sellerStorefront, arguments: slug)
+          : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.lightGrey.withOpacity(0.6)),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: logo != null && logo.isNotEmpty
+                  ? CommonImageView(
+                      url: logo,
+                      height: 40,
+                      width: 40,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      height: 40,
+                      width: 40,
+                      color: AppColors.primaryColor.withOpacity(0.1),
+                      alignment: Alignment.center,
+                      child: CustomText(
+                        text: initials,
+                        fontSize: AppFontSize.small2,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: 'Sold by',
+                    fontSize: AppFontSize.tiny,
+                    color: AppColors.gray600,
+                  ),
+                  CustomText(
+                    text: displayName,
+                    fontSize: AppFontSize.small2,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ),
+            if (canVisit) ...[
+              CustomText(
+                text: 'Visit Store',
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryColor,
+              ),
+              const SizedBox(width: 2),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: AppColors.primaryColor,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

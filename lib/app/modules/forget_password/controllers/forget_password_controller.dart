@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 
-class ForgotPasswordController extends GetxController {
+class ForgotPasswordController extends BaseController {
   final AuthRepository _authRepository = AuthRepository();
 
   final emailController = TextEditingController();
 
+  @override
   RxBool isLoading = false.obs;
 
   Future<void> sendOtp() async {

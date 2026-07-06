@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart'
-    show DigitalFileEntry;
+    show DigitalFileEntry, ProductPublishMode;
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:file_picker/file_picker.dart';
@@ -45,7 +45,8 @@ class EditSellerProductController extends GetxController {
   final RxString price = ''.obs;
   final RxString compareAtPrice = ''.obs;
   final RxString selectedEmoji = '📦'.obs;
-  final RxBool isActive = true.obs;
+  final Rx<ProductPublishMode> publishMode = ProductPublishMode.now.obs;
+  final Rxn<DateTime> scheduledAt = Rxn<DateTime>();
   final RxBool isSaving = false.obs;
   final RxBool isDeleting = false.obs;
   // Product images (shared)
@@ -73,13 +74,25 @@ class EditSellerProductController extends GetxController {
   bool get isDigital => product.type == 'Digital';
 
   bool get canSave =>
-      name.value.trim().isNotEmpty && price.value.trim().isNotEmpty;
+      name.value.trim().isNotEmpty &&
+      price.value.trim().isNotEmpty &&
+      (publishMode.value != ProductPublishMode.scheduled || scheduledAt.value != null);
+
+  /// The product's publish mode as it was when the screen opened, derived
+  /// from its list-level [ProductStatus] (active/lowStock/outOfStock all
+  /// mean the product itself is live, just annotated with stock info).
+  ProductPublishMode get _initialPublishMode => switch (product.status) {
+        ProductStatus.draft => ProductPublishMode.draft,
+        ProductStatus.scheduled => ProductPublishMode.scheduled,
+        _ => ProductPublishMode.now,
+      };
 
   bool get hasChanges =>
       name.value != product.name ||
       price.value != product.price.toStringAsFixed(2) ||
       selectedEmoji.value != product.emoji ||
-      isActive.value != (product.status == ProductStatus.active);
+      publishMode.value != _initialPublishMode ||
+      scheduledAt.value != product.scheduledAt;
 
   // ── Product image management ──────────────────────────────────────────────
 
@@ -191,7 +204,8 @@ class EditSellerProductController extends GetxController {
       variantId: product.variantId,
       name: nameCtrl.text.trim(),
       price: parsedPrice,
-      status: isActive.value ? 'active' : 'draft',
+      status: publishMode.value.apiStatus,
+      scheduledAt: scheduledAt.value?.toIso8601String(),
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
       compareAtPrice: parsedCompare,
       stock: parsedStock,
@@ -233,7 +247,8 @@ class EditSellerProductController extends GetxController {
       variantId: product.variantId,
       name: nameCtrl.text.trim(),
       price: parsedPrice,
-      status: isActive.value ? 'active' : 'draft',
+      status: publishMode.value.apiStatus,
+      scheduledAt: scheduledAt.value?.toIso8601String(),
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
       compareAtPrice: parsedCompare,
       files: files,
@@ -300,7 +315,8 @@ class EditSellerProductController extends GetxController {
     tags.value = product.tags.join(', ');
     selectedEmoji.value = product.emoji;
     unlimitedStock.value = product.isUnlimitedStock;
-    isActive.value = product.status == ProductStatus.active;
+    publishMode.value = _initialPublishMode;
+    scheduledAt.value = product.scheduledAt;
     productImages.assignAll(product.images);
     unlimitedDownload.value = isUnlimitedDl;
     downloadLimitCount.value = isUnlimitedDl ? '' : product.downloadLimit;

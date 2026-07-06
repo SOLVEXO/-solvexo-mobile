@@ -14,6 +14,7 @@ class ProductFilterBar extends StatelessWidget {
   static const _filters = [
     ProductStatus.all,
     ProductStatus.active,
+    ProductStatus.scheduled,
     ProductStatus.draft,
     ProductStatus.lowStock,
     ProductStatus.outOfStock,
@@ -22,6 +23,7 @@ class ProductFilterBar extends StatelessWidget {
   static const _labels = {
     ProductStatus.all: 'All',
     ProductStatus.active: 'Active',
+    ProductStatus.scheduled: 'Scheduled',
     ProductStatus.draft: 'Draft',
     ProductStatus.lowStock: 'Low Stock',
     ProductStatus.outOfStock: 'Out of Stock',

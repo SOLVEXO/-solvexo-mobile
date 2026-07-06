@@ -5,18 +5,21 @@ import 'package:book_store_app/app/modules/splash_screen/controllers/splash_scre
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
+import 'package:book_store_app/core/widgets/base_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SplashView extends StatelessWidget {
-  SplashView({super.key});
-
-  final controller = Get.put(SplashScreenController());
+  const SplashView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
+    final controller = Get.find<SplashScreenController>();
+    // The gradient background must bleed edge-to-edge behind the status bar;
+    // content still wraps itself in SafeArea below.
+    return BaseViewScreen(
+      useSafeArea: false,
+      child: Stack(
         children: [
           // ── Gradient background ──────────────────────────────────────────
           Container(

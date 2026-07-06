@@ -1,4 +1,4 @@
-import 'package:book_store_app/app/base_view/base_view_screen.dart';
+import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
@@ -10,38 +10,100 @@ import 'package:book_store_app/app/modules/cart/widgets/wishlist_icon_count.dart
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/cart_controller.dart';
 
-class CartView extends StatelessWidget {
-  CartView({super.key});
+class CartView extends BaseView<CartController> {
+  const CartView({super.key});
 
-  final controller = Get.put(CartController());
-  final profileController = Get.put(ProfileController());
+  // `CartView` is embedded directly as a bottom-nav tab, not only reached
+  // via `Routes.cartView`'s `CartBinding` — self-registering keeps it
+  // working either way (it happened to be safe before only because
+  // `BottomNavController` separately puts a `CartController` of its own).
   @override
-  Widget build(BuildContext context) {
-    // final size = MediaQuery.of(context).size;
-    // final cartItem = controller.cartItems[index];
-    return BaseViewScreen(
-      screenName: "Cart",
-      showCustomAppBar: true,
-      horizontalPadding: false,
-      verticalPadding: false,
-      resizeToAvoidBottomInset: true,
-      backgroundColor: AppColors.white,
-      actions: [WishlistIconCount()],
-      child: Obx(() {
-        if (profileController.user.isNull) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              children: [
-                SizedBox(height: Get.height / 12),
-                LoginSignupCard(),
-                Spacer(),
-                Column(
+  CartController get controller {
+    if (!Get.isRegistered<CartController>()) Get.put(CartController());
+    return Get.find<CartController>();
+  }
+
+  ProfileController get _profileController => Get.put(ProfileController());
+
+  @override
+  Color? get backgroundColor => AppColors.white;
+
+  @override
+  PreferredSizeWidget buildAppBar(BuildContext context) => CustomAppBarTwo(
+        title: "Cart",
+        actions: [WishlistIconCount()],
+      );
+
+  @override
+  Widget buildBody(BuildContext context) {
+    final profileController = _profileController;
+
+    return Obx(() {
+      if (profileController.user.isNull) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            children: [
+              SizedBox(height: Get.height / 12),
+              LoginSignupCard(),
+              const Spacer(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: "Featured Items you may like",
+                    fontSize: AppFontSize.regular,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  RecommendedProductList(),
+                ],
+              ),
+            ],
+          ),
+        );
+      }
+      if (controller.isLoading.value) {
+        return ShimmerEffect(itemCount: 3);
+      }
+      if (controller.cartItems.isEmpty) {
+        return const EmptyCartText();
+      }
+      return CustomRefreshWrapper(
+        onRefresh: controller.refreshCart,
+        child: Column(
+          children: [
+            _selectAllRow(),
+            const Divider(height: 1, thickness: 0.5),
+            Expanded(
+              child: Scrollbar(
+                trackVisibility: true,
+                interactive: true,
+                thickness: 4,
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                  itemCount: controller.cartItems.length,
+                  itemBuilder: (context, index) {
+                    final cartItem = controller.cartItems[index];
+                    return Column(
+                      children: [
+                        CartItemWidget(item: cartItem),
+                        const Divider(height: 1, thickness: 0.5),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+            if (controller.cartItems.length <= 2)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
@@ -52,73 +114,15 @@ class CartView extends StatelessWidget {
                     RecommendedProductList(),
                   ],
                 ),
-              ],
-            ),
-          );
-        }
-        if (controller.isLoading.value) {
-          return ShimmerEffect(itemCount: 3);
-        }
-        if (controller.cartItems.isEmpty) {
-          return EmptyCartText();
-        }
-        return CustomRefreshWrapper(
-          onRefresh: controller.refreshCart,
-          child: Column(
-            children: [
-              /// 🔹 Select All Row
-              selectAllRow(),
-              const Divider(height: 1, thickness: 0.5),
-
-              /// 🔹 Cart Items List
-              Expanded(
-                child: Scrollbar(
-                  trackVisibility: true,
-                  interactive: true,
-                  thickness: 4,
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: ClampingScrollPhysics(),
-                    ),
-                    itemCount: controller.cartItems.length,
-                    itemBuilder: (context, index) {
-                      final cartItem = controller.cartItems[index];
-
-                      return Column(
-                        children: [
-                          CartItemWidget(item: cartItem),
-                          const Divider(height: 1, thickness: 0.5),
-                        ],
-                      );
-                    },
-                  ),
-                ),
               ),
-              if (controller.cartItems.length <= 2)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomText(
-                        text: "Featured Items you may like",
-                        fontSize: AppFontSize.regular,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      RecommendedProductList(),
-                    ],
-                  ),
-                ),
-
-              BottomCheckoutBar(),
-            ],
-          ),
-        );
-      }),
-    );
+            BottomCheckoutBar(),
+          ],
+        ),
+      );
+    });
   }
 
-  Widget selectAllRow() {
+  Widget _selectAllRow() {
     return Row(
       children: [
         Obx(
@@ -135,9 +139,7 @@ class CartView extends StatelessWidget {
         ),
         const Spacer(),
         TextButton(
-          onPressed: () {
-            controller.showWishListConformation();
-          },
+          onPressed: () => controller.showWishListConformation(),
           child: CustomText(
             text: "Move to Wishlist",
             fontSize: AppFontSize.small2,

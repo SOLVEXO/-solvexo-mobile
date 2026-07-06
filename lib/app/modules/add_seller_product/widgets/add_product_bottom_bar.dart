@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart';
+import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart'
+    show AddSellerProductController, ProductPublishMode;
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
@@ -45,9 +46,17 @@ class AddProductBottomBar extends StatelessWidget {
             Expanded(
               child: _PrimaryButton(
                 label: isLast
-                    ? (controller.saveAsDraft.value ? 'Save Draft' : 'Publish')
+                    ? switch (controller.publishMode.value) {
+                        ProductPublishMode.draft => 'Save Draft',
+                        ProductPublishMode.scheduled => 'Schedule',
+                        ProductPublishMode.now => 'Publish',
+                      }
                     : 'Continue',
-                icon: isLast ? Icons.check_rounded : Icons.arrow_forward_rounded,
+                icon: isLast
+                    ? (controller.publishMode.value == ProductPublishMode.scheduled
+                        ? Icons.schedule_rounded
+                        : Icons.check_rounded)
+                    : Icons.arrow_forward_rounded,
                 isLoading: isSaving,
                 isEnabled: canProceed,
                 onTap: isLast ? controller.publish : controller.goNext,

@@ -3,16 +3,18 @@ import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/data/services/social_auth_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AuthController extends GetxController {
+class AuthController extends BaseController {
   final AuthRepository _authRepository = AuthRepository();
   final SocialAuthService _socialAuth = SocialAuthService();
   // Observables
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
+  @override
   final RxBool isLoading = false.obs;
   final RxBool isSocialLoading = false.obs;
   final RxBool isPasswordVisible = false.obs;
@@ -81,6 +83,7 @@ class AuthController extends GetxController {
   }
 
   /// Validate email
+  @override
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your email';
@@ -95,13 +98,14 @@ class AuthController extends GetxController {
   }
 
   /// Validate password
-  String? validatePassword(String? value) {
+  @override
+  String? validatePassword(String? value, {int minLength = 6}) {
     if (value == null || value.isEmpty) {
       return 'Please enter your password';
     }
 
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+    if (value.length < minLength) {
+      return 'Password must be at least $minLength characters';
     }
 
     return null;

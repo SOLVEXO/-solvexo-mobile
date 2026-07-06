@@ -71,6 +71,7 @@ class SellerProductRepository {
     required String name,
     required double price,
     required String status,
+    String? scheduledAt,
     String? description,
     double? compareAtPrice,
     List<Map<String, dynamic>> files = const [],
@@ -88,6 +89,7 @@ class SellerProductRepository {
         'name': name,
         'price': price,
         'status': status,
+        if (scheduledAt != null) 'scheduledAt': scheduledAt,
         if (description != null && description.isNotEmpty)
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
@@ -142,6 +144,7 @@ class SellerProductRepository {
     required String name,
     required double price,
     required String status,
+    String? scheduledAt,
     String? description,
     double? compareAtPrice,
     int? stock,
@@ -158,6 +161,7 @@ class SellerProductRepository {
         'name': name,
         'price': price,
         'status': status,
+        if (scheduledAt != null) 'scheduledAt': scheduledAt,
         if (description != null && description.isNotEmpty)
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
@@ -208,6 +212,7 @@ class SellerProductRepository {
     required String name,
     required double price,
     required String status,
+    String? scheduledAt,
     String? description,
     double? compareAtPrice,
     List<String> tags = const [],
@@ -228,6 +233,7 @@ class SellerProductRepository {
         'name': name,
         'price': price,
         'status': status,
+        if (scheduledAt != null) 'scheduledAt': scheduledAt,
         'productType': 'digital',
         'isListedOnSolvexo': isListedOnSolvexo,
         'images': images,
@@ -285,7 +291,8 @@ class SellerProductRepository {
     required String storeId,
     required String name,
     required double price,
-    required String status, // "active" | "draft"
+    required String status, // "active" | "draft" | "scheduled"
+    String? scheduledAt,
     String? description,
     double? compareAtPrice,
     int? stock, // null = unlimited (no stock tracking)
@@ -303,6 +310,7 @@ class SellerProductRepository {
         'name': name,
         'price': price,
         'status': status,
+        if (scheduledAt != null) 'scheduledAt': scheduledAt,
         'isListedOnSolvexo': isListedOnSolvexo,
         'images': images,
         if (description != null && description.isNotEmpty)

@@ -9,32 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class PosSessionHistoryView extends StatefulWidget {
-  const PosSessionHistoryView({super.key});
+class PosSessionHistoryView extends StatelessWidget {
+  PosSessionHistoryView({super.key});
 
-  @override
-  State<PosSessionHistoryView> createState() => _PosSessionHistoryViewState();
-}
-
-class _PosSessionHistoryViewState extends State<PosSessionHistoryView> {
   final PosSessionHistoryController c = Get.put(PosSessionHistoryController());
-  final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-        c.loadMore();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +35,7 @@ class _PosSessionHistoryViewState extends State<PosSessionHistoryView> {
           onRefresh: c.refreshData,
           color: AppColors.primaryColor,
           child: ListView.separated(
-            controller: _scrollController,
+            controller: c.scrollController,
             padding: const EdgeInsets.all(16),
             itemCount: c.sessions.length + (c.hasMore ? 1 : 0),
             separatorBuilder: (_, __) => const SizedBox(height: 10),

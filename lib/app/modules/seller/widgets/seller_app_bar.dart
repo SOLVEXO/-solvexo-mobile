@@ -1,8 +1,10 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/components/unread_count_badge.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/seller/controllers/seller_bottom_nav_controller.dart';
+import 'package:book_store_app/app/modules/seller_messages/controllers/seller_messaging_badge_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -16,6 +18,9 @@ class SellerAppBar extends StatelessWidget {
   SellerAppBar({super.key, this.title = 'Dashboard'});
   final SellerBottomNavController controller = Get.put(
     SellerBottomNavController(),
+  );
+  final SellerMessagingBadgeController messagingBadge = Get.put(
+    SellerMessagingBadgeController(),
   );
   @override
   Widget build(BuildContext context) {
@@ -54,6 +59,26 @@ class SellerAppBar extends StatelessWidget {
               ),
             ),
           ),
+          GestureDetector(
+            onTap: () => Get.toNamed(Routes.sellerMessages),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.background.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Obx(
+                () => UnreadCountBadge(
+                  count: messagingBadge.unreadCount.value,
+                  child: SvgIcon(
+                    assetName: AppIcons.messageIcon,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           GestureDetector(
             onTap: () => Get.toNamed(Routes.notifications),
             child: Container(

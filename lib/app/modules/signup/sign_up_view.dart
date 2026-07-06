@@ -10,12 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SignUpView extends StatelessWidget {
-  SignUpView({super.key});
-
-  final authController = Get.put(AuthController());
+  const SignUpView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authController = Get.find<AuthController>();
     return Form(
       key: authController.registerFormKey,
       child: SingleChildScrollView(

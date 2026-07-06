@@ -87,14 +87,27 @@ class ApiConstants {
       "$apiPrefix/addresses/$id/default";
 
   // ============ Order Endpoints ============
-  static const String refunds = "$apiPrefix/refunds";
-  static const String myRefunds = "$apiPrefix/refunds/my";
-  static const String uploadRefundImages = '$apiPrefix/refunds/upload-images';
   static const String orders = "$apiPrefix/orders";
   static const String myOrders = "$apiPrefix/orders/my-orders";
   static String getOrderById(String id) => "$apiPrefix/orders/$id";
   static String updateOrderToPaid(String id) => "$apiPrefix/orders/$id/pay";
-  static String cancelOrder(String id) => "$apiPrefix/orders/$id/cancel";
+  static String cancelOrder(String id) => "$apiPrefix/orders/cancel/$id";
+  static String returnRequest(String orderId) =>
+      "$apiPrefix/orders/return-request/$orderId";
+
+  // ============ Rating / Review Endpoints ============
+  static const String addReview = "$apiPrefix/rating/add-review";
+  static const String myReviews = "$apiPrefix/rating/my-reviews";
+  static String editReview(String reviewId) => "$apiPrefix/rating/$reviewId";
+  static String deleteReview(String reviewId) => "$apiPrefix/rating/$reviewId";
+  static String productReviews(String productId) =>
+      "$apiPrefix/rating/product/$productId";
+  static String storeReviews(String storeId) =>
+      "$apiPrefix/rating/store-reviews/$storeId";
+  static String replyToReview(String reviewId) =>
+      "$apiPrefix/rating/reply/$reviewId";
+  static String editReviewReply(String reviewId) =>
+      "$apiPrefix/rating/edit-reply/$reviewId";
 
   // Cart endpoints
   static const String getCart = '$apiPrefix/cart/get-cart';
@@ -121,6 +134,18 @@ class ApiConstants {
   static const String updateStore = "$apiPrefix/store/update-store";
   static const String myStores = "$apiPrefix/store/my-stores";
   static String getStoreById(String id) => "$apiPrefix/store/getStoreById/$id";
+
+  // ============ Public Storefront Endpoints ============
+  static String publicStoreBySlug(String slug) =>
+      "$apiPrefix/store/public/$slug";
+  static String publicStoreProducts(String storeId) =>
+      "$apiPrefix/store/public/$storeId/products";
+  static String publicStoreFilters(String storeId) =>
+      "$apiPrefix/store/public/$storeId/filters";
+  static String followStore(String storeId) =>
+      "$apiPrefix/store/$storeId/follow";
+  static String storeFollowStatus(String storeId) =>
+      "$apiPrefix/store/$storeId/follow-status";
 
   // ============ Seller / Product Endpoints ============
   static const String addPhysicalProduct =
@@ -215,6 +240,38 @@ class ApiConstants {
   // Audit logs
   static String posAuditLogs(String storeId) =>
       '$apiPrefix/pos/audit-logs/$storeId';
+
+  // ============ Messaging Endpoints ============
+  static const String startConversation = '$apiPrefix/messaging/conversations';
+  static const String conversations = '$apiPrefix/messaging/conversations';
+  static const String searchConversations =
+      '$apiPrefix/messaging/conversations/search';
+  static String conversationById(String id) =>
+      '$apiPrefix/messaging/conversations/$id';
+  static String archiveConversation(String id) =>
+      '$apiPrefix/messaging/conversations/$id/archive';
+  static String restoreConversation(String id) =>
+      '$apiPrefix/messaging/conversations/$id/restore';
+  static String pinConversation(String id) =>
+      '$apiPrefix/messaging/conversations/$id/pin';
+  static String muteConversation(String id) =>
+      '$apiPrefix/messaging/conversations/$id/mute';
+  static String deleteConversation(String id) =>
+      '$apiPrefix/messaging/conversations/$id';
+  static String conversationMessages(String convId) =>
+      '$apiPrefix/messaging/conversations/$convId/messages';
+  static String searchMessages(String convId) =>
+      '$apiPrefix/messaging/conversations/$convId/messages/search';
+  static String conversationAttachments(String convId) =>
+      '$apiPrefix/messaging/conversations/$convId/attachments';
+  static String editMessage(String id) => '$apiPrefix/messaging/messages/$id';
+  static String deleteMessage(String id) => '$apiPrefix/messaging/messages/$id';
+  static String markMessageSeen(String id) =>
+      '$apiPrefix/messaging/messages/$id/seen';
+  static const String blockUser = '$apiPrefix/messaging/block';
+  static String unblockUser(String targetId) =>
+      '$apiPrefix/messaging/block/$targetId';
+  static const String reportTarget = '$apiPrefix/messaging/report';
 
   // ============ Upload Endpoints ============
   static const String uploadFile = '$apiPrefix/upload/file';

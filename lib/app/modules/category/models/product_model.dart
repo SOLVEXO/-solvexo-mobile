@@ -97,6 +97,14 @@ class ProductModel {
   final List<ProductVariant> variants;
   final String type; // 'physical' | 'digital'
 
+  // Seller / store — only populated by the product-detail endpoint.
+  final String? sellerName;
+  final String? storeId;
+  final String? storeSlug;
+  final String? storeName;
+  final String? storeLogo;
+  final int storeFollowersCount;
+
   // Analytics fields
   final int viewCount;
   final int wishlistCount;
@@ -127,6 +135,12 @@ class ProductModel {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.sellerName,
+    this.storeId,
+    this.storeSlug,
+    this.storeName,
+    this.storeLogo,
+    this.storeFollowersCount = 0,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -168,6 +182,12 @@ class ProductModel {
       updatedAt: DateTime.parse(
         json['updatedAt'] ?? DateTime.now().toIso8601String(),
       ),
+      sellerName: json['sellerName'] as String?,
+      storeId: json['storeId'] as String?,
+      storeSlug: json['storeSlug'] as String?,
+      storeName: json['storeName'] as String?,
+      storeLogo: json['storeLogo'] as String?,
+      storeFollowersCount: json['storeFollowersCount'] as int? ?? 0,
     );
   }
 

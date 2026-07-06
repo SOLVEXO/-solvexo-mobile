@@ -9,32 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class PosAuditLogView extends StatefulWidget {
-  const PosAuditLogView({super.key});
+class PosAuditLogView extends StatelessWidget {
+  PosAuditLogView({super.key});
 
-  @override
-  State<PosAuditLogView> createState() => _PosAuditLogViewState();
-}
-
-class _PosAuditLogViewState extends State<PosAuditLogView> {
   final PosAuditLogController c = Get.put(PosAuditLogController());
-  final _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-        c.loadMore();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +35,7 @@ class _PosAuditLogViewState extends State<PosAuditLogView> {
           onRefresh: c.refreshData,
           color: AppColors.primaryColor,
           child: ListView.separated(
-            controller: _scrollController,
+            controller: c.scrollController,
             padding: const EdgeInsets.all(16),
             itemCount: c.logs.length + (c.hasMore ? 1 : 0),
             separatorBuilder: (_, __) => const SizedBox(height: 8),

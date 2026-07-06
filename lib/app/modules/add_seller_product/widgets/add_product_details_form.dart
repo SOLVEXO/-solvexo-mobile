@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/digital_file_upload_tile.dart';
+import 'package:book_store_app/app/modules/add_seller_product/widgets/product_publish_mode_selector.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
@@ -205,8 +206,13 @@ class AddProductDetailsForm extends StatelessWidget {
             return _DigitalFields(controller: controller);
           }),
 
-          // ── Save as Draft ───────────────────────────────────────────
-          _DraftToggle(controller: controller),
+          // ── Availability (publish now / schedule / draft) ───────────
+          Obx(() => ProductPublishModeSelector(
+                mode: controller.publishMode.value,
+                onModeChanged: (m) => controller.publishMode.value = m,
+                scheduledAt: controller.scheduledAt.value,
+                onScheduledAtChanged: (dt) => controller.scheduledAt.value = dt,
+              )),
           const SizedBox(height: 8),
         ],
       ),
@@ -894,56 +900,3 @@ class _LicenseChip extends StatelessWidget {
   }
 }
 
-// ── Save as draft toggle ──────────────────────────────────────────────────────
-
-class _DraftToggle extends StatelessWidget {
-  final AddSellerProductController controller;
-  const _DraftToggle({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-        border: Border.all(color: AppColors.lightGrey2),
-      ),
-      child: Obx(
-        () => Row(
-          children: [
-            const Icon(
-              Icons.edit_note_rounded,
-              size: 20,
-              color: AppColors.grey,
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    text: 'Save as draft',
-                    fontSize: AppFontSize.verySmall,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black2,
-                  ),
-                  CustomText(
-                    text: 'Publish later from Products',
-                    fontSize: AppFontSize.tiny,
-                    color: AppColors.grey,
-                  ),
-                ],
-              ),
-            ),
-            Switch(
-              value: controller.saveAsDraft.value,
-              onChanged: (_) => controller.saveAsDraft.toggle(),
-              activeColor: AppColors.primaryColor,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

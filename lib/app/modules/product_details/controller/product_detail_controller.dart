@@ -1,6 +1,8 @@
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
+import 'package:book_store_app/app/data/models/rating/review_model.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
+import 'package:book_store_app/app/data/repositories/rating_repository.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
@@ -11,6 +13,7 @@ import 'package:get/get.dart';
 class ProductDetailController extends GetxController {
   final ProductRepository _productRepository = ProductRepository();
   final CartRepository _cartRepository = CartRepository();
+  final RatingRepository _ratingRepository = RatingRepository();
 
   // ─── Arguments ────────────────────────────────────────────────────────────
   late final String productId;
@@ -25,6 +28,11 @@ class ProductDetailController extends GetxController {
   final RxBool isAddtoCartLoading = false.obs;
   final RxBool isLoadingVariant = false.obs;
 
+  // ─── Reviews ──────────────────────────────────────────────────────────────
+  final RxList<ReviewModel> reviews = <ReviewModel>[].obs;
+  final Rx<ReviewStats> reviewStats = const ReviewStats().obs;
+  final RxBool isLoadingReviews = true.obs;
+
   // ─── Quantity ─────────────────────────────────────────────────────────────
   final RxInt productQty = 1.obs;
 
@@ -35,6 +43,7 @@ class ProductDetailController extends GetxController {
     super.onInit();
     _readArguments();
     fetchProductDetails();
+    fetchReviews();
   }
 
   void _readArguments() {
@@ -90,6 +99,17 @@ class ProductDetailController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // ─── 1b. Fetch this product's review feed ────────────────────────────────
+
+  Future<void> fetchReviews() async {
+    if (productId.isEmpty) return;
+    isLoadingReviews.value = true;
+    final result = await _ratingRepository.getProductReviews(productId);
+    reviewStats.value = result.stats;
+    reviews.assignAll(result.reviews);
+    isLoadingReviews.value = false;
   }
 
   // ─── 2. Fetch variant by ID (when user taps a specific variant) ───────────

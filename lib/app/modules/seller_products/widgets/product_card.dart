@@ -7,6 +7,7 @@ import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
   final SellerProduct product;
@@ -148,10 +149,13 @@ class _ProductInfo extends StatelessWidget {
         ),
         const SizedBox(height: 5),
         CustomText(
-          text:
-              '${product.sold} sold · Stock: ${product.stockLabel}',
+          text: product.status == ProductStatus.scheduled && product.scheduledAt != null
+              ? 'Goes live ${DateFormat('MMM d, y · h:mm a').format(product.scheduledAt!)}'
+              : '${product.sold} sold · Stock: ${product.stockLabel}',
           fontSize: AppFontSize.tiny,
-          color: AppColors.lightGrey5,
+          color: product.status == ProductStatus.scheduled
+              ? AppColors.orange
+              : AppColors.lightGrey5,
         ),
       ],
     );

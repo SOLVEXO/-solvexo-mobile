@@ -93,15 +93,14 @@ class OrderRepository {
     }
   }
 
-  /// Cancel order
-  Future<bool> cancelOrder(String orderId) async {
+  /// Cancel order — POST /api/orders/cancel/:orderId, body: { reason }
+  Future<bool> cancelOrder(String orderId, {required String reason}) async {
     try {
-      // final token = await AppPreferences.getAccessTokenAsync();
-
       debugPrint('🔄 Cancelling order: $orderId');
 
-      final response = await _baseClient.put(
-        '${ApiConstants.orders}/$orderId/cancel',
+      final response = await _baseClient.post(
+        ApiConstants.cancelOrder(orderId),
+        data: {'reason': reason},
       );
 
       debugPrint('✅ Cancel Order Response: ${response.data}');
@@ -109,6 +108,33 @@ class OrderRepository {
       return response.data['success'] == true;
     } catch (e) {
       debugPrint('❌ Cancel Order error: $e');
+      rethrow;
+    }
+  }
+
+  /// Request a return/refund for a delivered order —
+  /// POST /api/orders/return-request/:orderId, body: { reason, itemIds? }
+  Future<bool> requestReturn({
+    required String orderId,
+    required String reason,
+    List<String>? itemIds,
+  }) async {
+    try {
+      debugPrint('🔄 Requesting return for order: $orderId');
+
+      final response = await _baseClient.post(
+        ApiConstants.returnRequest(orderId),
+        data: {
+          'reason': reason,
+          if (itemIds != null && itemIds.isNotEmpty) 'itemIds': itemIds,
+        },
+      );
+
+      debugPrint('✅ Return Request Response: ${response.data}');
+
+      return response.data['success'] == true;
+    } catch (e) {
+      debugPrint('❌ Return Request error: $e');
       rethrow;
     }
   }

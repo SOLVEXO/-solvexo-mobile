@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 
-class ResetPasswordController extends GetxController {
+class ResetPasswordController extends BaseController {
   final AuthRepository _authRepository = AuthRepository();
 
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
+  @override
   RxBool isLoading = false.obs;
   RxBool showPassword = false.obs;
   RxBool showConfirmPassword = false.obs;
@@ -27,12 +29,13 @@ class ResetPasswordController extends GetxController {
 
   // ================= VALIDATION =================
 
-  String? validatePassword(String? value) {
+  @override
+  String? validatePassword(String? value, {int minLength = 6}) {
     if (value == null || value.isEmpty) {
       return "Enter new password";
     }
-    if (value.length < 6) {
-      return "Password must be at least 6 characters";
+    if (value.length < minLength) {
+      return "Password must be at least $minLength characters";
     }
     return null;
   }

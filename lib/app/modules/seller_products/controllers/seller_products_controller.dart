@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 // ── Status enum ───────────────────────────────────────────────────────────────
 
-enum ProductStatus { all, active, draft, lowStock, outOfStock }
+enum ProductStatus { all, active, draft, scheduled, lowStock, outOfStock }
 
 // ── Model ─────────────────────────────────────────────────────────────────────
 
@@ -20,6 +20,7 @@ class SellerProduct {
   final ProductStatus status;
   final int sold;
   final int? stock; // null = unlimited
+  final DateTime? scheduledAt;
   // Extended fields (populated from edit/add flows)
   final String? variantId;
   final String? description;
@@ -49,6 +50,7 @@ class SellerProduct {
     this.image,
     this.sku,
     this.stock,
+    this.scheduledAt,
     this.variantId,
     this.description,
     this.compareAtPrice,
@@ -73,13 +75,15 @@ class SellerProduct {
     final rawStock = json['stock'];
     final int? stock = rawStock is int ? rawStock : null;
 
-    // Status resolution: draft wins, then stockStatus, then active
+    // Status resolution: draft/scheduled win, then stockStatus, then active
     final String apiStatus = json['status'] as String? ?? 'active';
     final String stockStatus = json['stockStatus'] as String? ?? 'active';
 
     final ProductStatus status;
     if (apiStatus == 'draft') {
       status = ProductStatus.draft;
+    } else if (apiStatus == 'scheduled') {
+      status = ProductStatus.scheduled;
     } else if (stockStatus == 'out_of_stock' || stock == 0) {
       status = ProductStatus.outOfStock;
     } else if (stockStatus == 'low_stock') {
@@ -87,6 +91,8 @@ class SellerProduct {
     } else {
       status = ProductStatus.active;
     }
+
+    final rawScheduledAt = json['scheduledAt'] as String?;
 
     // Type: "digital" → "Digital"
     final String rawType = json['type'] as String? ?? 'physical';
@@ -107,6 +113,7 @@ class SellerProduct {
       status: status,
       sold: json['allTimeSales'] as int? ?? 0,
       stock: stock,
+      scheduledAt: rawScheduledAt != null ? DateTime.tryParse(rawScheduledAt) : null,
     );
   }
 

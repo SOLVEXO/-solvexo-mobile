@@ -1,6 +1,5 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
-import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/recent_order.dart';
@@ -12,7 +11,6 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
 class RefundRequestView extends StatelessWidget {
   RefundRequestView({super.key});
@@ -39,7 +37,7 @@ class RefundRequestView extends StatelessWidget {
               if (controller.selectedIssue.value == null)
                 _issueList()
               else
-                _uploadSection(),
+                _detailsSection(),
 
               const Spacer(),
 
@@ -49,7 +47,7 @@ class RefundRequestView extends StatelessWidget {
                   iconWidget: controller.isLoading.value
                       ? CircularProgressIndicator(color: AppColors.background)
                       : SizedBox(),
-                  label: controller.isLoading.value ? "Continuing" : "Continue",
+                  label: controller.isLoading.value ? "Submitting" : "Submit Request",
                   onPressed: controller.canContinue
                       ? () {
                           controller.submitRefund(order);
@@ -65,42 +63,51 @@ class RefundRequestView extends StatelessWidget {
   }
 
   Widget _issueList() {
-    return Container(
-      color: AppColors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomText(
-            text: "What is the issue with your item?",
-            fontWeight: FontWeight.w800,
-            fontSize: AppFontSize.regular,
-          ),
-          ...controller.issues.entries.map((e) {
-            return GestureDetector(
-              onTap: () => controller.selectedIssue.value = e.key,
-              child: Container(
-                padding: const EdgeInsets.only(top: 25.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomText(
-                      text: e.value,
-                      fontWeight: FontWeight.w600,
-                      fontSize: AppFontSize.small,
-                      color: AppColors.gray600,
-                    ),
-                    Icon(Icons.radio_button_off, size: 27),
-                  ],
+    return Obx(
+      () => Container(
+        color: AppColors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomText(
+              text: "What is the issue with your item?",
+              fontWeight: FontWeight.w800,
+              fontSize: AppFontSize.regular,
+            ),
+            ...controller.issues.entries.map((e) {
+              final selected = controller.selectedIssue.value == e.key;
+              return GestureDetector(
+                onTap: () => controller.selectedIssue.value = e.key,
+                child: Container(
+                  padding: const EdgeInsets.only(top: 25.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: CustomText(
+                          text: e.value,
+                          fontWeight: FontWeight.w600,
+                          fontSize: AppFontSize.small,
+                          color: AppColors.gray600,
+                        ),
+                      ),
+                      Icon(
+                        selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                        size: 27,
+                        color: selected ? AppColors.primaryColor : AppColors.grey,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }),
-        ],
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _uploadSection() {
+  Widget _detailsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -109,120 +116,35 @@ class RefundRequestView extends StatelessWidget {
           fontWeight: FontWeight.w800,
           fontSize: AppFontSize.regular,
         ),
-        ListTile(
-          title: CustomText(
-            text: controller.issues[controller.selectedIssue.value].toString(),
-            fontWeight: FontWeight.w500,
-            fontSize: AppFontSize.small,
-          ),
-          trailing: SvgIcon(assetName: AppIcons.chevronRight, size: 20),
-        ),
-        const Text(
-          "Upload images or videos (Required)",
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 12),
-
-        /// Attachments
         Obx(
-          () => Wrap(
-            spacing: 10,
-            children: [
-              ...List.generate(controller.attachments.length, (i) {
-                return Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        controller.attachments[i],
-                        width: 70,
-                        height: 70,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      right: -5,
-                      top: -5,
-                      child: Container(
-                        padding: EdgeInsets.only(left: 7, top: 7, right: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: SvgIcon(
-                          size: 24,
-                          assetName: AppIcons.cross,
-                          color: AppColors.black,
-                          onTap: () => controller.removeAttachment(i),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }),
-
-              /// Add Button
-              GestureDetector(
-                onTap: () => _showPicker(Get.context!),
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.greyDefault),
-                  ),
-                  child: const Icon(Icons.camera_alt),
-                ),
-              ),
-            ],
+          () => ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: CustomText(
+              text: controller.issues[controller.selectedIssue.value] ?? '',
+              fontWeight: FontWeight.w500,
+              fontSize: AppFontSize.small,
+            ),
+            trailing: SvgIcon(assetName: AppIcons.chevronRight, size: 20),
+            onTap: () => controller.selectedIssue.value = null,
           ),
         ),
-
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
 
         /// Message
         const CustomText(
-          text: "Message (optional)",
+          text: "Additional details (optional)",
           fontWeight: FontWeight.w600,
           fontSize: AppFontSize.small,
         ),
         const SizedBox(height: 8),
         CustomTextField(
           controller: controller.messageController,
-          hintText: "Tell me more details about your issue",
+          hintText: "Tell the seller more about the issue",
           maxLines: 4,
           isborder: true,
           borderRadius: BorderRadius.circular(12),
         ),
       ],
-    );
-  }
-
-  void _showPicker(BuildContext context) {
-    Get.bottomSheet(
-      CustomBottomSheet(
-        widget: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text("Take Screenshot / Photo"),
-              onTap: () {
-                controller.pickImage(ImageSource.camera);
-                Get.back();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text("Choose from Gallery"),
-              onTap: () {
-                controller.pickImage(ImageSource.gallery);
-                Get.back();
-              },
-            ),
-          ],
-        ),
-        title: 'upload Image',
-      ),
     );
   }
 }

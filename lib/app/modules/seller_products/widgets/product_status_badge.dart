@@ -33,6 +33,8 @@ class ProductStatusBadge extends StatelessWidget {
         return const _Style('Active', AppColors.darkGreen, AppColors.greenContainerInnerColor);
       case ProductStatus.draft:
         return const _Style('Draft', AppColors.grey, AppColors.lightGrey10);
+      case ProductStatus.scheduled:
+        return _Style('Scheduled', AppColors.orange, AppColors.orange.withOpacity(0.12));
       case ProductStatus.lowStock:
         return const _Style('Low Stock', AppColors.amberDark, AppColors.yellowBg);
       case ProductStatus.outOfStock:

@@ -1,8 +1,8 @@
-import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/dynamic_shimmer.dart';
+import 'package:book_store_app/app/components/main_app_bar.dart';
 import 'package:book_store_app/app/components/no_signal_view.dart';
 import 'package:book_store_app/app/components/shimmer/banner_shimmer.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -21,145 +21,142 @@ import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dar
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class HomeView extends StatelessWidget {
-  HomeView({super.key});
+class HomeView extends BaseView<HomeController> {
+  const HomeView({super.key});
 
-  final controller = Get.put(HomeController());
-  final categoryController = Get.put(CategoryController());
-  final profileController = Get.put(ProfileController());
-  final networkController = Get.put(NetworkController());
+  // `HomeView` is embedded directly as a bottom-nav tab (see
+  // `BottomNavController.screens`), not only reached via `Routes.mainHome`'s
+  // `HomeBinding` — self-registering here keeps it working either way,
+  // matching the original `Get.put(HomeController())` field-initializer
+  // behaviour `BaseView`'s `Get.find`-only `controller` getter replaced.
+  @override
+  HomeController get controller {
+    if (!Get.isRegistered<HomeController>()) Get.put(HomeController());
+    return Get.find<HomeController>();
+  }
+
+  CategoryController get _categoryController => Get.put(CategoryController());
+  ProfileController get _profileController => Get.put(ProfileController());
+  NetworkController get _networkController => Get.put(NetworkController());
 
   @override
-  Widget build(BuildContext context) {
+  Color? get backgroundColor => AppColors.background;
+
+  @override
+  PreferredSizeWidget buildAppBar(BuildContext context) => const MainAppBar(height: 60);
+
+  @override
+  Widget? buildFloatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+      backgroundColor: AppColors.primaryColor,
+      tooltip: 'AI Product Assistant',
+      onPressed: () => Get.toNamed(Routes.CHAT),
+      child: SvgIcon(
+        assetName: AppIcons.assistantIcon,
+        size: 30,
+        color: AppColors.background.withOpacity(0.8),
+      ),
+    );
+  }
+
+  @override
+  Widget buildBody(BuildContext context) {
+    final categoryController = _categoryController;
+    final profileController = _profileController;
+    final networkController = _networkController;
     final double height = MediaQuery.of(context).size.height;
 
-    return BaseViewScreen(
-      backgroundColor: AppColors.background,
-      safeAreaTop: true,
-      showCustomAppBar: true,
-      height: 60,
-      mainAppBar: true,
-      horizontalPadding: false,
-      verticalPadding: false,
-      showBottomBar: false,
-      bottomBarShadow: true,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primaryColor,
-        tooltip: 'AI Product Assistant',
-        onPressed: () => Get.toNamed(Routes.CHAT),
-        child: SvgIcon(
-          assetName: AppIcons.assistantIcon,
-          size: 30,
-          color: AppColors.background.withOpacity(0.8),
-        ),
-      ),
-      child: Obx(() {
-        if (!networkController.isConnected.value) {
-          return const NoSignalView();
-        }
+    return Obx(() {
+      if (!networkController.isConnected.value) {
+        return const NoSignalView();
+      }
 
-        final bool isLoading =
-            controller.isLoading.value || categoryController.isLoading.value;
+      final bool isLoading = controller.isLoading.value || categoryController.isLoading.value;
 
-        return Stack(
-          children: [
-            CustomRefreshWrapper(
-              onRefresh: controller.refreshHome,
-              child: Scrollbar(
-                trackVisibility: true,
-                interactive: true,
-                thickness: 3,
-                radius: const Radius.circular(AppDimen.borderRadius),
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    const SizedBox(height: 16),
+      return Stack(
+        children: [
+          CustomRefreshWrapper(
+            onRefresh: controller.refreshHome,
+            child: Scrollbar(
+              trackVisibility: true,
+              interactive: true,
+              thickness: 3,
+              radius: const Radius.circular(AppDimen.borderRadius),
+              child: ListView(
+                padding: EdgeInsets.zero,
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 16),
 
-                    // ── Promotional banner ───────────────────────────────
-                    isLoading
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppDimen.allPadding,
-                            ),
-                            child: BannerShimmer(),
-                          )
-                        : Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppDimen.allPadding,
-                            ),
-                            child: BannerCarousel(),
-                          ),
+                  // ── Promotional banner ───────────────────────────────
+                  isLoading
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
+                          child: BannerShimmer(),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
+                          child: BannerCarousel(),
+                        ),
 
-                    const SizedBox(height: 22),
+                  const SizedBox(height: 22),
 
-                    // ── Browse by Category ───────────────────────────────
-                    const HomeSectionHeader(title: 'Browse by Category'),
-                    const SizedBox(height: 8),
+                  // ── Browse by Category ───────────────────────────────
+                  const HomeSectionHeader(title: 'Browse by Category'),
+                  const SizedBox(height: 8),
 
-                    isLoading
-                        ? const DynamicShimmer(iscategories: true)
-                        : categoryController.allCategoriesFlat.isEmpty
-                        ? SizedBox(
-                            height: height / 7,
-                            child: const Center(
-                              child: DynamicShimmer(iscategories: true),
-                            ),
-                          )
-                        : CategoriesGrid(),
+                  isLoading
+                      ? const DynamicShimmer(iscategories: true)
+                      : categoryController.allCategoriesFlat.isEmpty
+                          ? SizedBox(
+                              height: height / 7,
+                              child: const Center(child: DynamicShimmer(iscategories: true)),
+                            )
+                          : CategoriesGrid(),
 
-                    const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                    // ── Trending Now ─────────────────────────────────────
-                    const HomeSectionHeader(
-                      title: 'Trending Now',
-                      viewMore: true,
-                    ),
+                  // ── Trending Now ─────────────────────────────────────
+                  const HomeSectionHeader(title: 'Trending Now', viewMore: true),
 
-                    // ── Search bar ───────────────────────────────────────
-                    const HomeSearchBar(),
-                    const SizedBox(height: 12),
-                    // Sort chips
-                    const HomeSortChips(),
+                  const HomeSearchBar(),
+                  const SizedBox(height: 12),
+                  const HomeSortChips(),
 
-                    const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                    // Products grid / shimmer / empty
-                    isLoading
-                        ? const DynamicShimmer(isproducts: true)
-                        : _ProductsSection(controller: controller),
+                  isLoading ? const DynamicShimmer(isproducts: true) : _ProductsSection(controller: controller),
 
-                    const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                    // ── Staff Picks ──────────────────────────────────────
-                    const HomeSectionHeader(title: 'Staff Picks'),
-                    const SizedBox(height: 12),
+                  // ── Staff Picks ──────────────────────────────────────
+                  const HomeSectionHeader(title: 'Staff Picks'),
+                  const SizedBox(height: 12),
 
-                    const HomeStaffPicks(),
+                  const HomeStaffPicks(),
 
-                    const SizedBox(height: 32),
-                  ],
-                ),
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
+          ),
 
-            // Login nudge for guests
-            if (profileController.user.isNull)
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: SafeArea(child: LoginSignupCard()),
-              ),
-          ],
-        );
-      }),
-    );
+          if (profileController.user.isNull)
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: SafeArea(child: LoginSignupCard()),
+            ),
+        ],
+      );
+    });
   }
 }
 
@@ -209,18 +206,14 @@ class _ProductsSection extends StatelessWidget {
         children: [
           const ProductsGrid(),
           const SizedBox(height: 16),
-
           if (controller.hasMoreProducts.value && !isFetching)
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimen.allPadding,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
               child: AppButton(
                 onPressed: controller.loadMoreProducts,
                 label: 'Load More Products',
               ),
             ),
-
           if (isFetching)
             const Padding(
               padding: EdgeInsets.all(20),

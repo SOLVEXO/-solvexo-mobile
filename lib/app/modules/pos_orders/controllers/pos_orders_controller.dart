@@ -3,10 +3,13 @@ import 'package:book_store_app/app/data/models/pos/pos_sale_model.dart';
 import 'package:book_store_app/app/data/repositories/pos_repository.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class PosOrdersController extends GetxController {
   final _posRepo = PosRepository();
+
+  final ScrollController scrollController = ScrollController();
 
   final RxBool isLoading    = true.obs;
   final RxBool isLoadingMore = false.obs;
@@ -46,6 +49,17 @@ class PosOrdersController extends GetxController {
   void onInit() {
     super.onInit();
     _loadContext().then((_) => loadSales());
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200) {
+        loadMore();
+      }
+    });
+  }
+
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
   }
 
   Future<void> _loadContext() async {

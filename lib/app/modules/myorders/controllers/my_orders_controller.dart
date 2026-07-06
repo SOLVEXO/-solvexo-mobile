@@ -1,8 +1,10 @@
-import 'package:book_store_app/app/base_view/controller/base_view_controller.dart';
+import 'package:book_store_app/core/base/base_controller.dart';
+import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/data/repositories/order_repository.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/modules/myorders/models/order_timeline.dart';
 import 'package:book_store_app/app/data/models/enums/enums.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ class MyOrdersController extends BaseController {
 
   final OrderRepository _orderRepository = OrderRepository();
 
+  @override
   RxBool isLoading = false.obs;
   RxList<OrderModel> orders = <OrderModel>[].obs;
 
@@ -50,11 +53,11 @@ class MyOrdersController extends BaseController {
   Future<void> refreshOrders() => fetchOrders();
 
   /// Cancel order
-  Future<void> cancelOrder(String orderId) async {
+  Future<void> cancelOrder(String orderId, {String reason = 'Cancelled by customer'}) async {
     try {
       debugPrint('🔄 Cancelling order: $orderId');
 
-      final success = await _orderRepository.cancelOrder(orderId);
+      final success = await _orderRepository.cancelOrder(orderId, reason: reason);
 
       if (success) {
         ToastUtil.showToast('Order cancelled successfully');
@@ -66,6 +69,20 @@ class MyOrdersController extends BaseController {
       debugPrint('❌ Cancel order error: $e');
       ToastUtil.showToast('Error cancelling order');
     }
+  }
+
+  /// Confirms with the buyer before cancelling — the backend requires a
+  /// non-empty `reason`, so a default is sent since the app doesn't yet
+  /// collect a specific one from the user.
+  void confirmCancel(BuildContext context, String orderId) {
+    CustomConfirmDialog.show(
+      context,
+      title: 'Cancel this order?',
+      message: 'This can\'t be undone. The seller will be notified.',
+      confirmLabel: 'Cancel Order',
+      confirmColor: AppColors.red,
+      onConfirm: () => cancelOrder(orderId),
+    );
   }
 
   final List<OrderTimeline> timeline = [
@@ -90,10 +107,6 @@ class MyOrdersController extends BaseController {
       description: "Your package has been delivered",
     ),
   ];
-
-  bool get canCancel => currentStatus.value == OrderDeliveryStatus.process;
-  bool get canRefund => currentStatus.value != OrderDeliveryStatus.delivered;
-  bool get canReview => currentStatus.value == OrderDeliveryStatus.delivered;
 
   bool orderCanCancel(OrderModel order) => order.canCancel;
   bool orderIsCompleted(OrderModel order) => order.isCompleted;

@@ -1,4 +1,4 @@
-import 'package:book_store_app/app/base_view/controller/base_view_controller.dart';
+import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/app/data/repositories/banners_repository.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
@@ -22,12 +22,14 @@ class HomeController extends BaseController {
   final RxList<BannerModel> banners = <BannerModel>[].obs;
   final RxInt bannerIndex = 0.obs;
   final RxBool isLoadingBanners = false.obs;
+  @override
   final RxBool isLoading = true.obs;
   final RxBool isFetchingProducts = false.obs;
   final RxInt selectedCategoryIndex = 0.obs;
   final RxInt tabIndex = 0.obs;
 
   // ─── Pagination ───────────────────────────────────────────────────────────
+  @override
   final RxInt currentPage = 1.obs;
   final RxInt totalPages = 1.obs;
   final RxBool hasMoreProducts = true.obs;

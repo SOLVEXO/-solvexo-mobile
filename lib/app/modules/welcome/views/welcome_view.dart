@@ -2,11 +2,11 @@ import 'package:book_store_app/app/components/animated_background_circles.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/app/modules/welcome/controllers/welcome_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
-import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/core/widgets/base_view_screen.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -15,15 +15,12 @@ import 'package:get/get.dart';
 class WelcomeView extends StatelessWidget {
   const WelcomeView({super.key});
 
-  Future<void> _selectRole(String role) async {
-    await AppPreferences.saveIntentRole(role);
-    Get.offAllNamed(Routes.authTabView);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
+    final controller = Get.find<WelcomeController>();
+    return BaseViewScreen(
+      useSafeArea: false,
+      child: Stack(
         children: [
           Container(
             width: double.infinity,
@@ -36,7 +33,7 @@ class WelcomeView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _LogoSection(),
-                _BottomSection(onSelectRole: _selectRole),
+                _BottomSection(onSelectRole: controller.selectRole),
               ],
             ),
           ),

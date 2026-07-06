@@ -21,15 +21,18 @@ import '../modules/seller_language/bindings/seller_language_binding.dart';
 import '../modules/seller_language/views/seller_language_view.dart';
 import '../modules/seller_ai_studio/bindings/seller_ai_studio_binding.dart';
 import '../modules/seller_ai_studio/views/seller_ai_studio_view.dart';
-import '../modules/seller_messages/bindings/seller_chat_binding.dart';
 import '../modules/seller_messages/bindings/seller_messages_binding.dart';
-import '../modules/seller_messages/views/seller_chat_view.dart';
 import '../modules/seller_messages/views/seller_messages_view.dart';
+import '../modules/messaging/bindings/conversations_binding.dart';
+import '../modules/messaging/bindings/chat_binding.dart';
+import '../modules/messaging/views/conversations_view.dart';
+import '../modules/messaging/views/chat_view.dart';
 import '../modules/seller_onboarding/bindings/seller_onboarding_binding.dart';
 import '../modules/seller_onboarding/views/seller_onboarding_view.dart';
 import '../modules/seller_stores/bindings/seller_stores_binding.dart';
 import '../modules/seller_stores/views/seller_stores_view.dart';
 import '../modules/welcome/views/welcome_view.dart';
+import '../modules/welcome/bindings/welcome_binding.dart';
 import '../modules/pos/bindings/pos_binding.dart';
 import '../modules/pos_orders/bindings/pos_orders_binding.dart';
 import '../modules/pos_products/bindings/pos_products_binding.dart';
@@ -76,8 +79,8 @@ import '../modules/category/bindings/category_binding.dart';
 import '../modules/category/views/category_view.dart';
 import '../modules/change_password/bindings/change_password_binding.dart';
 import '../modules/change_password/views/change_password_view.dart';
-import '../modules/chat/bindings/chat_binding.dart';
-import '../modules/chat/views/chat_view.dart';
+import '../modules/ai_assistant_chat/bindings/ai_assistant_chat_binding.dart';
+import '../modules/ai_assistant_chat/views/ai_assistant_chat_view.dart';
 import '../modules/checkout/bindings/checkout_binding.dart';
 import '../modules/checkout/views/checkout_view.dart';
 import '../modules/edit_profile/bindings/edit_profile_binding.dart';
@@ -109,6 +112,8 @@ import '../modules/privacy_policy/bindings/privacy_policy_binding.dart';
 import '../modules/privacy_policy/views/privacy_policy_view.dart';
 import '../modules/product_details/binding/product_detail_binding.dart';
 import '../modules/product_details/views/product_details_view.dart';
+import '../modules/seller_storefront/bindings/seller_storefront_binding.dart';
+import '../modules/seller_storefront/views/seller_storefront_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/refund_request/bindings/refund_request_binding.dart';
@@ -156,6 +161,7 @@ class AppPages {
     GetPage(
       name: Routes.welcome,
       page: () => const WelcomeView(),
+      binding: WelcomeBinding(),
     ),
     GetPage(
       name: Routes.sellerStores,
@@ -194,6 +200,11 @@ class AppPages {
       name: Routes.productDetailsView,
       page: () => ProductDetailsView(),
       binding: ProductDetailBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerStorefront,
+      page: () => SellerStorefrontView(),
+      binding: SellerStorefrontBinding(),
     ),
     GetPage(
       name: Routes.searchView,
@@ -322,8 +333,8 @@ class AppPages {
     ),
     GetPage(
       name: Routes.CHAT,
-      page: () => const ChatView(),
-      binding: ChatBinding(),
+      page: () => const AiAssistantChatView(),
+      binding: AiAssistantChatBinding(),
     ),
     GetPage(
       name: Routes.WISHLIST,
@@ -352,9 +363,14 @@ class AppPages {
       binding: SellerMessagesBinding(),
     ),
     GetPage(
-      name: Routes.sellerChat,
-      page: () => SellerChatView(),
-      binding: SellerChatBinding(),
+      name: Routes.messagesView,
+      page: () => ConversationsView(),
+      binding: ConversationsBinding(),
+    ),
+    GetPage(
+      name: Routes.chatView,
+      page: () => ChatView(),
+      binding: ChatBinding(),
     ),
     GetPage(
       name: Routes.sellerOrders,
@@ -502,13 +518,13 @@ class AppPages {
     ),
     GetPage(
       name: Routes.posSessionHistory,
-      page: () => const PosSessionHistoryView(),
+      page: () => PosSessionHistoryView(),
       binding: PosSessionHistoryBinding(),
       middlewares: [PosAccessMiddleware(requireActiveSession: true)],
     ),
     GetPage(
       name: Routes.posAuditLog,
-      page: () => const PosAuditLogView(),
+      page: () => PosAuditLogView(),
       binding: PosAuditLogBinding(),
       middlewares: [PosAccessMiddleware()],
     ),

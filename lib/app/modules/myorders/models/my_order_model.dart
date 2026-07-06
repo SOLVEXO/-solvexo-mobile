@@ -124,4 +124,12 @@ class OrderModel {
   bool get isCompleted => orderStatus == 'completed';
   bool get isCancelled => orderStatus == 'cancelled';
   bool get canCancel => orderStatus == 'pending';
+
+  /// Mirrors `orders.service.ts#returnRequest`'s eligibility rules: at least
+  /// one delivered, physical, not-already-requested line item.
+  bool get canRequestReturn => stores.any(
+        (s) =>
+            (s.status == 'delivered' || s.status == 'completed') &&
+            s.items.any((i) => i.type == 'physical' && i.returnStatus == 'none'),
+      );
 }

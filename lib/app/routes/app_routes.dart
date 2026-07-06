@@ -13,6 +13,7 @@ abstract class Routes {
   static const categoryScreen = '/category_screen';
   static const subCategoryView = '/category/sub_category';
   static const productDetailsView = '/category/product_details';
+  static const sellerStorefront = '/store/storefront';
   static const searchView = '/search';
   static const cartView = '/cart';
   static const checkoutView = '/checkout';
@@ -41,6 +42,8 @@ abstract class Routes {
   static const CHAT = '/chat';
   static const WISHLIST = '/wishlist';
   static const notifications = '/notifications';
+  static const messagesView = '/messages';
+  static const chatView = '/messages/chat';
 
   // Entry
   static const welcome = '/welcome';
@@ -55,7 +58,6 @@ abstract class Routes {
 
   // Seller sub-screens
   static const sellerMessages = '/seller/messages';
-  static const sellerChat = '/seller/chat';
   static const sellerOrders = '/seller/orders';
   static const sellerOrderDetail = '/seller/orders/detail';
   // Seller settings sub-screens

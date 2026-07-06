@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 
-class OtpController extends GetxController
+class OtpController extends BaseController
     with GetSingleTickerProviderStateMixin {
   final AuthRepository _authRepository = AuthRepository();
 
@@ -16,6 +17,7 @@ class OtpController extends GetxController
 
   RxBool resendAvailable = false.obs;
   RxInt timerSec = 60.obs;
+  @override
   RxBool isLoading = false.obs;
 
   final String otpType = Get.arguments['type'] ?? "";
