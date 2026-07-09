@@ -1,10 +1,11 @@
 import 'package:book_store_app/app/base_view/base_view_screen.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,7 +36,11 @@ class AddAddressView extends StatelessWidget {
               () => CheckboxListTile(
                 value: controller.makeDefault.value,
                 onChanged: (v) => controller.makeDefault.value = v!,
-                title: Text("Make this as default address", style: BaseTypography.bodyMedium(color: AppColors.black)),
+                title: CustomText(
+                  text: "Make this as default address",
+                  color: AppColors.black,
+                  fontSize: AppFontSize.extraSmall,
+                ),
               ),
             ),
             Obx(
@@ -62,7 +67,12 @@ class AddAddressView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         islabel
-            ? Text(label, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w700))
+            ? CustomText(
+                text: label,
+                color: AppColors.black,
+                fontSize: AppFontSize.extraSmall,
+                fontWeight: FontWeight.w700,
+              )
             : const SizedBox(),
         CustomTextField(
           // Was `onChanged: (v) => controller.text = v` — reassigning
@@ -102,9 +112,18 @@ class AddAddressView extends StatelessWidget {
                   () => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w700)),
+                      CustomText(
+                        text: title,
+                        color: AppColors.black,
+                        fontSize: AppFontSize.extraSmall,
+                        fontWeight: FontWeight.w700,
+                      ),
                       SizedBox(height: BaseSpacing.xxs),
-                      Text(value.value, style: BaseTypography.bodyMedium(color: AppColors.black)),
+                      CustomText(
+                        text: value.value,
+                        color: AppColors.black,
+                        fontSize: AppFontSize.extraSmall,
+                      ),
                     ],
                   ),
                 ),

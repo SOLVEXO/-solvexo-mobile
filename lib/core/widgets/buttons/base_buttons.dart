@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import '../../theme/base_colors.dart';
 import '../../theme/base_shadows.dart';
 import '../../theme/base_spacing.dart';
-import '../../theme/base_typography.dart';
 import '../../theme/base_animations.dart';
 
 /// Shared visual size contract every button in the family honors, so a
@@ -97,9 +97,11 @@ class _BaseButton extends StatelessWidget {
           IconTheme(data: IconThemeData(color: fg, size: 20), child: leadingIcon!),
           SizedBox(width: _ButtonMetrics.iconGap + BaseSpacing.xxs),
         ],
-        Text(
-          label,
-          style: BaseTypography.labelLarge(color: fg).copyWith(fontSize: compact ? 13 : 15),
+        CustomText(
+          text: label,
+          color: fg,
+          fontSize: compact ? 13 : 15,
+          fontWeight: FontWeight.w600,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

@@ -101,36 +101,6 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
           ),
-          if (issearch) ...[
-            SizedBox(height: BaseSpacing.sm),
-            SizedBox(
-              height: _searchRowHeight,
-              child: Obx(
-                () => CustomTextField(
-                  controller: controller.textController,
-                  onChanged: controller.onSearchChanged,
-                  onFieldSubmitted: controller.performSearch,
-                  suffixIcon: controller.searchText.isNotEmpty
-                      ? SvgIcon(
-                          assetName: AppIcons.cross,
-                          color: AppColors.black,
-                          onTap: controller.clearSearch,
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: AppColors.white,
-                  borderRadius: BorderRadius.circular(BaseRadius.md),
-                  prefixIcon: SvgIcon(
-                    assetName: AppIcons.searchIcon,
-                    color: AppColors.lightGrey,
-                    size: 22,
-                  ),
-                  borderBorderradius: BaseRadius.md,
-                  hintText: "Search",
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

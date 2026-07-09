@@ -1,6 +1,7 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +24,7 @@ class HomeSectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: BaseTypography.bodyLarge(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(text: title, color: AppColors.black2, fontSize: AppFontSize.small, fontWeight: FontWeight.w700),
           if (viewMore)
             GestureDetector(
               onTap: onViewMore ?? () {},
@@ -31,9 +32,11 @@ class HomeSectionHeader extends StatelessWidget {
               child: Container(
                 constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
                 alignment: Alignment.center,
-                child: Text(
-                  'See All',
-                  style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w500),
+                child: CustomText(
+                  text: 'See All',
+                  color: AppColors.primaryColor,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),

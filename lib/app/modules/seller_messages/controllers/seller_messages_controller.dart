@@ -19,15 +19,22 @@ class SellerMessagesController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxString searchQuery = ''.obs;
   final Rx<InboxFilter> filter = InboxFilter.active.obs;
+  final RxBool unreadOnly = false.obs;
   final RxList<ConversationModel> conversations = <ConversationModel>[].obs;
 
   Timer? _pollTimer;
   static const _pollInterval = Duration(seconds: 15);
 
   List<ConversationModel> get filteredConversations {
+    var result = conversations.toList();
+    if (unreadOnly.value) {
+      result = result.where((c) => c.unreadFor('seller') > 0).toList();
+    }
     final q = searchQuery.value.trim().toLowerCase();
-    if (q.isEmpty) return conversations;
-    return conversations.where((c) => c.peerName('seller').toLowerCase().contains(q)).toList();
+    if (q.isNotEmpty) {
+      result = result.where((c) => c.peerName('seller').toLowerCase().contains(q)).toList();
+    }
+    return result;
   }
 
   int get totalUnread => conversations.fold(0, (sum, c) => sum + c.unreadFor('seller'));
@@ -76,6 +83,25 @@ class SellerMessagesController extends GetxController {
     if (filter.value == value) return;
     filter.value = value;
     loadConversations();
+  }
+
+  /// The three inbox pills — 'all' / 'unread' both read from the active
+  /// (non-archived) list, 'unread' just adds a client-side filter on top;
+  /// 'archived' switches the backend-scoped list entirely.
+  void selectQuickFilter(String key) {
+    switch (key) {
+      case 'unread':
+        unreadOnly.value = true;
+        setFilter(InboxFilter.active);
+        break;
+      case 'archived':
+        unreadOnly.value = false;
+        setFilter(InboxFilter.archived);
+        break;
+      default:
+        unreadOnly.value = false;
+        setFilter(InboxFilter.active);
+    }
   }
 
   void openChat(ConversationModel c) {

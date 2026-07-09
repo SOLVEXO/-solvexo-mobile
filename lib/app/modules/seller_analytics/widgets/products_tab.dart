@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/analytics/product_performance_model.dart';
 import 'package:book_store_app/app/modules/seller_analytics/controllers/seller_analytics_controller.dart';
 import 'package:book_store_app/app/modules/seller_analytics/widgets/analytics_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,7 +28,7 @@ class ProductsTab extends StatelessWidget {
               children: [
                 Icon(Icons.inventory_2_outlined, size: 48, color: AppColors.lightGrey),
                 SizedBox(height: BaseSpacing.sm),
-                Text('No products yet', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
+                CustomText(text: 'No products yet', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
               ],
             ),
           ),
@@ -37,7 +38,7 @@ class ProductsTab extends StatelessWidget {
       return CustomRefreshWrapper(
         onRefresh: controller.loadProducts,
         child: ListView.separated(
-          padding: EdgeInsets.all(BaseSpacing.md),
+          padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.md),
           itemCount: controller.products.length + (controller.productsPage.value < controller.productsTotalPages.value ? 1 : 0),
           separatorBuilder: (_, __) => SizedBox(height: BaseSpacing.sm),
           itemBuilder: (_, i) {
@@ -47,7 +48,7 @@ class ProductsTab extends StatelessWidget {
                   onPressed: controller.isLoadingProducts.value ? null : () => controller.loadProducts(loadMore: true),
                   child: controller.isLoadingProducts.value
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Text('Load More', style: BaseTypography.bodySmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700)),
+                      : CustomText(text: 'Load More', color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                 ),
               );
             }
@@ -78,13 +79,13 @@ class _ProductRow extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(product.name, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: CustomText(text: product.name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700, maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
               if (product.isLowPerformer)
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
                   decoration: BoxDecoration(color: AppColors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-                  child: Text('Low performer', style: BaseTypography.labelSmall(color: AppColors.orange).copyWith(fontWeight: FontWeight.w700, fontSize: 10)),
+                  child: CustomText(text: 'Low performer', color: AppColors.orange, fontSize: 10, fontWeight: FontWeight.w700),
                 ),
             ],
           ),
@@ -100,7 +101,7 @@ class _ProductRow extends StatelessWidget {
           ),
           if (product.refundRatePercent > 0) ...[
             SizedBox(height: BaseSpacing.xxs),
-            Text('${product.refundRatePercent.toStringAsFixed(1)}% refund rate', style: BaseTypography.labelSmall(color: AppColors.red)),
+            CustomText(text: '${product.refundRatePercent.toStringAsFixed(1)}% refund rate', color: AppColors.red, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
           ],
         ],
       ),
@@ -120,7 +121,7 @@ class _Stat extends StatelessWidget {
       children: [
         Icon(icon, size: 13, color: AppColors.gray600),
         SizedBox(width: BaseSpacing.xxs / 2),
-        Text(label, style: BaseTypography.labelSmall(color: AppColors.gray600)),
+        CustomText(text: label, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
       ],
     );
   }

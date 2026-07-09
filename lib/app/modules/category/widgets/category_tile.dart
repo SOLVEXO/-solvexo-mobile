@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -6,7 +7,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -101,15 +102,19 @@ class CategoryTile extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            category.name,
-                            style: BaseTypography.bodyLarge(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
+                          CustomText(
+                            text: category.name,
+                            color: AppColors.textPrimary,
+                            fontSize: AppFontSize.small,
+                            fontWeight: FontWeight.w600,
                           ),
                           if (hasChildren) ...[
                             SizedBox(height: BaseSpacing.xxs - 1),
-                            Text(
-                              '${category.children.length} subcategor${category.children.length == 1 ? 'y' : 'ies'}',
-                              style: BaseTypography.bodySmall(color: AppColors.gray600),
+                            CustomText(
+                              text:
+                                  '${category.children.length} subcategor${category.children.length == 1 ? 'y' : 'ies'}',
+                              color: AppColors.gray600,
+                              fontSize: AppFontSize.tiny,
                             ),
                           ],
                         ],

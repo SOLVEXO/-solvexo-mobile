@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/data/models/messaging/message_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -6,7 +7,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -32,9 +33,11 @@ class MessageBubble extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  message.createdAt != null ? DateFormat('h:mm a').format(message.createdAt!.toLocal()) : '',
-                  style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400),
+                CustomText(
+                  text: message.createdAt != null ? DateFormat('h:mm a').format(message.createdAt!.toLocal()) : '',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w400,
                 ),
                 if (isMine) ...[
                   SizedBox(width: BaseSpacing.xxs),
@@ -59,11 +62,11 @@ class MessageBubble extends StatelessWidget {
           children: [
             Icon(Icons.block_rounded, size: 14, color: isMine ? AppColors.white.withOpacity(0.7) : AppColors.gray600),
             SizedBox(width: BaseSpacing.xxs + 2),
-            Text(
-              'This message was deleted',
-              style: BaseTypography.bodySmall(
-                color: isMine ? AppColors.white.withOpacity(0.7) : AppColors.gray600,
-              ).copyWith(fontStyle: FontStyle.italic),
+            CustomText(
+              text: 'This message was deleted',
+              color: isMine ? AppColors.white.withOpacity(0.7) : AppColors.gray600,
+              fontSize: AppFontSize.tiny,
+              fontStyle: FontStyle.italic,
             ),
           ],
         ),
@@ -77,7 +80,7 @@ class MessageBubble extends StatelessWidget {
         return _productShareBubble();
       default:
         return _bubbleWrapper(
-          Text(message.text ?? '', style: BaseTypography.bodySmall(color: isMine ? AppColors.white : AppColors.black2)),
+          CustomText(text: message.text ?? '', color: isMine ? AppColors.white : AppColors.black2, fontSize: AppFontSize.tiny),
         );
     }
   }
@@ -116,7 +119,7 @@ class MessageBubble extends StatelessWidget {
           ),
           child: url != null
               ? CommonImageView(url: url, width: 200, height: 220, fit: BoxFit.cover)
-              : _bubbleWrapper(Text('Photo', style: BaseTypography.bodySmall(color: AppColors.black2))),
+              : _bubbleWrapper(CustomText(text: 'Photo', color: AppColors.black2, fontSize: AppFontSize.tiny)),
         ),
       ),
     );
@@ -158,7 +161,7 @@ class MessageBubble extends StatelessWidget {
 
   Widget _productShareBubble() {
     final p = message.productShare;
-    if (p == null) return _bubbleWrapper(Text('Shared a product', style: BaseTypography.bodySmall(color: AppColors.black2)));
+    if (p == null) return _bubbleWrapper(CustomText(text: 'Shared a product', color: AppColors.black2, fontSize: AppFontSize.tiny));
 
     return Semantics(
       button: true,
@@ -181,16 +184,20 @@ class MessageBubble extends StatelessWidget {
                 child: CommonImageView(url: p.image ?? '', height: 110, width: double.infinity, fit: BoxFit.cover),
               ),
               SizedBox(height: BaseSpacing.xs),
-              Text(
-                p.title,
-                style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600),
+              CustomText(
+                text: p.title,
+                color: AppColors.black2,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               SizedBox(height: BaseSpacing.xxs / 2),
-              Text(
-                '\$${p.price.toStringAsFixed(2)}',
-                style: BaseTypography.bodyMedium(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold),
+              CustomText(
+                text: '\$${p.price.toStringAsFixed(2)}',
+                color: AppColors.primaryColor,
+                fontSize: AppFontSize.extraSmall,
+                fontWeight: FontWeight.bold,
               ),
             ],
           ),

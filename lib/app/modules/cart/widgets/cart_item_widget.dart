@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/icon_with_text.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
@@ -7,7 +8,7 @@ import 'package:book_store_app/app/modules/cart/widgets/inc_dicr_quantity_widget
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -50,12 +51,19 @@ class CartItemWidget extends StatelessWidget {
                   spacing: BaseSpacing.xxs + 1,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.name, style: BaseTypography.bodySmall(color: AppColors.black).copyWith(fontWeight: FontWeight.bold)),
-                    Text("Color : White", style: BaseTypography.bodySmall(color: AppColors.gray600)),
-                    Text("${item.quantity} Item", style: BaseTypography.bodySmall(color: AppColors.gray600)),
-                    Text(
-                      "\$${item.actualPrice.toStringAsFixed(2)}",
-                      style: BaseTypography.bodyLarge(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
+                    CustomText(
+                      text: item.name,
+                      color: AppColors.black,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    CustomText(text: "Color : White", color: AppColors.gray600, fontSize: AppFontSize.tiny),
+                    CustomText(text: "${item.quantity} Item", color: AppColors.gray600, fontSize: AppFontSize.tiny),
+                    CustomText(
+                      text: "\$${item.actualPrice.toStringAsFixed(2)}",
+                      color: AppColors.black,
+                      fontSize: AppFontSize.small,
+                      fontWeight: FontWeight.bold,
                     ),
                   ],
                 ),

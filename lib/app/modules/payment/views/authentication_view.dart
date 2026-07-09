@@ -1,12 +1,13 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/payment/controllers/payment_verification_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -31,9 +32,11 @@ class AuthenticationView extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
-                  "BANK OF AMERICA.",
-                  style: BaseTypography.bodyMedium(color: AppColors.americanBlue).copyWith(fontWeight: FontWeight.w500),
+                CustomText(
+                  text: "BANK OF AMERICA.",
+                  color: AppColors.americanBlue,
+                  fontSize: AppFontSize.extraSmall,
+                  fontWeight: FontWeight.w500,
                 ),
                 SvgIcon(assetName: AppIcons.bankIcon, size: 20),
                 const Spacer(),
@@ -41,15 +44,17 @@ class AuthenticationView extends StatelessWidget {
               ],
             ),
             const Divider(height: 0),
-            Text(
-              "Transaction Authentication",
-              style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w800),
+            CustomText(
+              text: "Transaction Authentication",
+              color: AppColors.black,
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.w800,
             ),
-            Text(formattedDate, style: BaseTypography.bodyMedium(color: AppColors.gray600)),
+            CustomText(text: formattedDate, color: AppColors.gray600, fontSize: AppFontSize.extraSmall),
             Row(
               children: [
-                Text("From card number: ", style: BaseTypography.bodyMedium(color: AppColors.gray600)),
-                Text("XXXX XXXX XXXX ${pvController.method.last4}", style: BaseTypography.bodyMedium(color: AppColors.primaryColor)),
+                CustomText(text: "From card number: ", color: AppColors.gray600, fontSize: AppFontSize.extraSmall),
+                CustomText(text: "XXXX XXXX XXXX ${pvController.method.last4}", color: AppColors.primaryColor, fontSize: AppFontSize.extraSmall),
               ],
             ),
             Container(
@@ -66,9 +71,10 @@ class AuthenticationView extends StatelessWidget {
                 ],
               ),
             ),
-            Text(
-              "To verify this transaction, enter the One Time Password (OTP) we sent via SMS to +xx xxx xxxx105",
-              style: BaseTypography.bodyMedium(color: AppColors.black),
+            CustomText(
+              text: "To verify this transaction, enter the One Time Password (OTP) we sent via SMS to +xx xxx xxxx105",
+              color: AppColors.black,
+              fontSize: AppFontSize.extraSmall,
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,11 +108,12 @@ class AuthenticationView extends StatelessWidget {
             Row(
               spacing: BaseSpacing.xxs + 1,
               children: [
-                Text("Remaining", style: BaseTypography.bodyMedium(color: AppColors.black)),
+                CustomText(text: "Remaining", color: AppColors.black, fontSize: AppFontSize.extraSmall),
                 Obx(
-                  () => Text(
-                    pvController.secondsLeft.toString(),
-                    style: BaseTypography.bodyMedium(color: AppColors.orange),
+                  () => CustomText(
+                    text: pvController.secondsLeft.toString(),
+                    color: AppColors.orange,
+                    fontSize: AppFontSize.extraSmall,
                   ),
                 ),
               ],
@@ -124,8 +131,8 @@ class AuthenticationView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: BaseSpacing.xs,
               children: [
-                Text("For assistance, please contact", style: BaseTypography.bodySmall(color: AppColors.black)),
-                Text("BOA +92 322 2222222", style: BaseTypography.labelSmall(color: AppColors.primaryColor)),
+                CustomText(text: "For assistance, please contact", color: AppColors.black, fontSize: AppFontSize.tiny),
+                CustomText(text: "BOA +92 322 2222222", color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
               ],
             ),
           ],
@@ -138,8 +145,8 @@ class AuthenticationView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: BaseTypography.bodyMedium(color: AppColors.gray600)),
-        Text(subTitle, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold)),
+        CustomText(text: title, color: AppColors.gray600, fontSize: AppFontSize.extraSmall),
+        CustomText(text: subTitle, color: AppColors.black, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.bold),
       ],
     );
   }

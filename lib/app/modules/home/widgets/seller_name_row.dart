@@ -1,7 +1,8 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class SellerNameRow extends StatelessWidget {
@@ -26,7 +27,7 @@ class SellerNameRow extends StatelessWidget {
             fit: BoxFit.cover,
             radius: BorderRadius.circular(BaseRadius.pill),
           ),
-          Text(name, style: BaseTypography.labelSmall(color: AppColors.gray600)),
+          CustomText(text: name, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
         ],
       ),
     );

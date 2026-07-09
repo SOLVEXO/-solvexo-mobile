@@ -1,6 +1,7 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class CouponCodeListTile extends StatelessWidget {
@@ -30,13 +31,13 @@ class CouponCodeListTile extends StatelessWidget {
           backgroundColor: isSubtitle ? AppColors.primaryColor : AppColors.gray600,
           child: const Icon(Icons.local_offer_outlined, color: AppColors.white),
         ),
-        title: Text(
-          title,
-          style: BaseTypography.bodyMedium(
-            color: isSubtitle ? AppColors.primaryColor : AppColors.black,
-          ).copyWith(fontWeight: FontWeight.w600),
+        title: CustomText(
+          text: title,
+          color: isSubtitle ? AppColors.primaryColor : AppColors.black,
+          fontSize: AppFontSize.extraSmall,
+          fontWeight: FontWeight.w600,
         ),
-        subtitle: isSubtitle ? Text(subTitle ?? "", style: BaseTypography.bodySmall(color: AppColors.black)) : null,
+        subtitle: isSubtitle ? CustomText(text: subTitle ?? "", color: AppColors.black, fontSize: AppFontSize.tiny) : null,
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,
       ),

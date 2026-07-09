@@ -1,11 +1,12 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/sub_category/controller/sub_category_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,7 +40,7 @@ class FilterBottomSheetSubCategory extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
             child: Row(
               children: [
-                Text('Filters', style: BaseTypography.headlineSmall(color: AppColors.textPrimary)),
+                CustomText(text: 'Filters', color: AppColors.textPrimary, fontSize: AppFontSize.medium, fontWeight: FontWeight.w600),
                 SizedBox(width: BaseSpacing.xs),
                 // Active filter count badge
                 Obx(() {
@@ -48,7 +49,7 @@ class FilterBottomSheetSubCategory extends StatelessWidget {
                   return Container(
                     padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: BaseSpacing.xxs / 2),
                     decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.pill)),
-                    child: Text('$count', style: BaseTypography.labelSmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+                    child: CustomText(text: '$count', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                   );
                 }),
                 const Spacer(),
@@ -241,7 +242,7 @@ class _SectionTitle extends StatelessWidget {
           decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.xs)),
         ),
         SizedBox(width: BaseSpacing.xs),
-        Text(title, style: BaseTypography.bodyLarge(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w700)),
+        CustomText(text: title, color: AppColors.textPrimary, fontSize: AppFontSize.small, fontWeight: FontWeight.w700),
       ],
     );
   }
@@ -261,9 +262,9 @@ class _PriceTag extends StatelessWidget {
       decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.07), borderRadius: BorderRadius.circular(BaseRadius.sm)),
       child: Column(
         children: [
-          Text(label, style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w500)),
+          CustomText(text: label, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w500),
           SizedBox(height: BaseSpacing.xxs / 2),
-          Text(value, style: BaseTypography.bodyLarge(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(text: value, color: AppColors.primaryColor, fontSize: AppFontSize.small, fontWeight: FontWeight.w700),
         ],
       ),
     );
@@ -305,9 +306,11 @@ class _RatingChip extends StatelessWidget {
                 SvgIcon(assetName: AppIcons.fillStar, size: 14),
                 SizedBox(width: BaseSpacing.xxs),
               ],
-              Text(
-                label,
-                style: BaseTypography.labelSmall(color: isSelected ? AppColors.white : AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
+              CustomText(
+                text: label,
+                color: isSelected ? AppColors.white : AppColors.textPrimary,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
               ),
             ],
           ),
@@ -344,9 +347,11 @@ class _SelectableChip extends StatelessWidget {
             border: Border.all(color: isSelected ? AppColors.primaryColor : AppColors.lightGrey, width: 1.5),
           ),
           alignment: Alignment.center,
-          child: Text(
-            label,
-            style: BaseTypography.labelSmall(color: isSelected ? AppColors.white : AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
+          child: CustomText(
+            text: label,
+            color: isSelected ? AppColors.white : AppColors.textPrimary,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

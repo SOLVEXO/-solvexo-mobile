@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
@@ -7,7 +8,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -49,12 +50,14 @@ class HorizontalProductCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(prod.name, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600)),
-                  Text(
-                    prod.description,
+                  CustomText(text: prod.name, color: AppColors.black, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
+                  CustomText(
+                    text: prod.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: BaseTypography.labelSmall(color: AppColors.black54).copyWith(fontWeight: FontWeight.w400),
+                    color: AppColors.black54,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w400,
                   ),
                   Expanded(
                     child: Row(
@@ -71,9 +74,11 @@ class HorizontalProductCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Text(
-                    "\$ ${prod.price}",
-                    style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+                  CustomText(
+                    text: "\$ ${prod.price}",
+                    color: AppColors.black,
+                    fontSize: AppFontSize.extraSmall,
+                    fontWeight: FontWeight.w600,
                   ),
                 ],
               ),

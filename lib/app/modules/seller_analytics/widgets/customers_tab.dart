@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/analytics/customer_analytics_model.dart';
 import 'package:book_store_app/app/modules/seller_analytics/controllers/seller_analytics_controller.dart';
 import 'package:book_store_app/app/modules/seller_analytics/widgets/analytics_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,19 +25,19 @@ class CustomersTab extends StatelessWidget {
       return CustomRefreshWrapper(
         onRefresh: controller.loadCustomers,
         child: ListView(
-          padding: EdgeInsets.all(BaseSpacing.md),
+          padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.md),
           children: [
             _NewVsReturningCard(data: data),
             SizedBox(height: BaseSpacing.md),
             _SectionCard(
               title: 'Average Lifetime Value',
-              child: Text('\$${data.averageLifetimeValue.toStringAsFixed(2)}', style: BaseTypography.titleLarge(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w800, fontSize: 26)),
+              child: CustomText(text: '\$${data.averageLifetimeValue.toStringAsFixed(2)}', color: AppColors.primaryColor, fontSize: 26, fontWeight: FontWeight.w800),
             ),
             SizedBox(height: BaseSpacing.md),
             _SectionCard(
               title: 'Top Customers by Lifetime Value',
               child: data.topCustomersByLtv.isEmpty
-                  ? Text('No customers yet', style: BaseTypography.labelSmall(color: AppColors.gray600))
+                  ? CustomText(text: 'No customers yet', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600)
                   : Column(children: data.topCustomersByLtv.map((c) => _CustomerRow(customer: c)).toList()),
             ),
             if (data.geographicBreakdown.isNotEmpty) ...[
@@ -50,8 +51,8 @@ class CustomersTab extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(g.state, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
-                                Text('${g.orders} orders · \$${g.revenue.toStringAsFixed(0)}', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                                CustomText(text: g.state, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+                                CustomText(text: '${g.orders} orders · \$${g.revenue.toStringAsFixed(0)}', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                               ],
                             ),
                           ))
@@ -88,7 +89,7 @@ class _NewVsReturningCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('New vs Returning', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+              CustomText(text: 'New vs Returning', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
               const Spacer(),
               _Dot(color: AppColors.primaryColor, label: 'New'),
               SizedBox(width: BaseSpacing.sm),
@@ -99,7 +100,7 @@ class _NewVsReturningCard extends StatelessWidget {
           if (!hasActivity)
             Padding(
               padding: EdgeInsets.symmetric(vertical: BaseSpacing.xl),
-              child: Center(child: Text('No customer activity in this period', style: BaseTypography.labelSmall(color: AppColors.gray600))),
+              child: Center(child: CustomText(text: 'No customer activity in this period', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600)),
             )
           else
             SizedBox(
@@ -146,7 +147,7 @@ class _Dot extends StatelessWidget {
       children: [
         Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         SizedBox(width: BaseSpacing.xxs),
-        Text(label, style: BaseTypography.labelSmall(color: AppColors.gray600)),
+        CustomText(text: label, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
       ],
     );
   }
@@ -166,7 +167,7 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(text: title, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
           SizedBox(height: BaseSpacing.sm),
           child,
         ],
@@ -191,19 +192,19 @@ class _CustomerRow extends StatelessWidget {
             height: 36,
             decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
             alignment: Alignment.center,
-            child: Text(initials, style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold)),
+            child: CustomText(text: initials, color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.bold),
           ),
           SizedBox(width: BaseSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(customer.name, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
-                Text('${customer.totalOrders} orders', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                CustomText(text: customer.name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+                CustomText(text: '${customer.totalOrders} orders', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
               ],
             ),
           ),
-          Text('\$${customer.lifetimeValue.toStringAsFixed(0)}', style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w800)),
+          CustomText(text: '\$${customer.lifetimeValue.toStringAsFixed(0)}', color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w800),
         ],
       ),
     );

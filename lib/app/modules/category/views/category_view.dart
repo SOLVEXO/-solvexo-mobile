@@ -1,12 +1,13 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/category/widgets/category_search_bar.dart';
 import 'package:book_store_app/app/modules/category/widgets/category_search_list.dart';
 import 'package:book_store_app/app/modules/home/widgets/category_item.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -116,12 +117,19 @@ class CategoryContent extends StatelessWidget {
             child: Icon(Icons.category_outlined, size: 40, color: AppColors.primaryColor),
           ),
           SizedBox(height: BaseSpacing.md),
-          Text(
-            'No categories found',
-            style: BaseTypography.bodyLarge(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
+          CustomText(
+            text: 'No categories found',
+            color: AppColors.textPrimary,
+            fontSize: AppFontSize.small,
+            fontWeight: FontWeight.w600,
           ),
           SizedBox(height: BaseSpacing.xxs + 2),
-          Text('Check back later', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+          CustomText(
+            text: 'Check back later',
+            color: AppColors.gray600,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w600,
+          ),
         ],
       ),
     );

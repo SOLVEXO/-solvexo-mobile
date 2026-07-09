@@ -1,9 +1,10 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,9 +32,11 @@ class PaymentSuccessView extends StatelessWidget {
                 },
               ),
               SizedBox(height: BaseSpacing.xl),
-              Text(
-                "Payment Successful",
-                style: BaseTypography.headlineSmall(color: AppColors.black),
+              CustomText(
+                text: "Payment Successful",
+                color: AppColors.black,
+                fontSize: AppFontSize.medium,
+                fontWeight: FontWeight.w600,
               ),
               SizedBox(height: BaseSpacing.sm),
               PrimaryButton(

@@ -1,7 +1,8 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/analytics/payment_method_breakdown_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 /// One-time order revenue vs recurring subscription revenue, for sellers
@@ -26,9 +27,19 @@ class AnalyticsRevenueBreakdownCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Total Business Revenue', style: BaseTypography.labelSmall(color: AppColors.white.withOpacity(0.85))),
+          CustomText(
+            text: 'Total Business Revenue',
+            color: AppColors.white.withOpacity(0.85),
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w600,
+          ),
           SizedBox(height: BaseSpacing.xxs),
-          Text('\$${data.totalRevenue.toStringAsFixed(0)}', style: BaseTypography.titleLarge(color: AppColors.white).copyWith(fontWeight: FontWeight.w800, fontSize: 26)),
+          CustomText(
+            text: '\$${data.totalRevenue.toStringAsFixed(0)}',
+            color: AppColors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 26,
+          ),
           SizedBox(height: BaseSpacing.sm),
           ClipRRect(
             borderRadius: BorderRadius.circular(BaseRadius.pill),
@@ -66,7 +77,12 @@ class _Legend extends StatelessWidget {
       children: [
         Container(width: 9, height: 9, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         SizedBox(width: BaseSpacing.xxs),
-        Text('$label $value', style: BaseTypography.labelSmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w600)),
+        CustomText(
+          text: '$label $value',
+          color: AppColors.white,
+          fontSize: AppFontSize.tiny,
+          fontWeight: FontWeight.w600,
+        ),
       ],
     );
   }

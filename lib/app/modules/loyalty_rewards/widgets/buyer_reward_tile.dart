@@ -1,8 +1,9 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/loyalty/reward_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class BuyerRewardTile extends StatelessWidget {
@@ -48,17 +49,17 @@ class BuyerRewardTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(reward.name, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+                CustomText(text: reward.name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                 if (reward.description != null && reward.description!.isNotEmpty)
-                  Text(reward.description!, style: BaseTypography.labelSmall(color: AppColors.gray600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  CustomText(text: reward.description!, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, maxLines: 2, overflow: TextOverflow.ellipsis),
                 SizedBox(height: BaseSpacing.xxs),
                 Row(
                   children: [
                     Icon(Icons.bolt_rounded, size: 13, color: AppColors.primaryColor),
-                    Text('${reward.pointsCost} points', style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700)),
+                    CustomText(text: '${reward.pointsCost} points', color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                     if (reward.isOutOfStock) ...[
                       SizedBox(width: BaseSpacing.xs),
-                      Text('Out of stock', style: BaseTypography.labelSmall(color: AppColors.red).copyWith(fontWeight: FontWeight.w600)),
+                      CustomText(text: 'Out of stock', color: AppColors.red, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                     ],
                   ],
                 ),
@@ -78,9 +79,11 @@ class BuyerRewardTile extends StatelessWidget {
               ),
               child: isRedeeming
                   ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-                  : Text(
-                      'Redeem',
-                      style: BaseTypography.labelSmall(color: _disabled ? AppColors.gray600 : AppColors.white).copyWith(fontWeight: FontWeight.w700),
+                  : CustomText(
+                      text: 'Redeem',
+                      color: _disabled ? AppColors.gray600 : AppColors.white,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w700,
                     ),
             ),
           ),

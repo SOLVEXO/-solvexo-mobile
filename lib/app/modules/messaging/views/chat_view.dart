@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/messaging/controllers/chat_controller.dart';
 import 'package:book_store_app/app/modules/messaging/widgets/chat_input_bar.dart';
@@ -8,7 +9,7 @@ import 'package:book_store_app/app/modules/messaging/widgets/message_bubble.dart
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -30,7 +31,7 @@ class ChatView extends StatelessWidget {
 
               if (c.messages.isEmpty) {
                 return Center(
-                  child: Text('Say hello 👋', style: BaseTypography.bodySmall(color: AppColors.gray600)),
+                  child: CustomText(text: 'Say hello 👋', color: AppColors.gray600, fontSize: AppFontSize.tiny),
                 );
               }
 
@@ -105,17 +106,21 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                       height: 38,
                       color: AppColors.primaryColor.withOpacity(0.1),
                       alignment: Alignment.center,
-                      child: Text(
-                        initials,
-                        style: BaseTypography.bodySmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold),
+                      child: CustomText(
+                        text: initials,
+                        color: AppColors.primaryColor,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
             ),
             SizedBox(width: BaseSpacing.xs + 2),
             Expanded(
-              child: Text(
-                name,
-                style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700),
+              child: CustomText(
+                text: name,
+                color: AppColors.black2,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w700,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -138,7 +143,7 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   const Icon(Icons.block_rounded, size: 18, color: AppColors.red),
                   SizedBox(width: BaseSpacing.xs + 2),
-                  Text('Block', style: BaseTypography.labelSmall(color: AppColors.red).copyWith(fontWeight: FontWeight.w600)),
+                  CustomText(text: 'Block', color: AppColors.red, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                 ],
               ),
             ),
@@ -148,7 +153,7 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   SvgIcon(assetName: AppIcons.reportIcon, size: 18, color: AppColors.gray600),
                   SizedBox(width: BaseSpacing.xs + 2),
-                  Text('Report', style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w500)),
+                  CustomText(text: 'Report', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w500),
                 ],
               ),
             ),
@@ -196,15 +201,17 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             SizedBox(height: BaseSpacing.md + 2),
-            Text(
-              'Report this conversation',
-              style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold),
+            CustomText(
+              text: 'Report this conversation',
+              color: AppColors.black2,
+              fontSize: AppFontSize.extraSmall,
+              fontWeight: FontWeight.bold,
             ),
             SizedBox(height: BaseSpacing.sm),
             ...reasons.entries.map(
               (e) => ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(e.value, style: BaseTypography.bodySmall(color: AppColors.black2)),
+                title: CustomText(text: e.value, color: AppColors.black2, fontSize: AppFontSize.tiny),
                 onTap: () {
                   Navigator.pop(ctx);
                   c.reportConversation(e.key);

@@ -262,13 +262,11 @@ class _InfoRow extends StatelessWidget {
                         color: valueBg,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(
-                        value,
-                        style: TextStyle(
-                          fontSize: AppFontSize.tiny,
-                          fontWeight: FontWeight.w600,
-                          color: valueColor ?? AppColors.black2,
-                        ),
+                      child: CustomText(
+                        text: value,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.w600,
+                        color: valueColor ?? AppColors.black2,
                       ),
                     )
                   : CustomText(

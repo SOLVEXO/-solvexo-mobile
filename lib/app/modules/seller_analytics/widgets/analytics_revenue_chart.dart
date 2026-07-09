@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/analytics/revenue_point_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
@@ -6,6 +7,7 @@ import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 
 /// Interactive revenue-over-time line chart — tap/drag any point to see its
 /// exact date and net revenue in a tooltip.
@@ -33,12 +35,24 @@ class AnalyticsRevenueChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Revenue Over Time', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(
+            text: 'Revenue Over Time',
+            color: AppColors.black2,
+            fontSize: AppFontSize.extraSmall,
+            fontWeight: FontWeight.w700,
+          ),
           SizedBox(height: BaseSpacing.md),
           if (series.isEmpty || series.every((s) => s.netRevenue == 0))
             SizedBox(
               height: 180,
-              child: Center(child: Text('No revenue in this period', style: BaseTypography.labelSmall(color: AppColors.gray600))),
+              child: Center(
+                child: CustomText(
+                  text: 'No revenue in this period',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             )
           else
             SizedBox(height: 200, child: _buildChart()),
@@ -70,9 +84,11 @@ class AnalyticsRevenueChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 40,
-              getTitlesWidget: (value, meta) => Text(
-                value >= 1000 ? '\$${(value / 1000).toStringAsFixed(0)}k' : '\$${value.toStringAsFixed(0)}',
-                style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontSize: 9.5),
+              getTitlesWidget: (value, meta) => CustomText(
+                text: value >= 1000 ? '\$${(value / 1000).toStringAsFixed(0)}k' : '\$${value.toStringAsFixed(0)}',
+                color: AppColors.gray600,
+                fontWeight: FontWeight.w600,
+                fontSize: 9.5,
               ),
             ),
           ),
@@ -86,7 +102,12 @@ class AnalyticsRevenueChart extends StatelessWidget {
                 if (i < 0 || i >= series.length) return const SizedBox.shrink();
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text(_dateLabel(series[i].date), style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontSize: 9.5)),
+                  child: CustomText(
+                    text: _dateLabel(series[i].date),
+                    color: AppColors.gray600,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 9.5,
+                  ),
                 );
               },
             ),

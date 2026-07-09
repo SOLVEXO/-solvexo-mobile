@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/pos/pos_product_model.dart';
 import 'package:book_store_app/app/data/models/pos/pos_sale_model.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
@@ -436,13 +437,11 @@ class _VariantPickerSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            'Select Variant — ${product.name}',
-            style: const TextStyle(
-              color: kPosText,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
+          CustomText(
+            text: 'Select Variant — ${product.name}',
+            color: kPosText,
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
           ),
           const SizedBox(height: 12),
           ...product.variants.map((v) => GestureDetector(
@@ -465,27 +464,23 @@ class _VariantPickerSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(v.label,
-                          style: TextStyle(
-                            color: v.stock > 0 ? kPosText : kPosSubText,
-                            fontWeight: FontWeight.w600,
-                          )),
-                      Text(
-                        v.stock > 0 ? '${v.stock} in stock' : 'Out of stock',
-                        style: TextStyle(
-                          color: v.stock > 0 ? kPosSubText : kPosRed,
-                          fontSize: 12,
-                        ),
+                      CustomText(
+                        text: v.label,
+                        color: v.stock > 0 ? kPosText : kPosSubText,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      CustomText(
+                        text: v.stock > 0 ? '${v.stock} in stock' : 'Out of stock',
+                        color: v.stock > 0 ? kPosSubText : kPosRed,
+                        fontSize: 12,
                       ),
                     ],
                   ),
                 ),
-                Text(
-                  '\$${v.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    color: kPosOrange,
-                    fontWeight: FontWeight.bold,
-                  ),
+                CustomText(
+                  text: '\$${v.price.toStringAsFixed(2)}',
+                  color: kPosOrange,
+                  fontWeight: FontWeight.bold,
                 ),
               ]),
             ),

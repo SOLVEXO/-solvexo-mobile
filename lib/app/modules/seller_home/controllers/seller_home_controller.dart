@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/data/models/messaging/conversation_model.dart';
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
+import 'package:book_store_app/app/data/repositories/platform_plans_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_orders_repository.dart';
 import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orders_controller.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
@@ -9,6 +10,7 @@ import 'package:get/get.dart';
 class SellerHomeController extends GetxController {
   final _ordersRepo = SellerOrdersRepository();
   final _messagingRepo = MessagingRepository();
+  final _platformPlansRepo = PlatformPlansRepository();
 
   final RxBool isLoading = true.obs;
 
@@ -28,8 +30,9 @@ class SellerHomeController extends GetxController {
     'Photo Book',
   ].obs;
 
-  //  replace with real subscription check from API
   final RxBool hasPosSubscription = false.obs;
+  final RxBool posAddonEligible = false.obs; // requires Basic tier or above
+  final RxBool isPosActionLoading = false.obs;
 
   final RxList<ConversationModel> recentConversations = <ConversationModel>[].obs;
 
@@ -46,9 +49,35 @@ class SellerHomeController extends GetxController {
 
   Future<void> _loadData() async {
     try {
-      await Future.wait([_loadRecentOrders(), _loadRecentMessages()]);
+      await Future.wait([_loadRecentOrders(), _loadRecentMessages(), _loadPlatformPlan()]);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> _loadPlatformPlan() async {
+    try {
+      final storeId = await AppPreferences.getStoreId();
+      if (storeId == null || storeId.isEmpty) return;
+      final plan = await _platformPlansRepo.getMyPlan(storeId);
+      if (plan == null) return;
+      hasPosSubscription.value = plan.posAddon.active;
+      posAddonEligible.value = plan.posAddonEligible;
+    } catch (e) {
+      debugPrint('❌ _loadPlatformPlan error: $e');
+    }
+  }
+
+  Future<bool> subscribeToPosAddon() async {
+    final storeId = await AppPreferences.getStoreId();
+    if (storeId == null || storeId.isEmpty) return false;
+    isPosActionLoading.value = true;
+    try {
+      final ok = await _platformPlansRepo.subscribeToPosAddon(storeId);
+      if (ok) hasPosSubscription.value = true;
+      return ok;
+    } finally {
+      isPosActionLoading.value = false;
     }
   }
 

@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/otp/widgets/otp_field_boxes.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/otp_controller.dart';
@@ -58,9 +59,10 @@ class OtpView extends StatelessWidget {
               duration: BaseMotion.normal,
               child: controller.resendAvailable.value
                   ? GhostButton(label: "Resend OTP", onPressed: controller.resendCode)
-                  : Text(
-                      "Resend in ${controller.timerSec}s",
-                      style: BaseTypography.bodyMedium(color: AppColors.grey),
+                  : CustomText(
+                      text: "Resend in ${controller.timerSec}s",
+                      color: AppColors.grey,
+                      fontSize: AppFontSize.extraSmall,
                     ),
             );
           }),
@@ -68,12 +70,13 @@ class OtpView extends StatelessWidget {
           SizedBox(height: BaseSpacing.xl + BaseSpacing.xxs),
 
           /// Details
-          Text(
-            "For your security reason, we need to ensure it's really you."
-            "\nPlease enter the 6 digit code we sent to ${controller.email}"
-            "\nthis code is expires in 10 minutes",
+          CustomText(
+            text: "For your security reason, we need to ensure it's really you."
+                "\nPlease enter the 6 digit code we sent to ${controller.email}"
+                "\nthis code is expires in 10 minutes",
             textAlign: TextAlign.center,
-            style: BaseTypography.bodySmall(color: AppColors.greySwatch600),
+            color: AppColors.greySwatch600,
+            fontSize: AppFontSize.tiny,
           ),
 
           const Spacer(),

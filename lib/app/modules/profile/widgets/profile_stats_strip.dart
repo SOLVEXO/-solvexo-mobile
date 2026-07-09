@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
@@ -5,7 +6,7 @@ import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_control
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -82,18 +83,18 @@ class _StatCell extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            value,
-            style: BaseTypography.bodyMedium(
-              color: AppColors.primaryColor,
-            ).copyWith(fontWeight: FontWeight.bold),
+          CustomText(
+            text: value,
+            color: AppColors.primaryColor,
+            fontSize: AppFontSize.extraSmall,
+            fontWeight: FontWeight.bold,
           ),
           SizedBox(height: BaseSpacing.xxs / 2),
-          Text(
-            label,
-            style: BaseTypography.labelSmall(
-              color: AppColors.grey,
-            ).copyWith(fontWeight: FontWeight.w400),
+          CustomText(
+            text: label,
+            color: AppColors.grey,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w400,
           ),
         ],
       ),

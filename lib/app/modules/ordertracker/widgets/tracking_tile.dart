@@ -39,14 +39,15 @@ class TrackingTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                event.title,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+              CustomText(
+                text: event.title,
+                fontWeight: FontWeight.w600,
               ),
               const SizedBox(height: 4),
-              Text(
-                event.description,
-                style: TextStyle(color: AppColors.greySwatch600, fontSize: 12),
+              CustomText(
+                text: event.description,
+                color: AppColors.greySwatch600,
+                fontSize: 12,
               ),
               const SizedBox(height: 6),
             ],

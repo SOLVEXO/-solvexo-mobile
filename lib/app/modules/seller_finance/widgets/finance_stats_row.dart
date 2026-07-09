@@ -150,13 +150,11 @@ class _StatCard extends StatelessWidget {
                   color: item.badgeBg,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
-                  item.badge,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: item.badgeColor,
-                  ),
+                child: CustomText(
+                  text: item.badge,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: item.badgeColor,
                 ),
               ),
             ],

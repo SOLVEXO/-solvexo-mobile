@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
@@ -7,7 +8,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -111,9 +112,11 @@ class ProductCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          product.name,
-                          style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700),
+                        CustomText(
+                          text: product.name,
+                          color: AppColors.black2,
+                          fontSize: AppFontSize.tiny,
+                          fontWeight: FontWeight.w700,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -123,11 +126,13 @@ class ProductCard extends StatelessWidget {
                     ),
 
                     // Price pinned to bottom of text zone
-                    Text(
-                      product.hasPriceRange
+                    CustomText(
+                      text: product.hasPriceRange
                           ? '\$${product.price.toStringAsFixed(0)} – \$${product.maxPrice.toStringAsFixed(0)}'
                           : '\$${product.price.toStringAsFixed(0)}',
-                      style: BaseTypography.titleSmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w800),
+                      color: AppColors.primaryColor,
+                      fontSize: AppFontSize.verySmall,
+                      fontWeight: FontWeight.w800,
                     ),
                   ],
                 ),
@@ -152,9 +157,11 @@ class _SellerRatingRow extends StatelessWidget {
     return Row(
       children: [
         Flexible(
-          child: Text(
-            'by Seller · ',
-            style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400, fontSize: 10.5),
+          child: CustomText(
+            text: 'by Seller · ',
+            color: AppColors.gray600,
+            fontSize: 10.5,
+            fontWeight: FontWeight.w400,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -165,9 +172,11 @@ class _SellerRatingRow extends StatelessWidget {
           color: const Color(0xFFFACC15),
         ),
         SizedBox(width: BaseSpacing.xxs / 2),
-        Text(
-          rating,
-          style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400, fontSize: 10.5),
+        CustomText(
+          text: rating,
+          color: AppColors.gray600,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w400,
         ),
       ],
     );

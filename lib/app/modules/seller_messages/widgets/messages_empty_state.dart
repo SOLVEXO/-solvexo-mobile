@@ -1,8 +1,9 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class MessagesEmptyState extends StatelessWidget {
@@ -32,14 +33,18 @@ class MessagesEmptyState extends StatelessWidget {
             ),
           ),
           SizedBox(height: BaseSpacing.md),
-          Text(
-            isArchived ? 'No archived conversations' : 'No messages yet',
-            style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold),
+          CustomText(
+            text: isArchived ? 'No archived conversations' : 'No messages yet',
+            color: AppColors.black2,
+            fontSize: AppFontSize.small2,
+            fontWeight: FontWeight.bold,
           ),
           SizedBox(height: BaseSpacing.xxs + 2),
-          Text(
-            isArchived ? 'Conversations you archive will show up here.' : 'Buyer messages will show up here.',
-            style: BaseTypography.bodySmall(color: AppColors.gray600),
+          CustomText(
+            text: isArchived ? 'Conversations you archive will show up here.' : 'Buyer messages will show up here.',
+            color: AppColors.gray600,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w400,
             textAlign: TextAlign.center,
           ),
         ],

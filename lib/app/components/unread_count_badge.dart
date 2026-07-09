@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -39,14 +40,12 @@ class UnreadCountBadge extends StatelessWidget {
                 ],
               ),
               alignment: Alignment.center,
-              child: Text(
-                count > 9 ? '9+' : count.toString(),
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  height: 1,
-                ),
+              child: CustomText(
+                text: count > 9 ? '9+' : count.toString(),
+                color: AppColors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                height: 1,
               ),
             ),
           ),

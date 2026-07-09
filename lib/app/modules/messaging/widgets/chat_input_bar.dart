@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/app_image_picker.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/messaging/controllers/chat_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,9 +23,10 @@ class ChatInputBar extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: BaseSpacing.md),
           color: AppColors.white,
           child: Center(
-            child: Text(
-              'You can\'t reply to this conversation.',
-              style: BaseTypography.bodySmall(color: AppColors.gray600),
+            child: CustomText(
+              text: 'You can\'t reply to this conversation.',
+              color: AppColors.gray600,
+              fontSize: AppFontSize.tiny,
             ),
           ),
         );

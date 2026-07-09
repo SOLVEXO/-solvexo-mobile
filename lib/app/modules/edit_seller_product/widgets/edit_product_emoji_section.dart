@@ -137,9 +137,9 @@ class EditProductEmojiSection extends StatelessWidget {
                           ),
                         ),
                         alignment: Alignment.center,
-                        child: Text(
-                          emoji,
-                          style: const TextStyle(fontSize: 26),
+                        child: CustomText(
+                          text: emoji,
+                          fontSize: 26,
                         ),
                       ),
                     );
@@ -174,7 +174,7 @@ class _EmojiCircle extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
         ),
         alignment: Alignment.center,
-        child: Text(emoji, style: const TextStyle(fontSize: 34)),
+        child: CustomText(text: emoji, fontSize: 34),
       ),
     );
   }

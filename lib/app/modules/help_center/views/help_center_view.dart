@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/help_center/controllers/help_center_controller.dart';
 import 'package:book_store_app/app/modules/help_center/widgets/search_bar.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../widgets/faq_tile.dart';
@@ -28,9 +29,11 @@ class HelpCenterView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Related FAQs",
-                  style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+                CustomText(
+                  text: "Related FAQs",
+                  color: AppColors.black,
+                  fontSize: AppFontSize.extraSmall,
+                  fontWeight: FontWeight.w600,
                 ),
                 GhostButton(label: "View all topics", onPressed: () => Get.toNamed(Routes.faqListView)),
               ],

@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -136,12 +137,10 @@ class ProductGridItem extends StatelessWidget {
                         ),
                       ),
                       child: const Center(
-                        child: Text(
-                          'Out of Stock',
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: CustomText(
+                          text: 'Out of Stock',
+                          color: AppColors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -156,23 +155,22 @@ class ProductGridItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Product Name
-                  Text(
-                    product.name,
+                  CustomText(
+                    text: product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
 
                   const SizedBox(height: 4),
 
                   // Category
                   if (product.category != null)
-                    Text(
-                      product.category!.name,
-                      style: TextStyle(fontSize: 12, color: AppColors.greySwatch600),
+                    CustomText(
+                      text: product.category!.name,
+                      fontSize: 12,
+                      color: AppColors.greySwatch600,
                     ),
 
                   const SizedBox(height: 8),
@@ -182,9 +180,10 @@ class ProductGridItem extends StatelessWidget {
                     children: [
                       const Icon(Icons.star, color: AppColors.materialAmber, size: 16),
                       const SizedBox(width: 4),
-                      Text(
-                        '${product.totalRatings.toStringAsFixed(1)} (${product.averageRating})',
-                        style: TextStyle(fontSize: 12, color: AppColors.greySwatch600),
+                      CustomText(
+                        text: '${product.totalRatings.toStringAsFixed(1)} (${product.averageRating})',
+                        fontSize: 12,
+                        color: AppColors.greySwatch600,
                       ),
                     ],
                   ),
@@ -194,13 +193,11 @@ class ProductGridItem extends StatelessWidget {
                   // Price
                   Row(
                     children: [
-                      Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
-                        ),
+                      CustomText(
+                        text: '\$${product.price.toStringAsFixed(2)}',
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
                       ),
 
                       // if (product.hasDiscount) ...[
@@ -312,13 +309,10 @@ class EmptyProductsWidget extends StatelessWidget {
         children: [
           Icon(Icons.shopping_bag_outlined, size: 80, color: AppColors.greySwatch400),
           const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(fontSize: 16, color: AppColors.greySwatch600),
-          ),
+          CustomText(text: message, fontSize: 16, color: AppColors.greySwatch600),
           if (onRetry != null) ...[
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            ElevatedButton(onPressed: onRetry, child: const CustomText(text: 'Retry')),
           ],
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_loyalty/controllers/seller_loyalty_controller.dart';
 import 'package:book_store_app/app/modules/seller_loyalty/widgets/loyalty_members_tab.dart';
 import 'package:book_store_app/app/modules/seller_loyalty/widgets/loyalty_overview_tab.dart';
@@ -7,7 +8,7 @@ import 'package:book_store_app/app/modules/seller_loyalty/widgets/loyalty_reward
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -73,9 +74,11 @@ class _TabBar extends StatelessWidget {
                       color: selected ? AppColors.primaryColor : AppColors.lightGrey10,
                       borderRadius: BorderRadius.circular(BaseRadius.pill),
                     ),
-                    child: Text(
-                      t.$2,
-                      style: BaseTypography.labelSmall(color: selected ? AppColors.white : AppColors.gray600).copyWith(fontWeight: FontWeight.w600),
+                    child: CustomText(
+                      text: t.$2,
+                      color: selected ? AppColors.white : AppColors.gray600,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

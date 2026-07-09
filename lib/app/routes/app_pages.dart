@@ -60,6 +60,8 @@ import '../modules/seller_loyalty/bindings/seller_loyalty_binding.dart';
 import '../modules/seller_loyalty/views/seller_loyalty_view.dart';
 import '../modules/seller_subscriptions/bindings/seller_subscriptions_binding.dart';
 import '../modules/seller_subscriptions/views/seller_subscriptions_view.dart';
+import '../modules/seller_platform_plans/bindings/seller_platform_plans_binding.dart';
+import '../modules/seller_platform_plans/views/seller_platform_plans_view.dart';
 import '../modules/loyalty_rewards/bindings/loyalty_rewards_binding.dart';
 import '../modules/loyalty_rewards/views/loyalty_rewards_view.dart';
 import '../modules/seller_edit_profile/bindings/seller_edit_profile_binding.dart';
@@ -424,6 +426,11 @@ class AppPages {
       name: Routes.sellerSubscriptionPlans,
       page: () => SellerSubscriptionsView(),
       binding: SellerSubscriptionsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerPlatformPlan,
+      page: () => const SellerPlatformPlansView(),
+      binding: SellerPlatformPlansBinding(),
     ),
     GetPage(
       name: Routes.loyaltyRewards,

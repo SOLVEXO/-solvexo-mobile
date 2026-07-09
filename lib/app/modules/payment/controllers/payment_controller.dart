@@ -99,7 +99,7 @@ class PaymentController extends GetxController {
                   border: Border.all(width: 0.3),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Center(child: Text("+ Add")),
+                child: const Center(child: CustomText(text: "+ Add")),
               ),
             ),
             AppButton(

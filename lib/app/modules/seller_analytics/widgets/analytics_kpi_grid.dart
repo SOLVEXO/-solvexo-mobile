@@ -1,8 +1,8 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/analytics/analytics_overview_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 
 /// KPI cards row — revenue, orders, avg order value, repeat buyers — each
@@ -96,21 +96,31 @@ class _KpiCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w600, fontSize: 10, letterSpacing: 0.4),
+          CustomText(
+            text: label.toUpperCase(),
+            color: AppColors.gray600,
+            fontWeight: FontWeight.w600,
+            fontSize: 10,
+            letterSpacing: 0.4,
           ),
           SizedBox(height: BaseSpacing.xxs),
-          Text(value, style: BaseTypography.titleLarge(color: AppColors.black2).copyWith(fontWeight: FontWeight.w800, fontSize: 20)),
+          CustomText(
+            text: value,
+            color: AppColors.black2,
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+          ),
           SizedBox(height: BaseSpacing.xxs),
           Row(
             children: [
               Icon(icon, size: 12, color: color),
               SizedBox(width: BaseSpacing.xxs / 2),
               Expanded(
-                child: Text(
-                  changeText,
-                  style: BaseTypography.labelSmall(color: color).copyWith(fontWeight: FontWeight.w600, fontSize: 10.5),
+                child: CustomText(
+                  text: changeText,
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10.5,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

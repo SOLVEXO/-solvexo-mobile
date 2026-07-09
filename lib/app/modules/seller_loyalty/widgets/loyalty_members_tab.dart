@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/data/models/loyalty/loyalty_member_model.dart';
 import 'package:book_store_app/app/modules/seller_loyalty/controllers/seller_loyalty_controller.dart';
@@ -6,7 +7,7 @@ import 'package:book_store_app/app/modules/seller_loyalty/widgets/loyalty_shimme
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -29,9 +30,9 @@ class LoyaltyMembersTab extends StatelessWidget {
               children: [
                 Icon(Icons.groups_outlined, size: 48, color: AppColors.lightGrey),
                 SizedBox(height: BaseSpacing.sm),
-                Text('No loyalty members yet', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
+                CustomText(text: 'No loyalty members yet', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
                 SizedBox(height: BaseSpacing.xxs),
-                Text('Members appear automatically once buyers start earning points.', style: BaseTypography.labelSmall(color: AppColors.gray600), textAlign: TextAlign.center),
+                CustomText(text: 'Members appear automatically once buyers start earning points.', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, textAlign: TextAlign.center),
               ],
             ),
           ),
@@ -89,24 +90,24 @@ class _MemberCard extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
               alignment: Alignment.center,
-              child: Text(initials, style: BaseTypography.bodyMedium(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold)),
+              child: CustomText(text: initials, color: AppColors.primaryColor, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.bold),
             ),
             SizedBox(width: BaseSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(member.userName, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+                  CustomText(text: member.userName, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                   if (member.currentTier != null)
-                    Text(member.currentTier!, style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w600)),
+                    CustomText(text: member.currentTier!, color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                 ],
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('${member.pointsBalance}', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w800)),
-                Text('points', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                CustomText(text: '${member.pointsBalance}', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w800),
+                CustomText(text: 'points', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
               ],
             ),
           ],
@@ -150,7 +151,7 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Award or Deduct Points', style: BaseTypography.titleSmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold)),
+              CustomText(text: 'Award or Deduct Points', color: AppColors.black2, fontSize: AppFontSize.verySmall, fontWeight: FontWeight.bold),
               SizedBox(height: BaseSpacing.md),
               CustomTextField(label: 'Points (negative to deduct)', controller: pointsCtrl, isborder: true, keyboardType: const TextInputType.numberWithOptions(signed: true)),
               SizedBox(height: BaseSpacing.sm),
@@ -161,7 +162,7 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
                 children: ['adjustment', 'birthday', 'referral'].map((t) {
                   final selected = type == t;
                   return ChoiceChip(
-                    label: Text(t),
+                    label: CustomText(text: t),
                     selected: selected,
                     onSelected: (_) => setSheetState(() => type = t),
                     selectedColor: AppColors.primaryColor.withOpacity(0.15),
@@ -182,7 +183,7 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
                   constraints: const BoxConstraints(minHeight: 48),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.md)),
-                  child: Text('Apply', style: BaseTypography.bodySmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+                  child: CustomText(text: 'Apply', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -212,8 +213,8 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.member.userName, style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold)),
-                      Text('${widget.member.pointsBalance} points · ${widget.member.lifetimePoints} lifetime', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                      CustomText(text: widget.member.userName, color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
+                      CustomText(text: '${widget.member.pointsBalance} points · ${widget.member.lifetimePoints} lifetime', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                     ],
                   ),
                 ),
@@ -222,7 +223,7 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm, vertical: BaseSpacing.xs),
                     decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-                    child: Text('Award Points', style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700)),
+                    child: CustomText(text: 'Award Points', color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                   ),
                 ),
               ],
@@ -232,7 +233,7 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
             child: _transactions == null
                 ? const Center(child: CircularProgressIndicator())
                 : _transactions!.isEmpty
-                    ? Center(child: Text('No transaction history yet', style: BaseTypography.labelSmall(color: AppColors.gray600)))
+                    ? Center(child: CustomText(text: 'No transaction history yet', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600))
                     : ListView.separated(
                         padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg),
                         itemCount: _transactions!.length,
@@ -248,15 +249,17 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(tx.description ?? tx.type, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
+                                      CustomText(text: tx.description ?? tx.type, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                                       if (tx.createdAt != null)
-                                        Text(DateFormat('MMM d, yyyy · h:mm a').format(tx.createdAt!.toLocal()), style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                                        CustomText(text: DateFormat('MMM d, yyyy · h:mm a').format(tx.createdAt!.toLocal()), color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                                     ],
                                   ),
                                 ),
-                                Text(
-                                  '${positive ? '+' : ''}${tx.points}',
-                                  style: BaseTypography.bodyMedium(color: positive ? AppColors.greenSuccess : AppColors.red).copyWith(fontWeight: FontWeight.w700),
+                                CustomText(
+                                  text: '${positive ? '+' : ''}${tx.points}',
+                                  color: positive ? AppColors.greenSuccess : AppColors.red,
+                                  fontSize: AppFontSize.extraSmall,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ],
                             ),

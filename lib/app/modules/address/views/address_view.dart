@@ -2,6 +2,7 @@ import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
@@ -10,8 +11,8 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -99,10 +100,12 @@ class AddressView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgIcon(assetName: AppIcons.mapsIcon, size: 80),
-          Text(
-            "You don't have shipping address",
+          CustomText(
+            text: "You don't have shipping address",
             textAlign: TextAlign.center,
-            style: BaseTypography.headlineSmall(color: AppColors.black),
+            color: AppColors.black,
+            fontSize: AppFontSize.medium,
+            fontWeight: FontWeight.w600,
           ),
           PrimaryButton(
             label: 'Add Address',
@@ -133,7 +136,12 @@ class AddressView extends StatelessWidget {
                 Row(
                   children: [
                     SvgIcon(assetName: AppIcons.locationIcon, color: AppColors.primaryColor),
-                    Text(a.label, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w500)),
+                    CustomText(
+                      text: a.label,
+                      color: AppColors.black,
+                      fontSize: AppFontSize.extraSmall,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ],
                 ),
               ),
@@ -150,7 +158,12 @@ class AddressView extends StatelessWidget {
                         Get.toNamed(Routes.addAddressView);
                       },
                       child: customcontainer(
-                        Text('Edit', style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w500)),
+                        CustomText(
+                          text: 'Edit',
+                          color: AppColors.black,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
@@ -176,15 +189,23 @@ class AddressView extends StatelessWidget {
                   spacing: BaseSpacing.xxs / 2,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      a.recipientName,
-                      style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
+                    CustomText(
+                      text: a.recipientName,
+                      color: AppColors.black,
+                      fontSize: AppFontSize.extraSmall,
+                      fontWeight: FontWeight.bold,
                     ),
-                    Text(
-                      '${a.addressLine1.toUpperCase()}, ${a.city.toUpperCase()}, ${a.state.toUpperCase()}, ${a.zipCode}',
-                      style: BaseTypography.bodySmall(color: AppColors.black),
+                    CustomText(
+                      text:
+                          '${a.addressLine1.toUpperCase()}, ${a.city.toUpperCase()}, ${a.state.toUpperCase()}, ${a.zipCode}',
+                      color: AppColors.black,
+                      fontSize: AppFontSize.tiny,
                     ),
-                    Text(a.phoneNumber, style: BaseTypography.bodySmall(color: AppColors.black)),
+                    CustomText(
+                      text: a.phoneNumber,
+                      color: AppColors.black,
+                      fontSize: AppFontSize.tiny,
+                    ),
                   ],
                 ),
               ),

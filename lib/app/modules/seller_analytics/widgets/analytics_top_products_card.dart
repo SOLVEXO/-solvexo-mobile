@@ -1,8 +1,9 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/analytics/top_product_analytics_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsTopProductsCard extends StatelessWidget {
@@ -22,12 +23,22 @@ class AnalyticsTopProductsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Top Products by Revenue', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(
+            text: 'Top Products by Revenue',
+            color: AppColors.black2,
+            fontSize: AppFontSize.extraSmall,
+            fontWeight: FontWeight.w700,
+          ),
           SizedBox(height: BaseSpacing.sm),
           if (products.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: BaseSpacing.md),
-              child: Text('No product sales in this period', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+              child: CustomText(
+                text: 'No product sales in this period',
+                color: AppColors.gray600,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
+              ),
             )
           else
             ...products.asMap().entries.map((e) => _ProductRow(rank: e.key + 1, product: e.value)),
@@ -53,19 +64,41 @@ class _ProductRow extends StatelessWidget {
             height: 26,
             decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
             alignment: Alignment.center,
-            child: Text('$rank', style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w800)),
+            child: CustomText(
+              text: '$rank',
+              color: AppColors.primaryColor,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           SizedBox(width: BaseSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(product.name, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text('${product.orderCount} orders', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                CustomText(
+                  text: product.name,
+                  color: AppColors.black2,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                CustomText(
+                  text: '${product.orderCount} orders',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                ),
               ],
             ),
           ),
-          Text('\$${product.revenue.toStringAsFixed(0)}', style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w800)),
+          CustomText(
+            text: '\$${product.revenue.toStringAsFixed(0)}',
+            color: AppColors.black2,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w800,
+          ),
         ],
       ),
     );

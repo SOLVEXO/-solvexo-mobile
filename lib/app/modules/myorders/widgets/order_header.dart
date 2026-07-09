@@ -1,7 +1,8 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class OrderHeader extends StatelessWidget {
@@ -17,16 +18,20 @@ class OrderHeader extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              order.orderNumber,
-              style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
+            CustomText(
+              text: order.orderNumber,
+              color: AppColors.black,
+              fontSize: AppFontSize.extraSmall,
+              fontWeight: FontWeight.bold,
             ),
             SizedBox(height: BaseSpacing.xxs / 2),
-            Text(order.formattedDate, style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400)),
+            CustomText(text: order.formattedDate, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400),
             SizedBox(height: BaseSpacing.xxs / 2),
-            Text(
-              '${order.totalItemCount} item${order.totalItemCount == 1 ? '' : 's'}',
-              style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400),
+            CustomText(
+              text: '${order.totalItemCount} item${order.totalItemCount == 1 ? '' : 's'}',
+              color: AppColors.gray600,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w400,
             ),
           ],
         ),
@@ -36,9 +41,11 @@ class OrderHeader extends StatelessWidget {
             color: order.statusColor.withOpacity(0.12),
             borderRadius: BorderRadius.circular(BaseRadius.pill),
           ),
-          child: Text(
-            order.statusDisplay,
-            style: BaseTypography.labelSmall(color: order.statusColor).copyWith(fontWeight: FontWeight.w600),
+          child: CustomText(
+            text: order.statusDisplay,
+            color: order.statusColor,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],

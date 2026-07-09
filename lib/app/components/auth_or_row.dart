@@ -3,7 +3,8 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AuthOrRow extends StatelessWidget {
-  const AuthOrRow({super.key});
+  final String label;
+  const AuthOrRow({super.key, this.label = "Or continue with Socials"});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class AuthOrRow extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: CustomText(
-            text: "Or continue with Socials",
+            text: label,
             color: AppColors.textPrimary,
             fontSize: 14,
           ),

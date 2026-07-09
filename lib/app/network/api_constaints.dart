@@ -346,6 +346,24 @@ class ApiConstants {
   static const String analyticsRevenueBreakdown = '$apiPrefix/seller/analytics/revenue-breakdown';
   static const String analyticsExport = '$apiPrefix/seller/analytics/export';
 
+  // ============ Platform Subscription Endpoints (seller pays marketplace) ============
+  // Distinct from the seller-sells-to-buyers `seller/subscription*` endpoints
+  // above — this is the seller's OWN platform tier (Starter/Basic/Pro/Enterprise)
+  // plus the separate POS add-on purchase.
+  static const String platformTiers = '$apiPrefix/platform-subscriptions/tiers';
+  static String platformMyPlan(String storeId) =>
+      '$apiPrefix/platform-subscriptions/$storeId/my-plan';
+  static String platformSubscribe(String storeId) =>
+      '$apiPrefix/platform-subscriptions/$storeId/subscribe';
+  static String platformChangeTier(String storeId) =>
+      '$apiPrefix/platform-subscriptions/$storeId/change-tier';
+  static String platformCancel(String storeId, {bool atPeriodEnd = false}) =>
+      '$apiPrefix/platform-subscriptions/$storeId/cancel?atPeriodEnd=$atPeriodEnd';
+  static String platformPosAddonSubscribe(String storeId) =>
+      '$apiPrefix/platform-subscriptions/$storeId/pos-addon/subscribe';
+  static String platformPosAddonCancel(String storeId) =>
+      '$apiPrefix/platform-subscriptions/$storeId/pos-addon/cancel';
+
   // ============ Query Parameters Helper ============
   // For product filtering and search
   static String getProductsWithFilters({

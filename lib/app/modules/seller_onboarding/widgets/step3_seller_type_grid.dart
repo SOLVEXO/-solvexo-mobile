@@ -94,7 +94,7 @@ class _TypeCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(data.emoji, style: const TextStyle(fontSize: 30)),
+                CustomText(text: data.emoji, fontSize: 30),
                 _RadioDot(isSelected: isSelected),
               ],
             ),

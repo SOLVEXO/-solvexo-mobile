@@ -36,6 +36,13 @@ class ProductDetailController extends GetxController {
   // ─── Quantity ─────────────────────────────────────────────────────────────
   final RxInt productQty = 1.obs;
 
+  // ─── Hero image gallery ───────────────────────────────────────────────────
+  // Owned here (not in the view) so `ProductDetailsView` and its widgets can
+  // all stay `StatelessWidget` — the controller already outlives rebuilds
+  // and is disposed via `onClose` below.
+  final PageController imagePageController = PageController();
+  final RxInt imagePage = 0.obs;
+
   // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
@@ -44,6 +51,12 @@ class ProductDetailController extends GetxController {
     _readArguments();
     fetchProductDetails();
     fetchReviews();
+  }
+
+  @override
+  void onClose() {
+    imagePageController.dispose();
+    super.onClose();
   }
 
   void _readArguments() {
@@ -82,8 +95,9 @@ class ProductDetailController extends GetxController {
         selectedVariant.value = def;
         defaultVariant.value = def;
 
-        // Reset quantity
+        // Reset quantity + gallery position for the newly loaded product
         productQty.value = 1;
+        _resetImageGallery();
 
         debugPrint(
           '✅ Loaded product: ${response.product.name} '
@@ -141,7 +155,13 @@ class ProductDetailController extends GetxController {
   void selectVariant(ProductVariant variant) {
     selectedVariant.value = variant;
     productQty.value = 1;
+    _resetImageGallery();
     fetchVariantById(variant.id); // refresh from API
+  }
+
+  void _resetImageGallery() {
+    imagePage.value = 0;
+    if (imagePageController.hasClients) imagePageController.jumpToPage(0);
   }
 
   // ─── 4. Quantity controls ─────────────────────────────────────────────────

@@ -53,7 +53,7 @@ class SellerLanguageView extends StatelessWidget {
                             width: 40, height: 40,
                             decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(AppDimen.borderRadius)),
                             alignment: Alignment.center,
-                            child: Text(lang['flag']!, style: const TextStyle(fontSize: 22)),
+                            child: CustomText(text: lang['flag']!, fontSize: 22),
                           ),
                           const SizedBox(width: 14),
                           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

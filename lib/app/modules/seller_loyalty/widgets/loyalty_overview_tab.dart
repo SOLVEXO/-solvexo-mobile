@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/loyalty/loyalty_overview_model.dart';
 import 'package:book_store_app/app/modules/seller_loyalty/controllers/seller_loyalty_controller.dart';
 import 'package:book_store_app/app/modules/seller_loyalty/widgets/loyalty_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -91,9 +92,11 @@ class _DisabledBanner extends StatelessWidget {
           Icon(Icons.info_outline_rounded, size: 18, color: AppColors.orange),
           SizedBox(width: BaseSpacing.xs),
           Expanded(
-            child: Text(
-              'Loyalty program is disabled — buyers can\'t earn or redeem points. Enable it from the Program tab.',
-              style: BaseTypography.labelSmall(color: AppColors.orange).copyWith(fontWeight: FontWeight.w600),
+            child: CustomText(
+              text: 'Loyalty program is disabled — buyers can\'t earn or redeem points. Enable it from the Program tab.',
+              color: AppColors.orange,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -130,8 +133,8 @@ class _StatCard extends StatelessWidget {
             child: Icon(icon, size: 17, color: color),
           ),
           SizedBox(height: BaseSpacing.xs),
-          Text(value, style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w800)),
-          Text(label, style: BaseTypography.labelSmall(color: AppColors.gray600), maxLines: 1, overflow: TextOverflow.ellipsis),
+          CustomText(text: value, color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.w800),
+          CustomText(text: label, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -156,7 +159,7 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(text: title, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
           SizedBox(height: BaseSpacing.sm),
           child,
         ],
@@ -177,8 +180,8 @@ class _TierBar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(tier.tier, style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
-            Text('${tier.members} · ${tier.percent}%', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+            CustomText(text: tier.tier, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+            CustomText(text: '${tier.members} · ${tier.percent}%', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
           ],
         ),
         SizedBox(height: BaseSpacing.xxs),
@@ -220,10 +223,12 @@ class _ActivityRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(_label, style: BaseTypography.labelSmall(color: AppColors.black2)),
-          Text(
-            '${positive ? '+' : ''}$points',
-            style: BaseTypography.labelSmall(color: positive ? AppColors.greenSuccess : AppColors.red).copyWith(fontWeight: FontWeight.w700),
+          CustomText(text: _label, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+          CustomText(
+            text: '${positive ? '+' : ''}$points',
+            color: positive ? AppColors.greenSuccess : AppColors.red,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w700,
           ),
         ],
       ),

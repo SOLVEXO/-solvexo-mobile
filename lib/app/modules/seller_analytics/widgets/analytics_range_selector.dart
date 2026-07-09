@@ -1,7 +1,8 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_analytics/controllers/seller_analytics_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,7 +22,12 @@ class AnalyticsRangeSelector extends StatelessWidget {
             Center(
               child: Container(width: 36, height: 4, margin: EdgeInsets.only(bottom: BaseSpacing.md), decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2))),
             ),
-            Text('Select Range', style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold)),
+            CustomText(
+              text: 'Select Range',
+              color: AppColors.black2,
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.bold,
+            ),
             SizedBox(height: BaseSpacing.sm),
             Obx(
               () => Column(
@@ -29,7 +35,12 @@ class AnalyticsRangeSelector extends StatelessWidget {
                   final selected = controller.range.value == e.key;
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(e.value, style: BaseTypography.bodySmall(color: selected ? AppColors.primaryColor : AppColors.black2).copyWith(fontWeight: selected ? FontWeight.w700 : FontWeight.w500)),
+                    title: CustomText(
+                      text: e.value,
+                      color: selected ? AppColors.primaryColor : AppColors.black2,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    ),
                     trailing: selected ? const Icon(Icons.check_rounded, color: AppColors.primaryColor) : null,
                     onTap: () {
                       controller.changeRange(e.key);
@@ -58,9 +69,11 @@ class AnalyticsRangeSelector extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                kAnalyticsRangeLabels[controller.range.value] ?? controller.range.value,
-                style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600),
+              CustomText(
+                text: kAnalyticsRangeLabels[controller.range.value] ?? controller.range.value,
+                color: AppColors.black2,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
               ),
               SizedBox(width: BaseSpacing.xxs),
               Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppColors.gray600),

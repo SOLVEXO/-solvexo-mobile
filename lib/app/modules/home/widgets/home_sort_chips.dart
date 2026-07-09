@@ -1,8 +1,9 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -47,11 +48,11 @@ class HomeSortChips extends StatelessWidget {
                   borderRadius: BorderRadius.circular(BaseRadius.pill),
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  label,
-                  style: BaseTypography.labelSmall(
-                    color: selected ? AppColors.white : AppColors.gray600,
-                  ).copyWith(fontWeight: FontWeight.w600),
+                child: CustomText(
+                  text: label,
+                  color: selected ? AppColors.white : AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             );

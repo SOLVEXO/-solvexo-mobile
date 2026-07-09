@@ -2,6 +2,7 @@ import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/cart_icon_with_count.dart';
 import 'package:book_store_app/app/components/custom_bread_crumbs.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/cart/widgets/wishlist_icon_count.dart';
 import 'package:book_store_app/app/modules/sub_category/controller/sub_category_controller.dart';
 import 'package:book_store_app/app/modules/sub_category/widgets/floating_item_row.dart';
@@ -10,7 +11,7 @@ import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -86,9 +87,11 @@ class _SubCategoryBody extends StatelessWidget {
                   _SectionHeader(title: 'All Products'),
                   const Spacer(),
                   Obx(
-                    () => Text(
-                      '${c.products.length} items',
-                      style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w500),
+                    () => CustomText(
+                      text: '${c.products.length} items',
+                      color: AppColors.gray600,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -124,7 +127,7 @@ class _SectionHeader extends StatelessWidget {
           decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.xs)),
         ),
         SizedBox(width: BaseSpacing.xs),
-        Text(title, style: BaseTypography.bodyLarge(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w700)),
+        CustomText(text: title, color: AppColors.textPrimary, fontSize: AppFontSize.small, fontWeight: FontWeight.w700),
       ],
     );
   }
@@ -213,14 +216,14 @@ class _SubCategoryChips extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: BaseSpacing.xxs + 1),
-                        Text(
-                          chip.label,
+                        CustomText(
+                          text: chip.label,
                           maxLines: 2,
                           overflow: TextOverflow.clip,
                           textAlign: TextAlign.center,
-                          style: BaseTypography.labelSmall(
-                            color: isSelected ? AppColors.primaryColor : AppColors.textPrimary,
-                          ).copyWith(fontWeight: FontWeight.w600),
+                          color: isSelected ? AppColors.primaryColor : AppColors.textPrimary,
+                          fontSize: AppFontSize.tiny,
+                          fontWeight: FontWeight.w600,
                         ),
                       ],
                     ),
@@ -312,12 +315,14 @@ class _ProductGrid extends StatelessWidget {
               child: Icon(Icons.inventory_2_outlined, size: 40, color: AppColors.primaryColor),
             ),
             SizedBox(height: BaseSpacing.xs + 2),
-            Text(
-              'No products found',
-              style: BaseTypography.bodyLarge(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
+            CustomText(
+              text: 'No products found',
+              color: AppColors.textPrimary,
+              fontSize: AppFontSize.small,
+              fontWeight: FontWeight.w600,
             ),
             SizedBox(height: BaseSpacing.xxs + 2),
-            Text('Try a different subcategory', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+            CustomText(text: 'Try a different subcategory', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
           ],
         ),
       ),
@@ -355,9 +360,11 @@ class _LoadMoreButton extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
                     )
-                  : Text(
-                      'Load More',
-                      style: BaseTypography.bodyLarge(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w600),
+                  : CustomText(
+                      text: 'Load More',
+                      color: AppColors.primaryColor,
+                      fontSize: AppFontSize.small,
+                      fontWeight: FontWeight.w600,
                     ),
             ),
           ),

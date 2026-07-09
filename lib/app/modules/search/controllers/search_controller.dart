@@ -36,6 +36,7 @@ class SearchBarController extends GetxController {
     super.onInit();
     loadRecentSearches();
     loadRecentlyViewed();
+    loadPopularSearches();
   }
 
   @override
@@ -175,8 +176,17 @@ class SearchBarController extends GetxController {
   // Applies price / sort on the already-loaded filteredProducts list so
   // there is no extra API round-trip for simple filter changes.
 
-  void applyFilters({double? minPrice, double? maxPrice, String? sortBy}) {
+  final RxString activeQuickFilter = 'all'.obs;
+
+  void applyFilters({
+    double? minPrice,
+    double? maxPrice,
+    double? minRating,
+    String? sortBy,
+    String quickFilter = 'all',
+  }) {
     if (allProducts.isEmpty) return;
+    activeQuickFilter.value = quickFilter;
 
     var result = allProducts.toList();
 
@@ -198,6 +208,9 @@ class SearchBarController extends GetxController {
     }
     if (maxPrice != null) {
       result = result.where((p) => p.price <= maxPrice).toList();
+    }
+    if (minRating != null) {
+      result = result.where((p) => p.averageRating >= minRating).toList();
     }
 
     // Sort
@@ -234,17 +247,8 @@ class SearchBarController extends GetxController {
 
   Future<void> loadRecentSearches() async {
     try {
-      // Uncomment when SharedPreferences method is ready:
-      // final saved = await AppPreferences.getRecentSearches();
-      // if (saved != null) recentSearches.assignAll(saved);
-
-      // Placeholder dummy data
-      recentSearches.assignAll([
-        'desk storage',
-        'hanger',
-        'cabinet',
-        'bracket',
-      ]);
+      final saved = await AppPreferences.getRecentSearches();
+      if (saved != null) recentSearches.assignAll(saved);
     } catch (e) {
       debugPrint('❌ Error loading recent searches: $e');
     }
@@ -252,7 +256,7 @@ class SearchBarController extends GetxController {
 
   Future<void> _saveRecentSearches() async {
     try {
-      // await AppPreferences.saveRecentSearches(recentSearches);
+      await AppPreferences.saveRecentSearches(recentSearches);
     } catch (e) {
       debugPrint('❌ Error saving recent searches: $e');
     }

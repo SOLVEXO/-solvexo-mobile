@@ -1,10 +1,11 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_analytics/controllers/seller_analytics_controller.dart';
 import 'package:book_store_app/app/modules/seller_analytics/widgets/analytics_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,7 +24,7 @@ class InventoryTab extends StatelessWidget {
       return CustomRefreshWrapper(
         onRefresh: controller.loadInventory,
         child: ListView(
-          padding: EdgeInsets.all(BaseSpacing.md),
+          padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.md),
           children: [
             if (data.note.isNotEmpty) _NoteBanner(text: data.note),
             if (data.note.isNotEmpty) SizedBox(height: BaseSpacing.md),
@@ -35,7 +36,7 @@ class InventoryTab extends StatelessWidget {
                     children: [
                       Icon(Icons.inventory_2_outlined, size: 44, color: AppColors.lightGrey),
                       SizedBox(height: BaseSpacing.sm),
-                      Text('Nothing to flag right now', style: BaseTypography.bodySmall(color: AppColors.gray600)),
+                      CustomText(text: 'Nothing to flag right now', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400),
                     ],
                   ),
                 ),
@@ -103,7 +104,7 @@ class _NoteBanner extends StatelessWidget {
         children: [
           Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primaryColor),
           SizedBox(width: BaseSpacing.xs),
-          Expanded(child: Text(text, style: BaseTypography.labelSmall(color: AppColors.primaryColor))),
+          Expanded(child: CustomText(text: text, color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -130,9 +131,9 @@ class _SectionCard extends StatelessWidget {
             children: [
               Icon(icon, size: 16, color: iconColor),
               SizedBox(width: BaseSpacing.xs),
-              Text(title, style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+              CustomText(text: title, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
               const Spacer(),
-              Text('${items.length}', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+              CustomText(text: '${items.length}', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
             ],
           ),
           SizedBox(height: BaseSpacing.xs),
@@ -154,8 +155,8 @@ class _Row extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: BaseSpacing.xxs + 1),
       child: Row(
         children: [
-          Expanded(child: Text(name, style: BaseTypography.bodySmall(color: AppColors.black2), maxLines: 1, overflow: TextOverflow.ellipsis)),
-          Text(trailing, style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w600)),
+          Expanded(child: CustomText(text: name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400, maxLines: 1, overflow: TextOverflow.ellipsis)),
+          CustomText(text: trailing, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -12,9 +13,9 @@ class PrivacyPolicyView extends GetView<PrivacyPolicyController> {
     return Scaffold(
       appBar: CustomAppBarTwo(title: "Privacy Policy"),
       body: const Center(
-        child: Text(
-          'PrivacyPolicyView is working',
-          style: TextStyle(fontSize: 20),
+        child: CustomText(
+          text: 'PrivacyPolicyView is working',
+          fontSize: 20,
         ),
       ),
     );

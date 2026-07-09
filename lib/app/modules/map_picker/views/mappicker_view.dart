@@ -120,9 +120,9 @@ class MapPickerScreen extends StatelessWidget {
                               text: location['name'] ?? '',
                               fontWeight: FontWeight.w500,
                             ),
-                            subtitle: Text(
-                              location['address'] ?? '',
-                              style: TextStyle(fontSize: 12),
+                            subtitle: CustomText(
+                              text: location['address'] ?? '',
+                              fontSize: 12,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -160,7 +160,7 @@ class MapPickerScreen extends StatelessWidget {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                             SizedBox(width: 10),
-                            Text('Loading address...'),
+                            CustomText(text: 'Loading address...'),
                           ],
                         )
                       : CustomText(

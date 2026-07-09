@@ -1,7 +1,8 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,7 +18,7 @@ class ProductDetailSummary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: BaseSpacing.xxs + 1,
       children: [
-        Text('Order Summary', style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w800)),
+        CustomText(text: 'Order Summary', color: AppColors.black, fontSize: AppFontSize.small2, fontWeight: FontWeight.w800),
         _row("Sub Total", order.subtotal),
         _row("Shipping", order.shippingFee),
         if (order.taxAmount > 0) _row("Tax", order.taxAmount),
@@ -33,12 +34,12 @@ class ProductDetailSummary extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w500)),
-          Text(
-            "\$${value.toStringAsFixed(2)}",
-            style: BaseTypography.titleMedium(color: AppColors.black).copyWith(
-              fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-            ),
+          CustomText(text: label, color: AppColors.black, fontSize: AppFontSize.small2, fontWeight: FontWeight.w500),
+          CustomText(
+            text: "\$${value.toStringAsFixed(2)}",
+            color: AppColors.black,
+            fontSize: AppFontSize.small2,
+            fontWeight: bold ? FontWeight.bold : FontWeight.w500,
           ),
         ],
       ),

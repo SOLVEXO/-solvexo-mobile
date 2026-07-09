@@ -1,5 +1,7 @@
 import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
@@ -9,8 +11,9 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,112 +27,128 @@ class SearchView extends StatelessWidget {
   Widget build(BuildContext context) {
     double w = MediaQuery.of(context).size.width;
 
-    return BaseViewScreen(
+    return Scaffold(
       backgroundColor: AppColors.white,
-      safeAreaTop: true,
-      showCustomAppBar: true,
-      height: 140,
-      mainAppBar: true,
-      issearch: true,
-      verticalPadding: false,
-      showBottomBar: false,
-      bottomBarShadow: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // No Results Message
-          Obx(
-            () => c.showResults.value && !c.loading.value && !c.hasResults
-                ? Container(
-                    padding: EdgeInsets.symmetric(
-                      vertical: BaseSpacing.xxl - 2,
-                      horizontal: BaseSpacing.xxl - 2,
-                    ),
-                    child: Center(
-                      child: Column(
-                        spacing: BaseSpacing.xs,
-                        children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 80,
-                            color: AppColors.shimmerBase,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomTextField(
+                controller: c.textController,
+                onChanged: c.onSearchChanged,
+                onFieldSubmitted: c.performSearch,
+                suffixIcon: c.searchText.isNotEmpty
+                    ? SvgIcon(
+                        assetName: AppIcons.cross,
+                        color: AppColors.black,
+                        onTap: c.clearSearch,
+                      )
+                    : null,
+                isborder: true,
+                prefixIcon: SvgIcon(
+                  assetName: AppIcons.searchIcon,
+                  color: AppColors.lightGrey,
+                  size: 22,
+                ),
+                hintText: "Search",
+              ),
+              // No Results Message
+              Obx(
+                () => c.showResults.value && !c.loading.value && !c.hasResults
+                    ? Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: BaseSpacing.xxl - 2,
+                          horizontal: BaseSpacing.xxl - 2,
+                        ),
+                        child: Center(
+                          child: Column(
+                            spacing: BaseSpacing.xs,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 80,
+                                color: AppColors.shimmerBase,
+                              ),
+                              CustomText(
+                                text: "No Products Found",
+                                textAlign: TextAlign.center,
+                                color: AppColors.black,
+                                fontSize: AppFontSize.small2,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              CustomText(
+                                text:
+                                    "Try different keywords or check our recommendations",
+                                textAlign: TextAlign.center,
+                                color: AppColors.gray600,
+                                fontSize: AppFontSize.tiny,
+                              ),
+                            ],
                           ),
-                          Text(
-                            "No Products Found",
-                            textAlign: TextAlign.center,
-                            style: BaseTypography.titleMedium(
-                              color: AppColors.black,
-                            ).copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            "Try different keywords or check our recommendations",
-                            textAlign: TextAlign.center,
-                            style: BaseTypography.bodySmall(
-                              color: AppColors.gray600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
+                        ),
+                      )
+                    : const SizedBox(),
+              ),
+
+              // Recent Searches Header
+              Obx(
+                () => c.searchText.value.isEmpty && !c.showResults.value
+                    ? _recentHeader()
+                    : const SizedBox(),
+              ),
+
+              // Recent Searches List OR Suggestions
+              Obx(() {
+                if (c.searchText.value.isEmpty && !c.showResults.value) {
+                  return _recentSearchList();
+                }
+                if (c.showSuggestions.value && c.suggestions.isNotEmpty) {
+                  return suggestionList();
+                }
+                return const SizedBox();
+              }),
+
+              SizedBox(height: BaseSpacing.xxs + 1),
+
+              // See More/Less Button for Recent Searches
+              Obx(
+                () => c.searchText.value.isEmpty && !c.showResults.value
+                    ? _seeMoreButton()
+                    : const SizedBox(),
+              ),
+
+              SizedBox(height: BaseSpacing.xl),
+
+              // Section Header (Products/Last Seen/Recommended)
+              Obx(() {
+                if (c.showResults.value && c.hasResults) {
+                  return _sectionHeader("Search Results (${c.resultsCount})");
+                } else if (c.searchText.value.isEmpty) {
+                  return _sectionHeader("Recently Viewed");
+                } else if (c.showSuggestions.value && !c.hasResults) {
+                  return _sectionHeader("Recommended Products");
+                }
+                return const SizedBox();
+              }),
+
+              SizedBox(height: BaseSpacing.xs),
+
+              // Main Content Area
+              Obx(() {
+                if (c.showResults.value) {
+                  return Expanded(child: _resultsBody());
+                } else if (c.searchText.value.isEmpty) {
+                  return _lastSeenList(w);
+                } else if (c.showSuggestions.value) {
+                  return RecommendedProductList();
+                }
+                return const SizedBox();
+              }),
+            ],
           ),
-
-          // Recent Searches Header
-          Obx(
-            () => c.searchText.value.isEmpty && !c.showResults.value
-                ? _recentHeader()
-                : const SizedBox(),
-          ),
-
-          // Recent Searches List OR Suggestions
-          Obx(() {
-            if (c.searchText.value.isEmpty && !c.showResults.value) {
-              return _recentSearchList();
-            }
-            if (c.showSuggestions.value && c.suggestions.isNotEmpty) {
-              return suggestionList();
-            }
-            return const SizedBox();
-          }),
-
-          SizedBox(height: BaseSpacing.xxs + 1),
-
-          // See More/Less Button for Recent Searches
-          Obx(
-            () => c.searchText.value.isEmpty && !c.showResults.value
-                ? _seeMoreButton()
-                : const SizedBox(),
-          ),
-
-          SizedBox(height: BaseSpacing.xl),
-
-          // Section Header (Products/Last Seen/Recommended)
-          Obx(() {
-            if (c.showResults.value && c.hasResults) {
-              return _sectionHeader("Search Results (${c.resultsCount})");
-            } else if (c.searchText.value.isEmpty) {
-              return _sectionHeader("Recently Viewed");
-            } else if (c.showSuggestions.value && !c.hasResults) {
-              return _sectionHeader("Recommended Products");
-            }
-            return const SizedBox();
-          }),
-
-          SizedBox(height: BaseSpacing.xs),
-
-          // Main Content Area
-          Obx(() {
-            if (c.showResults.value) {
-              return Expanded(child: _resultsBody());
-            } else if (c.searchText.value.isEmpty) {
-              return _lastSeenList(w);
-            } else if (c.showSuggestions.value) {
-              return RecommendedProductList();
-            }
-            return const SizedBox();
-          }),
-        ],
+        ),
       ),
     );
   }
@@ -171,11 +190,11 @@ class SearchView extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          "Recent Searches",
-          style: BaseTypography.titleMedium(
-            color: AppColors.black,
-          ).copyWith(fontWeight: FontWeight.bold),
+        CustomText(
+          text: "Recent Searches",
+          color: AppColors.black,
+          fontSize: AppFontSize.small2,
+          fontWeight: FontWeight.bold,
         ),
         if (c.recentSearches.isNotEmpty)
           GhostButton(label: 'Clear All', onPressed: c.clearRecentSearches),
@@ -189,9 +208,10 @@ class SearchView extends StatelessWidget {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: BaseSpacing.xl),
         child: Center(
-          child: Text(
-            "No recent searches",
-            style: BaseTypography.bodyMedium(color: AppColors.gray600),
+          child: CustomText(
+            text: "No recent searches",
+            color: AppColors.gray600,
+            fontSize: AppFontSize.extraSmall,
           ),
         ),
       );
@@ -211,9 +231,10 @@ class SearchView extends StatelessWidget {
                 Icon(Icons.access_time, size: 20, color: AppColors.gray600),
                 SizedBox(width: BaseSpacing.xs + 2),
                 Expanded(
-                  child: Text(
-                    item,
-                    style: BaseTypography.bodyMedium(color: AppColors.black),
+                  child: CustomText(
+                    text: item,
+                    color: AppColors.black,
+                    fontSize: AppFontSize.extraSmall,
                   ),
                 ),
                 Semantics(
@@ -257,11 +278,11 @@ class SearchView extends StatelessWidget {
 
   /// Section header
   Widget _sectionHeader(String text) {
-    return Text(
-      text,
-      style: BaseTypography.titleMedium(
-        color: AppColors.black,
-      ).copyWith(fontWeight: FontWeight.bold),
+    return CustomText(
+      text: text,
+      color: AppColors.black,
+      fontSize: AppFontSize.small2,
+      fontWeight: FontWeight.bold,
     );
   }
 
@@ -361,19 +382,18 @@ class SearchView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          item.name,
-                          style: BaseTypography.bodyMedium(
-                            color: AppColors.black,
-                          ).copyWith(fontWeight: FontWeight.w500),
+                        CustomText(
+                          text: item.name,
+                          color: AppColors.black,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.w500,
                         ),
                         if (item.category != null) ...[
                           SizedBox(height: BaseSpacing.xxs / 2),
-                          Text(
-                            item.category!.name,
-                            style: BaseTypography.bodySmall(
-                              color: AppColors.gray600,
-                            ),
+                          CustomText(
+                            text: item.category!.name,
+                            color: AppColors.gray600,
+                            fontSize: AppFontSize.tiny,
                           ),
                         ],
                       ],

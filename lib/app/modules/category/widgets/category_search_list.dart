@@ -1,8 +1,9 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,7 +30,7 @@ class CategorySearchList extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(BaseRadius.md)),
             tileColor: AppColors.white,
             leading: const Icon(Icons.category),
-            title: Text(category.name, style: BaseTypography.bodyLarge(color: AppColors.black)),
+            title: CustomText(text: category.name, color: AppColors.black, fontSize: AppFontSize.small),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Get.toNamed(
@@ -55,7 +56,7 @@ class CategoryEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(text, style: BaseTypography.bodySmall(color: AppColors.greySwatch600)),
+      child: CustomText(text: text, color: AppColors.greySwatch600, fontSize: AppFontSize.tiny),
     );
   }
 }

@@ -140,7 +140,7 @@ class _TypeCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(data.emoji, style: const TextStyle(fontSize: 40)),
+            CustomText(text: data.emoji, fontSize: 40),
             const SizedBox(height: 10),
             CustomText(
               text: data.name,

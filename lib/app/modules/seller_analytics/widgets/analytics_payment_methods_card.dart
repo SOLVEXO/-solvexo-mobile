@@ -1,8 +1,9 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/analytics/payment_method_breakdown_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsPaymentMethodsCard extends StatelessWidget {
@@ -24,12 +25,22 @@ class AnalyticsPaymentMethodsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Payment Methods', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(
+            text: 'Payment Methods',
+            color: AppColors.black2,
+            fontSize: AppFontSize.extraSmall,
+            fontWeight: FontWeight.w700,
+          ),
           SizedBox(height: BaseSpacing.sm),
           if (methods.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: BaseSpacing.md),
-              child: Text('No orders in this period', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+              child: CustomText(
+                text: 'No orders in this period',
+                color: AppColors.gray600,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
+              ),
             )
           else
             ...methods.map((m) => Padding(
@@ -40,8 +51,18 @@ class AnalyticsPaymentMethodsCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(m.label, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
-                          Text('\$${m.revenue.toStringAsFixed(0)} · ${m.orderCount} orders', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                          CustomText(
+                            text: m.label,
+                            color: AppColors.black2,
+                            fontSize: AppFontSize.tiny,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          CustomText(
+                            text: '\$${m.revenue.toStringAsFixed(0)} · ${m.orderCount} orders',
+                            color: AppColors.gray600,
+                            fontSize: AppFontSize.tiny,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ],
                       ),
                       SizedBox(height: BaseSpacing.xxs),

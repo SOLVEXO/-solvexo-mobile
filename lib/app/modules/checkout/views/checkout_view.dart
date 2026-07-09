@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/skeleton.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/checkout/widgets/coupon_code_list_tile.dart';
@@ -10,8 +11,8 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/checkout_controller.dart';
@@ -94,9 +95,11 @@ class CheckoutView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Text(
-                    "Please select the address",
-                    style: BaseTypography.bodyMedium(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w700),
+                  child: CustomText(
+                    text: "Please select the address",
+                    color: AppColors.gray600,
+                    fontSize: AppFontSize.extraSmall,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 Expanded(
@@ -131,7 +134,12 @@ class CheckoutView extends StatelessWidget {
                     spacing: BaseSpacing.xxs + 2,
                     children: [
                       SvgIcon(assetName: AppIcons.locationIcon, size: 16),
-                      Text(address.label, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w700)),
+                      CustomText(
+                        text: address.label,
+                        color: AppColors.black,
+                        fontSize: AppFontSize.extraSmall,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ],
                   ),
                   GhostButton(
@@ -140,17 +148,23 @@ class CheckoutView extends StatelessWidget {
                   ),
                 ],
               ),
-              Text(address.recipientName, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600)),
-              Text(address.phoneNumber, style: BaseTypography.bodySmall(color: AppColors.gray600)),
-              Text(
-                [
+              CustomText(
+                text: address.recipientName,
+                color: AppColors.black,
+                fontSize: AppFontSize.extraSmall,
+                fontWeight: FontWeight.w600,
+              ),
+              CustomText(text: address.phoneNumber, color: AppColors.gray600, fontSize: AppFontSize.tiny),
+              CustomText(
+                text: [
                   address.addressLine1,
                   if (address.addressLine2 != null && address.addressLine2!.isNotEmpty) address.addressLine2!,
                   address.city,
                   address.state,
                   address.zipCode,
                 ].join(', '),
-                style: BaseTypography.bodySmall(color: AppColors.gray600),
+                color: AppColors.gray600,
+                fontSize: AppFontSize.tiny,
               ),
             ],
           ),
@@ -206,17 +220,23 @@ class CheckoutView extends StatelessWidget {
                   ),
                   child: ListTile(
                     leading: CommonImageView(url: item.image, width: 60),
-                    title: Text(item.name, style: BaseTypography.bodyMedium(color: AppColors.black)),
+                    title: CustomText(text: item.name, color: AppColors.black, fontSize: AppFontSize.extraSmall),
                     subtitle: Row(
                       spacing: BaseSpacing.xxs + 2,
                       children: [
-                        Text("${item.quantity} Item", style: BaseTypography.bodyMedium(color: AppColors.black)),
+                        CustomText(
+                          text: "${item.quantity} Item",
+                          color: AppColors.black,
+                          fontSize: AppFontSize.extraSmall,
+                        ),
                         _ProductTypeBadge(type: item.productType),
                       ],
                     ),
-                    trailing: Text(
-                      "\$${(item.price * item.quantity).toStringAsFixed(2)}",
-                      style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
+                    trailing: CustomText(
+                      text: "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+                      color: AppColors.black,
+                      fontSize: AppFontSize.extraSmall,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -243,9 +263,11 @@ class CheckoutView extends StatelessWidget {
           ),
           child: shipping == null
               ? ListTile(
-                  title: Text(
-                    "Select Shipping Method",
-                    style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+                  title: CustomText(
+                    text: "Select Shipping Method",
+                    color: AppColors.black,
+                    fontSize: AppFontSize.extraSmall,
+                    fontWeight: FontWeight.w600,
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () => controller.shippingOptionsBottomSheet(size),
@@ -257,7 +279,12 @@ class CheckoutView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(shipping.type, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w700)),
+                        CustomText(
+                          text: shipping.type,
+                          color: AppColors.black,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.w700,
+                        ),
                         GhostButton(
                           label: "Change",
                           onPressed: () => controller.shippingOptionsBottomSheet(size),
@@ -267,10 +294,12 @@ class CheckoutView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text(shipping.time, style: BaseTypography.bodySmall(color: AppColors.gray600)),
-                        Text(
-                          shipping.charges,
-                          style: BaseTypography.bodyMedium(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold),
+                        CustomText(text: shipping.time, color: AppColors.gray600, fontSize: AppFontSize.tiny),
+                        CustomText(
+                          text: shipping.charges,
+                          color: AppColors.primaryColor,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.bold,
                         ),
                       ],
                     ),
@@ -296,7 +325,7 @@ class CheckoutView extends StatelessWidget {
             const Divider(),
             _summaryRow("Total", controller.total.toStringAsFixed(2), bold: true, color: AppColors.primaryColor),
             SizedBox(height: BaseSpacing.xs),
-            Text("Get reward points 10", style: BaseTypography.bodyMedium(color: AppColors.lightGrey)),
+            CustomText(text: "Get reward points 10", color: AppColors.lightGrey, fontSize: AppFontSize.extraSmall),
           ],
         ),
       ),
@@ -311,7 +340,12 @@ class CheckoutView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold)),
+          CustomText(
+            text: title,
+            color: AppColors.black,
+            fontSize: AppFontSize.small2,
+            fontWeight: FontWeight.bold,
+          ),
           SizedBox(height: BaseSpacing.xs),
           child,
         ],
@@ -325,12 +359,12 @@ class CheckoutView extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: BaseTypography.bodyMedium(color: AppColors.black)),
-          Text(
-            "\$$value",
-            style: BaseTypography.bodyMedium(color: color ?? AppColors.black).copyWith(
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            ),
+          CustomText(text: title, color: AppColors.black, fontSize: AppFontSize.extraSmall),
+          CustomText(
+            text: "\$$value",
+            color: color ?? AppColors.black,
+            fontSize: AppFontSize.extraSmall,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
           ),
         ],
       ),
@@ -405,11 +439,11 @@ class _ProductTypeBadge extends StatelessWidget {
         color: isDigital ? AppColors.primaryColor.withOpacity(0.1) : AppColors.darkGreen.withOpacity(0.1),
         borderRadius: BorderRadius.circular(BaseRadius.xs),
       ),
-      child: Text(
-        isDigital ? 'Digital' : 'Physical',
-        style: BaseTypography.labelSmall(
-          color: isDigital ? AppColors.primaryColor : AppColors.darkGreen,
-        ).copyWith(fontWeight: FontWeight.w600),
+      child: CustomText(
+        text: isDigital ? 'Digital' : 'Physical',
+        color: isDigital ? AppColors.primaryColor : AppColors.darkGreen,
+        fontSize: AppFontSize.tiny,
+        fontWeight: FontWeight.w600,
       ),
     );
   }

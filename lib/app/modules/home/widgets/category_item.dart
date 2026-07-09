@@ -1,9 +1,10 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 class CategoryItem extends StatelessWidget {
@@ -34,9 +35,11 @@ class CategoryItem extends StatelessWidget {
               radius: BorderRadius.circular(BaseRadius.md),
               placeHolder: AppImages.sampleProduct,
             ),
-            Text(
-              title,
-              style: BaseTypography.labelSmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+            CustomText(
+              text: title,
+              color: AppColors.black,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
               textAlign: TextAlign.center,
             ),
           ],

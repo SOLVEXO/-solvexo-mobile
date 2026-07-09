@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/subscriptions/subscription_dashboard_model.dart';
 import 'package:book_store_app/app/modules/seller_subscriptions/controllers/seller_subscriptions_controller.dart';
 import 'package:book_store_app/app/modules/seller_subscriptions/widgets/subscriptions_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -54,11 +55,11 @@ class SubscriptionsDashboardTab extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Expanded(
-                                  child: Text(p.planName, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
+                                  child: CustomText(text: p.planName, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                                 ),
-                                Text('${p.subscriberCount} subs', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                                CustomText(text: '${p.subscriberCount} subs', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                                 SizedBox(width: BaseSpacing.sm),
-                                Text('\$${p.mrrContributionUSD.toStringAsFixed(0)}/mo', style: BaseTypography.bodySmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700)),
+                                CustomText(text: '\$${p.mrrContributionUSD.toStringAsFixed(0)}/mo', color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                               ],
                             ),
                           ))
@@ -81,13 +82,13 @@ class SubscriptionsDashboardTab extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(i.invoiceNumber, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
+                                      CustomText(text: i.invoiceNumber, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                                       if (i.paidAt != null)
-                                        Text(DateFormat('MMM d, yyyy').format(i.paidAt!.toLocal()), style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                                        CustomText(text: DateFormat('MMM d, yyyy').format(i.paidAt!.toLocal()), color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                                     ],
                                   ),
                                 ),
-                                Text('\$${i.amountUSD.toStringAsFixed(2)}', style: BaseTypography.bodySmall(color: AppColors.greenSuccess).copyWith(fontWeight: FontWeight.w700)),
+                                CustomText(text: '\$${i.amountUSD.toStringAsFixed(2)}', color: AppColors.greenSuccess, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                               ],
                             ),
                           ))
@@ -120,16 +121,16 @@ class _RevenueCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Revenue This Month', style: BaseTypography.labelSmall(color: AppColors.white.withOpacity(0.85))),
+                CustomText(text: 'Revenue This Month', color: AppColors.white.withOpacity(0.85), fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                 SizedBox(height: BaseSpacing.xxs),
-                Text('\$${d.revenueThisMonth.toStringAsFixed(0)}', style: BaseTypography.titleLarge(color: AppColors.white).copyWith(fontWeight: FontWeight.w800)),
+                CustomText(text: '\$${d.revenueThisMonth.toStringAsFixed(0)}', color: AppColors.white, fontSize: AppFontSize.regular, fontWeight: FontWeight.w800),
               ],
             ),
           ),
           Row(
             children: [
               Icon(isUp ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded, color: AppColors.white, size: 16),
-              Text('${d.revenueGrowthPercent.abs().toStringAsFixed(1)}%', style: BaseTypography.bodySmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+              CustomText(text: '${d.revenueGrowthPercent.abs().toStringAsFixed(1)}%', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
             ],
           ),
         ],
@@ -161,8 +162,8 @@ class _StatCard extends StatelessWidget {
             child: Icon(icon, size: 17, color: color),
           ),
           SizedBox(height: BaseSpacing.xs),
-          Text(value, style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w800)),
-          Text(label, style: BaseTypography.labelSmall(color: AppColors.gray600), maxLines: 1, overflow: TextOverflow.ellipsis),
+          CustomText(text: value, color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.w800),
+          CustomText(text: label, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -183,7 +184,7 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(text: title, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
           SizedBox(height: BaseSpacing.sm),
           child,
         ],

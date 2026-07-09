@@ -1,12 +1,13 @@
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/subscriptions/subscriber_model.dart';
 import 'package:book_store_app/app/modules/seller_subscriptions/controllers/seller_subscriptions_controller.dart';
 import 'package:book_store_app/app/modules/seller_subscriptions/widgets/subscriptions_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -29,9 +30,9 @@ class SubscribersTab extends StatelessWidget {
               children: [
                 Icon(Icons.person_outline_rounded, size: 48, color: AppColors.lightGrey),
                 SizedBox(height: BaseSpacing.sm),
-                Text('No subscribers yet', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
+                CustomText(text: 'No subscribers yet', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
                 SizedBox(height: BaseSpacing.xxs),
-                Text('Buyers who subscribe to your plans will show up here.', style: BaseTypography.labelSmall(color: AppColors.gray600), textAlign: TextAlign.center),
+                CustomText(text: 'Buyers who subscribe to your plans will show up here.', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, textAlign: TextAlign.center),
               ],
             ),
           ),
@@ -78,33 +79,37 @@ class _SubscriberCard extends StatelessWidget {
                 width: 40, height: 40,
                 decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
                 alignment: Alignment.center,
-                child: Text(initials, style: BaseTypography.bodySmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold)),
+                child: CustomText(text: initials, color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.bold),
               ),
               SizedBox(width: BaseSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(subscriber.customerName, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
-                    Text(subscriber.planName, style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                    CustomText(text: subscriber.customerName, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+                    CustomText(text: subscriber.planName, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                   ],
                 ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
                 decoration: BoxDecoration(color: _statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-                child: Text(subscriber.status, style: BaseTypography.labelSmall(color: _statusColor).copyWith(fontWeight: FontWeight.w700, fontSize: 10.5)),
+                child: CustomText(text: subscriber.status, color: _statusColor, fontSize: 10.5, fontWeight: FontWeight.w700),
               ),
             ],
           ),
           SizedBox(height: BaseSpacing.sm),
           Row(
             children: [
-              Text('\$${subscriber.amountUSD.toStringAsFixed(2)}/${subscriber.billingInterval == 'monthly' ? 'mo' : 'yr'}',
-                  style: BaseTypography.bodySmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700)),
+              CustomText(
+                text: '\$${subscriber.amountUSD.toStringAsFixed(2)}/${subscriber.billingInterval == 'monthly' ? 'mo' : 'yr'}',
+                color: AppColors.primaryColor,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w700,
+              ),
               if (subscriber.nextBillingDate != null) ...[
                 SizedBox(width: BaseSpacing.sm),
-                Text('Next bill: ${DateFormat('MMM d, yyyy').format(subscriber.nextBillingDate!.toLocal())}', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                CustomText(text: 'Next bill: ${DateFormat('MMM d, yyyy').format(subscriber.nextBillingDate!.toLocal())}', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
               ],
             ],
           ),
@@ -156,7 +161,7 @@ class _ActionButton extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 38),
         alignment: Alignment.center,
         decoration: BoxDecoration(border: Border.all(color: color), borderRadius: BorderRadius.circular(BaseRadius.md)),
-        child: Text(label, style: BaseTypography.labelSmall(color: color).copyWith(fontWeight: FontWeight.w700)),
+        child: CustomText(text: label, color: color, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
       ),
     );
   }

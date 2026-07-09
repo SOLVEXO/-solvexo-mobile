@@ -2,6 +2,7 @@ import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
+import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -9,6 +10,11 @@ import 'package:book_store_app/utils/toast_util.dart';
 class OtpController extends BaseController
     with GetSingleTickerProviderStateMixin {
   final AuthRepository _authRepository = AuthRepository();
+
+  AuthController get _authController {
+    if (!Get.isRegistered<AuthController>()) Get.put(AuthController());
+    return Get.find<AuthController>();
+  }
 
   final int otpLength = 6;
 
@@ -128,6 +134,10 @@ class OtpController extends BaseController
       }
 
       await AppPreferences.clearIntentRole();
+
+      // Attach any profile photo picked during signup now that real tokens
+      // exist. Never blocks navigation below if it fails.
+      await _authController.finishProfileSetupAfterVerification(auth);
 
       if (intentRole == 'seller') {
         Get.offAllNamed(Routes.sellerOnboarding);

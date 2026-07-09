@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/data/models/loyalty/reward_model.dart';
 import 'package:book_store_app/app/modules/seller_loyalty/controllers/seller_loyalty_controller.dart';
@@ -8,7 +9,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,9 +33,9 @@ class LoyaltyRewardsTab extends StatelessWidget {
                   children: [
                     Icon(Icons.card_giftcard_outlined, size: 48, color: AppColors.lightGrey),
                     SizedBox(height: BaseSpacing.sm),
-                    Text('No rewards yet', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
+                    CustomText(text: 'No rewards yet', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
                     SizedBox(height: BaseSpacing.xxs),
-                    Text('Add a reward buyers can redeem their points for.', style: BaseTypography.labelSmall(color: AppColors.gray600), textAlign: TextAlign.center),
+                    CustomText(text: 'Add a reward buyers can redeem their points for.', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, textAlign: TextAlign.center),
                   ],
                 ),
               ),
@@ -67,7 +68,7 @@ class LoyaltyRewardsTab extends StatelessWidget {
             onPressed: () => _RewardFormSheet.show(context, controller),
             backgroundColor: AppColors.primaryColor,
             icon: const Icon(Icons.add_rounded, color: AppColors.white),
-            label: Text('New Reward', style: BaseTypography.bodySmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+            label: CustomText(text: 'New Reward', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -122,12 +123,14 @@ class _RewardCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(reward.name, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
-                  Text(
-                    '${reward.pointsCost} points'
+                  CustomText(text: reward.name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+                  CustomText(
+                    text: '${reward.pointsCost} points'
                     '${reward.stockLimit != null ? ' · ${reward.redeemedCount}/${reward.stockLimit} redeemed' : ''}'
                     '${reward.isOutOfStock ? ' · Out of stock' : ''}',
-                    style: BaseTypography.labelSmall(color: reward.isOutOfStock ? AppColors.red : AppColors.gray600),
+                    color: reward.isOutOfStock ? AppColors.red : AppColors.gray600,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w600,
                   ),
                 ],
               ),
@@ -250,7 +253,7 @@ class _RewardFormSheetState extends State<_RewardFormSheet> {
                       decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
-                  Text(_isEdit ? 'Edit Reward' : 'Create Reward', style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold)),
+                  CustomText(text: _isEdit ? 'Edit Reward' : 'Create Reward', color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
                   SizedBox(height: BaseSpacing.md),
                   CustomTextField(label: 'Reward Name', controller: _nameCtrl, isborder: true),
                   SizedBox(height: BaseSpacing.sm),
@@ -283,7 +286,7 @@ class _RewardFormSheetState extends State<_RewardFormSheet> {
                         decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.md)),
                         child: widget.controller.isSavingReward.value
                             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-                            : Text(_isEdit ? 'Save Changes' : 'Create Reward', style: BaseTypography.bodyLarge(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+                            : CustomText(text: _isEdit ? 'Save Changes' : 'Create Reward', color: AppColors.white, fontSize: AppFontSize.small, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
@@ -308,7 +311,7 @@ class _RewardFormSheetState extends State<_RewardFormSheet> {
           color: selected ? AppColors.primaryColor : AppColors.background,
           borderRadius: BorderRadius.circular(BaseRadius.md),
         ),
-        child: Text(label, style: BaseTypography.labelSmall(color: selected ? AppColors.white : AppColors.gray600).copyWith(fontWeight: FontWeight.w600)),
+        child: CustomText(text: label, color: selected ? AppColors.white : AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
       ),
     );
   }

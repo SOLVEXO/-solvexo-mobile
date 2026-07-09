@@ -1,7 +1,8 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
@@ -33,8 +34,8 @@ class OrderInfo extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600)),
-        Text(text, style: BaseTypography.bodyMedium(color: AppColors.black)),
+        CustomText(text: title, color: AppColors.black, fontSize: AppFontSize.small2, fontWeight: FontWeight.w600),
+        CustomText(text: text, color: AppColors.black, fontSize: AppFontSize.extraSmall),
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/animated_background_circles.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/welcome/controllers/welcome_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -8,8 +9,8 @@ import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -65,20 +66,24 @@ class _LogoSection extends StatelessWidget {
           child: CommonImageView(imagePath: AppImages.logoImage),
         ),
         SizedBox(height: BaseSpacing.lg),
-        Text(
-          'Solvexo',
-          style: BaseTypography.displayMedium(color: AppColors.white),
+        CustomText(
+          text: 'Solvexo',
+          color: AppColors.white,
+          fontSize: AppFontSize.veryLarge3,
+          fontWeight: FontWeight.w800,
         ),
         SizedBox(height: BaseSpacing.xxs),
-        Text(
-          'Commerce. Solved.',
-          style: BaseTypography.bodyMedium(color: AppColors.white.withOpacity(0.8)),
+        CustomText(
+          text: 'Commerce. Solved.',
+          color: AppColors.white.withOpacity(0.8),
+          fontSize: AppFontSize.extraSmall,
         ),
         SizedBox(height: BaseSpacing.xxs - 2),
-        Text(
-          'Buy, sell, and grow — all in one place.',
+        CustomText(
+          text: 'Buy, sell, and grow — all in one place.',
           textAlign: TextAlign.center,
-          style: BaseTypography.bodySmall(color: AppColors.white.withOpacity(0.65)),
+          color: AppColors.white.withOpacity(0.65),
+          fontSize: AppFontSize.tiny,
         ),
       ],
     );
@@ -105,14 +110,17 @@ class _BottomSection extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'How would you like to use Solvexo?',
-            style: BaseTypography.titleMedium(color: AppColors.black),
+          CustomText(
+            text: 'How would you like to use Solvexo?',
+            color: AppColors.black,
+            fontSize: AppFontSize.small2,
+            fontWeight: FontWeight.w600,
           ),
           SizedBox(height: BaseSpacing.xxs),
-          Text(
-            'You can switch anytime from your profile settings.',
-            style: BaseTypography.bodySmall(color: AppColors.grey),
+          CustomText(
+            text: 'You can switch anytime from your profile settings.',
+            color: AppColors.grey,
+            fontSize: AppFontSize.tiny,
           ),
           SizedBox(height: BaseSpacing.xl),
           _RoleCard(
@@ -132,10 +140,12 @@ class _BottomSection extends StatelessWidget {
           ),
           SizedBox(height: BaseSpacing.md),
           Center(
-            child: Text(
-              'By continuing you agree to our Terms & Privacy Policy',
+            child: CustomText(
+              text: 'By continuing you agree to our Terms & Privacy Policy',
               textAlign: TextAlign.center,
-              style: BaseTypography.labelSmall(color: AppColors.lightGrey5).copyWith(fontWeight: FontWeight.w400),
+              color: AppColors.lightGrey5,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],
@@ -201,18 +211,18 @@ class _RoleCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: BaseTypography.titleSmall(
-                          color: isPrimary ? AppColors.white : AppColors.black,
-                        ).copyWith(fontWeight: FontWeight.bold),
+                      CustomText(
+                        text: title,
+                        color: isPrimary ? AppColors.white : AppColors.black,
+                        fontSize: AppFontSize.verySmall,
+                        fontWeight: FontWeight.bold,
                       ),
                       SizedBox(height: BaseSpacing.xxs / 2),
-                      Text(
-                        subtitle,
-                        style: BaseTypography.labelSmall(
-                          color: isPrimary ? AppColors.white.withOpacity(0.8) : AppColors.grey,
-                        ).copyWith(fontWeight: FontWeight.w400),
+                      CustomText(
+                        text: subtitle,
+                        color: isPrimary ? AppColors.white.withOpacity(0.8) : AppColors.grey,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.w400,
                       ),
                     ],
                   ),

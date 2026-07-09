@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
@@ -8,7 +9,7 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -88,9 +89,11 @@ class _StaffPickItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.name,
-                    style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700),
+                  CustomText(
+                    text: product.name,
+                    color: AppColors.black2,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w700,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -99,16 +102,18 @@ class _StaffPickItem extends StatelessWidget {
                   // "by Seller · ⭐ rating"
                   Row(
                     children: [
-                      Text('by Seller · ', style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400)),
+                      CustomText(text: 'by Seller · ', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400),
                       SvgIcon(
                         assetName: AppIcons.fillStar,
                         size: 11,
                         color: const Color(0xFFFACC15),
                       ),
                       SizedBox(width: BaseSpacing.xxs / 2),
-                      Text(
-                        product.averageRating.toStringAsFixed(1),
-                        style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400),
+                      CustomText(
+                        text: product.averageRating.toStringAsFixed(1),
+                        color: AppColors.gray600,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.w400,
                       ),
                     ],
                   ),
@@ -119,9 +124,11 @@ class _StaffPickItem extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: BaseTypography.bodySmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w800),
+                      CustomText(
+                        text: '\$${product.price.toStringAsFixed(2)}',
+                        color: AppColors.black,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.w800,
                       ),
                       PressableScale(
                         onTap: () => productController.openProductDetails(product),
@@ -133,9 +140,11 @@ class _StaffPickItem extends StatelessWidget {
                             borderRadius: BorderRadius.circular(BaseRadius.xs),
                           ),
                           alignment: Alignment.center,
-                          child: Text(
-                            'Buy',
-                            style: BaseTypography.labelSmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w600),
+                          child: CustomText(
+                            text: 'Buy',
+                            color: AppColors.white,
+                            fontSize: AppFontSize.tiny,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

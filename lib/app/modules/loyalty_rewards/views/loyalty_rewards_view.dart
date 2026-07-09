@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/loyalty/reward_model.dart';
 import 'package:book_store_app/app/modules/loyalty_rewards/controllers/loyalty_rewards_controller.dart';
 import 'package:book_store_app/app/modules/loyalty_rewards/widgets/buyer_reward_tile.dart';
@@ -8,7 +9,7 @@ import 'package:book_store_app/app/modules/loyalty_rewards/widgets/loyalty_balan
 import 'package:book_store_app/app/modules/loyalty_rewards/widgets/loyalty_rewards_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -36,7 +37,7 @@ class LoyaltyRewardsView extends StatelessWidget {
                 children: [
                   Container(width: 4, height: 16, decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(4))),
                   SizedBox(width: BaseSpacing.xs),
-                  Text('Redeem Your Points', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+                  CustomText(text: 'Redeem Your Points', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
                 ],
               ),
               SizedBox(height: BaseSpacing.sm),
@@ -48,7 +49,7 @@ class LoyaltyRewardsView extends StatelessWidget {
                       children: [
                         Icon(Icons.card_giftcard_outlined, size: 44, color: AppColors.lightGrey),
                         SizedBox(height: BaseSpacing.sm),
-                        Text('No rewards available yet', style: BaseTypography.bodySmall(color: AppColors.gray600)),
+                        CustomText(text: 'No rewards available yet', color: AppColors.gray600, fontSize: AppFontSize.tiny),
                       ],
                     ),
                   ),

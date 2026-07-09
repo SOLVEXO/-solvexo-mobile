@@ -1,8 +1,10 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/controllers/seller_onboarding_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,7 +36,7 @@ class Step5GoLive extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 12),
-                const Text('🎉', style: TextStyle(fontSize: 52)),
+                const CustomText(text: '🎉', fontSize: 52),
                 const SizedBox(height: 16),
                 const CustomText(
                   text: 'Your store is ready!',
@@ -141,7 +143,7 @@ class _SummaryRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 24,
-            child: Text(emoji, style: const TextStyle(fontSize: 14)),
+            child: CustomText(text: emoji, fontSize: 14),
           ),
           const SizedBox(width: 8),
           SizedBox(
@@ -221,7 +223,7 @@ class _NextStepCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 24)),
+            CustomText(text: emoji, fontSize: 24),
             const SizedBox(height: 8),
             CustomText(
               text: label,
@@ -239,7 +241,26 @@ class _NextStepCard extends StatelessWidget {
 
 // ── Upgrade note ──────────────────────────────────────────────────────────────
 
-class _UpgradeNote extends StatelessWidget {
+class _UpgradeNote extends StatefulWidget {
+  @override
+  State<_UpgradeNote> createState() => _UpgradeNoteState();
+}
+
+class _UpgradeNoteState extends State<_UpgradeNote> {
+  late final TapGestureRecognizer _recognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer = TapGestureRecognizer()..onTap = () => Get.toNamed(Routes.sellerPlatformPlan);
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return RichText(
@@ -253,7 +274,9 @@ class _UpgradeNote extends StatelessWidget {
             style: const TextStyle(
               color: AppColors.primaryColor,
               fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
             ),
+            recognizer: _recognizer,
           ),
           const TextSpan(
             text: ' to unlock unlimited products, AI Studio, POS, and custom domain.',

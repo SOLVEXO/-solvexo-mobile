@@ -1,10 +1,11 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/data/models/marketing/coupon_model.dart';
 import 'package:book_store_app/app/modules/seller_coupons/controllers/seller_coupons_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -145,9 +146,11 @@ class _CouponFormSheetState extends State<CouponFormSheet> {
                       decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
-                  Text(
-                    _isEdit ? 'Edit Coupon' : 'Create Coupon',
-                    style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold),
+                  CustomText(
+                    text: _isEdit ? 'Edit Coupon' : 'Create Coupon',
+                    color: AppColors.black2,
+                    fontSize: AppFontSize.small2,
+                    fontWeight: FontWeight.bold,
                   ),
                   SizedBox(height: BaseSpacing.md),
                   CustomTextField(
@@ -203,11 +206,12 @@ class _CouponFormSheetState extends State<CouponFormSheet> {
                         children: [
                           Icon(Icons.event_outlined, size: 18, color: AppColors.gray600),
                           SizedBox(width: BaseSpacing.xs),
-                          Text(
-                            _expiresAt != null
+                          CustomText(
+                            text: _expiresAt != null
                                 ? 'Expires ${DateFormat('MMM d, yyyy').format(_expiresAt!)}'
                                 : 'No expiry (optional)',
-                            style: BaseTypography.bodySmall(color: AppColors.black2),
+                            color: AppColors.black2,
+                            fontSize: AppFontSize.tiny,
                           ),
                           const Spacer(),
                           if (_expiresAt != null)
@@ -236,9 +240,11 @@ class _CouponFormSheetState extends State<CouponFormSheet> {
                                 width: 20, height: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
                               )
-                            : Text(
-                                _isEdit ? 'Save Changes' : 'Create Coupon',
-                                style: BaseTypography.bodyLarge(color: AppColors.white).copyWith(fontWeight: FontWeight.w700),
+                            : CustomText(
+                                text: _isEdit ? 'Save Changes' : 'Create Coupon',
+                                color: AppColors.white,
+                                fontSize: AppFontSize.small,
+                                fontWeight: FontWeight.w700,
                               ),
                       ),
                     ),
@@ -285,11 +291,11 @@ class _TypeToggle extends StatelessWidget {
             color: selected ? AppColors.primaryColor : Colors.transparent,
             borderRadius: BorderRadius.circular(BaseRadius.sm),
           ),
-          child: Text(
-            label,
-            style: BaseTypography.labelSmall(
-              color: selected ? AppColors.white : AppColors.gray600,
-            ).copyWith(fontWeight: FontWeight.w600),
+          child: CustomText(
+            text: label,
+            color: selected ? AppColors.white : AppColors.gray600,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

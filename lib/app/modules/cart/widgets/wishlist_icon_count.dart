@@ -1,11 +1,11 @@
 import 'package:book_store_app/app/components/custom_icon_button.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -55,9 +55,11 @@ class WishlistIconCount extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: Obx(
-                      () => Text(
-                        "${controller.wishlistController.count}",
-                        style: BaseTypography.labelSmall(color: AppColors.white).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
+                      () => CustomText(
+                        text: "${controller.wishlistController.count}",
+                        color: AppColors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

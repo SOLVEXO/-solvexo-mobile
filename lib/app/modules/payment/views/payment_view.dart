@@ -1,8 +1,9 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/payment_controller.dart';
@@ -34,9 +35,11 @@ class PaymentView extends StatelessWidget {
                     ),
                     child: ListTile(
                       leading: controller.paymentIcon(method),
-                      title: Text(
-                        method.title,
-                        style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w700),
+                      title: CustomText(
+                        text: method.title,
+                        color: AppColors.black,
+                        fontSize: AppFontSize.extraSmall,
+                        fontWeight: FontWeight.w700,
                       ),
                       // NOTE (incomplete feature): "Connect" has no handler
                       // wired up — tapping it does nothing. Not implementing

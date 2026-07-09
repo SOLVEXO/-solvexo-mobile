@@ -1,9 +1,10 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -56,12 +57,12 @@ class StatusStepper extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: BaseSpacing.xs),
-                Text(
-                  steps[index].title,
+                CustomText(
+                  text: steps[index].title,
                   textAlign: TextAlign.center,
-                  style: BaseTypography.labelSmall(
-                    color: isCompleted || isActive ? AppColors.primaryColor : AppColors.lightGrey,
-                  ).copyWith(fontWeight: isActive ? FontWeight.w600 : FontWeight.w400),
+                  color: isCompleted || isActive ? AppColors.primaryColor : AppColors.lightGrey,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                 ),
               ],
             ),

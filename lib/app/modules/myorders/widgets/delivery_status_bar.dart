@@ -1,11 +1,12 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/app/data/models/enums/enums.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -46,20 +47,21 @@ class DeliveryStatusBar extends StatelessWidget {
                   spacing: BaseSpacing.sm,
                   children: [
                     SvgIcon(assetName: AppIcons.truckIcon),
-                    Text(title, style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w700)),
+                    CustomText(text: title, color: AppColors.black, fontSize: AppFontSize.small2, fontWeight: FontWeight.w700),
                     const Spacer(),
                     SvgIcon(assetName: AppIcons.chevronRight),
                   ],
                 ),
-                Text(
-                  currentStep == OrderDeliveryStatus.deliver
+                CustomText(
+                  text: currentStep == OrderDeliveryStatus.deliver
                       ? "Your package has left the sorting center."
                       : currentStep == OrderDeliveryStatus.inTransit
                           ? "Your package is on the way to the delivery hub."
                           : currentStep == OrderDeliveryStatus.delivered
                               ? "Your package has been delivered."
                               : "",
-                  style: BaseTypography.bodySmall(color: AppColors.gray600),
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
                 ),
               ],
             ),

@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
+import 'package:book_store_app/app/data/models/common_models/auth_response_model.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
+import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/data/services/social_auth_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
@@ -8,9 +12,11 @@ import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AuthController extends BaseController {
   final AuthRepository _authRepository = AuthRepository();
+  final UploadRepository _uploadRepository = UploadRepository();
   final SocialAuthService _socialAuth = SocialAuthService();
   // Observables
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
@@ -29,10 +35,18 @@ class AuthController extends BaseController {
   final TextEditingController registerLastNameController =
       TextEditingController();
   final TextEditingController registerPhoneController = TextEditingController();
+  final TextEditingController registerAddressController = TextEditingController();
   final TextEditingController registerPasswordController =
       TextEditingController();
   final TextEditingController registerConfirmPasswordController =
       TextEditingController();
+
+  // Profile photo picked at signup time — the upload endpoint requires a
+  // bearer token the user doesn't have yet at this point (registration is
+  // OTP-gated), so this is only uploaded once OTP verification hands back
+  // real tokens (see `finishProfileSetupAfterVerification`).
+  final Rx<File?> registerProfileImage = Rx<File?>(null);
+  final RxBool isPickingRegisterImage = false.obs;
 
   // Form Keys
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
@@ -52,6 +66,7 @@ class AuthController extends BaseController {
     registerFirstNameController.dispose();
     registerLastNameController.dispose();
     registerPhoneController.dispose();
+    registerAddressController.dispose();
     registerPasswordController.dispose();
     registerConfirmPasswordController.dispose();
     super.onClose();
@@ -291,6 +306,9 @@ class AuthController extends BaseController {
         phone: registerPhoneController.text.trim().isNotEmpty
             ? registerPhoneController.text.trim()
             : null,
+        address: registerAddressController.text.trim().isNotEmpty
+            ? registerAddressController.text.trim()
+            : null,
         role: role ?? "user",
       );
       if (success) {
@@ -377,10 +395,48 @@ class AuthController extends BaseController {
     registerFirstNameController.clear();
     registerLastNameController.clear();
     registerPhoneController.clear();
+    registerAddressController.clear();
     registerPasswordController.clear();
     registerConfirmPasswordController.clear();
+    registerProfileImage.value = null;
     isPasswordVisible.value = false;
     isConfirmPasswordVisible.value = false;
+  }
+
+  /// Pick a profile photo at signup time. Just held locally — see
+  /// `registerProfileImage`'s doc comment for why it isn't uploaded yet.
+  Future<void> pickRegisterProfileImage() async {
+    isPickingRegisterImage.value = true;
+    try {
+      final file = await _uploadRepository.pickImage(source: ImageSource.gallery);
+      if (file != null) registerProfileImage.value = file;
+    } finally {
+      isPickingRegisterImage.value = false;
+    }
+  }
+
+  /// Called right after OTP verification succeeds (i.e. the moment real
+  /// tokens exist) to upload any profile photo picked during signup and
+  /// attach it to the now-verified user. Failures here must never block
+  /// navigation — signup itself already succeeded.
+  Future<void> finishProfileSetupAfterVerification(AuthResponseModel auth) async {
+    final file = registerProfileImage.value;
+    if (file == null) return;
+
+    try {
+      final imageUrl = await _uploadRepository.uploadImage(file);
+      if (imageUrl == null) return;
+
+      final updatedUser = await _authRepository.updateProfile(
+        token: auth.token.accessToken,
+        profileImage: imageUrl,
+      );
+      if (updatedUser != null) currentUser.value = updatedUser;
+    } catch (e) {
+      debugPrint('❌ finishProfileSetupAfterVerification error: $e');
+    } finally {
+      registerProfileImage.value = null;
+    }
   }
 
   /// Get user profile

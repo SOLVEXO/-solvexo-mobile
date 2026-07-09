@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/messaging/widgets/conversations_shimmer.dart';
@@ -10,20 +11,22 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SellerMessagesView extends StatelessWidget {
   SellerMessagesView({super.key});
 
-  final SellerMessagesController controller = Get.put(SellerMessagesController());
+  final SellerMessagesController controller = Get.put(
+    SellerMessagesController(),
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBarTwo(title: "Messages"),
       backgroundColor: AppColors.white,
+      appBar: CustomAppBarTwo(title: "Messages"),
       body: Column(
         children: [
           _SearchBar(controller: controller),
@@ -34,9 +37,21 @@ class SellerMessagesView extends StatelessWidget {
                 return const ConversationsShimmer();
               }
 
+              if (controller.conversations.isEmpty) {
+                return MessagesEmptyState(
+                  isArchived: controller.filter.value == InboxFilter.archived,
+                );
+              }
+
               final convs = controller.filteredConversations;
               if (convs.isEmpty) {
-                return MessagesEmptyState(isArchived: controller.filter.value == InboxFilter.archived);
+                return Center(
+                  child: CustomText(
+                    text: 'No conversations match',
+                    color: AppColors.gray600,
+                    fontSize: AppFontSize.extraSmall,
+                  ),
+                );
               }
 
               return CustomRefreshWrapper(
@@ -44,7 +59,8 @@ class SellerMessagesView extends StatelessWidget {
                 child: ListView.separated(
                   padding: EdgeInsets.only(bottom: BaseSpacing.md),
                   itemCount: convs.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.lightGrey3),
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, color: AppColors.lightGrey3),
                   itemBuilder: (_, i) => ConversationTile(
                     conversation: convs[i],
                     controller: controller,
@@ -68,15 +84,22 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.white,
-      padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.sm),
+      padding: EdgeInsets.fromLTRB(
+        BaseSpacing.md,
+        BaseSpacing.xs,
+        BaseSpacing.md,
+        BaseSpacing.sm,
+      ),
       child: CustomTextField(
         onChanged: controller.onSearch,
-        hintText: 'Search conversations',
+        hintText: 'Search messages',
         isborder: true,
-        fillColor: AppColors.textfldFillColor,
-        borderRadius: BorderRadius.circular(BaseRadius.md),
-        borderBorderradius: BaseRadius.md,
-        prefixIcon: SvgIcon(assetName: AppIcons.searchIcon, size: 20, color: AppColors.iosGrey),
+
+        prefixIcon: SvgIcon(
+          assetName: AppIcons.searchIcon,
+          size: 18,
+          color: AppColors.iosGrey,
+        ),
       ),
     );
   }
@@ -90,20 +113,33 @@ class _FilterTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.white,
-      padding: EdgeInsets.fromLTRB(BaseSpacing.md, 0, BaseSpacing.md, BaseSpacing.sm),
+      padding: EdgeInsets.fromLTRB(
+        BaseSpacing.md,
+        0,
+        BaseSpacing.md,
+        BaseSpacing.sm,
+      ),
       child: Obx(
         () => Row(
           children: [
             _Tab(
-              label: 'Active',
-              selected: controller.filter.value == InboxFilter.active,
-              onTap: () => controller.setFilter(InboxFilter.active),
+              label: 'All',
+              selected:
+                  controller.filter.value == InboxFilter.active &&
+                  !controller.unreadOnly.value,
+              onTap: () => controller.selectQuickFilter('all'),
+            ),
+            SizedBox(width: BaseSpacing.xs),
+            _Tab(
+              label: 'Unread',
+              selected: controller.unreadOnly.value,
+              onTap: () => controller.selectQuickFilter('unread'),
             ),
             SizedBox(width: BaseSpacing.xs),
             _Tab(
               label: 'Archived',
               selected: controller.filter.value == InboxFilter.archived,
-              onTap: () => controller.setFilter(InboxFilter.archived),
+              onTap: () => controller.selectQuickFilter('archived'),
             ),
           ],
         ),
@@ -116,7 +152,11 @@ class _Tab extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _Tab({required this.label, required this.selected, required this.onTap});
+  const _Tab({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -124,16 +164,19 @@ class _Tab extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: BaseMotion.normal,
-        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md, vertical: BaseSpacing.xs),
+        padding: EdgeInsets.symmetric(
+          horizontal: BaseSpacing.md,
+          vertical: BaseSpacing.xs,
+        ),
         decoration: BoxDecoration(
           color: selected ? AppColors.primaryColor : AppColors.lightGrey10,
           borderRadius: BorderRadius.circular(BaseRadius.pill),
         ),
-        child: Text(
-          label,
-          style: BaseTypography.labelSmall(
-            color: selected ? AppColors.white : AppColors.gray600,
-          ).copyWith(fontWeight: FontWeight.w600),
+        child: CustomText(
+          text: label,
+          color: selected ? AppColors.white : AppColors.gray600,
+          fontSize: AppFontSize.tiny,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

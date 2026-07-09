@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -12,7 +13,7 @@ class AboutView extends GetView<AboutController> {
     return Scaffold(
       appBar: CustomAppBarTwo(title: "About"),
       body: const Center(
-        child: Text('AboutView is working', style: TextStyle(fontSize: 20)),
+        child: CustomText(text: 'AboutView is working', fontSize: 20),
       ),
     );
   }

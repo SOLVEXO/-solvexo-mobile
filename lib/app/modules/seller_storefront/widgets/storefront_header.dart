@@ -8,7 +8,6 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -356,20 +355,19 @@ class _StatBox extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 10,
-              letterSpacing: 0.4,
-            ),
+          CustomText(
+            text: label.toUpperCase(),
+            color: AppColors.gray600,
+            fontWeight: FontWeight.w600,
+            fontSize: 10,
+            letterSpacing: 0.4,
           ),
           SizedBox(height: BaseSpacing.xxs / 2),
-          Text(
-            value,
-            style: BaseTypography.titleMedium(
-              color: AppColors.primaryColor,
-            ).copyWith(fontWeight: FontWeight.w800),
+          CustomText(
+            text: value,
+            color: AppColors.primaryColor,
+            fontSize: AppFontSize.small2,
+            fontWeight: FontWeight.w800,
           ),
         ],
       ),
@@ -402,18 +400,18 @@ class _AboutCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'ABOUT',
-            style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              fontSize: 10.5,
-            ),
+          CustomText(
+            text: 'ABOUT',
+            color: AppColors.gray600,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+            fontSize: 10.5,
           ),
           SizedBox(height: BaseSpacing.xxs + 1),
-          Text(
-            description,
-            style: BaseTypography.bodySmall(color: AppColors.black2),
+          CustomText(
+            text: description,
+            color: AppColors.black2,
+            fontSize: AppFontSize.tiny,
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
           ),
@@ -485,14 +483,12 @@ class _Pill extends StatelessWidget {
             Icon(icon, size: 12, color: AppColors.primaryColor),
             SizedBox(width: BaseSpacing.xxs),
           ],
-          Text(
-            text.toUpperCase(),
-            style: BaseTypography.labelSmall(color: AppColors.primaryColor)
-                .copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 10.5,
-                  letterSpacing: 0.3,
-                ),
+          CustomText(
+            text: text.toUpperCase(),
+            color: AppColors.primaryColor,
+            fontWeight: FontWeight.w700,
+            fontSize: 10.5,
+            letterSpacing: 0.3,
           ),
         ],
       ),
@@ -557,13 +553,13 @@ class _FollowButton extends StatelessWidget {
                           : AppColors.white,
                     ),
                     SizedBox(width: BaseSpacing.xxs + 2),
-                    Text(
-                      following ? 'Following' : 'Follow Store',
-                      style: BaseTypography.bodySmall(
-                        color: following
-                            ? AppColors.primaryColor
-                            : AppColors.white,
-                      ).copyWith(fontWeight: FontWeight.w700),
+                    CustomText(
+                      text: following ? 'Following' : 'Follow Store',
+                      color: following
+                          ? AppColors.primaryColor
+                          : AppColors.white,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w700,
                     ),
                   ],
                 ),

@@ -1,9 +1,10 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/marketing/coupon_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -45,11 +46,11 @@ class CouponCard extends StatelessWidget {
                 _CodeChip(code: coupon.code, dimmed: !_isLive),
                 SizedBox(width: BaseSpacing.xs),
                 Expanded(
-                  child: Text(
-                    coupon.discountLabel,
-                    style: BaseTypography.bodyMedium(
-                      color: _isLive ? AppColors.primaryColor : AppColors.gray600,
-                    ).copyWith(fontWeight: FontWeight.w700),
+                  child: CustomText(
+                    text: coupon.discountLabel,
+                    color: _isLive ? AppColors.primaryColor : AppColors.gray600,
+                    fontSize: AppFontSize.extraSmall,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 _StatusBadge(isLive: _isLive, isExpired: coupon.isExpired),
@@ -63,11 +64,11 @@ class CouponCard extends StatelessWidget {
                     if (v == 'delete') onDelete();
                   },
                   itemBuilder: (_) => [
-                    const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                    PopupMenuItem(value: 'toggle', child: Text(coupon.isActive ? 'Deactivate' : 'Activate')),
+                    const PopupMenuItem(value: 'edit', child: CustomText(text: 'Edit')),
+                    PopupMenuItem(value: 'toggle', child: CustomText(text: coupon.isActive ? 'Deactivate' : 'Activate')),
                     PopupMenuItem(
                       value: 'delete',
-                      child: Text('Delete', style: TextStyle(color: AppColors.red)),
+                      child: CustomText(text: 'Delete', color: AppColors.red),
                     ),
                   ],
                 ),
@@ -119,11 +120,12 @@ class _CodeChip extends StatelessWidget {
         color: dimmed ? AppColors.lightGrey.withOpacity(0.4) : AppColors.primaryColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(BaseRadius.sm),
       ),
-      child: Text(
-        code,
-        style: BaseTypography.bodySmall(
-          color: dimmed ? AppColors.gray600 : AppColors.primaryColor,
-        ).copyWith(fontWeight: FontWeight.w800, letterSpacing: 0.5),
+      child: CustomText(
+        text: code,
+        color: dimmed ? AppColors.gray600 : AppColors.primaryColor,
+        fontSize: AppFontSize.tiny,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -142,7 +144,7 @@ class _StatusBadge extends StatelessWidget {
       margin: EdgeInsets.only(right: BaseSpacing.xxs),
       padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-      child: Text(label, style: BaseTypography.labelSmall(color: color).copyWith(fontWeight: FontWeight.w700, fontSize: 10.5)),
+      child: CustomText(text: label, color: color, fontSize: 10.5, fontWeight: FontWeight.w700),
     );
   }
 }
@@ -161,7 +163,7 @@ class _InfoChip extends StatelessWidget {
       children: [
         Icon(icon, size: 13, color: color),
         SizedBox(width: BaseSpacing.xxs / 2),
-        Text(label, style: BaseTypography.labelSmall(color: color).copyWith(fontWeight: FontWeight.w500)),
+        CustomText(text: label, color: color, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w500),
       ],
     );
   }

@@ -4,6 +4,7 @@
 // this for a cleanup pass; fixed the logic bug below regardless in case
 // it's revived.
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
@@ -11,7 +12,7 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -47,9 +48,11 @@ class ProfileCard extends StatelessWidget {
                 ? CircleAvatar(
                     backgroundColor: AppColors.background,
                     radius: 30,
-                    child: Text(
-                      user.name[0].toUpperCase(),
-                      style: BaseTypography.displayMedium(color: AppColors.primaryColor),
+                    child: CustomText(
+                      text: user.name[0].toUpperCase(),
+                      color: AppColors.primaryColor,
+                      fontSize: AppFontSize.veryLarge3,
+                      fontWeight: FontWeight.w800,
                     ),
                   )
                 : CommonImageView(
@@ -63,9 +66,11 @@ class ProfileCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: BaseSpacing.xxs + 1,
               children: [
-                Text(
-                  user.name,
-                  style: BaseTypography.titleMedium(color: AppColors.white).copyWith(fontWeight: FontWeight.w500),
+                CustomText(
+                  text: user.name,
+                  color: AppColors.white,
+                  fontSize: AppFontSize.small2,
+                  fontWeight: FontWeight.w500,
                 ),
                 user.isEmailVerified
                     ? const Icon(Icons.verified, color: AppColors.blue, size: 18)
@@ -88,7 +93,11 @@ class ProfileCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     spacing: BaseSpacing.xs,
                     children: [
-                      Text('Edit Profile', style: BaseTypography.bodyMedium(color: AppColors.white)),
+                      CustomText(
+                        text: 'Edit Profile',
+                        color: AppColors.white,
+                        fontSize: AppFontSize.extraSmall,
+                      ),
                       SvgIcon(assetName: AppIcons.chevronRight, size: 20, color: AppColors.white),
                     ],
                   ),

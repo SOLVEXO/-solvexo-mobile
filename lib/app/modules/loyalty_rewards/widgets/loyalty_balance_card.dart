@@ -1,7 +1,8 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/loyalty/my_loyalty_balance_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 /// Hero card at the top of the buyer's rewards screen — current balance,
@@ -36,16 +37,16 @@ class LoyaltyBalanceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Your Points Balance', style: BaseTypography.labelSmall(color: AppColors.white.withOpacity(0.85))),
+                    CustomText(text: 'Your Points Balance', color: AppColors.white.withOpacity(0.85), fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                     SizedBox(height: BaseSpacing.xxs),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('${balance.pointsBalance}', style: BaseTypography.titleLarge(color: AppColors.white).copyWith(fontWeight: FontWeight.w800, fontSize: 30)),
+                        CustomText(text: '${balance.pointsBalance}', color: AppColors.white, fontSize: 30, fontWeight: FontWeight.w800),
                         SizedBox(width: BaseSpacing.xxs),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 5),
-                          child: Text('points', style: BaseTypography.bodySmall(color: AppColors.white.withOpacity(0.85))),
+                          child: CustomText(text: 'points', color: AppColors.white.withOpacity(0.85), fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400),
                         ),
                       ],
                     ),
@@ -61,7 +62,7 @@ class LoyaltyBalanceCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.workspace_premium_rounded, size: 14, color: AppColors.white),
                       SizedBox(width: BaseSpacing.xxs),
-                      Text(balance.currentTier!, style: BaseTypography.labelSmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+                      CustomText(text: balance.currentTier!, color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
                     ],
                   ),
                 ),
@@ -79,9 +80,11 @@ class LoyaltyBalanceCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: BaseSpacing.xxs + 1),
-            Text(
-              '${next.pointsNeeded} points to ${next.name}',
-              style: BaseTypography.labelSmall(color: AppColors.white.withOpacity(0.9)).copyWith(fontWeight: FontWeight.w600),
+            CustomText(
+              text: '${next.pointsNeeded} points to ${next.name}',
+              color: AppColors.white.withOpacity(0.9),
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
             ),
           ],
         ],

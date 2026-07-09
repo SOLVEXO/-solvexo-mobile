@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/comp_controllers/toast_controller.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:flutter/material.dart';
@@ -62,13 +63,11 @@ class CustomToast extends StatelessWidget {
 
                 /// 🔹 Text
                 Flexible(
-                  child: Text(
-                    message,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  child: CustomText(
+                    text: message,
+                    color: textColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

@@ -1,8 +1,9 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/faq_model.dart';
@@ -22,11 +23,13 @@ class FAQDetailView extends StatelessWidget {
           spacing: BaseSpacing.lg,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              faq.question,
-              style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+            CustomText(
+              text: faq.question,
+              color: AppColors.black,
+              fontSize: AppFontSize.extraSmall,
+              fontWeight: FontWeight.w600,
             ),
-            Text(faq.answer, style: BaseTypography.bodyMedium(color: AppColors.black)),
+            CustomText(text: faq.answer, color: AppColors.black, fontSize: AppFontSize.extraSmall),
             Row(
               spacing: BaseSpacing.sm + 3,
               children: [

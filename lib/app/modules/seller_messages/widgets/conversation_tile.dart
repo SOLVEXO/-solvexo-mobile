@@ -1,10 +1,11 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/unread_count_badge.dart';
 import 'package:book_store_app/app/data/models/messaging/conversation_model.dart';
 import 'package:book_store_app/app/modules/seller_messages/controllers/seller_messages_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -54,9 +55,11 @@ class ConversationTile extends StatelessWidget {
                         height: 52,
                         color: AppColors.primaryColor.withOpacity(0.1),
                         alignment: Alignment.center,
-                        child: Text(
-                          initials,
-                          style: BaseTypography.bodyMedium(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold),
+                        child: CustomText(
+                          text: initials,
+                          color: AppColors.primaryColor,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
               ),
@@ -73,22 +76,21 @@ class ConversationTile extends StatelessWidget {
                         SizedBox(width: BaseSpacing.xxs),
                       ],
                       Expanded(
-                        child: Text(
-                          name,
-                          style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(
-                            fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
-                            fontSize: 13,
-                          ),
+                        child: CustomText(
+                          text: name,
+                          color: AppColors.black2,
+                          fontSize: 13,
+                          fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       SizedBox(width: BaseSpacing.xs),
-                      Text(
-                        _relativeTime(conversation.updatedAt),
-                        style: BaseTypography.labelSmall(
-                          color: unread > 0 ? AppColors.primaryColor : AppColors.gray600,
-                        ).copyWith(fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400),
+                      CustomText(
+                        text: _relativeTime(conversation.updatedAt),
+                        color: unread > 0 ? AppColors.primaryColor : AppColors.gray600,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400,
                       ),
                     ],
                   ),
@@ -100,11 +102,11 @@ class ConversationTile extends StatelessWidget {
                         SizedBox(width: BaseSpacing.xxs),
                       ],
                       Expanded(
-                        child: Text(
-                          conversation.lastMessage?.previewText ?? 'No messages yet',
-                          style: BaseTypography.labelSmall(
-                            color: unread > 0 ? AppColors.black2 : AppColors.gray600,
-                          ).copyWith(fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400),
+                        child: CustomText(
+                          text: conversation.lastMessage?.previewText ?? 'No messages yet',
+                          color: unread > 0 ? AppColors.black2 : AppColors.gray600,
+                          fontSize: AppFontSize.tiny,
+                          fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -217,11 +219,11 @@ class _ActionRow extends StatelessWidget {
               child: Icon(icon, size: 20, color: color),
             ),
             SizedBox(width: BaseSpacing.sm + 2),
-            Text(
-              label,
-              style: BaseTypography.bodySmall(
-                color: danger ? AppColors.red : AppColors.black2,
-              ).copyWith(fontWeight: FontWeight.w500),
+            CustomText(
+              text: label,
+              color: danger ? AppColors.red : AppColors.black2,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w500,
             ),
           ],
         ),

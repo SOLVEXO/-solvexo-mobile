@@ -121,7 +121,7 @@ class _MethodCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppDimen.borderRadius),
                     ),
                     alignment: Alignment.center,
-                    child: Text(SellerTwoFactorController.methodEmojis[method]!, style: const TextStyle(fontSize: 18)),
+                    child: CustomText(text: SellerTwoFactorController.methodEmojis[method]!, fontSize: 18),
                   ),
                   const SizedBox(width: 14),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -175,7 +175,7 @@ class _SetupInstructions extends StatelessWidget {
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           const Row(children: [
-            Text('✨', style: TextStyle(fontSize: 14)),
+            CustomText(text: '✨', fontSize: 14),
             SizedBox(width: 6),
             CustomText(text: 'How it works', fontSize: AppFontSize.verySmall, fontWeight: FontWeight.w600, color: AppColors.primaryColor),
           ]),

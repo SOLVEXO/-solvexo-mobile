@@ -1,12 +1,13 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_rating_bar.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/reviews_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,9 +24,10 @@ class ReviewsView extends StatelessWidget {
       appBar: CustomAppBarTwo(title: "Write a review"),
       body: item == null
           ? Center(
-              child: Text(
-                'This item could not be loaded.',
-                style: BaseTypography.bodySmall(color: AppColors.gray600),
+              child: CustomText(
+                text: 'This item could not be loaded.',
+                color: AppColors.gray600,
+                fontSize: AppFontSize.tiny,
               ),
             )
           : Padding(
@@ -44,13 +46,15 @@ class ReviewsView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(BaseRadius.sm),
                         child: CommonImageView(url: item.image ?? '', width: 50, height: 50, fit: BoxFit.cover),
                       ),
-                      title: Text(
-                        item.name,
-                        style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
+                      title: CustomText(
+                        text: item.name,
+                        color: AppColors.black,
+                        fontSize: AppFontSize.extraSmall,
+                        fontWeight: FontWeight.bold,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: Text("Qty ${item.quantity}", style: BaseTypography.bodySmall(color: AppColors.gray600)),
+                      subtitle: CustomText(text: "Qty ${item.quantity}", color: AppColors.gray600, fontSize: AppFontSize.tiny),
                     ),
                   ),
                   Container(
@@ -59,9 +63,11 @@ class ReviewsView extends StatelessWidget {
                     child: Column(
                       spacing: BaseSpacing.sm,
                       children: [
-                        Text(
-                          "Rate this Product",
-                          style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
+                        CustomText(
+                          text: "Rate this Product",
+                          color: AppColors.black,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.bold,
                         ),
                         Obx(
                           () => CustomRatingBar(
@@ -78,9 +84,11 @@ class ReviewsView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Message (optional)",
-                          style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+                        CustomText(
+                          text: "Message (optional)",
+                          color: AppColors.black,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.w600,
                         ),
                         SizedBox(height: BaseSpacing.xs),
                         CustomTextField(

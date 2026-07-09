@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -142,31 +143,29 @@ class AppImagePicker {
     final result = await Get.dialog<bool>(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          '$permissionName Access',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.black,
-          ),
+        title: CustomText(
+          text: '$permissionName Access',
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: AppColors.black,
         ),
-        content: Text(
-          'This app needs access to your $permissionName to let you upload photos.',
-          style: const TextStyle(fontSize: 14, color: AppColors.grey, height: 1.5),
+        content: CustomText(
+          text: 'This app needs access to your $permissionName to let you upload photos.',
+          fontSize: 14,
+          color: AppColors.grey,
+          height: 1.5,
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: const Text('Not Now', style: TextStyle(color: AppColors.grey)),
+            child: const CustomText(text: 'Not Now', color: AppColors.grey),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
-            child: const Text(
-              'Allow',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontWeight: FontWeight.w600,
-              ),
+            child: const CustomText(
+              text: 'Allow',
+              color: AppColors.primaryColor,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -180,34 +179,32 @@ class AppImagePicker {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          '$permissionName Blocked',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.black,
-          ),
+        title: CustomText(
+          text: '$permissionName Blocked',
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: AppColors.black,
         ),
-        content: Text(
-          '$permissionName access was denied. Please enable it in your device settings to upload photos.',
-          style: const TextStyle(fontSize: 14, color: AppColors.grey, height: 1.5),
+        content: CustomText(
+          text: '$permissionName access was denied. Please enable it in your device settings to upload photos.',
+          fontSize: 14,
+          color: AppColors.grey,
+          height: 1.5,
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.grey)),
+            child: const CustomText(text: 'Cancel', color: AppColors.grey),
           ),
           TextButton(
             onPressed: () {
               Get.back();
               openAppSettings();
             },
-            child: const Text(
-              'Open Settings',
-              style: TextStyle(
-                color: AppColors.primaryColor,
-                fontWeight: FontWeight.w600,
-              ),
+            child: const CustomText(
+              text: 'Open Settings',
+              color: AppColors.primaryColor,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -258,13 +255,11 @@ class _PickerSheet extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.black,
-                ),
+              child: CustomText(
+                text: title,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.black,
               ),
             ),
           ),
@@ -328,13 +323,11 @@ class _Option extends StatelessWidget {
               child: Icon(icon, size: 20, color: color),
             ),
             const SizedBox(width: 14),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: danger ? AppColors.red : AppColors.black,
-              ),
+            CustomText(
+              text: label,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: danger ? AppColors.red : AppColors.black,
             ),
           ],
         ),

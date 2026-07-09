@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/ai_assistant_chat/controllers/ai_assistant_chat_controller.dart';
 import 'package:book_store_app/app/modules/ai_assistant_chat/models/chat_message_model.dart';
@@ -115,21 +116,17 @@ class _Bubble extends StatelessWidget {
         child: msg.isStreaming && msg.content.isEmpty
             ? SizedBox(
                 width: 36,
-                child: Text(
-                  '...',
-                  style: TextStyle(
-                    fontSize: 22,
-                    color: scheme.onSurfaceVariant,
-                    letterSpacing: 3,
-                  ),
+                child: CustomText(
+                  text: '...',
+                  fontSize: 22,
+                  color: scheme.onSurfaceVariant,
+                  letterSpacing: 3,
                 ),
               )
-            : Text(
-                msg.content,
-                style: TextStyle(
-                  color: isUser ? scheme.onPrimary : scheme.onSurfaceVariant,
-                  fontSize: 15,
-                ),
+            : CustomText(
+                text: msg.content,
+                color: isUser ? scheme.onPrimary : scheme.onSurfaceVariant,
+                fontSize: 15,
               ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_home/controllers/seller_home_controller.dart';
 import 'package:book_store_app/app/modules/seller_home/widgets/custom_action_card.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -14,13 +15,13 @@ class SellerQuickActions extends StatelessWidget {
     if (controller.hasPosSubscription.value) {
       Get.toNamed(Routes.sellerPosManagement);
     } else {
-      _showPosOfferSheet();
+      _showPosOfferSheet(controller);
     }
   }
 
-  void _showPosOfferSheet() {
+  void _showPosOfferSheet(SellerHomeController controller) {
     Get.bottomSheet(
-      _PosOfferSheet(),
+      _PosOfferSheet(controller: controller),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
     );
@@ -76,7 +77,21 @@ class SellerQuickActions extends StatelessWidget {
 }
 
 class _PosOfferSheet extends StatelessWidget {
-  const _PosOfferSheet();
+  final SellerHomeController controller;
+  const _PosOfferSheet({required this.controller});
+
+  Future<void> _onSubscribeTap() async {
+    if (!controller.posAddonEligible.value) {
+      Get.back();
+      Get.toNamed(Routes.sellerPlatformPlan);
+      return;
+    }
+    final ok = await controller.subscribeToPosAddon();
+    if (ok) {
+      Get.back();
+      Get.toNamed(Routes.sellerPosManagement);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,17 +124,26 @@ class _PosOfferSheet extends StatelessWidget {
           const SizedBox(height: 24),
           _PricingCard(),
           const SizedBox(height: 20),
-          AppButton(label: "Subscribe Now", onPressed: () => Get.back()),
-          const SizedBox(height: 12),
-          // Temporary button — remove once subscription is live
-          AppButton(
-            label: "Open POS",
-            isOutlined: true,
-            onPressed: () {
-              Get.back();
-              Get.toNamed(Routes.sellerPosManagement);
-            },
-          ),
+          Obx(() {
+            if (!controller.posAddonEligible.value) {
+              return Column(
+                children: [
+                  const CustomText(
+                    text: 'Requires Basic tier or above to unlock the POS add-on.',
+                    textAlign: TextAlign.center,
+                    fontSize: 13,
+                    color: AppColors.lightGrey5,
+                  ),
+                  const SizedBox(height: 12),
+                  AppButton(label: 'Upgrade Plan', onPressed: _onSubscribeTap),
+                ],
+              );
+            }
+            return AppButton(
+              label: controller.isPosActionLoading.value ? 'Subscribing...' : 'Subscribe Now',
+              onPressed: controller.isPosActionLoading.value ? null : _onSubscribeTap,
+            );
+          }),
         ],
       ),
     );
@@ -147,23 +171,19 @@ class _Header extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Unlock POS System',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: AppColors.black2,
-          ),
+        const CustomText(
+          text: 'Unlock POS System',
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          color: AppColors.black2,
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Accept in-store payments, manage walk-in orders,\nand sync your inventory in real time.',
+        const CustomText(
+          text: 'Accept in-store payments, manage walk-in orders,\nand sync your inventory in real time.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.lightGrey5,
-            height: 1.5,
-          ),
+          fontSize: 14,
+          color: AppColors.lightGrey5,
+          height: 1.5,
         ),
       ],
     );
@@ -203,13 +223,11 @@ class _FeaturesList extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    f.text,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black2,
-                    ),
+                  CustomText(
+                    text: f.text,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.black2,
                   ),
                 ],
               ),
@@ -238,22 +256,18 @@ class _PricingCard extends StatelessWidget {
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'POS Add-on Plan',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
+              CustomText(
+                text: 'POS Add-on Plan',
+                color: AppColors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
               ),
               SizedBox(height: 4),
-              Text(
-                'Billed monthly · Cancel anytime',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                ),
+              CustomText(
+                text: 'Billed monthly · Cancel anytime',
+                color: AppColors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
               ),
             ],
           ),

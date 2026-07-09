@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
@@ -275,7 +276,7 @@ class ProfileController extends GetxController {
           children: [
             ListTile(
               leading: Icon(Icons.photo_library),
-              title: Text('Choose from Gallery'),
+              title: CustomText(text: 'Choose from Gallery'),
               onTap: () {
                 Get.back();
                 pickImage();
@@ -283,7 +284,7 @@ class ProfileController extends GetxController {
             ),
             ListTile(
               leading: Icon(Icons.camera_alt),
-              title: Text('Take Photo'),
+              title: CustomText(text: 'Take Photo'),
               onTap: () {
                 Get.back();
                 takePhoto();
@@ -293,9 +294,9 @@ class ProfileController extends GetxController {
                 selectedImageFile.value != null)
               ListTile(
                 leading: Icon(Icons.delete, color: AppColors.red),
-                title: Text(
-                  'Remove Photo',
-                  style: TextStyle(color: AppColors.red),
+                title: CustomText(
+                  text: 'Remove Photo',
+                  color: AppColors.red,
                 ),
                 onTap: () {
                   Get.back();
@@ -441,9 +442,10 @@ class ProfileController extends GetxController {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Change Password',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                CustomText(
+                  text: 'Change Password',
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
                 SizedBox(height: 20),
 
@@ -543,7 +545,7 @@ class ProfileController extends GetxController {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Get.back(),
-                        child: Text('Cancel'),
+                        child: CustomText(text: 'Cancel'),
                       ),
                     ),
                     SizedBox(width: 16),
@@ -562,7 +564,7 @@ class ProfileController extends GetxController {
                                     ),
                                   ),
                                 )
-                              : Text('Change'),
+                              : CustomText(text: 'Change'),
                         ),
                       ),
                     ),
@@ -594,19 +596,19 @@ class ProfileController extends GetxController {
   Future<void> deleteAccount() async {
     Get.dialog(
       AlertDialog(
-        title: Text('Delete Account'),
-        content: Text(
-          'Are you sure you want to delete your account? This action cannot be undone.',
+        title: CustomText(text: 'Delete Account'),
+        content: CustomText(
+          text: 'Are you sure you want to delete your account? This action cannot be undone.',
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
+          TextButton(onPressed: () => Get.back(), child: CustomText(text: 'Cancel')),
           ElevatedButton(
             onPressed: () async {
               Get.back();
               await _performDeleteAccount();
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
-            child: Text('Delete'),
+            child: CustomText(text: 'Delete'),
           ),
         ],
       ),

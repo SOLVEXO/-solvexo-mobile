@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:book_store_app/app/components/app_image_picker.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
@@ -428,13 +429,11 @@ class _PickerSheet extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppColors.black,
-              ),
+            child: CustomText(
+              text: title,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: AppColors.black,
             ),
           ),
           const Divider(height: 1, color: AppColors.lightGrey2),
@@ -450,13 +449,11 @@ class _PickerSheet extends StatelessWidget {
               itemBuilder: (_, i) {
                 final isSelected = items[i] == selected;
                 return ListTile(
-                  title: Text(
-                    items[i],
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: isSelected ? AppColors.primaryColor : AppColors.black,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
+                  title: CustomText(
+                    text: items[i],
+                    fontSize: 15,
+                    color: isSelected ? AppColors.primaryColor : AppColors.black,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                   trailing: isSelected
                       ? const Icon(Icons.check_rounded, color: AppColors.primaryColor, size: 18)

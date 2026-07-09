@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
@@ -120,7 +121,7 @@ class SellerEditProfileController extends GetxController {
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.photo_library_rounded),
-              title: const Text('Choose from Gallery'),
+              title: const CustomText(text: 'Choose from Gallery'),
               onTap: () async {
                 Get.back();
                 final f = await _uploadRepo.pickImage(source: ImageSource.gallery);
@@ -129,7 +130,7 @@ class SellerEditProfileController extends GetxController {
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt_rounded),
-              title: const Text('Take Photo'),
+              title: const CustomText(text: 'Take Photo'),
               onTap: () async {
                 Get.back();
                 final f = await _uploadRepo.pickImage(source: ImageSource.camera);
@@ -139,7 +140,7 @@ class SellerEditProfileController extends GetxController {
             if (user.value?.profileImage != null || selectedImage.value != null)
               ListTile(
                 leading: const Icon(Icons.delete_rounded, color: Colors.red),
-                title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+                title: const CustomText(text: 'Remove Photo', color: Colors.red),
                 onTap: () {
                   Get.back();
                   selectedImage.value = null;

@@ -82,7 +82,7 @@ class _PaymentTile extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(AppDimen.borderRadius)),
           alignment: Alignment.center,
-          child: Text(method.emoji, style: const TextStyle(fontSize: 20)),
+          child: CustomText(text: method.emoji, fontSize: 20),
         ),
         const SizedBox(width: 14),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

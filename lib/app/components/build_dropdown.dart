@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 
@@ -38,7 +39,7 @@ class DropdownField extends StatelessWidget {
         ),
       ),
       items: items
-          .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+          .map((item) => DropdownMenuItem(value: item, child: CustomText(text: item)))
           .toList(),
     );
   }

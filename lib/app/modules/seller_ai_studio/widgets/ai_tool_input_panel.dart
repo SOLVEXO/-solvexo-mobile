@@ -178,17 +178,15 @@ class _DropdownField extends StatelessWidget {
                       color: AppColors.lightGrey2,
                     ),
                     itemBuilder: (_, i) => ListTile(
-                      title: Text(
-                        options[i],
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: options[i] == value
-                              ? AppColors.primaryColor
-                              : AppColors.black,
-                          fontWeight: options[i] == value
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
+                      title: CustomText(
+                        text: options[i],
+                        fontSize: 14,
+                        color: options[i] == value
+                            ? AppColors.primaryColor
+                            : AppColors.black,
+                        fontWeight: options[i] == value
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                       ),
                       trailing: options[i] == value
                           ? const Icon(

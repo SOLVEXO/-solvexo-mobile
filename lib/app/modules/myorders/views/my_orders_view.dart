@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
@@ -11,8 +12,8 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/base_empty_view.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,10 +22,6 @@ import '../controllers/my_orders_controller.dart';
 class MyOrdersView extends BaseView<MyOrdersController> {
   const MyOrdersView({super.key});
 
-  // `MyOrdersView` is embedded directly as a bottom-nav tab, not only
-  // reached via `Routes.myOrdersView`'s `ProfileMyordersBinding` —
-  // self-registering keeps it working either way, matching the original
-  // `Get.put(MyOrdersController())` field-initializer behaviour.
   @override
   MyOrdersController get controller {
     if (!Get.isRegistered<MyOrdersController>()) Get.put(MyOrdersController());
@@ -32,30 +29,22 @@ class MyOrdersView extends BaseView<MyOrdersController> {
   }
 
   @override
-  Color? get backgroundColor => AppColors.background;
-
-  @override
-  PreferredSizeWidget buildAppBar(BuildContext context) {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(90),
-      child: Container(
-        padding: EdgeInsets.only(top: Get.height / 14, bottom: BaseSpacing.sm + 1, left: BaseSpacing.md - 1, right: BaseSpacing.md - 1),
-        decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
-        child: CustomTextField(
-          hintText: "Search Order",
-          isborder: true,
-          borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-          borderBorderradius: AppDimen.borderRadius,
-          prefixIcon: SvgIcon(assetName: AppIcons.searchIcon, color: AppColors.gray600),
-        ),
-      ),
-    );
-  }
-
-  @override
   Widget buildBody(BuildContext context) {
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.all(AppDimen.allPadding),
+          child: CustomTextField(
+            isborder: true,
+            fillColor: AppColors.textfldFillColor,
+            prefixIcon: SvgIcon(
+              assetName: AppIcons.searchIcon,
+              color: AppColors.lightGrey,
+              size: 22,
+            ),
+            hintText: "Search",
+          ),
+        ),
         Obx(
           () => Container(
             color: AppColors.white,
@@ -78,18 +67,33 @@ class MyOrdersView extends BaseView<MyOrdersController> {
                           duration: BaseMotion.normal,
                           curve: Curves.easeInOut,
                           constraints: const BoxConstraints(minHeight: 40),
-                          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md + 2, vertical: BaseSpacing.xs),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: BaseSpacing.md + 2,
+                            vertical: BaseSpacing.xs,
+                          ),
                           decoration: BoxDecoration(
-                            color: isActive ? AppColors.primaryColor : AppColors.background,
-                            borderRadius: BorderRadius.circular(BaseRadius.pill),
-                            border: Border.all(color: isActive ? AppColors.primaryColor : AppColors.lightGrey2),
+                            color: isActive
+                                ? AppColors.primaryColor
+                                : AppColors.background,
+                            borderRadius: BorderRadius.circular(
+                              BaseRadius.pill,
+                            ),
+                            border: Border.all(
+                              color: isActive
+                                  ? AppColors.primaryColor
+                                  : AppColors.lightGrey2,
+                            ),
                           ),
                           alignment: Alignment.center,
-                          child: Text(
-                            controller.tabs[i],
-                            style: BaseTypography.labelSmall(
-                              color: isActive ? AppColors.white : AppColors.greyDefault,
-                            ).copyWith(fontWeight: isActive ? FontWeight.w700 : FontWeight.w500),
+                          child: CustomText(
+                            text: controller.tabs[i],
+                            color: isActive
+                                ? AppColors.white
+                                : AppColors.greyDefault,
+                            fontSize: AppFontSize.tiny,
+                            fontWeight: isActive
+                                ? FontWeight.w700
+                                : FontWeight.w500,
                           ),
                         ),
                       ),
@@ -114,13 +118,17 @@ class MyOrdersView extends BaseView<MyOrdersController> {
                     LoginSignupCard(),
                     SizedBox(height: BaseSpacing.xl),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md - 1),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: BaseSpacing.md - 1,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Featured Items you may like",
-                            style: BaseTypography.bodyLarge(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+                          CustomText(
+                            text: "Featured Items you may like",
+                            color: AppColors.black,
+                            fontSize: AppFontSize.small,
+                            fontWeight: FontWeight.w600,
                           ),
                           RecommendedProductList(),
                         ],
@@ -146,7 +154,9 @@ class MyOrdersView extends BaseView<MyOrdersController> {
             return CustomRefreshWrapper(
               onRefresh: () => controller.refreshOrders(),
               child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
                 itemCount: controller.filteredOrders.length,
                 itemBuilder: (_, i) {
                   final order = controller.filteredOrders[i];

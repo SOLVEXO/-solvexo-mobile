@@ -1,4 +1,5 @@
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -58,12 +59,17 @@ class CustomTextField extends StatelessWidget {
 
     return Container(
       margin: ispadding ? EdgeInsets.only(bottom: 2) : null,
-      decoration: BoxDecoration(color: color, borderRadius: borderRadius),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(BaseRadius.pill),
+        border: Border.all(color: AppColors.primaryColor.withOpacity(0.55)),
+      ),
       child: TextFormField(
         style: TextStyle(color: textColor),
         onFieldSubmitted: onFieldSubmitted,
         maxLength: maxLength,
         maxLines: maxLines,
+
         validator: validator,
         onChanged: onChanged,
         keyboardType: keyboardType,

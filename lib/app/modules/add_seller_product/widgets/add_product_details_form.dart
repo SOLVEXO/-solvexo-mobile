@@ -444,9 +444,9 @@ class _TypePreviewBadge extends StatelessWidget {
               color: AppColors.primaryColor.withOpacity(0.08),
               borderRadius: BorderRadius.circular(AppDimen.borderRadius),
             ),
-            child: Text(
-              controller.selectedTypeEmoji,
-              style: const TextStyle(fontSize: 24),
+            child: CustomText(
+              text: controller.selectedTypeEmoji,
+              fontSize: 24,
             ),
           ),
           const SizedBox(width: 12),

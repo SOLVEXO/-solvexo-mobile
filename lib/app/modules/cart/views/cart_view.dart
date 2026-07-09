@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
 import 'package:book_store_app/app/modules/cart/widgets/bottom_checkout_bar.dart';
@@ -11,8 +12,8 @@ import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dar
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/cart_controller.dart';
@@ -63,9 +64,11 @@ class CartView extends BaseView<CartController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Featured Items you may like",
-                    style: BaseTypography.bodyLarge(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+                  CustomText(
+                    text: "Featured Items you may like",
+                    color: AppColors.black,
+                    fontSize: AppFontSize.small,
+                    fontWeight: FontWeight.w600,
                   ),
                   RecommendedProductList(),
                 ],
@@ -112,9 +115,11 @@ class CartView extends BaseView<CartController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Featured Items you may like",
-                      style: BaseTypography.bodyLarge(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
+                    CustomText(
+                      text: "Featured Items you may like",
+                      color: AppColors.black,
+                      fontSize: AppFontSize.small,
+                      fontWeight: FontWeight.w600,
                     ),
                     RecommendedProductList(),
                   ],
@@ -137,10 +142,15 @@ class CartView extends BaseView<CartController> {
             onChanged: (v) => controller.toggleSelectAll(v!),
           ),
         ),
-        Text("Select All", style: BaseTypography.bodySmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w500)),
+        CustomText(
+          text: "Select All",
+          color: AppColors.black,
+          fontSize: AppFontSize.tiny,
+          fontWeight: FontWeight.w500,
+        ),
         const Spacer(),
         GhostButton(label: "Move to Wishlist", onPressed: () => controller.showWishListConformation()),
-        Text('|', style: BaseTypography.bodySmall(color: AppColors.lightGrey)),
+        CustomText(text: '|', color: AppColors.lightGrey, fontSize: AppFontSize.tiny),
         GhostButton(
           label: "Delete",
           onPressed: () {

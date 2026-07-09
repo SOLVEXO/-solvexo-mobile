@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/data/models/subscriptions/subscription_plan_model.dart';
 import 'package:book_store_app/app/modules/seller_subscriptions/controllers/seller_subscriptions_controller.dart';
@@ -8,7 +9,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,9 +33,9 @@ class SubscriptionPlansTab extends StatelessWidget {
                   children: [
                     Icon(Icons.workspace_premium_outlined, size: 48, color: AppColors.lightGrey),
                     SizedBox(height: BaseSpacing.sm),
-                    Text('No subscription plans yet', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600)),
+                    CustomText(text: 'No subscription plans yet', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
                     SizedBox(height: BaseSpacing.xxs),
-                    Text('Create a plan buyers can subscribe to for recurring revenue.', style: BaseTypography.labelSmall(color: AppColors.gray600), textAlign: TextAlign.center),
+                    CustomText(text: 'Create a plan buyers can subscribe to for recurring revenue.', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, textAlign: TextAlign.center),
                   ],
                 ),
               ),
@@ -66,7 +67,7 @@ class SubscriptionPlansTab extends StatelessWidget {
             onPressed: () => _PlanFormSheet.show(context, controller),
             backgroundColor: AppColors.primaryColor,
             icon: const Icon(Icons.add_rounded, color: AppColors.white),
-            label: Text('New Plan', style: BaseTypography.bodySmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+            label: CustomText(text: 'New Plan', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -111,21 +112,23 @@ class _PlanCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(plan.name, style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+                  child: CustomText(text: plan.name, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
                 ),
                 if (!plan.isActive)
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
                     decoration: BoxDecoration(color: AppColors.gray600.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-                    child: Text('Archived', style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w700, fontSize: 10.5)),
+                    child: CustomText(text: 'Archived', color: AppColors.gray600, fontSize: 10.5, fontWeight: FontWeight.w700),
                   ),
                 IconButton(icon: Icon(Icons.archive_outlined, size: 18, color: AppColors.gray600), onPressed: onArchive),
               ],
             ),
-            Text(
-              '\$${plan.displayMonthlyPrice.toStringAsFixed(2)} ${plan.displayCurrency}/mo'
+            CustomText(
+              text: '\$${plan.displayMonthlyPrice.toStringAsFixed(2)} ${plan.displayCurrency}/mo'
               '${plan.yearlyPriceUSD != null ? ' · \$${plan.yearlyPriceUSD!.toStringAsFixed(2)}/yr' : ''}',
-              style: BaseTypography.bodySmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700),
+              color: AppColors.primaryColor,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w700,
             ),
             if (plan.features.isNotEmpty) ...[
               SizedBox(height: BaseSpacing.xs),
@@ -135,7 +138,7 @@ class _PlanCard extends StatelessWidget {
                       children: [
                         Icon(Icons.check_circle_outline_rounded, size: 13, color: AppColors.greenSuccess),
                         SizedBox(width: BaseSpacing.xxs),
-                        Expanded(child: Text(f, style: BaseTypography.labelSmall(color: AppColors.gray600), overflow: TextOverflow.ellipsis)),
+                        Expanded(child: CustomText(text: f, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   )),
@@ -145,11 +148,11 @@ class _PlanCard extends StatelessWidget {
               children: [
                 Icon(Icons.groups_outlined, size: 13, color: AppColors.gray600),
                 SizedBox(width: BaseSpacing.xxs / 2),
-                Text('${plan.subscriberCount} subscribers', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                CustomText(text: '${plan.subscriberCount} subscribers', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                 SizedBox(width: BaseSpacing.sm),
                 Icon(Icons.trending_up_rounded, size: 13, color: AppColors.gray600),
                 SizedBox(width: BaseSpacing.xxs / 2),
-                Text('\$${plan.monthlyRecurringRevenueUSD.toStringAsFixed(0)}/mo MRR', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                CustomText(text: '\$${plan.monthlyRecurringRevenueUSD.toStringAsFixed(0)}/mo MRR', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
               ],
             ),
           ],
@@ -259,7 +262,7 @@ class _PlanFormSheetState extends State<_PlanFormSheet> {
                       decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
-                  Text(_isEdit ? 'Edit Plan' : 'Create Plan', style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold)),
+                  CustomText(text: _isEdit ? 'Edit Plan' : 'Create Plan', color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
                   SizedBox(height: BaseSpacing.md),
                   CustomTextField(label: 'Plan Name', hintText: 'e.g. Pro Plan', controller: _nameCtrl, isborder: true),
                   SizedBox(height: BaseSpacing.sm),
@@ -281,7 +284,7 @@ class _PlanFormSheetState extends State<_PlanFormSheet> {
                         decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.md)),
                         child: widget.controller.isSavingPlan.value
                             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-                            : Text(_isEdit ? 'Save Changes' : 'Create Plan', style: BaseTypography.bodyLarge(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+                            : CustomText(text: _isEdit ? 'Save Changes' : 'Create Plan', color: AppColors.white, fontSize: AppFontSize.small, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),

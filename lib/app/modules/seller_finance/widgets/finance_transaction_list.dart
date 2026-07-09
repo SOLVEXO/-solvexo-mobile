@@ -271,13 +271,11 @@ class _TypePill extends StatelessWidget {
         color: type.bgColor,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        type.label,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: type.color,
-        ),
+      child: CustomText(
+        text: type.label,
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+        color: type.color,
       ),
     );
   }

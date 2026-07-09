@@ -75,14 +75,12 @@ class RecentOrder extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Total Transaction", style: TextStyle(color: AppColors.greyDefault)),
-            Text(
-              "\$${orderItem.price}",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryColor,
-              ),
+            CustomText(text: "Total Transaction", color: AppColors.greyDefault),
+            CustomText(
+              text: "\$${orderItem.price}",
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryColor,
             ),
           ],
         ),

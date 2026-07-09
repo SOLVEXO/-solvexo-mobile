@@ -100,7 +100,7 @@ class _SellCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(data.emoji, style: const TextStyle(fontSize: 30)),
+                CustomText(text: data.emoji, fontSize: 30),
                 _CheckBadge(isSelected: isSelected),
               ],
             ),
@@ -177,7 +177,7 @@ class _ToolsPanel extends StatelessWidget {
           children: [
             Row(
               children: const [
-                Text('✨', style: TextStyle(fontSize: 14)),
+                CustomText(text: '✨', fontSize: 14),
                 SizedBox(width: 6),
                 CustomText(
                   text: "We'll activate these tools for you:",

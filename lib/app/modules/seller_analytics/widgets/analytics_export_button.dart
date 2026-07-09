@@ -1,7 +1,8 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_analytics/controllers/seller_analytics_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,7 +23,12 @@ class AnalyticsExportButton extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Export Report', style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold)),
+                child: CustomText(
+                  text: 'Export Report',
+                  color: AppColors.black2,
+                  fontSize: AppFontSize.small2,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             SizedBox(height: BaseSpacing.xs),
@@ -96,7 +102,12 @@ class _Row extends StatelessWidget {
               child: Icon(icon, size: 20, color: AppColors.primaryColor),
             ),
             SizedBox(width: BaseSpacing.sm + 2),
-            Text(label, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w500)),
+            CustomText(
+              text: label,
+              color: AppColors.black2,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w500,
+            ),
           ],
         ),
       ),

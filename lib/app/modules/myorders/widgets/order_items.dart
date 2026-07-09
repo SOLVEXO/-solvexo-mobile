@@ -1,8 +1,9 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,7 +19,7 @@ class OrderItems extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Your Order', style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w800)),
+        CustomText(text: 'Your Order', color: AppColors.black, fontSize: AppFontSize.small2, fontWeight: FontWeight.w800),
         ListView.builder(
           itemCount: item.allItems.length,
           shrinkWrap: true,
@@ -37,17 +38,21 @@ class OrderItems extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          orderDetail.name,
-                          style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w700),
+                        CustomText(
+                          text: orderDetail.name,
+                          color: AppColors.black,
+                          fontSize: AppFontSize.extraSmall,
+                          fontWeight: FontWeight.w700,
                         ),
-                        Text("Qty: ${orderDetail.quantity}", style: BaseTypography.bodyMedium(color: AppColors.gray600)),
+                        CustomText(text: "Qty: ${orderDetail.quantity}", color: AppColors.gray600, fontSize: AppFontSize.extraSmall),
                       ],
                     ),
                   ),
-                  Text(
-                    "\$${orderDetail.price.toStringAsFixed(2)}",
-                    style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
+                  CustomText(
+                    text: "\$${orderDetail.price.toStringAsFixed(2)}",
+                    color: AppColors.black,
+                    fontSize: AppFontSize.extraSmall,
+                    fontWeight: FontWeight.bold,
                   ),
                 ],
               ),

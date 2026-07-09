@@ -1,6 +1,7 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/core/theme/base_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
 /// The one error screen every redesigned view should use instead of a bare
@@ -37,12 +38,11 @@ class BaseErrorView extends StatelessWidget {
               child: const Icon(Icons.error_outline_rounded, size: 40, color: BaseColors.danger),
             ),
             const SizedBox(height: BaseSpacing.lg),
-            Text(
-              message,
+            CustomText(
+              text: message,
               textAlign: TextAlign.center,
-              style: BaseTypography.bodyMedium(
-                color: isDark ? BaseColors.onSurfaceMutedDark : BaseColors.onSurfaceMutedLight,
-              ),
+              color: isDark ? BaseColors.onSurfaceMutedDark : BaseColors.onSurfaceMutedLight,
+              fontSize: AppFontSize.extraSmall,
             ),
             if (onRetry != null) ...[
               const SizedBox(height: BaseSpacing.lg),
@@ -53,7 +53,7 @@ class BaseErrorView extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: BaseSpacing.xl, vertical: BaseSpacing.md),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(BaseRadius.md)),
                 ),
-                child: Text(retryLabel, style: BaseTypography.labelLarge(color: Colors.white)),
+                child: CustomText(text: retryLabel, color: Colors.white, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
               ),
             ],
           ],

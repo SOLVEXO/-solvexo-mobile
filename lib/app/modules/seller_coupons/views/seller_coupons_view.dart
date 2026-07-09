@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/marketing/coupon_model.dart';
 import 'package:book_store_app/app/modules/seller_coupons/controllers/seller_coupons_controller.dart';
 import 'package:book_store_app/app/modules/seller_coupons/widgets/coupon_card.dart';
@@ -9,7 +10,7 @@ import 'package:book_store_app/app/modules/seller_coupons/widgets/coupons_shimme
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -27,7 +28,7 @@ class SellerCouponsView extends StatelessWidget {
         onPressed: () => CouponFormSheet.show(context, controller),
         backgroundColor: AppColors.primaryColor,
         icon: const Icon(Icons.add_rounded, color: AppColors.white),
-        label: Text('New Coupon', style: BaseTypography.bodySmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+        label: CustomText(text: 'New Coupon', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
       ),
       body: Column(
         children: [
@@ -116,9 +117,11 @@ class _Tab extends StatelessWidget {
           color: selected ? AppColors.primaryColor : AppColors.lightGrey10,
           borderRadius: BorderRadius.circular(BaseRadius.pill),
         ),
-        child: Text(
-          label,
-          style: BaseTypography.labelSmall(color: selected ? AppColors.white : AppColors.gray600).copyWith(fontWeight: FontWeight.w600),
+        child: CustomText(
+          text: label,
+          color: selected ? AppColors.white : AppColors.gray600,
+          fontSize: AppFontSize.tiny,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -151,11 +154,11 @@ class _EmptyState extends StatelessWidget {
             child: Icon(Icons.local_offer_outlined, size: 34, color: AppColors.primaryColor),
           ),
           SizedBox(height: BaseSpacing.md),
-          Text('No coupons found', style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold)),
+          CustomText(text: 'No coupons found', color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
           SizedBox(height: BaseSpacing.xxs + 2),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxl),
-            child: Text(message, style: BaseTypography.bodySmall(color: AppColors.gray600), textAlign: TextAlign.center),
+            child: CustomText(text: message, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400, textAlign: TextAlign.center),
           ),
         ],
       ),

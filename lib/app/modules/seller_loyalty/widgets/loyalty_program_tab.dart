@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/data/models/loyalty/loyalty_program_model.dart';
 import 'package:book_store_app/app/modules/seller_loyalty/controllers/seller_loyalty_controller.dart';
@@ -6,7 +7,7 @@ import 'package:book_store_app/app/modules/seller_loyalty/widgets/loyalty_shimme
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -75,11 +76,13 @@ class _LoyaltyProgramTabState extends State<LoyaltyProgramTab> {
               activeColor: AppColors.primaryColor,
               onChanged: c.isSavingProgram.value ? null : c.toggleEnabled,
             ),
-            child: Text(
-              program.isEnabled
+            child: CustomText(
+              text: program.isEnabled
                   ? 'Buyers can earn and redeem points at your store.'
                   : 'Enable to let buyers start earning points on purchases.',
-              style: BaseTypography.labelSmall(color: AppColors.gray600),
+              color: AppColors.gray600,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
             ),
           ),
           SizedBox(height: BaseSpacing.md),
@@ -155,7 +158,7 @@ class _SaveButton extends StatelessWidget {
         decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.md)),
         child: isSaving
             ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-            : Text(label, style: BaseTypography.bodySmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w700)),
+            : CustomText(text: label, color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -183,7 +186,7 @@ class _SectionCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+              CustomText(text: title, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
               if (trailing != null) trailing!,
             ],
           ),
@@ -254,7 +257,7 @@ class _TiersEditor extends StatelessWidget {
           if (tiers.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: BaseSpacing.sm),
-              child: Text('No tiers configured yet. Add one to reward your most loyal buyers.', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+              child: CustomText(text: 'No tiers configured yet. Add one to reward your most loyal buyers.', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
             ),
           ...tiers.asMap().entries.map((entry) {
             final i = entry.key;
@@ -269,10 +272,10 @@ class _TiersEditor extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(t.name, style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
-                        Text('${t.minPoints}+ lifetime points', style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                        CustomText(text: t.name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+                        CustomText(text: '${t.minPoints}+ lifetime points', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                         if (t.benefits.isNotEmpty)
-                          Text(t.benefits.join(' · '), style: BaseTypography.labelSmall(color: AppColors.gray600)),
+                          CustomText(text: t.benefits.join(' · '), color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                       ],
                     ),
                   ),
@@ -299,7 +302,7 @@ class _TiersEditor extends StatelessWidget {
                 border: Border.all(color: AppColors.primaryColor, width: 1.5),
                 borderRadius: BorderRadius.circular(BaseRadius.md),
               ),
-              child: Text('+ Add Tier', style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700)),
+              child: CustomText(text: '+ Add Tier', color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
             ),
           ),
         ],

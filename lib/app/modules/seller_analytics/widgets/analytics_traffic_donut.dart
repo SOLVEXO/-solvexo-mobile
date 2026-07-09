@@ -1,8 +1,9 @@
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/analytics/traffic_source_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -40,12 +41,24 @@ class _AnalyticsTrafficDonutState extends State<AnalyticsTrafficDonut> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Traffic Sources', style: BaseTypography.bodyMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700)),
+          CustomText(
+            text: 'Traffic Sources',
+            color: AppColors.black2,
+            fontSize: AppFontSize.extraSmall,
+            fontWeight: FontWeight.w700,
+          ),
           SizedBox(height: BaseSpacing.md),
           if (total == 0)
             Padding(
               padding: EdgeInsets.symmetric(vertical: BaseSpacing.xl),
-              child: Center(child: Text('No orders in this period', style: BaseTypography.labelSmall(color: AppColors.gray600))),
+              child: Center(
+                child: CustomText(
+                  text: 'No orders in this period',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             )
           else
             Row(
@@ -104,11 +117,20 @@ class _LegendRow extends StatelessWidget {
           Container(width: 9, height: 9, decoration: BoxDecoration(color: _kSourceColors[source.source] ?? AppColors.lightGrey, shape: BoxShape.circle)),
           SizedBox(width: BaseSpacing.xs),
           Expanded(
-            child: Text(source.label, style: BaseTypography.labelSmall(color: AppColors.black2), maxLines: 1, overflow: TextOverflow.ellipsis),
+            child: CustomText(
+              text: source.label,
+              color: AppColors.black2,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          Text(
-            '${source.percent.toStringAsFixed(0)}%',
-            style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700),
+          CustomText(
+            text: '${source.percent.toStringAsFixed(0)}%',
+            color: AppColors.black2,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w700,
           ),
         ],
       ),
