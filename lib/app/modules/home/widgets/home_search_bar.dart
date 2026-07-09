@@ -3,6 +3,7 @@ import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,7 +20,6 @@ class HomeSearchBar extends StatelessWidget {
       child: CustomTextField(
         isborder: true,
         fillColor: AppColors.textfldFillColor,
-        // filled: true,
         controller: controller.searchTextCtrl,
         onChanged: controller.searchProducts,
         hintText: 'Search products…',
@@ -34,15 +34,15 @@ class HomeSearchBar extends StatelessWidget {
           () => controller.searchQuery.value.isNotEmpty
               ? GestureDetector(
                   onTap: controller.clearSearch,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: SvgIcon(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm),
+                    child: const SvgIcon(
                       assetName: AppIcons.cross,
                       color: AppColors.textPrimary,
                     ),
                   ),
                 )
-              : const SizedBox(width: 12),
+              : SizedBox(width: BaseSpacing.sm),
         ),
       ),
     );

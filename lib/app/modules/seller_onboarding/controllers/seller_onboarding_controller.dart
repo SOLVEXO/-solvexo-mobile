@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:book_store_app/app/components/app_image_picker.dart';
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
+import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
+import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
@@ -148,13 +150,6 @@ const kCountries = [
   'Malaysia', 'Singapore', 'Pakistan', 'India', 'South Africa',
 ];
 
-const kStoreCategories = [
-  'Education & Learning', 'Arts & Crafts', 'Fashion & Apparel',
-  'Electronics', 'Food & Beverage', 'Health & Beauty',
-  'Home & Garden', 'Sports & Outdoors', 'Books & Media',
-  'Services & Consulting', 'Others',
-];
-
 // ── API value helpers ─────────────────────────────────────────────────────────
 
 extension SellerTypeApi on SellerTypeOption {
@@ -191,14 +186,21 @@ class SellerOnboardingController extends GetxController {
   final RxBool isSaving = false.obs;
   Rx<StoreModel?> createdStore = Rx(null);
 
-  final _sellerRepo  = SellerRepository();
-  final _uploadRepo  = UploadRepository();
+  final _sellerRepo   = SellerRepository();
+  final _uploadRepo   = UploadRepository();
+  final _categoryRepo = CategoryRepository();
 
   // Step 1 — Store Info
   final RxString    storeName        = ''.obs;
-  final RxString    storeCategory    = ''.obs;
+  final RxString    storeCategory    = ''.obs; // display name shown in the picker
+  final RxString    storeCategoryId  = ''.obs; // real category _id sent to the backend
   final RxString    storeDescription = ''.obs;
   final Rx<File?>   logoFile         = Rx<File?>(null);
+
+  // Admin-curated main categories a seller picks from — sellers cannot
+  // create these themselves, only choose one.
+  final RxList<CategoryModel> mainCategories = <CategoryModel>[].obs;
+  final RxBool isLoadingCategories = false.obs;
 
   // Step 2 — Seller Type (single-select)
   final Rx<SellerTypeOption?> sellerType = Rx(null);
@@ -304,13 +306,34 @@ class SellerOnboardingController extends GetxController {
     );
   }
 
-  void pickCategory() {
+  Future<void> _fetchMainCategories() async {
+    isLoadingCategories.value = true;
+    final trees = await _categoryRepo.getAllCategoryTrees();
+    // `getAllCategoryTrees` returns only root categories already, but
+    // filter defensively in case that ever changes.
+    mainCategories.assignAll(trees.where((c) => c.isParent));
+    isLoadingCategories.value = false;
+  }
+
+  Future<void> pickCategory() async {
+    if (mainCategories.isEmpty && !isLoadingCategories.value) {
+      await _fetchMainCategories();
+    }
+    if (mainCategories.isEmpty) {
+      ToastUtil.showToast('No store categories are available right now.');
+      return;
+    }
+
     Get.bottomSheet(
       _PickerSheet(
         title: 'Store Category',
-        items: kStoreCategories,
+        items: mainCategories.map((c) => c.name).toList(),
         selected: storeCategory.value,
-        onSelect: (v) => storeCategory.value = v,
+        onSelect: (name) {
+          storeCategory.value = name;
+          storeCategoryId.value =
+              mainCategories.firstWhereOrNull((c) => c.name == name)?.id ?? '';
+        },
       ),
       backgroundColor: Colors.transparent,
     );
@@ -336,7 +359,7 @@ class SellerOnboardingController extends GetxController {
       sellerType:   sellerType.value?.apiValue ?? 'creator',
       productTypes: whatYouSell.map((o) => o.apiValue).toList(),
       description:  storeDescription.value.trim(),
-      categoryId:   storeCategory.value.trim(),
+      categoryId:   storeCategoryId.value.trim(),
       logoUrl:      logoUrl,
     );
 
@@ -358,6 +381,7 @@ class SellerOnboardingController extends GetxController {
     super.onInit();
     storeNameCtrl = TextEditingController();
     storeDescCtrl = TextEditingController();
+    _fetchMainCategories();
   }
 
   @override

@@ -1,7 +1,7 @@
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 
 class PricingSection extends StatelessWidget {
@@ -12,25 +12,15 @@ class PricingSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Current Price (or Discounted Price)
-        CustomText(
-          text: "\$${product.price.toStringAsFixed(2)}",
-          fontSize: AppFontSize.regular,
-          fontWeight: FontWeight.w700,
-          color: AppColors.primaryColor,
+        // Current price (discount price support: TODO once the backend
+        // model exposes an original/discounted price pair — not present on
+        // ProductModel yet, so a strikethrough original price can't be
+        // rendered correctly here without guessing at data that isn't there).
+        Text(
+          "\$${product.price.toStringAsFixed(2)}",
+          style: BaseTypography.titleMedium(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700),
         ),
-
-        const SizedBox(width: 8),
-
-        // Original Price (if discounted)
-        // if (product.)
-        //   CustomText(
-        //     text: "\$${product.price.toStringAsFixed(2)}",
-        //     fontSize: AppFontSize.small,
-        //     fontWeight: FontWeight.w500,
-        //     color: Colors.grey,
-        //     textDecoration: TextDecoration.lineThrough,
-        //   ),
+        SizedBox(width: BaseSpacing.xs),
       ],
     );
   }

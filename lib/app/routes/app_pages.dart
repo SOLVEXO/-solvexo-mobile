@@ -54,6 +54,14 @@ import '../modules/seller_pos_management/views/seller_pos_management_view.dart';
 import '../modules/seller_analytics/bindings/seller_analytics_binding.dart';
 import '../modules/seller_finance/bindings/seller_finance_binding.dart';
 import '../modules/seller_finance/views/seller_finance_view.dart';
+import '../modules/seller_coupons/bindings/seller_coupons_binding.dart';
+import '../modules/seller_coupons/views/seller_coupons_view.dart';
+import '../modules/seller_loyalty/bindings/seller_loyalty_binding.dart';
+import '../modules/seller_loyalty/views/seller_loyalty_view.dart';
+import '../modules/seller_subscriptions/bindings/seller_subscriptions_binding.dart';
+import '../modules/seller_subscriptions/views/seller_subscriptions_view.dart';
+import '../modules/loyalty_rewards/bindings/loyalty_rewards_binding.dart';
+import '../modules/loyalty_rewards/views/loyalty_rewards_view.dart';
 import '../modules/seller_edit_profile/bindings/seller_edit_profile_binding.dart';
 import '../modules/seller_edit_profile/views/seller_edit_profile_view.dart';
 import '../modules/seller/bindings/seller_binding.dart';
@@ -186,11 +194,6 @@ class AppPages {
       page: () => CategoryView(),
       binding: CategoryBinding(),
     ),
-    // GetPage(
-    //   name: Routes.categoryScreen,
-    //   page: () => CategoriesScreen(),
-    //   binding: CategoryBinding(),
-    // ),
     GetPage(
       name: Routes.subCategoryView,
       page: () => const SubCategoryView(),
@@ -406,6 +409,26 @@ class AppPages {
       name: Routes.sellerFinance,
       page: () => SellerFinanceView(),
       binding: SellerFinanceBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerCoupons,
+      page: () => SellerCouponsView(),
+      binding: SellerCouponsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerLoyalty,
+      page: () => SellerLoyaltyView(),
+      binding: SellerLoyaltyBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerSubscriptionPlans,
+      page: () => SellerSubscriptionsView(),
+      binding: SellerSubscriptionsBinding(),
+    ),
+    GetPage(
+      name: Routes.loyaltyRewards,
+      page: () => LoyaltyRewardsView(),
+      binding: LoyaltyRewardsBinding(),
     ),
     GetPage(
       name: Routes.sellerEditProfile,

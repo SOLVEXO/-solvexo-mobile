@@ -1,13 +1,13 @@
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
-import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 
 class MessagesEmptyState extends StatelessWidget {
-  const MessagesEmptyState({super.key});
+  final bool isArchived;
+  const MessagesEmptyState({super.key, this.isArchived = false});
 
   @override
   Widget build(BuildContext context) {
@@ -16,29 +16,31 @@ class MessagesEmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(AppDimen.allPadding + 4),
-            decoration: const BoxDecoration(
-              color: AppColors.background,
-              shape: BoxShape.circle,
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primaryColor.withOpacity(0.12), AppColors.accentColor.withOpacity(0.06)],
+              ),
+              borderRadius: BorderRadius.circular(BaseRadius.xxl),
             ),
-            child: const SvgIcon(
-              assetName: AppIcons.messageIcon,
-              size: 44,
-              color: AppColors.lightGrey,
+            alignment: Alignment.center,
+            child: SvgIcon(
+              assetName: isArchived ? AppIcons.reportIcon : AppIcons.messageIcon,
+              size: 34,
+              color: AppColors.primaryColor,
             ),
           ),
-          const SizedBox(height: 16),
-          const CustomText(
-            text: 'No messages yet',
-            fontSize: AppFontSize.small2,
-            fontWeight: FontWeight.w600,
-            color: AppColors.black2,
+          SizedBox(height: BaseSpacing.md),
+          Text(
+            isArchived ? 'No archived conversations' : 'No messages yet',
+            style: BaseTypography.titleMedium(color: AppColors.black2).copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 6),
-          const CustomText(
-            text: 'Buyer messages will appear here',
-            fontSize: AppFontSize.verySmall,
-            color: AppColors.grey,
+          SizedBox(height: BaseSpacing.xxs + 2),
+          Text(
+            isArchived ? 'Conversations you archive will show up here.' : 'Buyer messages will show up here.',
+            style: BaseTypography.bodySmall(color: AppColors.gray600),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

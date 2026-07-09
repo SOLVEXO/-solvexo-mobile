@@ -13,12 +13,9 @@ class CategoryController extends GetxController {
 
   // ─── State ────────────────────────────────────────────────────────────────
   final RxList<CategoryModel> categoryTrees = <CategoryModel>[].obs;
-  final Rx<CategoryModel?> selectedCategory = Rx<CategoryModel?>(null);
   final Rx<CategoryWithChildrenResponse?> categoryWithChildren =
       Rx<CategoryWithChildrenResponse?>(null);
-  final RxList<CategoryModel> navigationStack = <CategoryModel>[].obs;
   final RxBool isLoading = false.obs;
-  final RxBool isLoadingTree = false.obs;
   final RxBool isLoadingDetails = false.obs;
 
   final RxString searchQuery = ''.obs;
@@ -43,42 +40,16 @@ class CategoryController extends GetxController {
   bool isExpanded(String id) => expandedIds.contains(id);
 
   // ─── Select category ──────────────────────────────────────────────────────
-  /// • If the category has children  → drill down inside CategoryView
-  ///   (adds to navigationStack, loads details).
-  /// • If the category has NO children → navigate to SubCategoryView
-  ///   so the user can browse products for that leaf category.
+  /// Any category (main or sub) navigates straight to SubCategoryView, which
+  /// renders that category's own subcategories as filter chips over a single
+  /// product grid — matching the marketplace pattern (Daraz etc.) instead of
+  /// forcing the user to drill through nested category screens.
 
   void selectCategory(CategoryModel category) {
-    if (!category.hasChildren) {
-      // Leaf category → go straight to products
-      Get.toNamed(
-        Routes.subCategoryView,
-        arguments: {'categoryId': category.id, 'categoryName': category.name},
-      );
-      return;
-    }
-
-    // Parent category → drill down in-place
-    navigationStack.add(category);
-    selectedCategory.value = category;
-    fetchCategoryDetails(category.id);
-  }
-
-  // ─── Go back one level ────────────────────────────────────────────────────
-
-  void goBack() {
-    if (navigationStack.isNotEmpty) {
-      navigationStack.removeLast();
-    }
-
-    if (navigationStack.isEmpty) {
-      selectedCategory.value = null;
-      categoryWithChildren.value = null;
-    } else {
-      final last = navigationStack.last;
-      selectedCategory.value = last;
-      fetchCategoryDetails(last.id);
-    }
+    Get.toNamed(
+      Routes.subCategoryView,
+      arguments: {'categoryId': category.id, 'categoryName': category.name},
+    );
   }
 
   // ─── 1. Fetch all category trees ─────────────────────────────────────────
@@ -97,25 +68,7 @@ class CategoryController extends GetxController {
     }
   }
 
-  // ─── 2. Fetch category tree by ID ────────────────────────────────────────
-
-  Future<void> fetchCategoryTree(String categoryId) async {
-    try {
-      isLoadingTree.value = true;
-      final tree = await _categoryRepo.getCategoryTreeById(categoryId);
-      if (tree != null) {
-        selectedCategory.value = tree;
-        debugPrint('✅ Loaded category tree: ${tree.name}');
-      }
-    } catch (e) {
-      debugPrint('❌ Error loading category tree: $e');
-      ToastUtil.showToast('Failed to load category tree');
-    } finally {
-      isLoadingTree.value = false;
-    }
-  }
-
-  // ─── 3. Fetch category with direct children ───────────────────────────────
+  // ─── 2. Fetch category with direct children ───────────────────────────────
 
   Future<void> fetchCategoryDetails(String categoryId) async {
     try {
@@ -174,14 +127,6 @@ class CategoryController extends GetxController {
       flatList.addAll(tree.flatten());
     }
     return flatList;
-  }
-
-  // ─── Clear selection ──────────────────────────────────────────────────────
-
-  void clearSelection() {
-    selectedCategory.value = null;
-    categoryWithChildren.value = null;
-    navigationStack.clear();
   }
 
   // ─── Refresh ──────────────────────────────────────────────────────────────

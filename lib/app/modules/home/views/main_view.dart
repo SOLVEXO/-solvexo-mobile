@@ -10,7 +10,6 @@ class MainView extends StatelessWidget {
   MainView({super.key});
   @override
   Widget build(BuildContext context) {
-    // final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppColors.white,
       body: Obx(() => controller.screens[controller.selectedIndex.value]),

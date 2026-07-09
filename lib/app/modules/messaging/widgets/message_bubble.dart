@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/data/models/messaging/message_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -21,23 +22,22 @@ class MessageBubble extends StatelessWidget {
     return Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
+        margin: EdgeInsets.symmetric(vertical: BaseSpacing.xxs),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.74),
         child: Column(
           crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             _buildContent(context),
-            const SizedBox(height: 3),
+            SizedBox(height: BaseSpacing.xxs - 1),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CustomText(
-                  text: message.createdAt != null ? DateFormat('h:mm a').format(message.createdAt!.toLocal()) : '',
-                  fontSize: AppFontSize.tiny,
-                  color: AppColors.gray600,
+                Text(
+                  message.createdAt != null ? DateFormat('h:mm a').format(message.createdAt!.toLocal()) : '',
+                  style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400),
                 ),
                 if (isMine) ...[
-                  const SizedBox(width: 4),
+                  SizedBox(width: BaseSpacing.xxs),
                   Icon(_statusIcon, size: 13, color: _statusColor),
                 ],
               ],
@@ -58,12 +58,12 @@ class MessageBubble extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.block_rounded, size: 14, color: isMine ? AppColors.white.withOpacity(0.7) : AppColors.gray600),
-            const SizedBox(width: 6),
-            CustomText(
-              text: 'This message was deleted',
-              fontSize: AppFontSize.verySmall,
-              fontStyle: FontStyle.italic,
-              color: isMine ? AppColors.white.withOpacity(0.7) : AppColors.gray600,
+            SizedBox(width: BaseSpacing.xxs + 2),
+            Text(
+              'This message was deleted',
+              style: BaseTypography.bodySmall(
+                color: isMine ? AppColors.white.withOpacity(0.7) : AppColors.gray600,
+              ).copyWith(fontStyle: FontStyle.italic),
             ),
           ],
         ),
@@ -77,32 +77,24 @@ class MessageBubble extends StatelessWidget {
         return _productShareBubble();
       default:
         return _bubbleWrapper(
-          CustomText(
-            text: message.text ?? '',
-            fontSize: AppFontSize.verySmall,
-            color: isMine ? AppColors.white : AppColors.black2,
-          ),
+          Text(message.text ?? '', style: BaseTypography.bodySmall(color: isMine ? AppColors.white : AppColors.black2)),
         );
     }
   }
 
   Widget _bubbleWrapper(Widget child) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm + 2, vertical: BaseSpacing.xs + 2),
       decoration: BoxDecoration(
-        gradient: isMine
-            ? const LinearGradient(colors: [AppColors.primaryColor, AppColors.accentColor])
-            : null,
+        gradient: isMine ? const LinearGradient(colors: [AppColors.primaryColor, AppColors.accentColor]) : null,
         color: isMine ? null : AppColors.white,
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(16),
-          topRight: const Radius.circular(16),
-          bottomLeft: Radius.circular(isMine ? 16 : 4),
-          bottomRight: Radius.circular(isMine ? 4 : 16),
+          topLeft: Radius.circular(BaseRadius.lg),
+          topRight: Radius.circular(BaseRadius.lg),
+          bottomLeft: Radius.circular(isMine ? BaseRadius.lg : BaseRadius.xs),
+          bottomRight: Radius.circular(isMine ? BaseRadius.xs : BaseRadius.lg),
         ),
-        boxShadow: isMine
-            ? null
-            : [BoxShadow(color: AppColors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2))],
+        boxShadow: isMine ? null : BaseShadows.forLevel(BaseElevation.level1),
       ),
       child: child,
     );
@@ -110,18 +102,22 @@ class MessageBubble extends StatelessWidget {
 
   Widget _imageBubble(BuildContext context) {
     final url = message.attachments.isNotEmpty ? message.attachments.first.url : null;
-    return GestureDetector(
-      onTap: url == null ? null : () => _openFullImage(context, url),
-      child: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(16),
-          topRight: const Radius.circular(16),
-          bottomLeft: Radius.circular(isMine ? 16 : 4),
-          bottomRight: Radius.circular(isMine ? 4 : 16),
+    return Semantics(
+      button: url != null,
+      label: 'Photo message, tap to view full size',
+      child: GestureDetector(
+        onTap: url == null ? null : () => _openFullImage(context, url),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(BaseRadius.lg),
+            topRight: Radius.circular(BaseRadius.lg),
+            bottomLeft: Radius.circular(isMine ? BaseRadius.lg : BaseRadius.xs),
+            bottomRight: Radius.circular(isMine ? BaseRadius.xs : BaseRadius.lg),
+          ),
+          child: url != null
+              ? CommonImageView(url: url, width: 200, height: 220, fit: BoxFit.cover)
+              : _bubbleWrapper(Text('Photo', style: BaseTypography.bodySmall(color: AppColors.black2))),
         ),
-        child: url != null
-            ? CommonImageView(url: url, width: 200, height: 220, fit: BoxFit.cover)
-            : _bubbleWrapper(const CustomText(text: 'Photo', fontSize: AppFontSize.verySmall)),
       ),
     );
   }
@@ -138,16 +134,20 @@ class MessageBubble extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
-            right: 16,
-            child: GestureDetector(
-              onTap: () => Get.back(),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(color: AppColors.black.withOpacity(0.4), shape: BoxShape.circle),
-                alignment: Alignment.center,
-                child: const SvgIcon(assetName: AppIcons.cross, color: AppColors.white, size: 14),
+            top: MediaQuery.of(context).padding.top + BaseSpacing.sm,
+            right: BaseSpacing.md,
+            child: Semantics(
+              button: true,
+              label: 'Close image',
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(color: AppColors.black.withOpacity(0.4), shape: BoxShape.circle),
+                  alignment: Alignment.center,
+                  child: const SvgIcon(assetName: AppIcons.cross, color: AppColors.white, size: 14),
+                ),
               ),
             ),
           ),
@@ -158,42 +158,42 @@ class MessageBubble extends StatelessWidget {
 
   Widget _productShareBubble() {
     final p = message.productShare;
-    if (p == null) return _bubbleWrapper(const CustomText(text: 'Shared a product', fontSize: AppFontSize.verySmall));
+    if (p == null) return _bubbleWrapper(Text('Shared a product', style: BaseTypography.bodySmall(color: AppColors.black2)));
 
-    return GestureDetector(
-      onTap: () => Get.toNamed(Routes.productDetailsView, arguments: p.productId),
-      child: Container(
-        width: 210,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CommonImageView(url: p.image ?? '', height: 110, width: double.infinity, fit: BoxFit.cover),
-            ),
-            const SizedBox(height: 8),
-            CustomText(
-              text: p.title,
-              fontSize: AppFontSize.verySmall,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black2,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 2),
-            CustomText(
-              text: '\$${p.price.toStringAsFixed(2)}',
-              fontSize: AppFontSize.small2,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
-            ),
-          ],
+    return Semantics(
+      button: true,
+      label: 'Shared product: ${p.title}, \$${p.price.toStringAsFixed(2)}',
+      child: GestureDetector(
+        onTap: () => Get.toNamed(Routes.productDetailsView, arguments: p.productId),
+        child: Container(
+          width: 210,
+          padding: EdgeInsets.all(BaseSpacing.xs + 2),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(BaseRadius.lg),
+            boxShadow: BaseShadows.forLevel(BaseElevation.level1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(BaseRadius.md),
+                child: CommonImageView(url: p.image ?? '', height: 110, width: double.infinity, fit: BoxFit.cover),
+              ),
+              SizedBox(height: BaseSpacing.xs),
+              Text(
+                p.title,
+                style: BaseTypography.bodySmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: BaseSpacing.xxs / 2),
+              Text(
+                '\$${p.price.toStringAsFixed(2)}',
+                style: BaseTypography.bodyMedium(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         ),
       ),
     );

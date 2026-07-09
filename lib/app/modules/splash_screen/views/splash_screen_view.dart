@@ -5,6 +5,8 @@ import 'package:book_store_app/app/modules/splash_screen/controllers/splash_scre
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -55,7 +57,7 @@ class SplashView extends StatelessWidget {
                           width: 100,
                           decoration: BoxDecoration(
                             color: AppColors.white,
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(BaseRadius.xxl),
                             boxShadow: [
                               // Base shadow
                               BoxShadow(
@@ -74,7 +76,7 @@ class SplashView extends StatelessWidget {
                             ],
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: EdgeInsets.all(BaseSpacing.sm),
                             child: Image.asset(
                               AppImages.logoImage,
                               fit: BoxFit.contain,
@@ -86,7 +88,7 @@ class SplashView extends StatelessWidget {
                   },
                 ),
 
-                const SizedBox(height: 28),
+                SizedBox(height: BaseSpacing.xxl - BaseSpacing.xxs),
 
                 // Brand name + slogan
                 AnimatedBuilder(
@@ -98,18 +100,14 @@ class SplashView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Brand name
-                          const Text(
+                          Text(
                             'Solvexo',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 30,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.5,
-                            ),
+                            style: BaseTypography.displayMedium(color: AppColors.white)
+                                .copyWith(fontSize: 30, letterSpacing: 1.5),
                           ),
 
-                          const SizedBox(height: 6),
+                          SizedBox(height: BaseSpacing.xxs + 2),
 
                           // Thin divider
                           Container(
@@ -117,11 +115,11 @@ class SplashView extends StatelessWidget {
                             height: 1.5,
                             decoration: BoxDecoration(
                               color: AppColors.white.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(2),
+                              borderRadius: BorderRadius.circular(BaseRadius.xs),
                             ),
                           ),
 
-                          const SizedBox(height: 14),
+                          SizedBox(height: BaseSpacing.sm + BaseSpacing.xxs),
 
                           // Animated slogan
                           SizedBox(
@@ -136,14 +134,9 @@ class SplashView extends StatelessWidget {
                                       () => Text(
                                         controller.currentSlogan,
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: AppColors.white.withOpacity(
-                                            0.85,
-                                          ),
-                                          fontSize: 13.5,
-                                          fontWeight: FontWeight.w400,
-                                          letterSpacing: 0.5,
-                                        ),
+                                        style: BaseTypography.bodyMedium(
+                                          color: AppColors.white.withOpacity(0.85),
+                                        ).copyWith(fontSize: 13.5, fontWeight: FontWeight.w400, letterSpacing: 0.5),
                                       ),
                                     ),
                                   );
@@ -161,16 +154,16 @@ class SplashView extends StatelessWidget {
 
                 // ── Bottom logo mark + loading dots ──────────────────────
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 36),
+                  padding: EdgeInsets.only(bottom: BaseSpacing.xxl + BaseSpacing.xxs),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       _AnimatedDots(glowAnim: controller.glowAnim),
-                      const SizedBox(height: 20),
+                      SizedBox(height: BaseSpacing.lg),
                       Container(
-                        padding: EdgeInsets.all(3),
+                        padding: EdgeInsets.all(BaseSpacing.xxs - 1),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(BaseRadius.sm),
                           color: AppColors.white.withOpacity(0.2),
                         ),
                         child: SvgIcon(
@@ -209,7 +202,7 @@ class _AnimatedDots extends StatelessWidget {
             final raw = math.sin(math.pi * ((glowAnim.value - phase) % 1.0));
             final t = raw.clamp(0.0, 1.0);
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3.5),
+              padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxs - 0.5),
               child: Container(
                 width: 6 + 2 * t,
                 height: 6 + 2 * t,

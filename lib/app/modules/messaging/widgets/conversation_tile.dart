@@ -1,9 +1,9 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/messaging/conversation_model.dart';
 import 'package:book_store_app/app/components/unread_count_badge.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -25,14 +25,15 @@ class ConversationTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md - 1, vertical: BaseSpacing.sm),
         color: AppColors.white,
         child: Row(
           children: [
             UnreadCountBadge(
               count: unread,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(26),
+                borderRadius: BorderRadius.circular(BaseRadius.xxxl - 6),
                 child: avatar != null && avatar.isNotEmpty
                     ? CommonImageView(url: avatar, width: 52, height: 52, fit: BoxFit.cover)
                     : Container(
@@ -40,46 +41,45 @@ class ConversationTile extends StatelessWidget {
                         height: 52,
                         color: AppColors.primaryColor.withOpacity(0.1),
                         alignment: Alignment.center,
-                        child: CustomText(
-                          text: initials,
-                          fontSize: AppFontSize.small,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
+                        child: Text(
+                          initials,
+                          style: BaseTypography.bodyMedium(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: BaseSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomText(
-                    text: name,
-                    fontSize: AppFontSize.verySmall,
-                    fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
-                    color: AppColors.black2,
+                  Text(
+                    name,
+                    style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(
+                      fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
+                      fontSize: 13,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
-                  CustomText(
-                    text: conversation.lastMessage?.previewText ?? 'Start the conversation',
-                    fontSize: AppFontSize.tiny,
-                    fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400,
-                    color: unread > 0 ? AppColors.black2 : AppColors.gray600,
+                  SizedBox(height: BaseSpacing.xxs - 1),
+                  Text(
+                    conversation.lastMessage?.previewText ?? 'Start the conversation',
+                    style: BaseTypography.labelSmall(
+                      color: unread > 0 ? AppColors.black2 : AppColors.gray600,
+                    ).copyWith(fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            CustomText(
-              text: _relativeTime(conversation.updatedAt),
-              fontSize: AppFontSize.tiny,
-              color: unread > 0 ? AppColors.primaryColor : AppColors.gray600,
-              fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400,
+            SizedBox(width: BaseSpacing.xs),
+            Text(
+              _relativeTime(conversation.updatedAt),
+              style: BaseTypography.labelSmall(
+                color: unread > 0 ? AppColors.primaryColor : AppColors.gray600,
+              ).copyWith(fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400),
             ),
           ],
         ),

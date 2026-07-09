@@ -19,26 +19,26 @@ class StorefrontShimmer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 244,
+              height: 226,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(28),
-                      bottomRight: Radius.circular(28),
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
-                    child: Container(height: 200, width: double.infinity, color: AppColors.white),
+                    child: Container(height: 180, width: double.infinity, color: AppColors.white),
                   ),
                   Positioned(
                     bottom: 0,
                     left: 20,
                     child: Container(
-                      width: 88,
-                      height: 88,
+                      width: 92,
+                      height: 92,
                       decoration: BoxDecoration(
                         color: AppColors.white,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(24),
                         border: Border.all(color: AppColors.background, width: 4),
                       ),
                     ),
@@ -57,13 +57,13 @@ class StorefrontShimmer extends StatelessWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      _bar(width: 100, height: 30, radius: 12),
+                      Expanded(child: _bar(width: double.infinity, height: 54, radius: 12)),
                       const SizedBox(width: 10),
-                      _bar(width: 100, height: 30, radius: 12),
+                      Expanded(child: _bar(width: double.infinity, height: 54, radius: 12)),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  _bar(width: double.infinity, height: 44, radius: 12),
+                  _bar(width: double.infinity, height: 46, radius: 12),
                 ],
               ),
             ),

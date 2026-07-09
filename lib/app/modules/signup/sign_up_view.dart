@@ -1,11 +1,11 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,25 +19,19 @@ class SignUpView extends StatelessWidget {
       key: authController.registerFormKey,
       child: SingleChildScrollView(
         key: const PageStorageKey("signup"),
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+        padding: EdgeInsets.fromLTRB(BaseSpacing.xl, BaseSpacing.xs, BaseSpacing.xl, BaseSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Heading ───────────────────────────────────────────────────
-            const CustomText(
-              text: 'Create account',
-              fontSize: AppFontSize.veryLarge,
-              fontWeight: FontWeight.w800,
-              color: AppColors.black2,
-            ),
-            const SizedBox(height: 2),
-            const CustomText(
-              text: 'Fill in the details below to get started',
-              fontSize: AppFontSize.small,
-              color: AppColors.grey,
+            Text('Create account', style: BaseTypography.headlineLarge(color: AppColors.black2)),
+            SizedBox(height: BaseSpacing.xxs / 2),
+            Text(
+              'Fill in the details below to get started',
+              style: BaseTypography.bodySmall(color: AppColors.grey),
             ),
 
-            const SizedBox(height: 10),
+            SizedBox(height: BaseSpacing.sm),
 
             // ── Email ─────────────────────────────────────────────────────
             CustomTextField(
@@ -54,7 +48,7 @@ class SignUpView extends StatelessWidget {
               validator: authController.validateEmail,
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: BaseSpacing.xs),
 
             // ── First + Last name ─────────────────────────────────────────
             Row(
@@ -73,7 +67,7 @@ class SignUpView extends StatelessWidget {
                     validator: authController.validateName,
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: BaseSpacing.xs + 2),
                 Expanded(
                   child: CustomTextField(
                     hintText: 'Last name',
@@ -91,7 +85,7 @@ class SignUpView extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: BaseSpacing.xs),
 
             // ── Phone ─────────────────────────────────────────────────────
             CustomTextField(
@@ -108,7 +102,7 @@ class SignUpView extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: BaseSpacing.xs),
 
             // ── Password ──────────────────────────────────────────────────
             Obx(
@@ -136,7 +130,7 @@ class SignUpView extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: BaseSpacing.xs),
 
             // ── Confirm password ──────────────────────────────────────────
             Obx(
@@ -164,17 +158,14 @@ class SignUpView extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: BaseSpacing.sm),
 
             // ── Sign up button ────────────────────────────────────────────
             Obx(
-              () => AppButton(
-                label: authController.isLoading.value
-                    ? 'Creating Account…'
-                    : 'Create Account',
-                onPressed: authController.isLoading.value
-                    ? null
-                    : authController.register,
+              () => PrimaryButton(
+                label: authController.isLoading.value ? 'Creating Account…' : 'Create Account',
+                isLoading: authController.isLoading.value,
+                onPressed: authController.isLoading.value ? null : authController.register,
               ),
             ),
           ],

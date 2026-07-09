@@ -1,12 +1,13 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,7 +18,16 @@ class ProductCard extends StatelessWidget {
   ProductCard({super.key, required this.product, required this.index});
 
   final homeController = Get.find<HomeController>();
-  final productController = Get.put(ProductController());
+
+  // Was `Get.put(ProductController())` as a field initializer — since a
+  // grid renders many `ProductCard`s, this replaced the app-wide
+  // `ProductController` singleton (which also holds category/pagination
+  // filter state) once per card, every rebuild. `Get.find` reuses the one
+  // instance the relevant binding already created.
+  ProductController get productController {
+    if (!Get.isRegistered<ProductController>()) Get.put(ProductController());
+    return Get.find<ProductController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +36,8 @@ class ProductCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withOpacity(0.07),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(BaseRadius.lg),
+          boxShadow: BaseShadows.forLevel(BaseElevation.level1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,8 +45,7 @@ class ProductCard extends StatelessWidget {
             // ── Image — exactly 50% of card height ───────────────────
             Expanded(
               child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(BaseRadius.lg)),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -62,8 +65,8 @@ class ProductCard extends StatelessWidget {
                           ),
                     // Wishlist heart — top right
                     Positioned(
-                      top: 8,
-                      right: 8,
+                      top: BaseSpacing.xs,
+                      right: BaseSpacing.xs,
                       child: Obx(
                         () => GestureDetector(
                           onTap: () => homeController.addorRemoveWishList(
@@ -78,12 +81,7 @@ class ProductCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: AppColors.white.withOpacity(0.88),
                               shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.black.withOpacity(0.08),
-                                  blurRadius: 4,
-                                ),
-                              ],
+                              boxShadow: BaseShadows.forLevel(BaseElevation.level1),
                             ),
                             alignment: Alignment.center,
                             child: SvgIcon(
@@ -104,7 +102,7 @@ class ProductCard extends StatelessWidget {
             // ── Text — exactly 50% of card height ────────────────────
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
+                padding: EdgeInsets.fromLTRB(BaseSpacing.sm - 1, BaseSpacing.sm - 2, BaseSpacing.sm - 1, BaseSpacing.sm - 2),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,27 +111,23 @@ class ProductCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomText(
-                          text: product.name,
-                          fontSize: AppFontSize.extraSmall,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.black2,
+                        Text(
+                          product.name,
+                          style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w700),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: BaseSpacing.xxs),
                         _SellerRatingRow(product: product),
                       ],
                     ),
 
                     // Price pinned to bottom of text zone
-                    CustomText(
-                      text: product.hasPriceRange
+                    Text(
+                      product.hasPriceRange
                           ? '\$${product.price.toStringAsFixed(0)} – \$${product.maxPrice.toStringAsFixed(0)}'
                           : '\$${product.price.toStringAsFixed(0)}',
-                      fontSize: AppFontSize.medium,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.black,
+                      style: BaseTypography.titleSmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w800),
                     ),
                   ],
                 ),
@@ -158,10 +152,9 @@ class _SellerRatingRow extends StatelessWidget {
     return Row(
       children: [
         Flexible(
-          child: CustomText(
-            text: 'by Seller · ',
-            fontSize: AppFontSize.tiny,
-            color: AppColors.gray600,
+          child: Text(
+            'by Seller · ',
+            style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400, fontSize: 10.5),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -171,11 +164,10 @@ class _SellerRatingRow extends StatelessWidget {
           size: 11,
           color: const Color(0xFFFACC15),
         ),
-        const SizedBox(width: 2),
-        CustomText(
-          text: rating,
-          fontSize: AppFontSize.tiny,
-          color: AppColors.gray600,
+        SizedBox(width: BaseSpacing.xxs / 2),
+        Text(
+          rating,
+          style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400, fontSize: 10.5),
         ),
       ],
     );

@@ -1,13 +1,14 @@
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProductsGrid extends StatelessWidget {
   const ProductsGrid({super.key});
 
-  static const double _gridHPad = 15.0;
-  static const double _crossGap = 12.0;
+  static const double _gridHPad = BaseSpacing.md - 1;
+  static const double _crossGap = BaseSpacing.sm;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class ProductsGrid extends StatelessWidget {
             itemCount: controller.filteredProducts.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: cols,
-              mainAxisSpacing: 14,
+              mainAxisSpacing: BaseSpacing.md - 2,
               crossAxisSpacing: _crossGap,
               mainAxisExtent: cellHeight,
             ),

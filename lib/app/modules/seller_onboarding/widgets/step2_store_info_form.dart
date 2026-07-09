@@ -206,7 +206,13 @@ class _CategoryField extends StatelessWidget {
                           : AppColors.black,
                     ),
                   ),
-                  const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.grey),
+                  controller.isLoadingCategories.value
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                        )
+                      : const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.grey),
                 ],
               ),
             ),

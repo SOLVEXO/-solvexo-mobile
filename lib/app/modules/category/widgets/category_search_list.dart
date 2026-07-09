@@ -1,6 +1,8 @@
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,23 +19,20 @@ class CategorySearchList extends StatelessWidget {
       }
 
       return ListView.separated(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(BaseSpacing.md),
         itemCount: controller.searchResults.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        separatorBuilder: (_, __) => SizedBox(height: BaseSpacing.sm),
         itemBuilder: (_, index) {
           final category = controller.searchResults[index];
 
           return ListTile(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(BaseRadius.md)),
             tileColor: AppColors.white,
             leading: const Icon(Icons.category),
-            title: Text(category.name),
+            title: Text(category.name, style: BaseTypography.bodyLarge(color: AppColors.black)),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               Get.toNamed(
-                // '/products',
                 Routes.subCategoryView,
                 arguments: {
                   'categoryId': category.id,
@@ -56,7 +55,7 @@ class CategoryEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(text, style: TextStyle(color: AppColors.greySwatch600)),
+      child: Text(text, style: BaseTypography.bodySmall(color: AppColors.greySwatch600)),
     );
   }
 }

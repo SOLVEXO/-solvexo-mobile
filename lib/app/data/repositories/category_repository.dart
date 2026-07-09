@@ -74,15 +74,55 @@ class CategoryRepository {
 
       debugPrint('✅ Category Tree Response: ${response.data}');
 
-      if (response.data != null) {
-        // Response is the category object directly
-        return CategoryModel.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data?['data'];
+      if (data is Map<String, dynamic>) {
+        return CategoryModel.fromJson(data);
       }
 
       return null;
     } catch (e) {
       debugPrint('❌ Error fetching category tree by ID: $e');
       rethrow;
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // 4. CREATE CATEGORY — admin: main categories only; seller: optional
+  //    subcategories, nested one level under an existing main category.
+  // ─────────────────────────────────────────
+
+  Future<CategoryModel?> createCategory({
+    required String name,
+    String? parentId,
+    String? image,
+    String? description,
+    int? sortOrder,
+  }) async {
+    try {
+      final response = await _baseClient.post(
+        ApiConstants.addCategory,
+        data: {
+          'name': name,
+          if (parentId != null) 'parentId': parentId,
+          if (image != null) 'image': image,
+          if (description != null) 'description': description,
+          if (sortOrder != null) 'sortOrder': sortOrder,
+        },
+      );
+
+      debugPrint('✅ createCategory Response: ${response.data}');
+
+      final data = response.data?['data'];
+      if (response.data?['success'] == true && data is Map<String, dynamic>) {
+        return CategoryModel.fromJson(data);
+      }
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint('❌ Error creating category: $e');
+      return null;
     }
   }
 

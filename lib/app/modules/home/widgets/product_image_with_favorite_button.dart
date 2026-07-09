@@ -45,7 +45,8 @@ class ProductImageWithFavoriteButton extends StatelessWidget {
             ),
           ),
 
-          // Favorite Button (Top Right)
+          // Favorite Button (Top Right) — IconButton already provides the
+          // Material-standard 48x48 minimum touch target.
           Positioned(
             top: 0,
             right: 0,
@@ -63,45 +64,6 @@ class ProductImageWithFavoriteButton extends StatelessWidget {
               ),
             ),
           ),
-
-          // // Discount Badge (Top Left)
-          // if (product.hasDiscount && product.discountPercentage != null)
-          //   Positioned(
-          //     top: 8,
-          //     left: 8,
-          //     child: Container(
-          //       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          //       decoration: BoxDecoration(
-          //         color: Colors.red,
-          //         borderRadius: BorderRadius.circular(8),
-          //       ),
-          //       child: CustomText(
-          //         text: "-${product.discountPercentage}%",
-          //         fontSize: AppFontSize.small,
-          //         fontWeight: FontWeight.bold,
-          //         color: Colors.white,
-          //       ),
-          //     ),
-          //   ),
-
-          // // Out of Stock Badge
-          // if (!product.inStock)
-          //   Positioned.fill(
-          //     child: Container(
-          //       decoration: BoxDecoration(
-          //         color: Colors.black54,
-          //         borderRadius: BorderRadius.circular(radius),
-          //       ),
-          //       child: Center(
-          //         child: CustomText(
-          //           text: "OUT OF STOCK",
-          //           fontSize: AppFontSize.small,
-          //           fontWeight: FontWeight.bold,
-          //           color: Colors.white,
-          //         ),
-          //       ),
-          //     ),
-          //   ),
         ],
       );
     });

@@ -1,159 +1,217 @@
+import 'dart:convert';
+
+import 'package:book_store_app/app/data/models/analytics/analytics_overview_model.dart';
+import 'package:book_store_app/app/data/models/analytics/customer_analytics_model.dart';
+import 'package:book_store_app/app/data/models/analytics/inventory_insights_model.dart';
+import 'package:book_store_app/app/data/models/analytics/payment_method_breakdown_model.dart';
+import 'package:book_store_app/app/data/models/analytics/product_performance_model.dart';
+import 'package:book_store_app/app/data/models/analytics/revenue_point_model.dart';
+import 'package:book_store_app/app/data/models/analytics/top_product_analytics_model.dart';
+import 'package:book_store_app/app/data/models/analytics/traffic_source_model.dart';
+import 'package:book_store_app/app/data/repositories/seller_analytics_repository.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 
-enum AnalyticsPeriod { today, sevenDays, thirtyDays, ninetyDays }
+enum AnalyticsTab { overview, products, customers, inventory }
 
-class BarEntry {
-  final String label;
-  final double value;
-  const BarEntry(this.label, this.value);
-}
-
-class StatItem {
-  final String title;
-  final String value;
-  final String change;
-  final bool isPositive;
-  const StatItem({
-    required this.title,
-    required this.value,
-    required this.change,
-    required this.isPositive,
-  });
-}
-
-class TopProduct {
-  final String name;
-  final String emoji;
-  final int orders;
-  final double revenue;
-  const TopProduct({
-    required this.name,
-    required this.emoji,
-    required this.orders,
-    required this.revenue,
-  });
-}
-
-class AnalyticsData {
-  final String revenueTitle;
-  final double revenue;
-  final String revenueChange;
-  final bool revenuePositive;
-  final List<BarEntry> bars;
-  final List<StatItem> stats;
-  final List<TopProduct> topProducts;
-
-  const AnalyticsData({
-    required this.revenueTitle,
-    required this.revenue,
-    required this.revenueChange,
-    required this.revenuePositive,
-    required this.bars,
-    required this.stats,
-    required this.topProducts,
-  });
-}
+const kAnalyticsRangeLabels = {
+  '7d': 'Last 7 days',
+  '30d': 'Last 30 days',
+  '90d': 'Last 90 days',
+  '6m': 'Last 6 months',
+  '12m': 'Last 12 months',
+};
 
 class SellerAnalyticsController extends GetxController {
-  final RxBool isLoading = false.obs;
-  final Rx<AnalyticsPeriod> selectedPeriod = AnalyticsPeriod.sevenDays.obs;
-  final Rx<AnalyticsData?> data = Rx(null);
+  final SellerAnalyticsRepository _repo = SellerAnalyticsRepository();
 
-  static const _topProducts = [
-    TopProduct(name: 'Math Bundle', emoji: '📐', orders: 847, revenue: 4802),
-    TopProduct(name: 'Fractions Kit', emoji: '➗', orders: 123, revenue: 2214),
-    TopProduct(name: 'Figma UI Kit', emoji: '🎨', orders: 40, revenue: 1560),
-  ];
+  String storeId = '';
+  final Rx<AnalyticsTab> tab = AnalyticsTab.overview.obs;
+  final RxString range = '30d'.obs;
+  final RxBool isExporting = false.obs;
 
-  static const _dataset = {
-    AnalyticsPeriod.today: AnalyticsData(
-      revenueTitle: 'Revenue (Today)',
-      revenue: 1240.00,
-      revenueChange: '+5.2% vs yesterday',
-      revenuePositive: true,
-      bars: [
-        BarEntry('9am', 80), BarEntry('11am', 210), BarEntry('1pm', 150),
-        BarEntry('3pm', 330), BarEntry('5pm', 270), BarEntry('7pm', 200),
-      ],
-      stats: [
-        StatItem(title: 'Orders', value: '38', change: '↑ +5%', isPositive: true),
-        StatItem(title: 'Visitors', value: '1.8K', change: '↑ +3%', isPositive: true),
-        StatItem(title: 'Conv. Rate', value: '1.8%', change: '↑ +0.1%', isPositive: true),
-        StatItem(title: 'Avg Order', value: r'$32.63', change: r'↑ +$1.20', isPositive: true),
-      ],
-      topProducts: _topProducts,
-    ),
-    AnalyticsPeriod.sevenDays: AnalyticsData(
-      revenueTitle: 'Revenue (Last 7 Days)',
-      revenue: 8420.00,
-      revenueChange: '+18.4% vs last week',
-      revenuePositive: true,
-      bars: [
-        BarEntry('M', 900), BarEntry('T', 1200), BarEntry('W', 600),
-        BarEntry('T', 1400), BarEntry('F', 800), BarEntry('S', 1100),
-        BarEntry('S', 2420),
-      ],
-      stats: [
-        StatItem(title: 'Orders', value: '284', change: '↑ +12%', isPositive: true),
-        StatItem(title: 'Visitors', value: '14.2K', change: '↑ +8%', isPositive: true),
-        StatItem(title: 'Conv. Rate', value: '2.0%', change: '↑ +0.3%', isPositive: true),
-        StatItem(title: 'Avg Order', value: r'$29.65', change: r'↑ +$2.10', isPositive: true),
-      ],
-      topProducts: _topProducts,
-    ),
-    AnalyticsPeriod.thirtyDays: AnalyticsData(
-      revenueTitle: 'Revenue (Last 30 Days)',
-      revenue: 32140.00,
-      revenueChange: '+9.1% vs last month',
-      revenuePositive: true,
-      bars: [
-        BarEntry('W1', 7200), BarEntry('W2', 8100), BarEntry('W3', 6900),
-        BarEntry('W4', 9940),
-      ],
-      stats: [
-        StatItem(title: 'Orders', value: '1,084', change: '↑ +9%', isPositive: true),
-        StatItem(title: 'Visitors', value: '54K', change: '↑ +14%', isPositive: true),
-        StatItem(title: 'Conv. Rate', value: '2.1%', change: '↑ +0.4%', isPositive: true),
-        StatItem(title: 'Avg Order', value: r'$29.65', change: r'↓ -$0.50', isPositive: false),
-      ],
-      topProducts: _topProducts,
-    ),
-    AnalyticsPeriod.ninetyDays: AnalyticsData(
-      revenueTitle: 'Revenue (Last 90 Days)',
-      revenue: 98500.00,
-      revenueChange: '+22.3% vs last quarter',
-      revenuePositive: true,
-      bars: [
-        BarEntry('M1', 28000), BarEntry('M2', 32140), BarEntry('M3', 38360),
-      ],
-      stats: [
-        StatItem(title: 'Orders', value: '3,320', change: '↑ +22%', isPositive: true),
-        StatItem(title: 'Visitors', value: '160K', change: '↑ +31%', isPositive: true),
-        StatItem(title: 'Conv. Rate', value: '2.2%', change: '↑ +0.5%', isPositive: true),
-        StatItem(title: 'Avg Order', value: r'$29.67', change: r'↑ +$2.70', isPositive: true),
-      ],
-      topProducts: _topProducts,
-    ),
-  };
+  // ── Overview tab ───────────────────────────────────────────────────────
+  final RxBool isLoadingOverview = true.obs;
+  final Rx<AnalyticsOverviewModel> overview = Rx<AnalyticsOverviewModel>(AnalyticsOverviewModel.empty);
+  final RxString chartGranularity = 'day'.obs;
+  final RxList<RevenuePointModel> revenueSeries = <RevenuePointModel>[].obs;
+  final RxList<OrderPointModel> orderSeries = <OrderPointModel>[].obs;
+  final RxList<TrafficSourceModel> trafficSources = <TrafficSourceModel>[].obs;
+  final RxList<TopProductAnalyticsModel> topProducts = <TopProductAnalyticsModel>[].obs;
+  final RxList<PaymentMethodBreakdownModel> paymentMethods = <PaymentMethodBreakdownModel>[].obs;
+  final Rx<RevenueBreakdownModel> revenueBreakdown = Rx<RevenueBreakdownModel>(RevenueBreakdownModel.empty);
 
-  void setPeriod(AnalyticsPeriod period) {
-    selectedPeriod.value = period;
-    _load();
-  }
+  // ── Products tab ───────────────────────────────────────────────────────
+  final RxBool isLoadingProducts = false.obs;
+  final RxList<ProductPerformanceModel> products = <ProductPerformanceModel>[].obs;
+  final RxInt productsPage = 1.obs;
+  final RxInt productsTotalPages = 1.obs;
+  bool _productsLoaded = false;
+
+  // ── Customers tab ──────────────────────────────────────────────────────
+  final RxBool isLoadingCustomers = false.obs;
+  final Rx<CustomerAnalyticsModel> customers = Rx<CustomerAnalyticsModel>(CustomerAnalyticsModel.empty);
+  bool _customersLoaded = false;
+
+  // ── Inventory tab ──────────────────────────────────────────────────────
+  final RxBool isLoadingInventory = false.obs;
+  final Rx<InventoryInsightsModel> inventory = Rx<InventoryInsightsModel>(InventoryInsightsModel.empty);
+  bool _inventoryLoaded = false;
 
   @override
   void onInit() {
     super.onInit();
-    _load();
+    _init();
   }
 
-  Future<void> _load() async {
-    isLoading.value = true;
-    data.value = null;
-    await Future.delayed(const Duration(milliseconds: 500));
-    data.value = _dataset[selectedPeriod.value];
-    isLoading.value = false;
+  Future<void> _init() async {
+    storeId = await AppPreferences.getStoreId() ?? '';
+    if (storeId.isEmpty) {
+      debugPrint('⚠️ SellerAnalyticsController: no storeId in prefs');
+      isLoadingOverview.value = false;
+      return;
+    }
+    await loadOverview();
   }
 
-  Future<void> refreshData() async => _load();
+  void changeTab(AnalyticsTab value) {
+    tab.value = value;
+    switch (value) {
+      case AnalyticsTab.overview:
+        break; // already loaded eagerly, refreshed on pull-to-refresh
+      case AnalyticsTab.products:
+        if (!_productsLoaded) loadProducts();
+        break;
+      case AnalyticsTab.customers:
+        if (!_customersLoaded) loadCustomers();
+        break;
+      case AnalyticsTab.inventory:
+        if (!_inventoryLoaded) loadInventory();
+        break;
+    }
+  }
+
+  void changeRange(String value) {
+    if (range.value == value) return;
+    range.value = value;
+    refresh();
+  }
+
+  Future<void> loadOverview() async {
+    if (storeId.isEmpty) return;
+    isLoadingOverview.value = true;
+    final r = range.value;
+    final results = await Future.wait([
+      _repo.getOverview(storeId, r),
+      _repo.getRevenueOverTime(storeId, r),
+      _repo.getOrdersOverTime(storeId, r),
+      _repo.getTrafficSources(storeId, r),
+      _repo.getTopProducts(storeId, r, limit: 5),
+      _repo.getPaymentMethods(storeId, r),
+      _repo.getRevenueBreakdown(storeId, r),
+    ]);
+
+    overview.value = results[0] as AnalyticsOverviewModel;
+    final revenue = results[1] as ({String granularity, List<RevenuePointModel> series});
+    revenueSeries.assignAll(revenue.series);
+    chartGranularity.value = revenue.granularity;
+    final orders = results[2] as ({String granularity, List<OrderPointModel> series});
+    orderSeries.assignAll(orders.series);
+    trafficSources.assignAll(results[3] as List<TrafficSourceModel>);
+    topProducts.assignAll(results[4] as List<TopProductAnalyticsModel>);
+    paymentMethods.assignAll(results[5] as List<PaymentMethodBreakdownModel>);
+    revenueBreakdown.value = results[6] as RevenueBreakdownModel;
+
+    isLoadingOverview.value = false;
+  }
+
+  Future<void> loadProducts({bool loadMore = false}) async {
+    if (storeId.isEmpty) return;
+    isLoadingProducts.value = true;
+    final page = loadMore ? productsPage.value + 1 : 1;
+    final result = await _repo.getProductPerformance(storeId, range.value, page: page);
+    if (loadMore) {
+      products.addAll(result.products);
+    } else {
+      products.assignAll(result.products);
+    }
+    productsPage.value = page;
+    productsTotalPages.value = result.totalPages;
+    _productsLoaded = true;
+    isLoadingProducts.value = false;
+  }
+
+  Future<void> loadCustomers() async {
+    if (storeId.isEmpty) return;
+    isLoadingCustomers.value = true;
+    customers.value = await _repo.getCustomerAnalytics(storeId, range.value);
+    _customersLoaded = true;
+    isLoadingCustomers.value = false;
+  }
+
+  Future<void> loadInventory() async {
+    if (storeId.isEmpty) return;
+    isLoadingInventory.value = true;
+    inventory.value = await _repo.getInventoryInsights(storeId);
+    _inventoryLoaded = true;
+    isLoadingInventory.value = false;
+  }
+
+  @override
+  Future<void> refresh() async {
+    switch (tab.value) {
+      case AnalyticsTab.overview:
+        await loadOverview();
+        break;
+      case AnalyticsTab.products:
+        await loadProducts();
+        break;
+      case AnalyticsTab.customers:
+        await loadCustomers();
+        break;
+      case AnalyticsTab.inventory:
+        await loadInventory();
+        break;
+    }
+  }
+
+  // ── Export ───────────────────────────────────────────────────────────────
+
+  Future<void> exportPdf() async {
+    if (isExporting.value) return;
+    isExporting.value = true;
+    try {
+      final bytes = await _repo.exportPdf(storeId, range.value);
+      if (bytes == null) return;
+      final file = XFile.fromData(
+        Uint8List.fromList(bytes),
+        name: 'analytics-report-${DateTime.now().millisecondsSinceEpoch}.pdf',
+        mimeType: 'application/pdf',
+      );
+      await SharePlus.instance.share(ShareParams(files: [file], subject: 'Analytics Report'));
+    } finally {
+      isExporting.value = false;
+    }
+  }
+
+  Future<void> exportCsv(String section) async {
+    if (isExporting.value) return;
+    isExporting.value = true;
+    try {
+      final csv = await _repo.exportCsv(storeId, range.value, section: section);
+      if (csv == null) return;
+      final file = XFile.fromData(
+        Uint8List.fromList(utf8.encode(csv)),
+        name: 'analytics-$section-${DateTime.now().millisecondsSinceEpoch}.csv',
+        mimeType: 'text/csv',
+      );
+      await SharePlus.instance.share(
+        ShareParams(files: [file], subject: 'Analytics — ${section[0].toUpperCase()}${section.substring(1)}'),
+      );
+    } finally {
+      isExporting.value = false;
+    }
+  }
 }

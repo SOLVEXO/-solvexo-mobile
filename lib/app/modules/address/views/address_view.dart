@@ -1,8 +1,7 @@
 import 'package:book_store_app/app/base_view/base_view_screen.dart';
-import 'package:book_store_app/app/components/buttons/app_button.dart';
+import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
@@ -10,7 +9,9 @@ import 'package:book_store_app/app/modules/address/models/address_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -21,6 +22,25 @@ class AddressView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        _screen(),
+        // Brief overlay while re-fetching the latest copy of an address by
+        // id before opening the edit form (see `AddressController.startEditing`).
+        Obx(
+          () => controller.isFetchingForEdit.value
+              ? Container(
+                  color: AppColors.black.withOpacity(0.15),
+                  alignment: Alignment.center,
+                  child: const CircularProgressIndicator(color: AppColors.primaryColor),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  Widget _screen() {
     return BaseViewScreen(
       resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.background,
@@ -32,8 +52,8 @@ class AddressView extends StatelessWidget {
         () => controller.addresses.isEmpty
             ? const SizedBox.shrink()
             : Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-                child: AppButton(
+                padding: EdgeInsets.fromLTRB(BaseSpacing.xl, 0, BaseSpacing.xl, BaseSpacing.xxl - 2),
+                child: PrimaryButton(
                   label: 'Add',
                   onPressed: () {
                     controller.clearForm();
@@ -57,13 +77,11 @@ class AddressView extends StatelessWidget {
 
           // ── Address list ─────────────────────────────────────────────
           return ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: ClampingScrollPhysics(),
-            ),
+            physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
             itemCount: controller.addresses.length,
-            itemBuilder: (_, i) {
+            itemBuilder: (itemContext, i) {
               final a = controller.addresses[i];
-              return _addressCard(a, i);
+              return _addressCard(itemContext, a, i);
             },
           );
         }),
@@ -75,18 +93,18 @@ class AddressView extends StatelessWidget {
 
   Widget _emptyState() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxl - 2),
       child: Column(
-        spacing: 20,
+        spacing: BaseSpacing.lg,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgIcon(assetName: AppIcons.mapsIcon, size: 80),
-          CustomText(
+          Text(
+            "You don't have shipping address",
             textAlign: TextAlign.center,
-            text: "You don't have shipping address",
-            fontSize: AppFontSize.large,
+            style: BaseTypography.headlineSmall(color: AppColors.black),
           ),
-          AppButton(
+          PrimaryButton(
             label: 'Add Address',
             onPressed: () {
               controller.clearForm();
@@ -100,13 +118,13 @@ class AddressView extends StatelessWidget {
 
   // ─── Address card ─────────────────────────────────────────────────────────
 
-  Widget _addressCard(AddressModel a, int index) {
+  Widget _addressCard(BuildContext context, AddressModel a, int index) {
     return Container(
-      margin: const EdgeInsets.only(top: 2),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      margin: EdgeInsets.only(top: BaseSpacing.xxs / 2),
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl, vertical: BaseSpacing.md - 1),
       decoration: const BoxDecoration(color: AppColors.white),
       child: Column(
-        spacing: 10,
+        spacing: BaseSpacing.xs,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -114,22 +132,39 @@ class AddressView extends StatelessWidget {
               customcontainer(
                 Row(
                   children: [
-                    SvgIcon(
-                      assetName: AppIcons.locationIcon,
-                      color: AppColors.primaryColor,
-                    ),
-                    CustomText(text: a.label, fontWeight: FontWeight.w500),
+                    SvgIcon(assetName: AppIcons.locationIcon, color: AppColors.primaryColor),
+                    Text(a.label, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  controller.startEditing(a);
-                  Get.toNamed(Routes.addAddressView);
-                },
-                child: customcontainer(
-                  CustomText(text: 'Edit', fontWeight: FontWeight.w500),
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: BaseSpacing.xs,
+                children: [
+                  Semantics(
+                    button: true,
+                    label: 'Edit address',
+                    child: GestureDetector(
+                      onTap: () async {
+                        await controller.startEditing(a);
+                        Get.toNamed(Routes.addAddressView);
+                      },
+                      child: customcontainer(
+                        Text('Edit', style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w500)),
+                      ),
+                    ),
+                  ),
+                  Semantics(
+                    button: true,
+                    label: 'Delete address',
+                    child: GestureDetector(
+                      onTap: () => _confirmDelete(context, a),
+                      child: customcontainer(
+                        SvgIcon(assetName: AppIcons.deleteIcon, size: 18, color: AppColors.red),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -138,23 +173,18 @@ class AddressView extends StatelessWidget {
             children: [
               Expanded(
                 child: Column(
-                  spacing: 2,
+                  spacing: BaseSpacing.xxs / 2,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText(
-                      text: a.recipientName,
-                      fontSize: AppFontSize.regular,
-                      fontWeight: FontWeight.bold,
+                    Text(
+                      a.recipientName,
+                      style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
                     ),
-                    CustomText(
-                      text:
-                          '${a.addressLine1.toUpperCase()}, ${a.city.toUpperCase()}, ${a.state.toUpperCase()}, ${a.zipCode}',
-                      fontSize: AppFontSize.small,
+                    Text(
+                      '${a.addressLine1.toUpperCase()}, ${a.city.toUpperCase()}, ${a.state.toUpperCase()}, ${a.zipCode}',
+                      style: BaseTypography.bodySmall(color: AppColors.black),
                     ),
-                    CustomText(
-                      text: a.phoneNumber,
-                      fontSize: AppFontSize.small,
-                    ),
+                    Text(a.phoneNumber, style: BaseTypography.bodySmall(color: AppColors.black)),
                   ],
                 ),
               ),
@@ -173,13 +203,27 @@ class AddressView extends StatelessWidget {
     );
   }
 
+  void _confirmDelete(BuildContext context, AddressModel a) {
+    if (a.id == null) return;
+    CustomConfirmDialog.show(
+      context,
+      title: 'Delete address?',
+      message: 'This will permanently remove "${a.label}" from your saved addresses.',
+      confirmLabel: 'Delete',
+      confirmColor: AppColors.red,
+      onConfirm: () => controller.deleteAddress(a.id!),
+    );
+  }
+
   Widget customcontainer(Widget child) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      constraints: const BoxConstraints(minHeight: 40),
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: BaseSpacing.xxs),
       decoration: BoxDecoration(
         border: Border.all(width: 0.2),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(BaseRadius.sm),
       ),
+      alignment: Alignment.center,
       child: child,
     );
   }

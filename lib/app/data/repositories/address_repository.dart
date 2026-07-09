@@ -62,6 +62,31 @@ class AddressRepository {
     }
   }
 
+  // ─── Get single address ───────────────────────────────────────────────────
+  // GET /address/get-address-by-id/:id
+
+  Future<AddressModel?> getAddressById(String id) async {
+    try {
+      debugPrint('📍 GET ${ApiConstants.getAddressById(id)}');
+
+      final res = await _baseClient.get(
+        ApiConstants.getAddressById(id),
+        requiresAuth: true,
+      );
+
+      debugPrint('📦 getAddressById: ${res.data}');
+
+      final data = res.data?['data'];
+      if (data is Map<String, dynamic>) {
+        return AddressModel.fromJson(data);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('❌ getAddressById: $e');
+      return null;
+    }
+  }
+
   // ─── Add address ──────────────────────────────────────────────────────────
   // POST /address/add-address
   // Body: { label, recipientName, phoneNumber, addressLine1, addressLine2,
@@ -145,7 +170,7 @@ class AddressRepository {
     try {
       debugPrint('📍 PUT ${ApiConstants.setDefaultAddress(id)}');
 
-      final res = await _baseClient.put(ApiConstants.setDefaultAddress(id));
+      final res = await _baseClient.patch(ApiConstants.setDefaultAddress(id));
 
       debugPrint('✅ setDefault: ${res.data}');
 

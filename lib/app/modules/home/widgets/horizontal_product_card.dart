@@ -1,12 +1,13 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,48 +24,37 @@ class HorizontalProductCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 120,
-        margin: const EdgeInsets.only(bottom: 13),
+        margin: EdgeInsets.only(bottom: BaseSpacing.sm + 1),
         decoration: BoxDecoration(
           color: AppColors.white,
-          boxShadow: [
-            BoxShadow(color: AppColors.black12, blurRadius: 4, spreadRadius: 1),
-          ],
-          borderRadius: BorderRadius.circular(12),
+          boxShadow: BaseShadows.forLevel(BaseElevation.level1),
+          borderRadius: BorderRadius.circular(BaseRadius.md),
         ),
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(BaseSpacing.sm),
         child: Row(
           children: [
             Container(
               width: 95,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.black12,
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(BaseRadius.md),
+                boxShadow: BaseShadows.forLevel(BaseElevation.level1),
               ),
-              child: CommonImageView(url: prod.images.first, width: 50),
+              child: prod.images.isNotEmpty
+                  ? CommonImageView(url: prod.images.first, width: 50)
+                  : const Icon(Icons.image_outlined, color: AppColors.lightGrey7, size: 30),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: BaseSpacing.xs + 2),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomText(
-                    text: prod.name,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  CustomText(
-                    text: prod.description,
+                  Text(prod.name, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600)),
+                  Text(
+                    prod.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    fontSize: 12,
-                    color: AppColors.black54,
+                    style: BaseTypography.labelSmall(color: AppColors.black54).copyWith(fontWeight: FontWeight.w400),
                   ),
                   Expanded(
                     child: Row(
@@ -74,38 +64,20 @@ class HorizontalProductCard extends StatelessWidget {
                             scrollDirection: Axis.horizontal,
                             itemCount: 5,
                             itemBuilder: (context, index) {
-                              return SvgIcon(
-                                assetName: AppIcons.fillStar,
-                                size: AppFontSize.small2,
-                              );
+                              return SvgIcon(assetName: AppIcons.fillStar, size: 13);
                             },
                           ),
                         ),
                       ],
                     ),
                   ),
-                  CustomText(
-                    text: "\$ ${prod.price}",
-                    color: AppColors.black,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                  Text(
+                    "\$ ${prod.price}",
+                    style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
             ),
-            // Obx(
-            //   () => IconButton(
-            //     onPressed: () {
-            //       controller.favouriteMap[prod.name] =
-            //           !controller.favouriteMap[prod.name]!;
-            //     },
-            //     icon: SvgIcon(
-            //       assetName: controller.favouriteMap[prod.name]!
-            //           ? AppIcons.heartFill
-            //           : AppIcons.heartIcon,
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),

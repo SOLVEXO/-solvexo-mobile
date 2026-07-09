@@ -1,23 +1,33 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
+// NOTE (architecture): this screen's own `ChangePasswordController` is dead
+// code (an empty GetxController) — all real logic lives on the shared
+// `ProfileController`, found here rather than owned by this module. Left
+// as-is for this pass since consolidating it needs a full trace of every
+// place `ProfileController.changePassword` is called; flagging for a
+// dedicated cleanup rather than risking an untested rewire.
 class ChangePasswordView extends StatelessWidget {
   const ChangePasswordView({super.key});
   @override
   Widget build(BuildContext context) {
-    final profileController = Get.put(ProfileController());
+    // Was `Get.put(ProfileController())` — since ProfileController is a
+    // shared/permanent controller already created by the Profile screen,
+    // `Get.put` here would replace that live instance every time this
+    // screen builds. `Get.find` reuses it instead.
+    final profileController = Get.find<ProfileController>();
     return BaseViewScreen(
       appBar: CustomAppBarTwo(title: "Change Password"),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs + 2, vertical: BaseSpacing.xs + 2),
       child: Form(
         key: profileController.passwordFormKey,
         child: Column(
@@ -40,8 +50,8 @@ class ChangePasswordView extends StatelessWidget {
                   return null;
                 },
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
+                  topLeft: Radius.circular(BaseRadius.sm),
+                  topRight: Radius.circular(BaseRadius.sm),
                 ),
                 ispadding: true,
               ),
@@ -52,7 +62,6 @@ class ChangePasswordView extends StatelessWidget {
                 obscureText: !profileController.showNewPassword.value,
                 label: "New Password",
                 hintText: "Set New Password",
-
                 suffixIcon: SvgIcon(
                   assetName: profileController.showNewPassword.value
                       ? AppIcons.showPassword
@@ -92,27 +101,18 @@ class ChangePasswordView extends StatelessWidget {
                   return null;
                 },
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
+                  bottomLeft: Radius.circular(BaseRadius.sm),
+                  bottomRight: Radius.circular(BaseRadius.sm),
                 ),
               ),
             ),
-            SizedBox(height: 10),
-            AppButton(
-              iconWidget: profileController.isUpdating.value
-                  ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(AppColors.white),
-                      ),
-                    )
-                  : null,
-              label: profileController.isUpdating.value ? "" : "Reset",
-              onPressed: profileController.isUpdating.value
-                  ? null
-                  : profileController.changePassword,
+            SizedBox(height: BaseSpacing.xs + 2),
+            Obx(
+              () => PrimaryButton(
+                label: profileController.isUpdating.value ? "Updating..." : "Reset",
+                isLoading: profileController.isUpdating.value,
+                onPressed: profileController.isUpdating.value ? null : profileController.changePassword,
+              ),
             ),
           ],
         ),

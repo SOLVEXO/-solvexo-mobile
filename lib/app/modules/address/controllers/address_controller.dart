@@ -138,7 +138,23 @@ class AddressController extends GetxController {
 
   // ─── 3. Edit ──────────────────────────────────────────────────────────────
 
-  void startEditing(AddressModel address) {
+  final RxBool isFetchingForEdit = false.obs;
+
+  /// Fetches the latest copy of [address] by id before opening the edit
+  /// form, rather than trusting the (possibly stale) row from the list —
+  /// falls back to the passed-in [address] if the fetch fails.
+  Future<void> startEditing(AddressModel address) async {
+    var toEdit = address;
+    if (address.id != null) {
+      isFetchingForEdit.value = true;
+      final fresh = await _repo.getAddressById(address.id!);
+      isFetchingForEdit.value = false;
+      if (fresh != null) toEdit = fresh;
+    }
+    _populateForm(toEdit);
+  }
+
+  void _populateForm(AddressModel address) {
     _editingAddress = address;
     selectedLabel.value = address.label;
     nameCtrl.text = address.recipientName;
@@ -158,8 +174,10 @@ class AddressController extends GetxController {
       loading.value = true;
       final success = await _repo.deleteAddress(id);
       if (success) {
-        addresses.removeWhere((a) => a.id == id);
-        syncDefaultAddress();
+        // Refetch rather than splice locally: deleting the default address
+        // promotes another one server-side, and only a refetch picks up
+        // which address that ended up being.
+        await fetchAddresses();
         ToastUtil.showToast('Address deleted');
       }
     } catch (e) {

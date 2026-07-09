@@ -1,7 +1,7 @@
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
@@ -14,11 +14,11 @@ class OrderInfo extends StatelessWidget {
     final controller = Get.find<MyOrdersController>();
     final item = controller.orders[index];
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 2),
-      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      margin: EdgeInsets.symmetric(vertical: BaseSpacing.xxs / 2),
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxs + 1, vertical: BaseSpacing.xxs + 1),
       color: AppColors.white,
       child: Column(
-        spacing: 7,
+        spacing: BaseSpacing.xs - 1,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           customRow("Order Number:", item.orderNumber),
@@ -29,16 +29,12 @@ class OrderInfo extends StatelessWidget {
     );
   }
 
-  Widget customRow(String title, text) {
+  Widget customRow(String title, String text) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        CustomText(
-          text: title,
-          fontSize: AppFontSize.regular,
-          fontWeight: FontWeight.w600,
-        ),
-        CustomText(text: text, fontSize: AppFontSize.small),
+        Text(title, style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600)),
+        Text(text, style: BaseTypography.bodyMedium(color: AppColors.black)),
       ],
     );
   }

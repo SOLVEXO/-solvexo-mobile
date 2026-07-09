@@ -1,6 +1,5 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
 import 'package:book_store_app/app/modules/cart/widgets/bottom_checkout_bar.dart';
@@ -11,7 +10,9 @@ import 'package:book_store_app/app/modules/profile/controllers/profile_controlle
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/base/base_view.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/cart_controller.dart';
@@ -29,7 +30,13 @@ class CartView extends BaseView<CartController> {
     return Get.find<CartController>();
   }
 
-  ProfileController get _profileController => Get.put(ProfileController());
+  // Was unconditional `Get.put(ProfileController())` — same
+  // singleton-replacement issue fixed elsewhere: this ran every time the
+  // Cart tab was shown, wiping the shared ProfileController.
+  ProfileController get _profileController {
+    if (!Get.isRegistered<ProfileController>()) Get.put(ProfileController());
+    return Get.find<ProfileController>();
+  }
 
   @override
   Color? get backgroundColor => AppColors.white;
@@ -47,7 +54,7 @@ class CartView extends BaseView<CartController> {
     return Obx(() {
       if (profileController.user.isNull) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
           child: Column(
             children: [
               SizedBox(height: Get.height / 12),
@@ -56,10 +63,9 @@ class CartView extends BaseView<CartController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomText(
-                    text: "Featured Items you may like",
-                    fontSize: AppFontSize.regular,
-                    fontWeight: FontWeight.w600,
+                  Text(
+                    "Featured Items you may like",
+                    style: BaseTypography.bodyLarge(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
                   ),
                   RecommendedProductList(),
                 ],
@@ -102,14 +108,13 @@ class CartView extends BaseView<CartController> {
             ),
             if (controller.cartItems.length <= 2)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText(
-                      text: "Featured Items you may like",
-                      fontSize: AppFontSize.regular,
-                      fontWeight: FontWeight.w600,
+                    Text(
+                      "Featured Items you may like",
+                      style: BaseTypography.bodyLarge(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
                     ),
                     RecommendedProductList(),
                   ],
@@ -132,33 +137,18 @@ class CartView extends BaseView<CartController> {
             onChanged: (v) => controller.toggleSelectAll(v!),
           ),
         ),
-        const CustomText(
-          text: "Select All",
-          fontSize: AppFontSize.small,
-          fontWeight: FontWeight.w500,
-        ),
+        Text("Select All", style: BaseTypography.bodySmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w500)),
         const Spacer(),
-        TextButton(
-          onPressed: () => controller.showWishListConformation(),
-          child: CustomText(
-            text: "Move to Wishlist",
-            fontSize: AppFontSize.small2,
-            color: AppColors.primaryColor,
-          ),
-        ),
-        CustomText(text: '|', color: AppColors.lightGrey),
-        TextButton(
+        GhostButton(label: "Move to Wishlist", onPressed: () => controller.showWishListConformation()),
+        Text('|', style: BaseTypography.bodySmall(color: AppColors.lightGrey)),
+        GhostButton(
+          label: "Delete",
           onPressed: () {
             controller.showDeleteConfirmation(
               onLeftButtonTap: () => controller.showWishListConformation(),
               onRightButtonTap: () => controller.clearCart(),
             );
           },
-          child: CustomText(
-            text: "Delete",
-            color: AppColors.primaryColor,
-            fontSize: AppFontSize.small2,
-          ),
         ),
       ],
     );

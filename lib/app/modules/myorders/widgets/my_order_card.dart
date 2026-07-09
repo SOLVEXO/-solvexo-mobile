@@ -1,11 +1,12 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/order_actions.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/order_header.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 
@@ -16,24 +17,18 @@ class MyOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: BaseSpacing.xs),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: BaseShadows.forLevel(BaseElevation.level1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Header ────────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.xs + 2, BaseSpacing.md, BaseSpacing.xs),
             child: OrderHeader(order: order),
           ),
           const Divider(height: 1, thickness: 1, color: AppColors.background),
@@ -45,43 +40,32 @@ class MyOrderCard extends StatelessWidget {
 
           // ── Total + payment ───────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md, vertical: BaseSpacing.xs),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText(
-                      text: order.isPaid ? 'Paid' : 'Unpaid',
-                      fontSize: AppFontSize.tiny,
-                      fontWeight: FontWeight.w600,
-                      color: order.isPaid
-                          ? const Color(0xFF22C55E)
-                          : AppColors.orange,
+                    Text(
+                      order.isPaid ? 'Paid' : 'Unpaid',
+                      style: BaseTypography.labelSmall(
+                        color: order.isPaid ? const Color(0xFF22C55E) : AppColors.orange,
+                      ).copyWith(fontWeight: FontWeight.w600),
                     ),
-                    CustomText(
-                      text: order.paymentType
-                          .replaceAll('_', ' ')
-                          .toUpperCase(),
-                      fontSize: AppFontSize.tiny,
-                      color: AppColors.gray600,
+                    Text(
+                      order.paymentType.replaceAll('_', ' ').toUpperCase(),
+                      style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400),
                     ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    CustomText(
-                      text: 'Total',
-                      fontSize: AppFontSize.tiny,
-                      color: AppColors.gray600,
-                    ),
-                    CustomText(
-                      text: order.formattedTotal,
-                      fontSize: AppFontSize.small,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.black,
+                    Text('Total', style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400)),
+                    Text(
+                      order.formattedTotal,
+                      style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -91,7 +75,7 @@ class MyOrderCard extends StatelessWidget {
 
           // ── Actions ───────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+            padding: EdgeInsets.fromLTRB(BaseSpacing.md, 0, BaseSpacing.md, BaseSpacing.xs + 2),
             child: OrderActions(order: order),
           ),
         ],
@@ -124,30 +108,24 @@ class _StoreSection extends StatelessWidget {
       children: [
         // Store status row
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+          padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.xs + 2, BaseSpacing.md, BaseSpacing.xxs + 2),
           child: Row(
             children: [
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
-                  color: _storeStatusColor,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: _storeStatusColor, shape: BoxShape.circle),
               ),
-              const SizedBox(width: 6),
-              CustomText(
-                text: store.status[0].toUpperCase() + store.status.substring(1),
-                fontSize: AppFontSize.tiny,
-                fontWeight: FontWeight.w600,
-                color: _storeStatusColor,
+              SizedBox(width: BaseSpacing.xxs + 2),
+              Text(
+                store.status[0].toUpperCase() + store.status.substring(1),
+                style: BaseTypography.labelSmall(color: _storeStatusColor).copyWith(fontWeight: FontWeight.w600),
               ),
               if (store.tracking != null) ...[
                 const Spacer(),
-                CustomText(
-                  text: '${store.tracking!.carrier} · ${store.tracking!.trackingNumber}',
-                  fontSize: AppFontSize.tiny,
-                  color: AppColors.gray600,
+                Text(
+                  '${store.tracking!.carrier} · ${store.tracking!.trackingNumber}',
+                  style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ],
@@ -155,7 +133,6 @@ class _StoreSection extends StatelessWidget {
         ),
         // Items
         ...store.items.map((item) => _OrderItemRow(item: item)),
-        if (store != store) const SizedBox(height: 4),
       ],
     );
   }
@@ -170,7 +147,7 @@ class _OrderItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.xxs, BaseSpacing.md, BaseSpacing.xxs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -179,36 +156,28 @@ class _OrderItemRow extends StatelessWidget {
             width: 54,
             height: 54,
             fit: BoxFit.cover,
-            radius: BorderRadius.circular(8),
+            radius: BorderRadius.circular(BaseRadius.sm),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: BaseSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomText(
-                  text: item.name,
-                  fontSize: AppFontSize.extraSmall,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black2,
+                Text(
+                  item.name,
+                  style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w600, fontSize: 12.5),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
-                CustomText(
-                  text: 'Qty: ${item.quantity}',
-                  fontSize: AppFontSize.tiny,
-                  color: AppColors.gray600,
-                ),
+                SizedBox(height: BaseSpacing.xxs / 2),
+                Text("Qty: ${item.quantity}", style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400)),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          CustomText(
-            text: '\$${item.totalPrice.toStringAsFixed(2)}',
-            fontSize: AppFontSize.extraSmall,
-            fontWeight: FontWeight.bold,
-            color: AppColors.black,
+          SizedBox(width: BaseSpacing.xs),
+          Text(
+            '\$${item.totalPrice.toStringAsFixed(2)}',
+            style: BaseTypography.labelSmall(color: AppColors.black).copyWith(fontWeight: FontWeight.bold, fontSize: 12.5),
           ),
         ],
       ),

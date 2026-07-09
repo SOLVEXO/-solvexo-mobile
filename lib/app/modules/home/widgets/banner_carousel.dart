@@ -2,21 +2,65 @@ import 'dart:async';
 import 'package:book_store_app/app/components/custom_catagory_header.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class BannerCarousel extends StatelessWidget {
-  BannerCarousel({super.key});
+class BannerCarousel extends StatefulWidget {
+  const BannerCarousel({super.key});
 
+  @override
+  State<BannerCarousel> createState() => _BannerCarouselState();
+}
+
+class _BannerCarouselState extends State<BannerCarousel> {
   final c = Get.find<HomeController>();
   final PageController controllerPage = PageController();
+  Timer? _autoScrollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Was called unconditionally from `build()` with a plain
+    // `Timer.periodic` and no handle kept — every rebuild (e.g. whenever
+    // any parent `Obx` fired) started a *new* timer stacked on top of
+    // whatever was already running, so the carousel accelerated over time
+    // and timers leaked for the lifetime of the app. Starting once here in
+    // `initState` and cancelling in `dispose` fixes both.
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (!mounted) return;
+      if (controllerPage.hasClients && c.banners.isNotEmpty) {
+        final nextPage = (c.bannerIndex.value + 1) % c.banners.length;
+        controllerPage.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.ease,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    controllerPage.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openBannerLink(String? urlOnTap) async {
+    if (urlOnTap == null || urlOnTap.trim().isEmpty) return;
+    final uri = Uri.tryParse(urlOnTap.trim());
+    if (uri == null) return;
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched) ToastUtil.showToast('Could not open this link.');
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Start auto-scroll when widget is built
-    _startAutoScroll();
     if (c.banners.isEmpty) {
       return Shimmer.fromColors(
         baseColor: AppColors.gray600,
@@ -35,14 +79,17 @@ class BannerCarousel extends StatelessWidget {
             itemBuilder: (_, i) {
               final item = c.banners[i];
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: CustomCatagoryHeader(productImage: item.image),
+                padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md),
+                child: GestureDetector(
+                  onTap: () => _openBannerLink(item.urlOnTap),
+                  child: CustomCatagoryHeader(productImage: item.image),
+                ),
               );
             },
           ),
         ),
 
-        const SizedBox(height: 10),
+        SizedBox(height: BaseSpacing.xs + 2),
 
         Obx(
           () => SmoothIndicator(
@@ -60,19 +107,5 @@ class BannerCarousel extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  void _startAutoScroll() {
-    Timer.periodic(Duration(seconds: 5), (timer) {
-      if (controllerPage.hasClients && c.banners.isNotEmpty) {
-        int nextPage = (c.bannerIndex.value + 1) % c.banners.length;
-
-        controllerPage.animateToPage(
-          nextPage,
-          duration: Duration(milliseconds: 500),
-          curve: Curves.ease,
-        );
-      }
-    });
   }
 }

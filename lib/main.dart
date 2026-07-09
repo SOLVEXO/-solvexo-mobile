@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           // screen has been verified against the dark palette.
           themeMode: ThemeMode.light,
           debugShowCheckedModeBanner: false,
-          title: "Book Store",
+          title: "Solvexo",
           initialRoute: AppPages.initialRoute,
           getPages: AppPages.routes,
         );

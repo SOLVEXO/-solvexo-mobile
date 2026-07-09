@@ -1,13 +1,15 @@
 import 'package:book_store_app/app/components/animated_background_circles.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/welcome/controllers/welcome_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
+import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,7 +34,7 @@ class WelcomeView extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _LogoSection(),
+                const _LogoSection(),
                 _BottomSection(onSelectRole: controller.selectRole),
               ],
             ),
@@ -46,48 +48,37 @@ class WelcomeView extends StatelessWidget {
 // ── Logo + branding ───────────────────────────────────────────────────────────
 
 class _LogoSection extends StatelessWidget {
+  const _LogoSection();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          // width: 100,
-          // height: 100,
-          padding: const EdgeInsets.all(5),
+          padding: EdgeInsets.all(BaseSpacing.xxs + 1),
           decoration: BoxDecoration(
             color: AppColors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.black.withOpacity(0.18),
-                blurRadius: 24,
-                offset: const Offset(0, 10),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(BaseRadius.xxl),
+            boxShadow: BaseShadows.forLevel(BaseElevation.level4),
           ),
           child: CommonImageView(imagePath: AppImages.logoImage),
         ),
-        const SizedBox(height: 20),
-        const CustomText(
-          text: 'Solvexo',
-          fontSize: AppFontSize.veryLarge,
-          fontWeight: FontWeight.bold,
-          color: AppColors.white,
+        SizedBox(height: BaseSpacing.lg),
+        Text(
+          'Solvexo',
+          style: BaseTypography.displayMedium(color: AppColors.white),
         ),
-        const SizedBox(height: 8),
-        CustomText(
-          text: 'Commerce. Solved.',
-          fontSize: AppFontSize.small2,
-          color: AppColors.white.withOpacity(0.8),
-          fontWeight: FontWeight.w400,
+        SizedBox(height: BaseSpacing.xxs),
+        Text(
+          'Commerce. Solved.',
+          style: BaseTypography.bodyMedium(color: AppColors.white.withOpacity(0.8)),
         ),
-        const SizedBox(height: 6),
-        CustomText(
-          text: 'Buy, sell, and grow — all in one place.',
-          fontSize: AppFontSize.verySmall,
-          color: AppColors.white.withOpacity(0.65),
+        SizedBox(height: BaseSpacing.xxs - 2),
+        Text(
+          'Buy, sell, and grow — all in one place.',
           textAlign: TextAlign.center,
+          style: BaseTypography.bodySmall(color: AppColors.white.withOpacity(0.65)),
         ),
       ],
     );
@@ -105,33 +96,25 @@ class _BottomSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
-      padding: const EdgeInsets.fromLTRB(
-        AppDimen.allPadding,
-        28,
-        AppDimen.allPadding,
-        32,
-      ),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.fromLTRB(AppDimen.allPadding, BaseSpacing.xl, AppDimen.allPadding, BaseSpacing.xxl),
+      decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.all(Radius.circular(28)),
+        borderRadius: BorderRadius.circular(BaseRadius.xxxl),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CustomText(
-            text: 'How would you like to use Solvexo?',
-            fontSize: AppFontSize.small,
-            fontWeight: FontWeight.bold,
-            color: AppColors.black,
+          Text(
+            'How would you like to use Solvexo?',
+            style: BaseTypography.titleMedium(color: AppColors.black),
           ),
-          const SizedBox(height: 6),
-          CustomText(
-            text: 'You can switch anytime from your profile settings.',
-            fontSize: AppFontSize.verySmall,
-            color: AppColors.grey,
+          SizedBox(height: BaseSpacing.xxs),
+          Text(
+            'You can switch anytime from your profile settings.',
+            style: BaseTypography.bodySmall(color: AppColors.grey),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: BaseSpacing.xl),
           _RoleCard(
             emoji: AppIcons.cartIcon,
             title: 'I\'m a Buyer',
@@ -139,7 +122,7 @@ class _BottomSection extends StatelessWidget {
             isPrimary: false,
             onTap: () => onSelectRole('user'),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: BaseSpacing.sm),
           _RoleCard(
             emoji: AppIcons.cashIcon,
             title: 'I\'m a Seller',
@@ -147,13 +130,12 @@ class _BottomSection extends StatelessWidget {
             isPrimary: true,
             onTap: () => onSelectRole('seller'),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: BaseSpacing.md),
           Center(
-            child: CustomText(
-              text: 'By continuing you agree to our Terms & Privacy Policy',
-              fontSize: AppFontSize.tiny,
-              color: AppColors.lightGrey5,
+            child: Text(
+              'By continuing you agree to our Terms & Privacy Policy',
               textAlign: TextAlign.center,
+              style: BaseTypography.labelSmall(color: AppColors.lightGrey5).copyWith(fontWeight: FontWeight.w400),
             ),
           ),
         ],
@@ -179,75 +161,70 @@ class _RoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        decoration: BoxDecoration(
-          color: isPrimary ? AppColors.primaryColor : AppColors.background,
-          borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-          border: Border.all(
-            color: isPrimary ? AppColors.primaryColor : AppColors.lightGrey2,
-            width: isPrimary ? 0 : 1,
+    return Semantics(
+      button: true,
+      label: '$title — $subtitle',
+      child: PressableScale(
+        onTap: onTap,
+        child: ConstrainedBox(
+          // Enforce the 48px minimum touch target regardless of content height.
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md + 2, vertical: BaseSpacing.md),
+            decoration: BoxDecoration(
+              color: isPrimary ? AppColors.primaryColor : AppColors.background,
+              borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+              border: Border.all(
+                color: isPrimary ? AppColors.primaryColor : AppColors.lightGrey2,
+                width: isPrimary ? 0 : 1,
+              ),
+              boxShadow: isPrimary ? BaseShadows.glow(AppColors.primaryColor) : BaseShadows.none,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isPrimary ? AppColors.white.withOpacity(0.2) : AppColors.white,
+                    borderRadius: BorderRadius.circular(BaseRadius.sm),
+                  ),
+                  alignment: Alignment.center,
+                  child: SvgIcon(
+                    assetName: emoji,
+                    size: 30,
+                    color: isPrimary ? AppColors.white10 : AppColors.barrierColor,
+                  ),
+                ),
+                SizedBox(width: BaseSpacing.md - 2),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: BaseTypography.titleSmall(
+                          color: isPrimary ? AppColors.white : AppColors.black,
+                        ).copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: BaseSpacing.xxs / 2),
+                      Text(
+                        subtitle,
+                        style: BaseTypography.labelSmall(
+                          color: isPrimary ? AppColors.white.withOpacity(0.8) : AppColors.grey,
+                        ).copyWith(fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: isPrimary ? AppColors.white.withOpacity(0.8) : AppColors.lightGrey5,
+                ),
+              ],
+            ),
           ),
-          boxShadow: isPrimary
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryColor.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: isPrimary
-                    ? AppColors.white.withOpacity(0.2)
-                    : AppColors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              alignment: Alignment.center,
-              child: SvgIcon(
-                assetName: emoji,
-                size: 30,
-                color: isPrimary ? AppColors.white10 : AppColors.barrierColor,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    text: title,
-                    fontSize: AppFontSize.small2,
-                    fontWeight: FontWeight.bold,
-                    color: isPrimary ? AppColors.white : AppColors.black,
-                  ),
-                  const SizedBox(height: 2),
-                  CustomText(
-                    text: subtitle,
-                    fontSize: AppFontSize.tiny,
-                    color: isPrimary
-                        ? AppColors.white.withOpacity(0.8)
-                        : AppColors.grey,
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: isPrimary
-                  ? AppColors.white.withOpacity(0.8)
-                  : AppColors.lightGrey5,
-            ),
-          ],
         ),
       ),
     );

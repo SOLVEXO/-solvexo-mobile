@@ -92,12 +92,7 @@ class CustomAppSnackbar {
                 if (onAction != null) onAction();
               },
               child: Container(
-                padding: const EdgeInsets.only(
-                  // horizontal: 10,
-                  top: 6,
-                  left: 10,
-                  bottom: 6,
-                ),
+                padding: const EdgeInsets.all(5),
                 // margin: const EdgeInsets.only(left: 8),
                 decoration: BoxDecoration(
                   color: accentColor.withOpacity(0.15),

@@ -34,7 +34,11 @@ class SettingsTileWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppDimen.borderRadius),
               ),
               alignment: Alignment.center,
-              child: SvgIcon(assetName: tile.emoji, size: 22),
+              child: SvgIcon(
+                assetName: tile.emoji,
+                size: 22,
+                color: tile.isDanger ? AppColors.red : AppColors.primaryColor,
+              ),
             ),
             const SizedBox(width: 14),
 

@@ -1,10 +1,8 @@
 import 'package:book_store_app/app/bottom_bar/controllers/bottom_navbar_controller.dart';
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/cart_icon_with_count.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_rating_bar.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -16,7 +14,10 @@ import 'package:book_store_app/app/modules/profile/controllers/profile_controlle
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,10 +25,24 @@ class ProductDetailsView extends StatelessWidget {
   ProductDetailsView({super.key});
 
   // ── Controllers ────────────────────────────────────────────────────────
-  // ProductDetailController reads productId from Get.arguments in onInit
+  // ProductDetailController is intentionally re-put on every navigation
+  // here — each product page needs fresh state for the new productId
+  // (matches ProductDetailBinding's own lazyPut for the routed case).
   final controller = Get.put(ProductDetailController());
-  final profileController = Get.put(ProfileController());
-  final bottombarcontroller = Get.put(BottomNavController());
+
+  // These two are app-wide shared controllers, unlike the one above — was
+  // `Get.put(...)` here too, which replaced the *live* ProfileController /
+  // BottomNavController singleton every single time a product page opened,
+  // discarding whatever state (logged-in user, selected tab) they held.
+  ProfileController get profileController {
+    if (!Get.isRegistered<ProfileController>()) Get.put(ProfileController());
+    return Get.find<ProfileController>();
+  }
+
+  BottomNavController get bottombarcontroller {
+    if (!Get.isRegistered<BottomNavController>()) Get.put(BottomNavController());
+    return Get.find<BottomNavController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +66,7 @@ class ProductDetailsView extends StatelessWidget {
             size: 22,
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 20.0, left: 5),
+            padding: EdgeInsets.only(right: BaseSpacing.xl, left: BaseSpacing.xxs + 1),
             child: CartIconWithCount(),
           ),
         ],
@@ -72,15 +87,11 @@ class ProductDetailsView extends StatelessWidget {
               children: [
                 Icon(
                   Icons.error_outline_rounded,
-                  size: AppFontSize.extraLarge,
+                  size: 40,
                   color: AppColors.gray600,
                 ),
-                const SizedBox(height: 12),
-                CustomText(
-                  text: 'Product not found',
-                  fontSize: AppFontSize.regular,
-                  color: AppColors.gray600,
-                ),
+                SizedBox(height: BaseSpacing.sm),
+                Text('Product not found', style: BaseTypography.bodyLarge(color: AppColors.gray600)),
               ],
             ),
           );
@@ -114,23 +125,22 @@ class ProductDetailsView extends StatelessWidget {
 
               Container(
                 color: AppColors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
+                padding: EdgeInsets.symmetric(
+                  horizontal: BaseSpacing.xl,
+                  vertical: BaseSpacing.xs,
                 ),
                 width: double.infinity,
                 child: Column(
-                  spacing: 10,
+                  spacing: BaseSpacing.xs,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // ── Name + actions ──────────────────────────────────
                     Row(
                       children: [
                         Expanded(
-                          child: CustomText(
-                            text: product.name,
-                            fontSize: AppFontSize.medium,
-                            fontWeight: FontWeight.w600,
+                          child: Text(
+                            product.name,
+                            style: BaseTypography.titleLarge(color: AppColors.black),
                           ),
                         ),
                         const Spacer(),
@@ -152,12 +162,11 @@ class ProductDetailsView extends StatelessWidget {
                             '\$ ${controller.displayPrice.toStringAsFixed(2)}',
                             color: AppColors.primaryColor,
                           ),
-                          CustomText(
-                            text: 'Stock (${controller.displayStock})',
-                            fontSize: AppFontSize.small2,
-                            color: controller.inStock
-                                ? AppColors.green2
-                                : AppColors.red,
+                          Text(
+                            'Stock (${controller.displayStock})',
+                            style: BaseTypography.labelSmall(
+                              color: controller.inStock ? AppColors.green2 : AppColors.red,
+                            ).copyWith(fontWeight: FontWeight.w400),
                           ),
                         ],
                       ),
@@ -179,50 +188,39 @@ class ProductDetailsView extends StatelessWidget {
                           // Colors
                           if (product.availableColors.isNotEmpty) ...[
                             titleText('Color'),
-                            const SizedBox(height: 8),
+                            SizedBox(height: BaseSpacing.xs),
                             Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
+                              spacing: BaseSpacing.xs,
+                              runSpacing: BaseSpacing.xs,
                               children: variants
-                                  .where(
-                                    (v) =>
-                                        v.color != null && v.color!.isNotEmpty,
-                                  )
+                                  .where((v) => v.color != null && v.color!.isNotEmpty)
                                   .map((v) {
-                                    final isSelected =
-                                        controller.selectedVariant.value?.id ==
-                                        v.id;
-                                    return GestureDetector(
-                                      onTap: () => controller.selectVariant(v),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 180,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 5,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? AppColors.primaryColor
-                                              : AppColors.background,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
+                                    final isSelected = controller.selectedVariant.value?.id == v.id;
+                                    return Semantics(
+                                      button: true,
+                                      selected: isSelected,
+                                      label: 'Color ${v.color}',
+                                      child: GestureDetector(
+                                        onTap: () => controller.selectVariant(v),
+                                        child: AnimatedContainer(
+                                          duration: BaseMotion.normal,
+                                          constraints: const BoxConstraints(minHeight: 40),
+                                          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs + 2, vertical: BaseSpacing.xxs + 1),
+                                          decoration: BoxDecoration(
+                                            color: isSelected ? AppColors.primaryColor : AppColors.background,
+                                            borderRadius: BorderRadius.circular(BaseRadius.sm),
+                                            border: Border.all(
+                                              color: isSelected ? AppColors.primaryColor : AppColors.lightGrey,
+                                              width: 1.5,
+                                            ),
                                           ),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? AppColors.primaryColor
-                                                : AppColors.lightGrey,
-                                            width: 1.5,
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            v.color!,
+                                            style: BaseTypography.labelSmall(
+                                              color: isSelected ? AppColors.white : AppColors.textPrimary,
+                                            ).copyWith(fontWeight: FontWeight.w600),
                                           ),
-                                        ),
-                                        child: CustomText(
-                                          text: v.color!,
-                                          fontSize: AppFontSize.tiny,
-                                          fontWeight: FontWeight.w600,
-                                          color: isSelected
-                                              ? AppColors.white
-                                              : AppColors.textPrimary,
                                         ),
                                       ),
                                     );
@@ -233,60 +231,51 @@ class ProductDetailsView extends StatelessWidget {
 
                           // Sizes
                           if (product.availableSizes.isNotEmpty) ...[
-                            const SizedBox(height: 12),
+                            SizedBox(height: BaseSpacing.sm),
                             titleText('Size'),
-                            const SizedBox(height: 8),
+                            SizedBox(height: BaseSpacing.xs),
                             Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
+                              spacing: BaseSpacing.xs,
+                              runSpacing: BaseSpacing.xs,
                               children: variants
-                                  .where(
-                                    (v) => v.size != null && v.size!.isNotEmpty,
-                                  )
+                                  .where((v) => v.size != null && v.size!.isNotEmpty)
                                   .map((v) {
-                                    final isSelected =
-                                        controller.selectedVariant.value?.id ==
-                                        v.id;
+                                    final isSelected = controller.selectedVariant.value?.id == v.id;
                                     final outOfStock = !v.isInStock;
-                                    return GestureDetector(
-                                      onTap: outOfStock
-                                          ? null
-                                          : () => controller.selectVariant(v),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 180,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 5,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: outOfStock
-                                              ? AppColors.lightGrey.withOpacity(
-                                                  0.3,
-                                                )
-                                              : isSelected
-                                              ? AppColors.primaryColor
-                                              : AppColors.background,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
+                                    return Semantics(
+                                      button: true,
+                                      selected: isSelected,
+                                      enabled: !outOfStock,
+                                      label: outOfStock ? 'Size ${v.size}, out of stock' : 'Size ${v.size}',
+                                      child: GestureDetector(
+                                        onTap: outOfStock ? null : () => controller.selectVariant(v),
+                                        child: AnimatedContainer(
+                                          duration: BaseMotion.normal,
+                                          constraints: const BoxConstraints(minHeight: 40),
+                                          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs + 2, vertical: BaseSpacing.xxs + 1),
+                                          decoration: BoxDecoration(
+                                            color: outOfStock
+                                                ? AppColors.lightGrey.withOpacity(0.3)
+                                                : isSelected
+                                                    ? AppColors.primaryColor
+                                                    : AppColors.background,
+                                            borderRadius: BorderRadius.circular(BaseRadius.sm),
+                                            border: Border.all(
+                                              color: isSelected ? AppColors.primaryColor : AppColors.lightGrey,
+                                              width: 1.5,
+                                            ),
                                           ),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? AppColors.primaryColor
-                                                : AppColors.lightGrey,
-                                            width: 1.5,
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            v.size!,
+                                            style: BaseTypography.labelSmall(
+                                              color: outOfStock
+                                                  ? AppColors.gray600
+                                                  : isSelected
+                                                      ? AppColors.white
+                                                      : AppColors.textPrimary,
+                                            ).copyWith(fontWeight: FontWeight.w600),
                                           ),
-                                        ),
-                                        child: CustomText(
-                                          text: v.size!,
-                                          fontSize: AppFontSize.tiny,
-                                          fontWeight: FontWeight.w600,
-                                          color: outOfStock
-                                              ? AppColors.gray600
-                                              : isSelected
-                                              ? AppColors.white
-                                              : AppColors.textPrimary,
                                         ),
                                       ),
                                     );
@@ -300,27 +289,19 @@ class ProductDetailsView extends StatelessWidget {
                             final v = controller.selectedVariant.value;
                             if (v == null) return const SizedBox.shrink();
                             return Padding(
-                              padding: const EdgeInsets.only(top: 10),
+                              padding: EdgeInsets.only(top: BaseSpacing.sm),
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
+                                    padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs + 2, vertical: BaseSpacing.xxs + 1),
                                     decoration: BoxDecoration(
-                                      color: AppColors.primaryColor.withOpacity(
-                                        0.08,
-                                      ),
-                                      borderRadius: BorderRadius.circular(20),
+                                      color: AppColors.primaryColor.withOpacity(0.08),
+                                      borderRadius: BorderRadius.circular(BaseRadius.pill),
                                     ),
-                                    child: CustomText(
-                                      text: 'SKU: ${v.sku}',
-                                      fontSize: AppFontSize.verySmall,
-                                      color: AppColors.primaryColor,
-                                      fontWeight: FontWeight.w600,
+                                    child: Text(
+                                      'SKU: ${v.sku}',
+                                      style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w600, fontSize: 11),
                                     ),
                                   ),
                                   // Loading indicator when fetching variant
@@ -335,27 +316,22 @@ class ProductDetailsView extends StatelessWidget {
                                     )
                                   else
                                     Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 5,
-                                      ),
+                                      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs + 2, vertical: BaseSpacing.xxs + 1),
                                       decoration: BoxDecoration(
                                         color: v.isInStock
                                             ? AppColors.green2.withOpacity(0.10)
                                             : AppColors.red.withOpacity(0.10),
-                                        borderRadius: BorderRadius.circular(20),
+                                        borderRadius: BorderRadius.circular(BaseRadius.pill),
                                       ),
-                                      child: CustomText(
-                                        text: v.isUnlimited
+                                      child: Text(
+                                        v.isUnlimited
                                             ? '∞ Unlimited'
                                             : v.isInStock
-                                            ? '${v.stock} in stock'
-                                            : 'Out of stock',
-                                        fontSize: AppFontSize.verySmall,
-                                        fontWeight: FontWeight.w600,
-                                        color: v.isInStock
-                                            ? AppColors.green2
-                                            : AppColors.red,
+                                                ? '${v.stock} in stock'
+                                                : 'Out of stock',
+                                        style: BaseTypography.labelSmall(
+                                          color: v.isInStock ? AppColors.green2 : AppColors.red,
+                                        ).copyWith(fontWeight: FontWeight.w600, fontSize: 11),
                                       ),
                                     ),
                                 ],
@@ -369,49 +345,30 @@ class ProductDetailsView extends StatelessWidget {
                     const Divider(),
 
                     titleText('Description'),
-                    CustomText(
-                      text: product.description,
-                      fontSize: AppFontSize.small2,
-                    ),
+                    Text(product.description, style: BaseTypography.bodySmall(color: AppColors.black)),
 
                     // ── Rating + sold row ───────────────────────────────
                     Row(
-                      spacing: 5,
+                      spacing: BaseSpacing.xxs + 1,
                       children: [
-                        SvgIcon(
-                          assetName: AppIcons.fillStar,
-                          size: AppFontSize.small,
+                        SvgIcon(assetName: AppIcons.fillStar, size: 16),
+                        Text(
+                          product.averageRating.toStringAsFixed(1),
+                          style: BaseTypography.bodySmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
                         ),
-                        CustomText(
-                          text: product.averageRating.toStringAsFixed(1),
-                          fontSize: AppFontSize.small2,
-                          fontWeight: FontWeight.w600,
+                        Text(
+                          '(${controller.reviewStats.value.totalReviews})',
+                          style: BaseTypography.bodySmall(color: AppColors.gray600),
                         ),
-                        CustomText(
-                          text: '(${controller.reviewStats.value.totalReviews})',
-                          fontSize: AppFontSize.small2,
-                          color: AppColors.gray600,
-                        ),
-                        const VerticalDivider(
-                          color: AppColors.black,
-                          width: 1,
-                          thickness: 2,
-                        ),
-                        CustomText(
-                          text: '${product.purchaseCount} Sold',
-                          fontSize: AppFontSize.small2,
-                        ),
+                        const VerticalDivider(color: AppColors.black, width: 1, thickness: 2),
+                        Text('${product.purchaseCount} Sold', style: BaseTypography.bodySmall(color: AppColors.black)),
                       ],
                     ),
 
                     const Divider(),
 
                     // ── Reviews expansion tile ──────────────────────────
-                    _expandTile(
-                      'Reviews',
-                      false.obs,
-                      _buildReviewsContent(),
-                    ),
+                    _expandTile('Reviews', false.obs, _buildReviewsContent()),
 
                     const Divider(),
 
@@ -430,18 +387,13 @@ class ProductDetailsView extends StatelessWidget {
   // ── Helpers ────────────────────────────────────────────────────────────
 
   Widget titleText(String text, {Color color = AppColors.black}) {
-    return CustomText(
-      text: text,
-      color: color,
-      fontSize: AppFontSize.medium,
-      fontWeight: FontWeight.w800,
-    );
+    return Text(text, style: BaseTypography.titleMedium(color: color).copyWith(fontWeight: FontWeight.w800));
   }
 
   Widget _buildReviewsContent() {
     if (controller.isLoadingReviews.value) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 20),
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: BaseSpacing.xl),
         child: Center(
           child: SizedBox(
             width: 20,
@@ -454,24 +406,21 @@ class ProductDetailsView extends StatelessWidget {
 
     if (controller.reviews.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: CustomText(
+        padding: EdgeInsets.symmetric(vertical: BaseSpacing.md),
+        child: Text(
+          'No reviews yet. Be the first to review this product!',
           textAlign: TextAlign.center,
-          color: AppColors.gray600,
-          fontSize: AppFontSize.small2,
-          text: 'No reviews yet. Be the first to review this product!',
+          style: BaseTypography.bodySmall(color: AppColors.gray600),
         ),
       );
     }
 
-    return Column(
-      children: controller.reviews.map(_reviewTile).toList(),
-    );
+    return Column(children: controller.reviews.map(_reviewTile).toList());
   }
 
   Widget _reviewTile(ReviewModel review) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: BaseSpacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -481,60 +430,47 @@ class ProductDetailsView extends StatelessWidget {
             title: Row(
               children: [
                 Expanded(
-                  child: CustomText(
-                    text: review.customerName.isEmpty ? 'Anonymous' : review.customerName,
-                    fontWeight: FontWeight.w600,
-                    fontSize: AppFontSize.small2,
+                  child: Text(
+                    review.customerName.isEmpty ? 'Anonymous' : review.customerName,
+                    style: BaseTypography.bodySmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
                 if (review.isVerifiedPurchase)
-                  CustomText(
-                    text: 'Verified Purchase',
-                    fontSize: AppFontSize.tiny,
-                    color: AppColors.green2,
-                    fontWeight: FontWeight.w600,
+                  Text(
+                    'Verified Purchase',
+                    style: BaseTypography.labelSmall(color: AppColors.green2).copyWith(fontWeight: FontWeight.w600),
                   ),
               ],
             ),
             subtitle: review.rating != null
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 4),
+                    padding: EdgeInsets.only(top: BaseSpacing.xxs),
                     child: CustomRatingBar(rating: review.rating!, itemSize: 15, ignoreGestures: true),
                   )
                 : null,
           ),
           if (review.commentText.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 4),
-              child: CustomText(
-                text: review.commentText,
-                fontSize: AppFontSize.small2,
-                color: AppColors.gray600,
-              ),
+              padding: EdgeInsets.only(left: BaseSpacing.md, right: BaseSpacing.md, bottom: BaseSpacing.xxs),
+              child: Text(review.commentText, style: BaseTypography.bodySmall(color: AppColors.gray600)),
             ),
           if (review.sellerReply != null)
             Container(
-              margin: const EdgeInsets.only(left: 30, right: 16, bottom: 8),
-              padding: const EdgeInsets.all(10),
+              margin: EdgeInsets.only(left: BaseSpacing.xxl, right: BaseSpacing.md, bottom: BaseSpacing.sm),
+              padding: EdgeInsets.all(BaseSpacing.sm),
               decoration: BoxDecoration(
                 color: AppColors.background,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(BaseRadius.sm),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomText(
-                    text: 'Seller response',
-                    fontSize: AppFontSize.tiny,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryColor,
+                  Text(
+                    'Seller response',
+                    style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w700),
                   ),
-                  const SizedBox(height: 2),
-                  CustomText(
-                    text: review.sellerReply!.text,
-                    fontSize: AppFontSize.tiny,
-                    color: AppColors.black2,
-                  ),
+                  SizedBox(height: BaseSpacing.xxs / 2),
+                  Text(review.sellerReply!.text, style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(fontWeight: FontWeight.w400)),
                 ],
               ),
             ),
@@ -552,7 +488,7 @@ class ProductDetailsView extends StatelessWidget {
         title: titleText(title),
         initiallyExpanded: toggle.value,
         onExpansionChanged: (v) => toggle.value = v,
-        children: [Padding(padding: const EdgeInsets.all(12), child: content)],
+        children: [Padding(padding: EdgeInsets.all(BaseSpacing.sm), child: content)],
       ),
     );
   }
@@ -563,8 +499,8 @@ class ProductDetailsView extends StatelessWidget {
     if (profileController.user.value.isNull) {
       return Container(
         color: AppColors.white,
-        padding: const EdgeInsets.only(left: 30, right: 30, bottom: 20, top: 5),
-        child: AppButton(
+        padding: EdgeInsets.only(left: BaseSpacing.xxl - 2, right: BaseSpacing.xxl - 2, bottom: BaseSpacing.md + 4, top: BaseSpacing.xxs + 1),
+        child: PrimaryButton(
           label: 'Login',
           onPressed: () => Get.toNamed(Routes.authTabView),
         ),
@@ -573,18 +509,18 @@ class ProductDetailsView extends StatelessWidget {
 
     return Container(
       color: AppColors.white,
-      padding: const EdgeInsets.only(left: 30, right: 30, bottom: 20, top: 5),
+      padding: EdgeInsets.only(left: BaseSpacing.xxl - 2, right: BaseSpacing.xxl - 2, bottom: BaseSpacing.md + 4, top: BaseSpacing.xxs + 1),
       child: Row(
-        spacing: 10,
+        spacing: BaseSpacing.sm,
         children: [
           // ── Qty stepper ───────────────────────────────────────────
           Obx(
             () => Container(
               width: size.width / 2.5,
-              padding: const EdgeInsets.symmetric(vertical: 1),
+              padding: EdgeInsets.symmetric(vertical: 1),
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.textPrimary, width: 0.4),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(BaseRadius.sm),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -593,14 +529,13 @@ class ProductDetailsView extends StatelessWidget {
                     onPressed: controller.decreaseQty,
                     icon: Icon(Icons.remove, color: AppColors.primaryColor),
                   ),
-                  CustomText(
-                    text: controller.productQty.value.toString(),
-                    fontSize: AppFontSize.regular,
-                    fontWeight: FontWeight.w600,
+                  Text(
+                    controller.productQty.value.toString(),
+                    style: BaseTypography.bodyLarge(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
                   ),
                   IconButton(
                     onPressed: controller.increaseQty,
-                    icon: const Icon(Icons.add, color: AppColors.primaryColor),
+                    icon: Icon(Icons.add, color: AppColors.primaryColor),
                   ),
                 ],
               ),
@@ -610,13 +545,10 @@ class ProductDetailsView extends StatelessWidget {
           // ── Add to cart ───────────────────────────────────────────
           Expanded(
             child: Obx(
-              () => AppButton(
-                label: controller.isAddtoCartLoading.value
-                    ? "Adding..."
-                    : 'Add to cart',
-                onPressed: () => controller.isAddtoCartLoading.value
-                    ? null
-                    : controller.addToCart(),
+              () => PrimaryButton(
+                label: controller.isAddtoCartLoading.value ? "Adding..." : 'Add to cart',
+                isLoading: controller.isAddtoCartLoading.value,
+                onPressed: controller.isAddtoCartLoading.value ? null : () => controller.addToCart(),
               ),
             ),
           ),
@@ -641,81 +573,63 @@ class _SellerStoreCard extends StatelessWidget {
         : (sellerName != null && sellerName.isNotEmpty)
             ? sellerName
             : 'Store';
-    final String initials = displayName.trim().isNotEmpty
-        ? displayName.trim()[0].toUpperCase()
-        : 'S';
+    final String initials = displayName.trim().isNotEmpty ? displayName.trim()[0].toUpperCase() : 'S';
     final bool canVisit = slug != null && slug.isNotEmpty;
 
-    return GestureDetector(
-      onTap: canVisit
-          ? () => Get.toNamed(Routes.sellerStorefront, arguments: slug)
-          : null,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.lightGrey.withOpacity(0.6)),
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: logo != null && logo.isNotEmpty
-                  ? CommonImageView(
-                      url: logo,
-                      height: 40,
-                      width: 40,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      height: 40,
-                      width: 40,
-                      color: AppColors.primaryColor.withOpacity(0.1),
-                      alignment: Alignment.center,
-                      child: CustomText(
-                        text: initials,
-                        fontSize: AppFontSize.small2,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryColor,
+    return Semantics(
+      button: canVisit,
+      label: canVisit ? 'Sold by $displayName, visit store' : 'Sold by $displayName',
+      child: GestureDetector(
+        onTap: canVisit ? () => Get.toNamed(Routes.sellerStorefront, arguments: slug) : null,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 48),
+          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm, vertical: BaseSpacing.xs + 2),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(BaseRadius.md),
+            border: Border.all(color: AppColors.lightGrey.withOpacity(0.6)),
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(BaseRadius.pill),
+                child: logo != null && logo.isNotEmpty
+                    ? CommonImageView(url: logo, height: 40, width: 40, fit: BoxFit.cover)
+                    : Container(
+                        height: 40,
+                        width: 40,
+                        color: AppColors.primaryColor.withOpacity(0.1),
+                        alignment: Alignment.center,
+                        child: Text(
+                          initials,
+                          style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold),
+                        ),
                       ),
+              ),
+              SizedBox(width: BaseSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Sold by', style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w400)),
+                    Text(
+                      displayName,
+                      style: BaseTypography.labelSmall(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
+                      maxLines: 1,
                     ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    text: 'Sold by',
-                    fontSize: AppFontSize.tiny,
-                    color: AppColors.gray600,
-                  ),
-                  CustomText(
-                    text: displayName,
-                    fontSize: AppFontSize.small2,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    maxLines: 1,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            if (canVisit) ...[
-              CustomText(
-                text: 'Visit Store',
-                fontSize: AppFontSize.tiny,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryColor,
-              ),
-              const SizedBox(width: 2),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 18,
-                color: AppColors.primaryColor,
-              ),
+              if (canVisit) ...[
+                Text(
+                  'Visit Store',
+                  style: BaseTypography.labelSmall(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w600),
+                ),
+                SizedBox(width: BaseSpacing.xxs / 2),
+                Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.primaryColor),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

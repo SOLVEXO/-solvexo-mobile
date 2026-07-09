@@ -43,6 +43,7 @@ class ApiConstants {
 
   // ============ Category Endpoints ============
   static const String categories = "$apiPrefix/categories/category-tree";
+  static const String addCategory = "$apiPrefix/categories/add-category";
   static String getCategoryTree(String id) =>
       "$apiPrefix/categories/category-tree?id=$id";
   static String getCategoryById(String id) =>
@@ -80,11 +81,11 @@ class ApiConstants {
   static const String getAdresses = "$baseUrl/address/getMyAddresses";
   static const String getDefaultAddress = "$baseUrl/address/getDefaultAddress";
   static const String updateAddress = "$baseUrl/address/update-address";
-  static String deleteAddress(String id) => "$apiPrefix/addresses/$id";
+  static String deleteAddress(String id) => "$baseUrl/address/delete-address/$id";
   static String getAddressById(String id) =>
-      "$apiPrefix/addresses/get-address-by-id/$id";
+      "$baseUrl/address/get-address-by-id/$id";
   static String setDefaultAddress(String id) =>
-      "$apiPrefix/addresses/$id/default";
+      "$baseUrl/address/setDefaultAddress/$id";
 
   // ============ Order Endpoints ============
   static const String orders = "$apiPrefix/orders";
@@ -277,6 +278,73 @@ class ApiConstants {
   static const String uploadFile = '$apiPrefix/upload/file';
   static const String uploadPrivateFile = '$apiPrefix/upload/private-file';
   // static String get cartSync => null;
+
+  // ============ Marketing (Coupons) Endpoints — seller ============
+  static String coupons(String storeId) =>
+      '$apiPrefix/marketing/$storeId/coupons';
+  static String couponById(String storeId, String couponId) =>
+      '$apiPrefix/marketing/$storeId/coupons/$couponId';
+
+  // ============ Loyalty & Rewards Endpoints — seller ============
+  static String loyaltyOverview(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/overview';
+  static String loyaltyProgram(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/program';
+  static String loyaltyEarningRules(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/earning-rules';
+  static String loyaltyTiers(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/tiers';
+  static String loyaltyMembers(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/members';
+  static String loyaltyMemberTransactions(String storeId, String memberId) =>
+      '$apiPrefix/loyalty/$storeId/members/$memberId/transactions';
+  static String loyaltyAwardPoints(String storeId, String memberId) =>
+      '$apiPrefix/loyalty/$storeId/members/$memberId/award';
+  // Seller's own management list — includes inactive rewards.
+  static String loyaltyRewardsManage(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/rewards/manage';
+  static String loyaltyRewardById(String storeId, String rewardId) =>
+      '$apiPrefix/loyalty/$storeId/rewards/$rewardId';
+
+  // ============ Loyalty & Rewards Endpoints — buyer ============
+  // Public catalog — active rewards only.
+  static String loyaltyRewards(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/rewards';
+  static String loyaltyMyBalance(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/my-balance';
+  static String loyaltyRedeem(String storeId) =>
+      '$apiPrefix/loyalty/$storeId/redeem';
+
+  // ============ Subscription Plans Endpoints — seller ============
+  static const String subscriptionPlans = '$apiPrefix/seller/subscription-plans';
+  static String subscriptionPlanById(String id) =>
+      '$apiPrefix/seller/subscription-plans/$id';
+  static const String subscriptionsDashboard =
+      '$apiPrefix/seller/subscriptions/dashboard';
+  static const String subscriptionsList = '$apiPrefix/seller/subscriptions';
+  static String subscriptionById(String id) =>
+      '$apiPrefix/seller/subscriptions/$id';
+  static String subscriptionPause(String id) =>
+      '$apiPrefix/seller/subscriptions/$id/pause';
+  static String subscriptionResume(String id) =>
+      '$apiPrefix/seller/subscriptions/$id/resume';
+  static String subscriptionCancel(String id, {bool atPeriodEnd = false}) =>
+      '$apiPrefix/seller/subscriptions/$id/cancel?atPeriodEnd=$atPeriodEnd';
+
+  // ============ Seller Analytics Endpoints ============
+  // All GET, storeId/range/from/to passed as query params via BaseClient's
+  // `queryParameters` (same convention as coupons/loyalty/subscriptions).
+  static const String analyticsOverview = '$apiPrefix/seller/analytics/overview';
+  static const String analyticsRevenueOverTime = '$apiPrefix/seller/analytics/revenue-over-time';
+  static const String analyticsOrdersOverTime = '$apiPrefix/seller/analytics/orders-over-time';
+  static const String analyticsTrafficSources = '$apiPrefix/seller/analytics/traffic-sources';
+  static const String analyticsTopProducts = '$apiPrefix/seller/analytics/top-products';
+  static const String analyticsCustomers = '$apiPrefix/seller/analytics/customers';
+  static const String analyticsProductPerformance = '$apiPrefix/seller/analytics/products/performance';
+  static const String analyticsInventoryInsights = '$apiPrefix/seller/analytics/inventory-insights';
+  static const String analyticsPaymentMethods = '$apiPrefix/seller/analytics/payment-methods';
+  static const String analyticsRevenueBreakdown = '$apiPrefix/seller/analytics/revenue-breakdown';
+  static const String analyticsExport = '$apiPrefix/seller/analytics/export';
 
   // ============ Query Parameters Helper ============
   // For product filtering and search

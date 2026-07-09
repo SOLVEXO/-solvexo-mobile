@@ -26,6 +26,7 @@ class AppIcons {
   static const String dashboardIcon = '${_baseIconsPath}dashboard.svg';
   static const String mapsIcon = '${_baseIconsPath}mapsicon.svg';
   static const String checkIcon = '${_baseIconsPath}checkicon.svg';
+  static const String verifiedIcon = '${_baseIconsPath}checkicon.svg';
   static const String dhlLogo = '${_baseIconsPath}dhl-logo.svg';
   static const String inTransitIcon = '${_baseIconsPath}intransit.svg';
   static const String deliveryCompleted = '${_baseIconsPath}done-delivery.svg';

@@ -1,6 +1,9 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,35 +14,30 @@ class PaymentSuccessView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 600),
+                duration: BaseMotion.slow,
+                curve: Curves.easeOutBack,
                 builder: (_, value, child) {
                   return Transform.scale(
                     scale: value,
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: AppColors.seaGreen,
-                      size: 120,
-                    ),
+                    child: const Icon(Icons.check_circle, color: AppColors.seaGreen, size: 120),
                   );
                 },
               ),
-              const SizedBox(height: 20),
-              const Text(
+              SizedBox(height: BaseSpacing.xl),
+              Text(
                 "Payment Successful",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: BaseTypography.headlineSmall(color: AppColors.black),
               ),
-              const SizedBox(height: 10),
-              AppButton(
-                onPressed: () {
-                  Get.offAllNamed(Routes.mainHome);
-                },
+              SizedBox(height: BaseSpacing.sm),
+              PrimaryButton(
+                onPressed: () => Get.offAllNamed(Routes.mainHome),
                 label: "Continue Shopping",
               ),
             ],

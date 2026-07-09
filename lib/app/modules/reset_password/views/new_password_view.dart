@@ -1,12 +1,12 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
-import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -22,17 +22,17 @@ class NewPasswordView extends StatelessWidget {
       controller: controller,
       backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Reset Password"),
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md + 4, vertical: BaseSpacing.md + 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomText(color: AppColors.gray600, text: "Set your new Password!"),
-          const SizedBox(height: AppDimen.borderRadius),
+          Text("Set your new Password!", style: BaseTypography.bodyMedium(color: AppColors.gray600)),
+          SizedBox(height: BaseSpacing.md),
           Obx(
             () => CustomTextField(
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(AppDimen.borderRadius),
-                topRight: Radius.circular(AppDimen.borderRadius),
+                topLeft: Radius.circular(BaseRadius.md),
+                topRight: Radius.circular(BaseRadius.md),
               ),
               fillColor: AppColors.background,
               obscureText: !controller.showPassword.value,
@@ -52,8 +52,8 @@ class NewPasswordView extends StatelessWidget {
           Obx(
             () => CustomTextField(
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(AppDimen.borderRadius),
-                bottomRight: Radius.circular(AppDimen.borderRadius),
+                bottomLeft: Radius.circular(BaseRadius.md),
+                bottomRight: Radius.circular(BaseRadius.md),
               ),
               fillColor: AppColors.background,
               suffixIcon: SvgIcon(
@@ -65,25 +65,17 @@ class NewPasswordView extends StatelessWidget {
                 size: 20,
               ),
               obscureText: !controller.showConfirmPassword.value,
-              hintText: "Conform Password",
+              // Was "Conform Password" — user-facing typo.
+              hintText: "Confirm Password",
               controller: controller.confirmPasswordController,
             ),
           ),
-          const SizedBox(height: AppDimen.borderRadius),
+          SizedBox(height: BaseSpacing.md),
           Obx(
-            () => AppButton(
-              onPressed: () {
-                if (controller.isLoading.value) {
-                  return;
-                }
-                controller.resetPassword();
-              },
-              // onPressed: controller.isLoading.value
-              //     ? null
-              //     : controller.resetPassword,
-              label: controller.isLoading.value
-                  ? "Updating..."
-                  : "Reset Password",
+            () => PrimaryButton(
+              isLoading: controller.isLoading.value,
+              onPressed: controller.isLoading.value ? null : controller.resetPassword,
+              label: controller.isLoading.value ? "Updating..." : "Reset Password",
             ),
           ),
         ],

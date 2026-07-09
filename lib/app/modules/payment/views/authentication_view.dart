@@ -1,14 +1,15 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/payment/controllers/payment_verification_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class AuthenticationView extends StatelessWidget {
   AuthenticationView({super.key});
@@ -16,81 +17,62 @@ class AuthenticationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = DateTime.now();
+    // Was `"${date.day}, ${date.month}, ${date.year}"` — produced raw
+    // numbers like "6, 7, 2026" instead of a readable date.
+    final formattedDate = DateFormat('MMM d, yyyy').format(DateTime.now());
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Authentication"),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
         child: Column(
-          spacing: 10,
+          spacing: BaseSpacing.xs,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                CustomText(
-                  text: "BANK OF AMERICA.",
-                  color: AppColors.americanBlue,
-                  fontWeight: FontWeight.w500,
-
-                  fontSize: AppFontSize.small,
+                Text(
+                  "BANK OF AMERICA.",
+                  style: BaseTypography.bodyMedium(color: AppColors.americanBlue).copyWith(fontWeight: FontWeight.w500),
                 ),
                 SvgIcon(assetName: AppIcons.bankIcon, size: 20),
-                Spacer(),
+                const Spacer(),
                 SvgIcon(assetName: AppIcons.visaCardIcon, size: 50),
               ],
             ),
-            Divider(height: 0),
-            CustomText(
-              text: "Transaction Authentication",
-              fontSize: AppFontSize.regular,
-              fontWeight: FontWeight.w800,
+            const Divider(height: 0),
+            Text(
+              "Transaction Authentication",
+              style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w800),
             ),
-            CustomText(
-              text: "${date.day}, ${date.month}, ${date.year}",
-              fontSize: AppFontSize.small,
-              color: AppColors.gray600,
-            ),
+            Text(formattedDate, style: BaseTypography.bodyMedium(color: AppColors.gray600)),
             Row(
               children: [
-                CustomText(
-                  text: "From card number: ",
-                  fontSize: AppFontSize.small,
-                  color: AppColors.gray600,
-                ),
-                CustomText(
-                  text: "XXXX XXXX XXXX ${pvController.method.last4}",
-                  fontSize: AppFontSize.small,
-                  color: AppColors.primaryColor,
-                ),
+                Text("From card number: ", style: BaseTypography.bodyMedium(color: AppColors.gray600)),
+                Text("XXXX XXXX XXXX ${pvController.method.last4}", style: BaseTypography.bodyMedium(color: AppColors.primaryColor)),
               ],
             ),
             Container(
-              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+              padding: EdgeInsets.symmetric(vertical: BaseSpacing.xl, horizontal: BaseSpacing.xs),
               decoration: BoxDecoration(
                 border: Border.all(width: 0.3),
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(BaseRadius.lg),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  transactionRowColumn(
-                    "Transaction Amount:",
-                    "\$${pvController.amount.toStringAsFixed(2)}",
-                  ),
-
+                  transactionRowColumn("Transaction Amount:", "\$${pvController.amount.toStringAsFixed(2)}"),
                   transactionRowColumn("Merchant", pvController.method.title),
                 ],
               ),
             ),
-            CustomText(
-              text:
-                  "To verify this transaction, enter One Time Password(OTP) That we have sent via SMS to +xx xxx xxxx105",
-              fontSize: AppFontSize.small,
+            Text(
+              "To verify this transaction, enter the One Time Password (OTP) we sent via SMS to +xx xxx xxxx105",
+              style: BaseTypography.bodyMedium(color: AppColors.black),
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 10,
+              spacing: BaseSpacing.xs,
               children: [
                 Expanded(
                   child: CustomTextField(
@@ -99,78 +81,51 @@ class AuthenticationView extends StatelessWidget {
                     controller: pvController.otpController,
                     maxLength: 6,
                     keyboardType: TextInputType.number,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(BaseRadius.sm),
                     onChanged: pvController.onOtpChanged,
                   ),
                 ),
                 Obx(
                   () => Expanded(
-                    child: AppButton(
-                      label: pvController.isLoading.value
-                          ? "Submitting..."
-                          : "Submit",
-                      onPressed: () {
-                        pvController.verifyOtp();
-                      },
+                    child: PrimaryButton(
+                      label: pvController.isLoading.value ? "Submitting..." : "Submit",
+                      isLoading: pvController.isLoading.value,
+                      // Was unconditionally wired — could double-submit on
+                      // a fast double-tap while a verification was already
+                      // in flight.
+                      onPressed: pvController.isLoading.value ? null : pvController.verifyOtp,
                     ),
                   ),
                 ),
               ],
             ),
             Row(
-              spacing: 5,
+              spacing: BaseSpacing.xxs + 1,
               children: [
-                CustomText(text: "Ramining", fontSize: AppFontSize.small),
+                Text("Remaining", style: BaseTypography.bodyMedium(color: AppColors.black)),
                 Obx(
-                  () => CustomText(
-                    text: pvController.secondsLeft.toString(),
-                    color: AppColors.orange,
-                    fontSize: AppFontSize.small,
+                  () => Text(
+                    pvController.secondsLeft.toString(),
+                    style: BaseTypography.bodyMedium(color: AppColors.orange),
                   ),
                 ),
               ],
             ),
             Row(
-              spacing: 20,
+              spacing: BaseSpacing.xl,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                  onPressed: () {
-                    pvController.onClose();
-                  },
-                  child: CustomText(
-                    text: "Cancle",
-                    fontWeight: FontWeight.bold,
-                    fontSize: AppFontSize.small,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    pvController.startTimer();
-                  },
-                  child: CustomText(
-                    text: "Resend OTP",
-                    color: AppColors.primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: AppFontSize.small,
-                  ),
-                ),
+                GhostButton(label: "Cancel", onPressed: pvController.onClose),
+                GhostButton(label: "Resend OTP", onPressed: pvController.startTimer),
               ],
             ),
-            Divider(height: 0),
+            const Divider(height: 0),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 10,
+              spacing: BaseSpacing.xs,
               children: [
-                CustomText(
-                  text: "For assisstance, please contact",
-                  fontSize: AppFontSize.small2,
-                ),
-                CustomText(
-                  text: "BOA +92 322 2222222",
-                  color: AppColors.primaryColor,
-                  fontSize: AppFontSize.verySmall,
-                ),
+                Text("For assistance, please contact", style: BaseTypography.bodySmall(color: AppColors.black)),
+                Text("BOA +92 322 2222222", style: BaseTypography.labelSmall(color: AppColors.primaryColor)),
               ],
             ),
           ],
@@ -183,17 +138,8 @@ class AuthenticationView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomText(
-          text: title,
-          fontSize: AppFontSize.small,
-          color: AppColors.gray600,
-        ),
-        CustomText(
-          text: subTitle,
-          fontSize: AppFontSize.small,
-          color: AppColors.black,
-          fontWeight: FontWeight.bold,
-        ),
+        Text(title, style: BaseTypography.bodyMedium(color: AppColors.gray600)),
+        Text(subTitle, style: BaseTypography.bodyMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.bold)),
       ],
     );
   }

@@ -40,7 +40,7 @@ class StoreEditFormCard extends StatelessWidget {
         const SizedBox(height: 6),
         Obx(() => StoreDropdown(
           value: c.editCategory.value,
-          options: kStoreCategories,
+          options: c.mainCategories.map((cat) => cat.name).toList(),
           onSelect: c.pickCategory,
         )),
       ]),

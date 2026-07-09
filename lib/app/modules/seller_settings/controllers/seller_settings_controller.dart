@@ -92,6 +92,26 @@ class SellerSettingsController extends GetxController {
       ],
     ),
     SettingsSection(
+      header: 'GROWTH',
+      tiles: [
+        SettingsTile(
+          emoji: AppIcons.saleIcon,
+          title: 'Coupons & Discounts',
+          onTap: () => Get.toNamed(Routes.sellerCoupons),
+        ),
+        SettingsTile(
+          emoji: AppIcons.coinIcon,
+          title: 'Loyalty & Rewards',
+          onTap: () => Get.toNamed(Routes.sellerLoyalty),
+        ),
+        SettingsTile(
+          emoji: AppIcons.cardIcon,
+          title: 'Subscription Plans',
+          onTap: () => Get.toNamed(Routes.sellerSubscriptionPlans),
+        ),
+      ],
+    ),
+    SettingsSection(
       header: 'NOTIFICATIONS',
       tiles: [
         SettingsTile(

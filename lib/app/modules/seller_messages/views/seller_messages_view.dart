@@ -1,14 +1,16 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/messaging/widgets/conversations_shimmer.dart';
 import 'package:book_store_app/app/modules/seller_messages/controllers/seller_messages_controller.dart';
 import 'package:book_store_app/app/modules/seller_messages/widgets/conversation_tile.dart';
 import 'package:book_store_app/app/modules/seller_messages/widgets/messages_empty_state.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
-import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,17 +22,12 @@ class SellerMessagesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBarTwo(
-        title: "Messages",
-        backgroundColor: AppColors.primaryColor,
-        color: AppColors.white,
-      ),
+      appBar: const CustomAppBarTwo(title: "Messages"),
       backgroundColor: AppColors.white,
       body: Column(
         children: [
           _SearchBar(controller: controller),
           _FilterTabs(controller: controller),
-          const Divider(height: 1, color: AppColors.lightGrey2),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
@@ -38,18 +35,16 @@ class SellerMessagesView extends StatelessWidget {
               }
 
               final convs = controller.filteredConversations;
-              if (convs.isEmpty) return const MessagesEmptyState();
+              if (convs.isEmpty) {
+                return MessagesEmptyState(isArchived: controller.filter.value == InboxFilter.archived);
+              }
 
               return CustomRefreshWrapper(
                 onRefresh: controller.loadConversations,
                 child: ListView.separated(
-                  padding: const EdgeInsets.only(top: 4, bottom: 16),
+                  padding: EdgeInsets.only(bottom: BaseSpacing.md),
                   itemCount: convs.length,
-                  separatorBuilder: (_, __) => const Divider(
-                    height: 1,
-                    indent: 78,
-                    color: AppColors.lightGrey2,
-                  ),
+                  separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.lightGrey3),
                   itemBuilder: (_, i) => ConversationTile(
                     conversation: convs[i],
                     controller: controller,
@@ -73,20 +68,15 @@ class _SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.white,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimen.allPadding,
-        vertical: 8,
-      ),
+      padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.sm),
       child: CustomTextField(
         onChanged: controller.onSearch,
-        hintText: 'Search conversations...',
+        hintText: 'Search conversations',
         isborder: true,
-        fillColor: AppColors.background,
-        prefixIcon: const Icon(
-          Icons.search_rounded,
-          color: AppColors.grey,
-          size: 20,
-        ),
+        fillColor: AppColors.textfldFillColor,
+        borderRadius: BorderRadius.circular(BaseRadius.md),
+        borderBorderradius: BaseRadius.md,
+        prefixIcon: SvgIcon(assetName: AppIcons.searchIcon, size: 20, color: AppColors.iosGrey),
       ),
     );
   }
@@ -100,7 +90,7 @@ class _FilterTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.white,
-      padding: const EdgeInsets.fromLTRB(AppDimen.allPadding, 0, AppDimen.allPadding, 10),
+      padding: EdgeInsets.fromLTRB(BaseSpacing.md, 0, BaseSpacing.md, BaseSpacing.sm),
       child: Obx(
         () => Row(
           children: [
@@ -109,7 +99,7 @@ class _FilterTabs extends StatelessWidget {
               selected: controller.filter.value == InboxFilter.active,
               onTap: () => controller.setFilter(InboxFilter.active),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: BaseSpacing.xs),
             _Tab(
               label: 'Archived',
               selected: controller.filter.value == InboxFilter.archived,
@@ -133,17 +123,17 @@ class _Tab extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        duration: BaseMotion.normal,
+        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md, vertical: BaseSpacing.xs),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primaryColor : AppColors.background,
-          borderRadius: BorderRadius.circular(20),
+          color: selected ? AppColors.primaryColor : AppColors.lightGrey10,
+          borderRadius: BorderRadius.circular(BaseRadius.pill),
         ),
-        child: CustomText(
-          text: label,
-          fontSize: AppFontSize.tiny,
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          color: selected ? AppColors.white : AppColors.gray600,
+        child: Text(
+          label,
+          style: BaseTypography.labelSmall(
+            color: selected ? AppColors.white : AppColors.gray600,
+          ).copyWith(fontWeight: FontWeight.w600),
         ),
       ),
     );

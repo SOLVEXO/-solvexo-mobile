@@ -359,10 +359,12 @@ class ProfileController extends GetxController {
         imageUrl = await uploadProfileImage();
       }
 
-      final updatedUser = await _authRepository.editProfile(
+      final updatedUser = await _authRepository.updateProfile(
+        token: token,
         name: nameController.text.trim(),
         email: emailController.text.trim(),
         phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
+        address: addressController.text.trim().isEmpty ? null : addressController.text.trim(),
         profileImage: imageUrl ?? user.value?.profileImage,
       );
 
@@ -395,15 +397,15 @@ class ProfileController extends GetxController {
     isUpdating.value = true;
 
     try {
-      final token = AppPreferences.getAccessTokenAsync();
+      final token = await AppPreferences.getAccessTokenAsync();
 
-      if (token.isNull) {
+      if (token == null || token.isEmpty) {
         ToastUtil.showToast('Session expired. Please login again');
         return;
       }
 
       final success = await _authRepository.changePassword(
-        token: token.toString(),
+        token: token,
         currentPassword: currentPasswordController.text,
         newPassword: newPasswordController.text,
       );
@@ -614,15 +616,15 @@ class ProfileController extends GetxController {
   /// Perform account deletion
   Future<void> _performDeleteAccount() async {
     try {
-      final token = AppPreferences.getAccessTokenAsync();
+      final token = await AppPreferences.getAccessTokenAsync();
 
-      if (token.isNull) {
+      if (token == null || token.isEmpty) {
         ToastUtil.showToast('Session expired');
         return;
       }
 
       final success = await _authRepository.deleteAccount(
-        token: token.toString(),
+        token: token,
       );
 
       if (success) {

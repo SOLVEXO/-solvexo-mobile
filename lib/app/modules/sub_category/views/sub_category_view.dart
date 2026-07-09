@@ -2,14 +2,15 @@ import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/cart_icon_with_count.dart';
 import 'package:book_store_app/app/components/custom_bread_crumbs.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/cart/widgets/wishlist_icon_count.dart';
 import 'package:book_store_app/app/modules/sub_category/controller/sub_category_controller.dart';
 import 'package:book_store_app/app/modules/sub_category/widgets/floating_item_row.dart';
 import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -19,7 +20,9 @@ class SubCategoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Controller reads arguments itself in onInit
+    // Controller reads arguments itself in onInit — intentionally
+    // re-created fresh per navigation, since each subcategory page needs
+    // its own state.
     final c = Get.put(SubCategoryController());
 
     return BaseViewScreen(
@@ -31,7 +34,7 @@ class SubCategoryView extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: CustomFloatingButton(),
       screenName: c.categoryName,
-      actions: [CartIconWithCount(), SizedBox(width: 7), WishlistIconCount()],
+      actions: [CartIconWithCount(), SizedBox(width: BaseSpacing.xxs + 3), WishlistIconCount()],
       child: RefreshIndicator(
         color: AppColors.primaryColor,
         onRefresh: c.refresh,
@@ -56,27 +59,26 @@ class _SubCategoryBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ── Banner ──────────────────────────────────────────────────
-        BannerCarousel(),
+        const BannerCarousel(),
 
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 14),
+              SizedBox(height: BaseSpacing.xs + 2),
 
               // ── Breadcrumb ────────────────────────────────────────
               CustomBreadCrumbs(categoryName: c.categoryName),
 
-              const SizedBox(height: 20),
+              SizedBox(height: BaseSpacing.xl - BaseSpacing.xxs),
 
               // ── Sub-category chips ────────────────────────────────
               _SectionHeader(title: 'Shop by Subcategory'),
-              const SizedBox(height: 12),
+              SizedBox(height: BaseSpacing.sm),
 
-              // _SubCategoryChips(c: c),
               _SubCategoryChips(c: c),
-              const SizedBox(height: 24),
+              SizedBox(height: BaseSpacing.xl),
 
               // ── Products header ───────────────────────────────────
               Row(
@@ -84,22 +86,20 @@ class _SubCategoryBody extends StatelessWidget {
                   _SectionHeader(title: 'All Products'),
                   const Spacer(),
                   Obx(
-                    () => CustomText(
-                      text: '${c.products.length} items',
-                      fontSize: AppFontSize.small2,
-                      color: AppColors.gray600,
-                      fontWeight: FontWeight.w500,
+                    () => Text(
+                      '${c.products.length} items',
+                      style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              SizedBox(height: BaseSpacing.sm),
 
               // ── Product grid ──────────────────────────────────────
               _ProductGrid(c: c),
 
-              const SizedBox(height: 80),
+              SizedBox(height: BaseSpacing.xxl + BaseSpacing.xxl),
             ],
           ),
         ),
@@ -121,34 +121,22 @@ class _SectionHeader extends StatelessWidget {
         Container(
           width: 4,
           height: 18,
-          decoration: BoxDecoration(
-            color: AppColors.primaryColor,
-            borderRadius: BorderRadius.circular(2),
-          ),
+          decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.xs)),
         ),
-        const SizedBox(width: 8),
-        CustomText(
-          text: title,
-          fontSize: AppFontSize.medium,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-        ),
+        SizedBox(width: BaseSpacing.xs),
+        Text(title, style: BaseTypography.bodyLarge(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w700)),
       ],
     );
   }
 }
 
-// // ─── Sub-category chips ────────────────────────────────────────────────────
+// ─── Sub-category chips ─────────────────────────────────────────────────────
 class _ChipData {
   final String label;
   final String? imageUrl;
   final int index;
 
-  const _ChipData({
-    required this.label,
-    required this.imageUrl,
-    required this.index,
-  });
+  const _ChipData({required this.label, required this.imageUrl, required this.index});
 }
 
 class _SubCategoryChips extends StatelessWidget {
@@ -162,12 +150,8 @@ class _SubCategoryChips extends StatelessWidget {
       final items = <_ChipData>[
         _ChipData(label: 'All', imageUrl: null, index: 0),
         ...c.subCategories.asMap().entries.map(
-          (e) => _ChipData(
-            label: e.value.name,
-            imageUrl: e.value.image,
-            index: e.key + 1,
-          ),
-        ),
+              (e) => _ChipData(label: e.value.name, imageUrl: e.value.image, index: e.key + 1),
+            ),
       ];
 
       if (items.length == 1) {
@@ -179,82 +163,67 @@ class _SubCategoryChips extends StatelessWidget {
         height: 100,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 2),
+          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxs / 2),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          separatorBuilder: (_, __) => SizedBox(width: BaseSpacing.sm),
           itemBuilder: (_, i) {
             return Obx(() {
               final chip = items[i];
               final isSelected = c.selectedSubCategoryIndex.value == chip.index;
-              return GestureDetector(
-                onTap: () => c.selectSubCategory(chip.index),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 72,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primaryColor.withOpacity(0.08)
-                        : AppColors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.primaryColor
-                          : AppColors.transparent,
-                      width: 1.5,
+              return Semantics(
+                button: true,
+                selected: isSelected,
+                label: chip.label,
+                child: GestureDetector(
+                  onTap: () => c.selectSubCategory(chip.index),
+                  child: AnimatedContainer(
+                    duration: BaseMotion.normal,
+                    width: 72,
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primaryColor.withOpacity(0.08) : AppColors.white,
+                      borderRadius: BorderRadius.circular(BaseRadius.lg),
+                      border: Border.all(
+                        color: isSelected ? AppColors.primaryColor : AppColors.transparent,
+                        width: 1.5,
+                      ),
+                      boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.black.withOpacity(0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Image / icon container
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primaryColor.withOpacity(0.12)
-                              : AppColors.primaryColor.withOpacity(0.06),
-                          borderRadius: BorderRadius.circular(12),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Image / icon container
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primaryColor.withOpacity(0.12)
+                                : AppColors.primaryColor.withOpacity(0.06),
+                            borderRadius: BorderRadius.circular(BaseRadius.md - 1),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(BaseRadius.md - 1),
+                            child: chip.imageUrl != null && chip.imageUrl!.isNotEmpty
+                                ? CommonImageView(url: chip.imageUrl, width: 44, height: 44, fit: BoxFit.cover)
+                                : Icon(
+                                    chip.index == 0 ? Icons.grid_view_rounded : Icons.category_rounded,
+                                    color: AppColors.primaryColor,
+                                    size: 26,
+                                  ),
+                          ),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child:
-                              chip.imageUrl != null && chip.imageUrl!.isNotEmpty
-                              ? CommonImageView(
-                                  url: chip.imageUrl,
-                                  width: 44,
-                                  height: 44,
-                                  fit: BoxFit.cover,
-                                )
-                              : Icon(
-                                  chip.index == 0
-                                      ? Icons.grid_view_rounded
-                                      : Icons.category_rounded,
-                                  color: AppColors.primaryColor,
-                                  size: AppFontSize.large,
-                                ),
+                        SizedBox(height: BaseSpacing.xxs + 1),
+                        Text(
+                          chip.label,
+                          maxLines: 2,
+                          overflow: TextOverflow.clip,
+                          textAlign: TextAlign.center,
+                          style: BaseTypography.labelSmall(
+                            color: isSelected ? AppColors.primaryColor : AppColors.textPrimary,
+                          ).copyWith(fontWeight: FontWeight.w600),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      CustomText(
-                        text: chip.label,
-                        fontSize: AppFontSize.verySmall,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? AppColors.primaryColor
-                            : AppColors.textPrimary,
-                        maxLines: 2,
-                        overflow: TextOverflow.clip,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -296,13 +265,12 @@ class _ProductGrid extends StatelessWidget {
               crossAxisSpacing: 14,
               childAspectRatio: 0.60,
             ),
-            itemBuilder: (_, i) =>
-                ProductCard(product: c.products[i], index: i),
+            itemBuilder: (_, i) => ProductCard(product: c.products[i], index: i),
           ),
 
           // ── Load more button ─────────────────────────────────────
           if (c.hasMoreProducts.value) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: BaseSpacing.md),
             _LoadMoreButton(c: c),
           ],
         ],
@@ -325,10 +293,7 @@ class _ProductGrid extends StatelessWidget {
         baseColor: AppColors.lightGrey.withOpacity(0.5),
         highlightColor: AppColors.lightGrey.withOpacity(0.9),
         child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(BaseRadius.lg)),
         ),
       ),
     );
@@ -336,36 +301,23 @@ class _ProductGrid extends StatelessWidget {
 
   Widget _buildEmptyState() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40),
+      padding: EdgeInsets.symmetric(vertical: BaseSpacing.xxl + BaseSpacing.sm),
       child: Center(
         child: Column(
           children: [
             Container(
               width: 72,
               height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                Icons.inventory_2_outlined,
-                size: AppFontSize.extraLarge,
-                color: AppColors.primaryColor,
-              ),
+              decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.08), borderRadius: BorderRadius.circular(BaseRadius.xxl)),
+              child: Icon(Icons.inventory_2_outlined, size: 40, color: AppColors.primaryColor),
             ),
-            const SizedBox(height: 14),
-            CustomText(
-              text: 'No products found',
-              fontSize: AppFontSize.regular,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+            SizedBox(height: BaseSpacing.xs + 2),
+            Text(
+              'No products found',
+              style: BaseTypography.bodyLarge(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 6),
-            CustomText(
-              text: 'Try a different subcategory',
-              fontSize: AppFontSize.small2,
-              color: AppColors.gray600,
-            ),
+            SizedBox(height: BaseSpacing.xxs + 2),
+            Text('Try a different subcategory', style: BaseTypography.labelSmall(color: AppColors.gray600)),
           ],
         ),
       ),
@@ -382,32 +334,32 @@ class _LoadMoreButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => GestureDetector(
-        onTap: c.isLoadingProducts.value ? null : c.loadMoreProducts,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.primaryColor, width: 1.5),
-          ),
-          child: Center(
-            child: c.isLoadingProducts.value
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primaryColor,
+      () => Semantics(
+        button: true,
+        label: c.isLoadingProducts.value ? 'Loading more products' : 'Load more products',
+        child: GestureDetector(
+          onTap: c.isLoadingProducts.value ? null : c.loadMoreProducts,
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(minHeight: 48),
+            padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs + 2),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(BaseRadius.md),
+              border: Border.all(color: AppColors.primaryColor, width: 1.5),
+            ),
+            child: Center(
+              child: c.isLoadingProducts.value
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                    )
+                  : Text(
+                      'Load More',
+                      style: BaseTypography.bodyLarge(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.w600),
                     ),
-                  )
-                : CustomText(
-                    text: 'Load More',
-                    fontSize: AppFontSize.regular,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryColor,
-                  ),
+            ),
           ),
         ),
       ),

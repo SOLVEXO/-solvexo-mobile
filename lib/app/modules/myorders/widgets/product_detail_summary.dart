@@ -1,6 +1,7 @@
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,13 +15,9 @@ class ProductDetailSummary extends StatelessWidget {
     final order = controller.orders[index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 5,
+      spacing: BaseSpacing.xxs + 1,
       children: [
-        CustomText(
-          text: "Order Summary",
-          fontSize: AppFontSize.medium,
-          fontWeight: FontWeight.w800,
-        ),
+        Text('Order Summary', style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w800)),
         _row("Sub Total", order.subtotal),
         _row("Shipping", order.shippingFee),
         if (order.taxAmount > 0) _row("Tax", order.taxAmount),
@@ -32,20 +29,16 @@ class ProductDetailSummary extends StatelessWidget {
 
   Widget _row(String label, double value, {bool bold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 15),
+      padding: EdgeInsets.symmetric(vertical: BaseSpacing.xxs, horizontal: BaseSpacing.md - 1),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          CustomText(
-            text: label,
-            fontSize: AppFontSize.regular,
-            fontWeight: FontWeight.w500,
-          ),
-          CustomText(
-            text: "\$${value.toStringAsFixed(2)}",
-            fontSize: AppFontSize.regular,
-
-            fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+          Text(label, style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w500)),
+          Text(
+            "\$${value.toStringAsFixed(2)}",
+            style: BaseTypography.titleMedium(color: AppColors.black).copyWith(
+              fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+            ),
           ),
         ],
       ),

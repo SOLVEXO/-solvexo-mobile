@@ -1,14 +1,18 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/unread_count_badge.dart';
 import 'package:book_store_app/app/data/models/messaging/conversation_model.dart';
 import 'package:book_store_app/app/modules/seller_messages/controllers/seller_messages_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+/// Mirrors the buyer-side `ConversationTile` visually (same avatar/badge,
+/// typography, spacing tokens) but keeps the seller-only inbox management —
+/// pin/mute indicators and a long-press actions sheet for
+/// pin/mute/archive/delete.
 class ConversationTile extends StatelessWidget {
   final ConversationModel conversation;
   final SellerMessagesController controller;
@@ -33,31 +37,31 @@ class ConversationTile extends StatelessWidget {
       onLongPress: () => _showActionsSheet(context),
       splashColor: AppColors.primaryColor.withOpacity(0.05),
       highlightColor: AppColors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md - 1, vertical: BaseSpacing.sm),
+        color: AppColors.white,
         child: Row(
           children: [
             UnreadCountBadge(
               count: unread,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(BaseRadius.xxxl - 6),
                 child: avatar != null && avatar.isNotEmpty
-                    ? CommonImageView(url: avatar, width: 50, height: 50, fit: BoxFit.cover)
+                    ? CommonImageView(url: avatar, width: 52, height: 52, fit: BoxFit.cover)
                     : Container(
-                        width: 50,
-                        height: 50,
-                        color: AppColors.primaryColor.withOpacity(0.12),
+                        width: 52,
+                        height: 52,
+                        color: AppColors.primaryColor.withOpacity(0.1),
                         alignment: Alignment.center,
-                        child: CustomText(
-                          text: initials,
-                          fontSize: AppFontSize.small2,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
+                        child: Text(
+                          initials,
+                          style: BaseTypography.bodyMedium(color: AppColors.primaryColor).copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: BaseSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,39 +70,41 @@ class ConversationTile extends StatelessWidget {
                     children: [
                       if (conversation.isPinned) ...[
                         const Icon(Icons.push_pin_rounded, size: 13, color: AppColors.gray600),
-                        const SizedBox(width: 4),
+                        SizedBox(width: BaseSpacing.xxs),
                       ],
                       Expanded(
-                        child: CustomText(
-                          text: name,
-                          fontSize: AppFontSize.small2,
-                          fontWeight: unread > 0 ? FontWeight.bold : FontWeight.w500,
-                          color: AppColors.black,
+                        child: Text(
+                          name,
+                          style: BaseTypography.labelSmall(color: AppColors.black2).copyWith(
+                            fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
+                            fontSize: 13,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      CustomText(
-                        text: _relativeTime(conversation.updatedAt),
-                        fontSize: AppFontSize.tiny,
-                        color: unread > 0 ? AppColors.primaryColor : AppColors.grey,
-                        fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400,
+                      SizedBox(width: BaseSpacing.xs),
+                      Text(
+                        _relativeTime(conversation.updatedAt),
+                        style: BaseTypography.labelSmall(
+                          color: unread > 0 ? AppColors.primaryColor : AppColors.gray600,
+                        ).copyWith(fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: BaseSpacing.xxs - 1),
                   Row(
                     children: [
                       if (conversation.isMuted) ...[
                         const Icon(Icons.volume_off_rounded, size: 13, color: AppColors.gray600),
-                        const SizedBox(width: 4),
+                        SizedBox(width: BaseSpacing.xxs),
                       ],
                       Expanded(
-                        child: CustomText(
-                          text: conversation.lastMessage?.previewText ?? 'No messages yet',
-                          fontSize: AppFontSize.verySmall,
-                          color: unread > 0 ? AppColors.black2 : AppColors.grey,
-                          fontWeight: unread > 0 ? FontWeight.w500 : FontWeight.w400,
+                        child: Text(
+                          conversation.lastMessage?.previewText ?? 'No messages yet',
+                          style: BaseTypography.labelSmall(
+                            color: unread > 0 ? AppColors.black2 : AppColors.gray600,
+                          ).copyWith(fontWeight: unread > 0 ? FontWeight.w600 : FontWeight.w400),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -129,19 +135,19 @@ class ConversationTile extends StatelessWidget {
   void _showActionsSheet(BuildContext context) {
     Get.bottomSheet(
       Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(BaseRadius.xxl)),
         ),
-        padding: EdgeInsets.fromLTRB(0, 12, 0, MediaQuery.of(context).padding.bottom + 8),
+        padding: EdgeInsets.fromLTRB(0, BaseSpacing.sm, 0, MediaQuery.of(context).padding.bottom + BaseSpacing.xs),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 40,
               height: 4,
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2)),
+              margin: EdgeInsets.only(bottom: BaseSpacing.sm),
+              decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(BaseRadius.xs / 2)),
             ),
             const Divider(height: 1, color: AppColors.lightGrey2),
             _ActionRow(
@@ -200,22 +206,22 @@ class _ActionRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg, vertical: BaseSpacing.sm + 1),
         child: Row(
           children: [
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(BaseRadius.md)),
               alignment: Alignment.center,
               child: Icon(icon, size: 20, color: color),
             ),
-            const SizedBox(width: 14),
-            CustomText(
-              text: label,
-              fontSize: AppFontSize.verySmall,
-              fontWeight: FontWeight.w500,
-              color: danger ? AppColors.red : AppColors.black2,
+            SizedBox(width: BaseSpacing.sm + 2),
+            Text(
+              label,
+              style: BaseTypography.bodySmall(
+                color: danger ? AppColors.red : AppColors.black2,
+              ).copyWith(fontWeight: FontWeight.w500),
             ),
           ],
         ),

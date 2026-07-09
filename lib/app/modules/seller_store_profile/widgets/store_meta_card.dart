@@ -22,7 +22,7 @@ class StoreMetaCard extends StatelessWidget {
             StoreInfoRow(
               icon: AppIcons.dashboardIcon,
               label: 'Category',
-              value: s?.categoryId ?? '—',
+              value: c.categoryName,
             ),
             const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
             StoreInfoRow(

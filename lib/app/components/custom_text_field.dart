@@ -20,6 +20,7 @@ class CustomTextField extends StatelessWidget {
   final bool? filled;
   final Color? fillColor;
   final Color color;
+  final Color textColor;
   final BorderRadiusGeometry? borderRadius;
   final bool ispadding;
   final bool isborder;
@@ -42,6 +43,7 @@ class CustomTextField extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.color = AppColors.white,
+    this.textColor = AppColors.black,
     this.keyboardType,
     this.validator,
     this.maxLines = 1,
@@ -58,6 +60,7 @@ class CustomTextField extends StatelessWidget {
       margin: ispadding ? EdgeInsets.only(bottom: 2) : null,
       decoration: BoxDecoration(color: color, borderRadius: borderRadius),
       child: TextFormField(
+        style: TextStyle(color: textColor),
         onFieldSubmitted: onFieldSubmitted,
         maxLength: maxLength,
         maxLines: maxLines,
@@ -68,7 +71,7 @@ class CustomTextField extends StatelessWidget {
         obscureText: obscureText,
         decoration: InputDecoration(
           prefixIcon: Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(12.0),
             child: prefixIcon,
           ),
           prefixIconColor: AppColors.grey,
@@ -79,7 +82,10 @@ class CustomTextField extends StatelessWidget {
           ),
           hintText: "$hintText".tr,
           hintStyle: TextStyle(color: AppColors.grey),
-          suffixIcon: suffixIcon,
+          suffixIcon: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: suffixIcon,
+          ),
           suffixIconColor: AppColors.grey,
           filled: filled,
           fillColor: fillColor,

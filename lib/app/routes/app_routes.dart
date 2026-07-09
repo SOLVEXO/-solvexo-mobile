@@ -76,6 +76,12 @@ abstract class Routes {
   static const sellerEditProfile = '/seller/edit-profile';
   static const sellerAiStudio = '/seller/ai-studio';
   static const sellerSettings = '/seller/settings';
+  static const sellerCoupons = '/seller/coupons';
+  static const sellerLoyalty = '/seller/loyalty';
+  static const sellerSubscriptionPlans = '/seller/subscription-plans';
+
+  // Buyer — loyalty & rewards for a specific store
+  static const loyaltyRewards = '/loyalty-rewards';
 
   // POS sub-screens
   static const posOrders = '/pos/orders';

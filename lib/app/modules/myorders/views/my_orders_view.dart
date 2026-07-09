@@ -1,5 +1,4 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
@@ -10,8 +9,10 @@ import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dar
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/base/base_view.dart';
+import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/core/widgets/base_empty_view.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -38,7 +39,7 @@ class MyOrdersView extends BaseView<MyOrdersController> {
     return PreferredSize(
       preferredSize: const Size.fromHeight(90),
       child: Container(
-        padding: EdgeInsets.only(top: Get.height / 14, bottom: 13, left: 15, right: 15),
+        padding: EdgeInsets.only(top: Get.height / 14, bottom: BaseSpacing.sm + 1, left: BaseSpacing.md - 1, right: BaseSpacing.md - 1),
         decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
         child: CustomTextField(
           hintText: "Search Order",
@@ -58,31 +59,38 @@ class MyOrdersView extends BaseView<MyOrdersController> {
         Obx(
           () => Container(
             color: AppColors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: EdgeInsets.symmetric(vertical: BaseSpacing.sm - 1),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md - 1),
               child: Row(
                 children: List.generate(controller.tabs.length, (i) {
                   final isActive = controller.selectedTab.value == i;
                   return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () => controller.changeTab(i),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut,
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isActive ? AppColors.primaryColor : AppColors.background,
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(color: isActive ? AppColors.primaryColor : AppColors.lightGrey2),
-                        ),
-                        child: CustomText(
-                          text: controller.tabs[i],
-                          fontSize: AppFontSize.verySmall,
-                          fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                          color: isActive ? AppColors.white : AppColors.greyDefault,
+                    padding: EdgeInsets.only(right: BaseSpacing.xs),
+                    child: Semantics(
+                      button: true,
+                      selected: isActive,
+                      label: controller.tabs[i],
+                      child: GestureDetector(
+                        onTap: () => controller.changeTab(i),
+                        child: AnimatedContainer(
+                          duration: BaseMotion.normal,
+                          curve: Curves.easeInOut,
+                          constraints: const BoxConstraints(minHeight: 40),
+                          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md + 2, vertical: BaseSpacing.xs),
+                          decoration: BoxDecoration(
+                            color: isActive ? AppColors.primaryColor : AppColors.background,
+                            borderRadius: BorderRadius.circular(BaseRadius.pill),
+                            border: Border.all(color: isActive ? AppColors.primaryColor : AppColors.lightGrey2),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            controller.tabs[i],
+                            style: BaseTypography.labelSmall(
+                              color: isActive ? AppColors.white : AppColors.greyDefault,
+                            ).copyWith(fontWeight: isActive ? FontWeight.w700 : FontWeight.w500),
+                          ),
                         ),
                       ),
                     ),
@@ -104,16 +112,15 @@ class MyOrdersView extends BaseView<MyOrdersController> {
                 child: Column(
                   children: [
                     LoginSignupCard(),
-                    const SizedBox(height: 24),
+                    SizedBox(height: BaseSpacing.xl),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md - 1),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CustomText(
-                            text: "Featured Items you may like",
-                            fontSize: AppFontSize.regular,
-                            fontWeight: FontWeight.w600,
+                          Text(
+                            "Featured Items you may like",
+                            style: BaseTypography.bodyLarge(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
                           ),
                           RecommendedProductList(),
                         ],

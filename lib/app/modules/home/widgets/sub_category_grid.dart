@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/sub_category_card.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,24 +15,24 @@ class SubCategoryGrid extends StatelessWidget {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
 
-        // 🔥 Responsive columns
+        // Responsive columns
         int crossAxisCount = 2;
         if (width > 600) crossAxisCount = 3; // tablet
         if (width > 900) crossAxisCount = 4; // large screens
 
-        // 🔥 Responsive aspect ratio
+        // Responsive aspect ratio
         final aspectRatio = width < 400 ? 1.2 : 1.45;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
+          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md - 1),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: controller.items.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 14,
-              crossAxisSpacing: 14,
+              mainAxisSpacing: BaseSpacing.md - 2,
+              crossAxisSpacing: BaseSpacing.md - 2,
               childAspectRatio: aspectRatio,
             ),
             itemBuilder: (context, i) {

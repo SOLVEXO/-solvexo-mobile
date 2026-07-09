@@ -1,7 +1,10 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/pos_pin_login/controllers/pos_pin_login_controller.dart';
 import 'package:book_store_app/app/modules/pos_pin_login/widgets/pos_pin_login_shimmer.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -45,41 +48,46 @@ class PosPinLoginView extends StatelessWidget {
 }
 
 // ── Theme constants ────────────────────────────────────────────────────────────
-const kPinBg      = Color(0xFF1A1A1A);
+const kPinBg = Color(0xFF1A1A1A);
 const kPinSurface = Color(0xFF252525);
-const kPinBorder  = Color(0xFF333333);
-const kPinText    = Color(0xFFE8E8E8);
-const kPinSub     = Color(0xFF888888);
-const kPinOrange  = Color(0xFFd97757);
+const kPinBorder = Color(0xFF333333);
+const kPinText = Color(0xFFE8E8E8);
+const kPinSub = Color(0xFF888888);
+const kPinOrange = Color(0xFFd97757);
 
 // ── Header ─────────────────────────────────────────────────────────────────────
 class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          color: kPinOrange.withOpacity(0.15),
-          shape: BoxShape.circle,
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: kPinOrange.withOpacity(0.15),
+            shape: BoxShape.circle,
+          ),
+          child: SvgIcon(
+            assetName: AppIcons.posIcon,
+            color: kPinOrange,
+            size: 32,
+          ),
         ),
-        child: const Icon(Icons.point_of_sale_rounded, color: kPinOrange, size: 32),
-      ),
-      const SizedBox(height: 14),
-      const CustomText(
-        text: 'Employee Login',
-        fontSize: AppFontSize.large,
-        fontWeight: FontWeight.bold,
-        color: kPinText,
-      ),
-      const SizedBox(height: 6),
-      const CustomText(
-        text: 'Enter your email and 4-digit PIN',
-        fontSize: AppFontSize.verySmall,
-        color: kPinSub,
-      ),
-    ]);
+        const SizedBox(height: 14),
+        const CustomText(
+          text: 'Employee Login',
+          fontSize: AppFontSize.large,
+          fontWeight: FontWeight.bold,
+          color: kPinText,
+        ),
+        const SizedBox(height: 6),
+        const CustomText(
+          text: 'Enter your email and 4-digit PIN',
+          fontSize: AppFontSize.verySmall,
+          color: kPinSub,
+        ),
+      ],
+    );
   }
 }
 
@@ -99,15 +107,17 @@ class _RegisterSelector extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppDimen.borderRadius),
             border: Border.all(color: kPinBorder),
           ),
-          child: const Row(children: [
-            Icon(Icons.point_of_sale_outlined, color: kPinSub, size: 18),
-            SizedBox(width: 10),
-            CustomText(
-              text: 'No registers configured',
-              fontSize: AppFontSize.verySmall,
-              color: kPinSub,
-            ),
-          ]),
+          child: const Row(
+            children: [
+              SvgIcon(assetName: AppIcons.posIcon, color: kPinSub, size: 18),
+              SizedBox(width: 10),
+              CustomText(
+                text: 'No registers configured',
+                fontSize: AppFontSize.verySmall,
+                color: kPinSub,
+              ),
+            ],
+          ),
         );
       }
       return GestureDetector(
@@ -119,19 +129,29 @@ class _RegisterSelector extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppDimen.borderRadius),
             border: Border.all(color: kPinBorder),
           ),
-          child: Row(children: [
-            const Icon(Icons.point_of_sale_outlined, color: kPinOrange, size: 18),
-            const SizedBox(width: 10),
-            Expanded(
-              child: CustomText(
-                text: c.selectedRegister.value?['name'] ?? 'Select Register',
-                fontSize: AppFontSize.verySmall,
-                fontWeight: FontWeight.w600,
-                color: kPinText,
+          child: Row(
+            children: [
+              const Icon(
+                Icons.point_of_sale_outlined,
+                color: kPinOrange,
+                size: 18,
               ),
-            ),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: kPinSub, size: 20),
-          ]),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CustomText(
+                  text: c.selectedRegister.value?['name'] ?? 'Select Register',
+                  fontSize: AppFontSize.verySmall,
+                  fontWeight: FontWeight.w600,
+                  color: kPinText,
+                ),
+              ),
+              const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: kPinSub,
+                size: 20,
+              ),
+            ],
+          ),
         ),
       );
     });
@@ -152,7 +172,8 @@ class _RegisterSelector extends StatelessWidget {
           children: [
             Center(
               child: Container(
-                width: 36, height: 4,
+                width: 36,
+                height: 4,
                 decoration: BoxDecoration(
                   color: kPinBorder,
                   borderRadius: BorderRadius.circular(2),
@@ -167,43 +188,54 @@ class _RegisterSelector extends StatelessWidget {
               color: kPinText,
             ),
             const SizedBox(height: 12),
-            ...c.registers.map((reg) => GestureDetector(
-              onTap: () {
-                c.selectRegister(reg);
-                Get.back();
-              },
-              child: Obx(() => Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                decoration: BoxDecoration(
-                  color: c.selectedRegister.value?['id'] == reg['id']
-                      ? kPinOrange.withOpacity(0.15)
-                      : kPinBg,
-                  borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-                  border: Border.all(
-                    color: c.selectedRegister.value?['id'] == reg['id']
-                        ? kPinOrange
-                        : kPinBorder,
+            ...c.registers.map(
+              (reg) => GestureDetector(
+                onTap: () {
+                  c.selectRegister(reg);
+                  Get.back();
+                },
+                child: Obx(
+                  () => Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: c.selectedRegister.value?['id'] == reg['id']
+                          ? kPinOrange.withOpacity(0.15)
+                          : kPinBg,
+                      borderRadius: BorderRadius.circular(
+                        AppDimen.borderRadius,
+                      ),
+                      border: Border.all(
+                        color: c.selectedRegister.value?['id'] == reg['id']
+                            ? kPinOrange
+                            : kPinBorder,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.point_of_sale_outlined,
+                          color: c.selectedRegister.value?['id'] == reg['id']
+                              ? kPinOrange
+                              : kPinSub,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        CustomText(
+                          text: reg['name'] ?? '',
+                          fontSize: AppFontSize.verySmall,
+                          fontWeight: FontWeight.w600,
+                          color: kPinText,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                child: Row(children: [
-                  Icon(
-                    Icons.point_of_sale_outlined,
-                    color: c.selectedRegister.value?['id'] == reg['id']
-                        ? kPinOrange
-                        : kPinSub,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 10),
-                  CustomText(
-                    text: reg['name'] ?? '',
-                    fontSize: AppFontSize.verySmall,
-                    fontWeight: FontWeight.w600,
-                    color: kPinText,
-                  ),
-                ]),
-              )),
-            )),
+              ),
+            ),
           ],
         ),
       ),
@@ -221,10 +253,16 @@ class _EmailField extends StatelessWidget {
     return CustomTextField(
       controller: c.emailController,
       hintText: 'Employee Email',
+      textColor: AppColors.white,
       keyboardType: TextInputType.emailAddress,
+      borderRadius: BorderRadius.circular(AppDimen.borderRadius),
       fillColor: kPinSurface,
       onChanged: (v) => c.email.value = v,
-      prefixIcon: const Icon(Icons.email_outlined, color: kPinSub, size: 20),
+      prefixIcon: SvgIcon(
+        assetName: AppIcons.emailIcon,
+        color: kPinSub,
+        size: 20,
+      ),
     );
   }
 }
@@ -276,31 +314,38 @@ class _PinKeypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Column(
-      children: _keys.map((row) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: row.map((key) {
-            if (key.isEmpty) return const SizedBox(width: 80, height: 72);
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: _KeyButton(
-                label: key,
-                isLoading: key == '⌫' && c.isLoading.value,
-                onTap: () {
-                  if (key == '⌫') {
-                    c.backspace();
-                  } else {
-                    c.appendDigit(key);
-                  }
-                },
+    return Obx(
+      () => Column(
+        children: _keys
+            .map(
+              (row) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: row.map((key) {
+                    if (key.isEmpty)
+                      return const SizedBox(width: 80, height: 72);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: _KeyButton(
+                        label: key,
+                        isLoading: key == '⌫' && c.isLoading.value,
+                        onTap: () {
+                          if (key == '⌫') {
+                            c.backspace();
+                          } else {
+                            c.appendDigit(key);
+                          }
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
-            );
-          }).toList(),
-        ),
-      )).toList(),
-    ));
+            )
+            .toList(),
+      ),
+    );
   }
 }
 
@@ -308,7 +353,11 @@ class _KeyButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool isLoading;
-  const _KeyButton({required this.label, required this.onTap, this.isLoading = false});
+  const _KeyButton({
+    required this.label,
+    required this.onTap,
+    this.isLoading = false,
+  });
 
   bool get isBackspace => label == '⌫';
 
@@ -328,17 +377,21 @@ class _KeyButton extends StatelessWidget {
         alignment: Alignment.center,
         child: isLoading
             ? const SizedBox(
-                width: 20, height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2, color: kPinOrange),
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: kPinOrange,
+                ),
               )
             : isBackspace
-                ? const Icon(Icons.backspace_outlined, color: kPinOrange, size: 22)
-                : CustomText(
-                    text: label,
-                    fontSize: AppFontSize.veryLarge,
-                    fontWeight: FontWeight.w600,
-                    color: kPinText,
-                  ),
+            ? const Icon(Icons.backspace_outlined, color: kPinOrange, size: 22)
+            : CustomText(
+                text: label,
+                fontSize: AppFontSize.veryLarge,
+                fontWeight: FontWeight.w600,
+                color: kPinText,
+              ),
       ),
     );
   }

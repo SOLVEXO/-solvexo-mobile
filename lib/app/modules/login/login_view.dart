@@ -1,13 +1,13 @@
 import 'package:book_store_app/app/components/auth_or_row.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,25 +19,19 @@ class LoginView extends StatelessWidget {
     final authController = Get.find<AuthController>();
     return SingleChildScrollView(
       key: const PageStorageKey("signin"),
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      padding: EdgeInsets.fromLTRB(BaseSpacing.xl, BaseSpacing.xs, BaseSpacing.xl, BaseSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Heading ─────────────────────────────────────────────────────
-          const CustomText(
-            text: 'Welcome back',
-            fontSize: AppFontSize.veryLarge,
-            fontWeight: FontWeight.w800,
-            color: AppColors.black2,
-          ),
-          const SizedBox(height: 2),
-          const CustomText(
-            text: 'Sign in to continue to your account',
-            fontSize: AppFontSize.small,
-            color: AppColors.grey,
+          Text('Welcome back', style: BaseTypography.headlineLarge(color: AppColors.black2)),
+          SizedBox(height: BaseSpacing.xxs / 2),
+          Text(
+            'Sign in to continue to your account',
+            style: BaseTypography.bodySmall(color: AppColors.grey),
           ),
 
-          const SizedBox(height: 14),
+          SizedBox(height: BaseSpacing.md),
 
           // ── Form ─────────────────────────────────────────────────────────
           Form(
@@ -58,7 +52,7 @@ class LoginView extends StatelessWidget {
                   validator: authController.validateEmail,
                 ),
 
-                const SizedBox(height: 8),
+                SizedBox(height: BaseSpacing.xs),
 
                 Obx(
                   () => CustomTextField(
@@ -92,40 +86,29 @@ class LoginView extends StatelessWidget {
           // ── Forgot password ───────────────────────────────────────────────
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton(
+            child: GhostButton(
+              label: 'Forgot Password?',
               onPressed: () => Get.toNamed(Routes.forgetPasswordView),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const CustomText(
-                text: 'Forgot Password?',
-                color: AppColors.primaryColor,
-                fontWeight: FontWeight.w600,
-                fontSize: AppFontSize.verySmall,
-              ),
             ),
           ),
 
-          const SizedBox(height: 10),
+          SizedBox(height: BaseSpacing.xs),
 
           // ── Login button ──────────────────────────────────────────────────
           Obx(
-            () => AppButton(
+            () => PrimaryButton(
               label: authController.isLoading.value ? 'Signing In…' : 'Sign In',
-              onPressed: authController.isLoading.value
-                  ? null
-                  : authController.login,
+              isLoading: authController.isLoading.value,
+              onPressed: authController.isLoading.value ? null : authController.login,
             ),
           ),
 
-          const SizedBox(height: 14),
+          SizedBox(height: BaseSpacing.md),
 
           // ── Divider ───────────────────────────────────────────────────────
           const AuthOrRow(),
 
-          const SizedBox(height: 12),
+          SizedBox(height: BaseSpacing.sm),
 
           // ── Social icons ──────────────────────────────────────────────────
           _SocialRow(
@@ -156,9 +139,9 @@ class _SocialRow extends StatelessWidget {
     return Row(
       children: [
         _SocialIcon(icon: AppIcons.googleIcon, onTap: onGoogle),
-        const SizedBox(width: 12),
+        SizedBox(width: BaseSpacing.sm),
         _SocialIcon(icon: AppIcons.facebookIcon, onTap: onFacebook),
-        const SizedBox(width: 12),
+        SizedBox(width: BaseSpacing.sm),
         _SocialIcon(icon: AppIcons.appleIcon, onTap: onApple),
       ],
     );
@@ -176,10 +159,10 @@ class _SocialIcon extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          height: 44,
+          height: 48, // 48px minimum touch target
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.lightGrey2),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(BaseRadius.md),
             color: AppColors.white,
           ),
           child: Center(child: SvgIcon(assetName: icon, size: 22)),

@@ -1,9 +1,9 @@
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -25,7 +25,7 @@ class StatusStepper extends StatelessWidget {
       final currentStep = controller.currentStep;
 
       return Row(
-        spacing: 40,
+        spacing: BaseSpacing.xxl + BaseSpacing.xs,
         children: List.generate(steps.length, (index) {
           final isCompleted = index < currentStep;
           final isActive = index == currentStep;
@@ -39,47 +39,29 @@ class StatusStepper extends StatelessWidget {
                   children: [
                     if (index != 0)
                       Expanded(
-                        child: Container(
-                          height: 3,
-                          color: isCompleted
-                              ? AppColors.primaryColor
-                              : AppColors.lightGrey,
-                        ),
+                        child: Container(height: 3, color: isCompleted ? AppColors.primaryColor : AppColors.lightGrey),
                       ),
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.all(BaseSpacing.xs),
                       decoration: BoxDecoration(
-                        color: isCompleted || isActive
-                            ? AppColors.primaryColor
-                            : AppColors.lightGrey,
+                        color: isCompleted || isActive ? AppColors.primaryColor : AppColors.lightGrey,
                         shape: BoxShape.circle,
                       ),
-                      child: SvgIcon(
-                        assetName: steps[index].icon,
-                        size: 24,
-                        color: AppColors.white,
-                      ),
+                      child: SvgIcon(assetName: steps[index].icon, size: 24, color: AppColors.white),
                     ),
                     if (index != steps.length - 1)
                       Expanded(
-                        child: Container(
-                          height: 3,
-                          color: isCompleted
-                              ? AppColors.primaryColor
-                              : AppColors.lightGrey,
-                        ),
+                        child: Container(height: 3, color: isCompleted ? AppColors.primaryColor : AppColors.lightGrey),
                       ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                CustomText(
+                SizedBox(height: BaseSpacing.xs),
+                Text(
+                  steps[index].title,
                   textAlign: TextAlign.center,
-                  text: steps[index].title,
-                  fontSize: AppFontSize.small2,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                  color: isCompleted || isActive
-                      ? AppColors.primaryColor
-                      : AppColors.lightGrey,
+                  style: BaseTypography.labelSmall(
+                    color: isCompleted || isActive ? AppColors.primaryColor : AppColors.lightGrey,
+                  ).copyWith(fontWeight: isActive ? FontWeight.w600 : FontWeight.w400),
                 ),
               ],
             ),

@@ -3,6 +3,7 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/pos_open_register/controllers/pos_open_register_controller.dart';
 import 'package:book_store_app/app/modules/pos_pin_login/views/pos_pin_login_view.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -33,8 +34,11 @@ class PosOpenRegisterView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: kPinBorder),
                   ),
-                  child: const Icon(Icons.arrow_back_ios_new_rounded,
-                      color: kPinText, size: 18),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: kPinText,
+                    size: 18,
+                  ),
                 ),
               ),
               const SizedBox(height: 28),
@@ -66,7 +70,8 @@ class PosOpenRegisterView extends StatelessWidget {
                 icon: Icons.point_of_sale_outlined,
                 label: 'Register',
                 value: c.registerName,
-                sub: 'Shift: ${c.shiftId.isEmpty ? "Not assigned" : "Assigned"}',
+                sub:
+                    'Shift: ${c.shiftId.isEmpty ? "Not assigned" : "Assigned"}',
               ),
               const SizedBox(height: 28),
 
@@ -81,8 +86,11 @@ class PosOpenRegisterView extends StatelessWidget {
               CustomTextField(
                 controller: c.openingCashController,
                 hintText: '0.00',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                textColor: AppColors.white,
+                borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 fillColor: kPinSurface,
                 prefixIcon: const Padding(
                   padding: EdgeInsets.only(left: 14, right: 8),
@@ -104,10 +112,14 @@ class PosOpenRegisterView extends StatelessWidget {
               const Spacer(),
 
               // ── Open button ────────────────────────────────────────
-              Obx(() => AppButton(
-                    label: c.isOpening.value ? 'Opening...' : 'Open Register & Start Shift',
-                    onPressed: c.isOpening.value ? null : c.openRegister,
-                  )),
+              Obx(
+                () => AppButton(
+                  label: c.isOpening.value
+                      ? 'Opening...'
+                      : 'Open Register & Start Shift',
+                  onPressed: c.isOpening.value ? null : c.openRegister,
+                ),
+              ),
               const SizedBox(height: AppDimen.allPadding),
             ],
           ),
@@ -139,36 +151,37 @@ class _InfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppDimen.borderRadius),
         border: Border.all(color: kPinBorder),
       ),
-      child: Row(children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: kPinOrange.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(10),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: kPinOrange.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: kPinOrange, size: 20),
           ),
-          child: Icon(icon, color: kPinOrange, size: 20),
-        ),
-        const SizedBox(width: 14),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          CustomText(
-            text: label,
-            fontSize: AppFontSize.tiny,
-            color: kPinSub,
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomText(
+                text: label,
+                fontSize: AppFontSize.tiny,
+                color: kPinSub,
+              ),
+              const SizedBox(height: 3),
+              CustomText(
+                text: value,
+                fontSize: AppFontSize.verySmall,
+                fontWeight: FontWeight.bold,
+                color: kPinText,
+              ),
+              CustomText(text: sub, fontSize: AppFontSize.tiny, color: kPinSub),
+            ],
           ),
-          const SizedBox(height: 3),
-          CustomText(
-            text: value,
-            fontSize: AppFontSize.verySmall,
-            fontWeight: FontWeight.bold,
-            color: kPinText,
-          ),
-          CustomText(
-            text: sub,
-            fontSize: AppFontSize.tiny,
-            color: kPinSub,
-          ),
-        ]),
-      ]),
+        ],
+      ),
     );
   }
 }

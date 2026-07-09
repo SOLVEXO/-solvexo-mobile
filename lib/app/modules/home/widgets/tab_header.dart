@@ -1,8 +1,8 @@
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
-import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,63 +24,43 @@ class TabHeader extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(
             parent: ClampingScrollPhysics(),
           ),
-          padding: const EdgeInsets.only(left: 15, right: 15),
+          padding: EdgeInsets.only(left: BaseSpacing.md - 1, right: BaseSpacing.md - 1),
           scrollDirection: Axis.horizontal,
           itemCount: c.tabs.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 16),
+          separatorBuilder: (_, __) => SizedBox(width: BaseSpacing.md),
           itemBuilder: (_, i) {
             return Obx(() {
               bool selected = c.tabIndex.value == i;
 
               return GestureDetector(
-                onTap: () {
-                  c.tabIndex.value = i;
-                  c.filteredProducts;
-                },
-
+                // Was `c.tabIndex.value = i; c.filteredProducts;` — the
+                // second statement just read an RxList reference and threw
+                // it away; it never re-triggered filtering/fetching, so
+                // tapping a tab changed its own highlighted state but never
+                // actually updated the product list. `onTabChanged` is the
+                // controller's own public method for this exact action.
+                onTap: () => c.onTabChanged(i),
                 child: Column(
                   children: [
-                    /// --- tab label
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
+                      duration: BaseMotion.normal,
                       curve: Curves.easeOut,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                          AppDimen.borderRadius,
-                        ),
-                        color: selected
-                            ? AppColors.primaryColor
-                            : AppColors.white,
+                        borderRadius: BorderRadius.circular(BaseRadius.md),
+                        color: selected ? AppColors.primaryColor : AppColors.white,
                         border: Border.all(
                           width: 0.3,
-                          color: selected
-                              ? AppColors.primaryColor
-                              : AppColors.textPrimary,
+                          color: selected ? AppColors.primaryColor : AppColors.textPrimary,
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                      child: CustomText(
-                        text: c.tabs[i],
-                        fontSize: AppFontSize.small2,
-                        fontWeight: selected
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        color: selected
-                            ? AppColors.white
-                            : AppColors.textPrimary,
+                      padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs - 2, horizontal: BaseSpacing.xs),
+                      child: Text(
+                        c.tabs[i],
+                        style: BaseTypography.labelSmall(
+                          color: selected ? AppColors.white : AppColors.textPrimary,
+                        ).copyWith(fontWeight: selected ? FontWeight.w600 : FontWeight.w400),
                       ),
                     ),
-
-                    // /// --- underline indicator
-                    // AnimatedContainer(
-
-                    //   height: selected ? 4 : 0,
-                    //   width: selected ? 30 : 0,
-                    //   decoration: BoxDecoration(
-                    //     color: const Color(0xFF7a73ff),
-                    //     borderRadius: BorderRadius.circular(12),
-                    //   ),
-                    // ),
                   ],
                 ),
               );

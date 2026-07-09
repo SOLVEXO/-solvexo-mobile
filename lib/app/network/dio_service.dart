@@ -44,15 +44,24 @@ class DioService {
           debugPrint("❌ Dio Error: ${e.response?.statusCode}");
           debugPrint("❌ Response: ${e.response?.data}");
 
-          if (e.response?.statusCode == 401) {
+          // Only an expired/invalid *session token* should force a logout —
+          // that's a 401 on a request that actually sent one
+          // (`requiresAuth: true`). A 401 from an unauthenticated request
+          // like login/register just means "wrong credentials" and must be
+          // returned to the caller normally, not treated as a session drop.
+          final requiresAuth = e.requestOptions.extra['requiresAuth'] ?? false;
+          if (e.response?.statusCode == 401 && requiresAuth) {
             // Session expired or token invalid — clear local data and kick to welcome
             await AppPreferences.clearPreference();
             if (Get.currentRoute != Routes.welcome) {
               Get.offAllNamed(Routes.welcome);
             }
-            return;
           }
 
+          // Always hand the error back down the chain — swallowing it here
+          // (via a bare `return`) leaves the original request's Future
+          // pending forever, so the calling screen's `finally` block never
+          // runs and `isLoading` gets stuck true across navigations.
           handler.next(e);
         },
       ),

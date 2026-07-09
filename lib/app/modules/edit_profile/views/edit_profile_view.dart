@@ -48,65 +48,63 @@ class EditProfileView extends StatelessWidget {
                 ],
               ),
             ),
-            Obx(() {
-              return Form(
-                key: controller.profileFormKey,
-                child: Column(
-                  children: [
-                    CustomTextField(
-                      hintText: 'Full Name',
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(AppDimen.borderRadius),
-                        topRight: Radius.circular(AppDimen.borderRadius),
-                      ),
-                      ispadding: true,
-                      controller: controller.nameController,
-                      validator: controller.validateName,
+            Form(
+              key: controller.profileFormKey,
+              child: Column(
+                children: [
+                  CustomTextField(
+                    hintText: 'Full Name',
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(AppDimen.borderRadius),
+                      topRight: Radius.circular(AppDimen.borderRadius),
                     ),
-                    CustomTextField(
-                      hintText: "Email",
-                      ispadding: true,
-                      controller: controller.emailController,
-                      validator: controller.validateEmail,
-                      keyboardType: TextInputType.emailAddress,
+                    ispadding: true,
+                    controller: controller.nameController,
+                    validator: controller.validateName,
+                  ),
+                  CustomTextField(
+                    hintText: "Email",
+                    ispadding: true,
+                    controller: controller.emailController,
+                    validator: controller.validateEmail,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  CustomTextField(
+                    hintText: "Phone Number",
+                    ispadding: true,
+                    controller: controller.phoneController,
+                    validator: controller.validatePhone,
+                    keyboardType: TextInputType.phone,
+                  ),
+
+                  CustomTextField(
+                    hintText: 'Address',
+                    controller: controller.addressController,
+                    maxLines: 4,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(AppDimen.borderRadius),
+                      bottomRight: Radius.circular(AppDimen.borderRadius),
                     ),
-                    CustomTextField(
-                      hintText: "Phone Number",
-                      ispadding: true,
-                      controller: controller.phoneController,
-                      validator: controller.validatePhone,
-                      keyboardType: TextInputType.phone,
+                    suffixIcon: CustomIconButton(
+                      isPadding: true,
+                      assetName: AppIcons.mapsIcon,
+                      onPressed: () async {
+                        final result = await Get.toNamed(
+                          Routes.mapPickerView,
+                        );
+                        if (result != null) {
+                          controller.addressController.text = result;
+                        }
+                      },
                     ),
 
-                    CustomTextField(
-                      hintText: 'Address',
-                      controller: controller.addressController,
-                      maxLines: 4,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(AppDimen.borderRadius),
-                        bottomRight: Radius.circular(AppDimen.borderRadius),
-                      ),
-                      suffixIcon: CustomIconButton(
-                        isPadding: true,
-                        assetName: AppIcons.mapsIcon,
-                        onPressed: () async {
-                          final result = await Get.toNamed(
-                            Routes.mapPickerView,
-                          );
-                          if (result != null) {
-                            controller.addressController.text = result;
-                          }
-                        },
-                      ),
-
-                      keyboardType: TextInputType.multiline,
-                      validator: (val) =>
-                          FieldValidationUtil.validateValue(val!, 'address'.tr),
-                    ),
-                  ],
-                ),
-              );
-            }),
+                    keyboardType: TextInputType.multiline,
+                    validator: (val) =>
+                        FieldValidationUtil.validateValue(val!, 'address'.tr),
+                  ),
+                ],
+              ),
+            ),
             Obx(
               () => AppButton(
                 label: controller.isUpdating.value

@@ -1,27 +1,33 @@
-import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
-import 'package:book_store_app/app/modules/category/widgets/category_bread_crumb.dart';
 import 'package:book_store_app/app/modules/category/widgets/category_search_bar.dart';
 import 'package:book_store_app/app/modules/category/widgets/category_search_list.dart';
 import 'package:book_store_app/app/modules/home/widgets/category_item.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
+/// Browse main categories. Tapping any category navigates straight to
+/// SubCategoryView, which shows that category's own subcategories as filter
+/// chips over a single product grid — so there's no in-app drill-down here.
 class CategoryView extends StatelessWidget {
   CategoryView({super.key});
 
-  final controller = Get.put(CategoryController());
+  // Guarded — was unconditional `Get.put`, which replaced the shared
+  // `CategoryController` singleton (also used by Home's "Browse by
+  // Category" section) every time this screen was opened.
+  CategoryController get controller {
+    if (!Get.isRegistered<CategoryController>()) Get.put(CategoryController());
+    return Get.find<CategoryController>();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<CategoryController>();
-    // final hasChildren = controller.categoryWithChildren.value == null;
+    final controller = this.controller;
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Categories"),
@@ -36,12 +42,7 @@ class CategoryView extends StatelessWidget {
               if (controller.searchQuery.value.isNotEmpty) {
                 return CategorySearchList(controller: controller);
               }
-              return Column(
-                children: [
-                  CategoryBreadcrumb(),
-                  Expanded(child: CategoryContent()),
-                ],
-              );
+              return CategoryContent();
             }),
           ),
         ],
@@ -52,7 +53,7 @@ class CategoryView extends StatelessWidget {
   Widget _buildSearchBar() {
     return Container(
       color: AppColors.white,
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      padding: EdgeInsets.fromLTRB(0, 0, 0, BaseSpacing.sm),
       child: CategorySearchBar(controller: controller),
     );
   }
@@ -68,22 +69,18 @@ class CategoryContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.isLoading.value || controller.isLoadingDetails.value) {
+      if (controller.isLoading.value) {
         return const CategoryShimmerGrid();
       }
 
-      final isRoot = controller.selectedCategory.value == null;
-      final items = isRoot
-          ? controller.rootCategories
-          : controller.categoryWithChildren.value?.children ??
-                controller.selectedCategory.value!.children;
+      final items = controller.rootCategories;
 
       if (items.isEmpty) return _buildEmptyState();
 
       return CustomRefreshWrapper(
         onRefresh: controller.refresh,
         child: GridView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.md, BaseSpacing.md, BaseSpacing.xl),
           itemCount: items.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
@@ -114,27 +111,17 @@ class CategoryContent extends StatelessWidget {
             height: 80,
             decoration: BoxDecoration(
               color: AppColors.primaryColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(BaseRadius.xxl),
             ),
-            child: Icon(
-              Icons.category_outlined,
-              size: AppFontSize.extraLarge,
-              color: AppColors.primaryColor,
-            ),
+            child: Icon(Icons.category_outlined, size: 40, color: AppColors.primaryColor),
           ),
-          const SizedBox(height: 16),
-          CustomText(
-            text: 'No categories found',
-            fontSize: AppFontSize.regular,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+          SizedBox(height: BaseSpacing.md),
+          Text(
+            'No categories found',
+            style: BaseTypography.bodyLarge(color: AppColors.textPrimary).copyWith(fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 6),
-          CustomText(
-            text: 'Check back later',
-            fontSize: AppFontSize.small2,
-            color: AppColors.gray600,
-          ),
+          SizedBox(height: BaseSpacing.xxs + 2),
+          Text('Check back later', style: BaseTypography.labelSmall(color: AppColors.gray600)),
         ],
       ),
     );
@@ -149,7 +136,7 @@ class CategoryShimmerGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.md, BaseSpacing.md, BaseSpacing.xl),
       itemCount: 12,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
@@ -165,278 +152,24 @@ class CategoryShimmerGrid extends StatelessWidget {
             children: [
               Container(
                 height: 68,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(BaseRadius.lg)),
               ),
-              const SizedBox(height: 7),
+              SizedBox(height: BaseSpacing.xxs - 1),
               Container(
                 height: 10,
                 width: 50,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(5),
-                ),
+                decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(BaseRadius.xs)),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: BaseSpacing.xxs),
               Container(
                 height: 10,
                 width: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(5),
-                ),
+                decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(BaseRadius.xs)),
               ),
             ],
           ),
         );
       },
-    );
-  }
-}
-
-// ─── Left Menu ─────────────────────────────────────────────────────────────
-
-class CategoryLeftMenu extends StatelessWidget {
-  final controller = Get.find<CategoryController>();
-
-  CategoryLeftMenu({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.background,
-      child: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(
-            child: CircularProgressIndicator(color: AppColors.primaryColor),
-          );
-        }
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          itemCount: controller.rootCategories.length,
-          itemBuilder: (_, i) {
-            final item = controller.rootCategories[i];
-            final isSelected = controller.selectedCategory.value?.id == item.id;
-
-            return GestureDetector(
-              onTap: () {
-                controller.selectCategory(item);
-                controller.fetchCategoryDetails(item.id);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 10,
-                  horizontal: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: AppColors.primaryColor.withOpacity(0.12),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primaryColor.withOpacity(0.08)
-                            : AppColors.lightGrey.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(13),
-                        child: CommonImageView(
-                          url: item.image,
-                          width: 52,
-                          height: 52,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    CustomText(
-                      text: item.name,
-                      fontSize: AppFontSize.small,
-                      fontWeight: FontWeight.w600,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      color: isSelected
-                          ? AppColors.primaryColor
-                          : AppColors.blackColor,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      }),
-    );
-  }
-}
-
-// ─── Right Content ─────────────────────────────────────────────────────────
-
-class CategoryRightContent extends StatelessWidget {
-  final controller = Get.find<CategoryController>();
-
-  CategoryRightContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final selected = controller.selectedCategory.value;
-
-      if (selected == null) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.touch_app_outlined,
-                size: 48,
-                color: AppColors.lightGrey,
-              ),
-              const SizedBox(height: 12),
-              CustomText(
-                text: 'Select a category',
-                fontSize: AppFontSize.small2,
-                color: AppColors.gray600,
-                fontWeight: FontWeight.w500,
-              ),
-            ],
-          ),
-        );
-      }
-
-      final children =
-          controller.categoryWithChildren.value?.children ?? selected.children;
-
-      if (controller.isLoadingDetails.value) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(AppColors.primaryColor),
-            strokeWidth: 2.5,
-          ),
-        );
-      }
-
-      if (children.isEmpty) {
-        return Center(
-          child: CustomText(
-            text: 'No subcategories',
-            fontSize: AppFontSize.small2,
-            color: AppColors.gray600,
-          ),
-        );
-      }
-
-      return ListView.builder(
-        padding: const EdgeInsets.all(14),
-        itemCount: children.length,
-        itemBuilder: (_, i) {
-          final item = children[i];
-          return _ModernCategoryCard(
-            title: item.name,
-            image: item.image,
-            onTap: () {
-              controller.selectCategory(item);
-              controller.fetchCategoryDetails(item.id);
-            },
-          );
-        },
-      );
-    });
-  }
-}
-
-class _ModernCategoryCard extends StatelessWidget {
-  final String title;
-  final String? image;
-  final VoidCallback onTap;
-
-  const _ModernCategoryCard({
-    required this.title,
-    required this.image,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(13),
-                child: CommonImageView(
-                  url: image,
-                  width: 56,
-                  height: 56,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: CustomText(
-                text: title,
-                fontSize: AppFontSize.regular,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(9),
-              ),
-              child: Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 13,
-                color: AppColors.primaryColor,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

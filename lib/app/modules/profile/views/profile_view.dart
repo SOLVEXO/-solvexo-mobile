@@ -7,6 +7,7 @@ import 'package:book_store_app/app/modules/profile/widgets/profile_stats_strip.d
 import 'package:book_store_app/app/modules/settings/widgets/settings_section_widget.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/base/base_view.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -40,17 +41,17 @@ class ProfileView extends BaseView<ProfileController> {
             Transform.translate(
               offset: const Offset(0, -24),
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.background,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(BaseRadius.xxl)),
                 ),
                 child: Column(children: [
-                  const SizedBox(height: 20),
+                  SizedBox(height: BaseSpacing.xl),
                   ProfileStatsStrip(controller: controller),
-                  const SizedBox(height: 24),
+                  SizedBox(height: BaseSpacing.xl + BaseSpacing.xxs),
                   ...controller.sections.map(
                     (s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 24),
+                      padding: EdgeInsets.only(bottom: BaseSpacing.xl + BaseSpacing.xxs),
                       child: SettingsSectionWidget(section: s),
                     ),
                   ),
@@ -80,9 +81,9 @@ class _LoadingBody extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(AppDimen.allPadding),
           child: Column(children: [
-            const SizedBox(height: 8),
+            SizedBox(height: BaseSpacing.xs),
             ShimmerUserGreeting(),
-            const SizedBox(height: 16),
+            SizedBox(height: BaseSpacing.md),
             ShimmerProfileDetails(),
           ]),
         ),

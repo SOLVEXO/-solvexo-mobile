@@ -1,8 +1,9 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 
 class CategoryItem extends StatelessWidget {
@@ -15,16 +16,13 @@ class CategoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      // onTap: () => Get.toNamed(Routes.categoryView),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(BaseSpacing.sm),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [BoxShadow(color: AppColors.black12, blurRadius: 6)],
+          borderRadius: BorderRadius.circular(BaseRadius.xl),
+          boxShadow: BaseShadows.forLevel(BaseElevation.level1),
         ),
-
-        // height: height / 5,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -33,14 +31,12 @@ class CategoryItem extends StatelessWidget {
               height: 60,
               width: 60,
               fit: BoxFit.cover,
-              radius: BorderRadius.circular(12),
+              radius: BorderRadius.circular(BaseRadius.md),
               placeHolder: AppImages.sampleProduct,
             ),
-            // const SizedBox(height: 8),
-            CustomText(
-              text: title,
-              fontSize: AppFontSize.verySmall,
-              fontWeight: FontWeight.w600,
+            Text(
+              title,
+              style: BaseTypography.labelSmall(color: AppColors.black).copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
           ],

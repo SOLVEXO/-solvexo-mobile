@@ -1,8 +1,15 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
+// NOTE (duplication): this widget's branching logic is near-identical to
+// `OrderActions` (order_actions.dart) — same three cases (completed+review,
+// canRequestReturn, canCancel), just used in different visual contexts
+// (sticky bottom bar here vs. inline in the order card there). Worth
+// consolidating into one shared `_OrderActionsRow(compact: bool)` in a
+// follow-up pass; not merged now to avoid changing either call site's
+// behavior without the ability to compile-test both together.
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/review_item_picker_sheet.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
@@ -19,17 +26,15 @@ class CustomActionButtons extends StatelessWidget {
       return Row(
         children: [
           Expanded(
-            child: AppButton(
+            child: PrimaryButton(
               onPressed: () => ReviewItemPickerSheet.show(context, order),
               label: "Write Review",
             ),
           ),
           if (order.canRequestReturn) ...[
-            const SizedBox(width: 10),
+            SizedBox(width: BaseSpacing.xs + 2),
             Expanded(
-              child: AppButton(
-                isOutlined: true,
-                textColor: AppColors.red,
+              child: DangerButton(
                 onPressed: () => Get.toNamed(Routes.refundRequestView, arguments: order),
                 label: "Request Refund",
               ),
@@ -40,9 +45,7 @@ class CustomActionButtons extends StatelessWidget {
     }
 
     if (order.canCancel) {
-      return AppButton(
-        isOutlined: true,
-        textColor: AppColors.red,
+      return DangerButton(
         onPressed: () => controller.confirmCancel(context, order.orderId),
         label: "Cancel Order",
       );

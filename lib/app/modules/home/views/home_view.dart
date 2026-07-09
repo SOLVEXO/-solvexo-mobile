@@ -1,6 +1,4 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/dynamic_shimmer.dart';
 import 'package:book_store_app/app/components/main_app_bar.dart';
 import 'package:book_store_app/app/components/no_signal_view.dart';
@@ -22,7 +20,9 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/base/base_view.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -41,15 +41,31 @@ class HomeView extends BaseView<HomeController> {
     return Get.find<HomeController>();
   }
 
-  CategoryController get _categoryController => Get.put(CategoryController());
-  ProfileController get _profileController => Get.put(ProfileController());
-  NetworkController get _networkController => Get.put(NetworkController());
+  // Guarded the same way as `controller` above — these three were previously
+  // unconditional `Get.put(...)`, which replaces the live singleton (losing
+  // its state) every single time `buildBody` runs, e.g. on every return to
+  // this tab. `isRegistered` makes them behave like `Get.find` once bound.
+  CategoryController get _categoryController {
+    if (!Get.isRegistered<CategoryController>()) Get.put(CategoryController());
+    return Get.find<CategoryController>();
+  }
+
+  ProfileController get _profileController {
+    if (!Get.isRegistered<ProfileController>()) Get.put(ProfileController());
+    return Get.find<ProfileController>();
+  }
+
+  NetworkController get _networkController {
+    if (!Get.isRegistered<NetworkController>()) Get.put(NetworkController());
+    return Get.find<NetworkController>();
+  }
 
   @override
   Color? get backgroundColor => AppColors.background;
 
   @override
-  PreferredSizeWidget buildAppBar(BuildContext context) => const MainAppBar(height: 60);
+  PreferredSizeWidget buildAppBar(BuildContext context) =>
+      MainAppBar(height: MainAppBar.preferredHeight(context));
 
   @override
   Widget? buildFloatingActionButton(BuildContext context) {
@@ -70,88 +86,69 @@ class HomeView extends BaseView<HomeController> {
     final categoryController = _categoryController;
     final profileController = _profileController;
     final networkController = _networkController;
-    final double height = MediaQuery.of(context).size.height;
 
     return Obx(() {
       if (!networkController.isConnected.value) {
         return const NoSignalView();
       }
 
-      final bool isLoading = controller.isLoading.value || categoryController.isLoading.value;
+      final bool isLoading =
+          controller.isLoading.value || categoryController.isLoading.value;
 
       return Stack(
         children: [
           CustomRefreshWrapper(
             onRefresh: controller.refreshHome,
-            child: Scrollbar(
-              trackVisibility: true,
-              interactive: true,
-              thickness: 3,
-              radius: const Radius.circular(AppDimen.borderRadius),
-              child: ListView(
-                padding: EdgeInsets.zero,
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  const SizedBox(height: 16),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(height: BaseSpacing.sm),
 
-                  // ── Promotional banner ───────────────────────────────
-                  isLoading
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
-                          child: BannerShimmer(),
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
-                          child: BannerCarousel(),
-                        ),
+                // ── Promotional banner ───────────────────────────────
+                isLoading ? BannerShimmer() : BannerCarousel(),
 
-                  const SizedBox(height: 22),
+                SizedBox(height: BaseSpacing.lg),
 
-                  // ── Browse by Category ───────────────────────────────
-                  const HomeSectionHeader(title: 'Browse by Category'),
-                  const SizedBox(height: 8),
+                // ── Browse by Category ───────────────────────────────
+                const HomeSectionHeader(title: 'Browse by Category'),
+                CategoriesGrid(),
 
-                  isLoading
-                      ? const DynamicShimmer(iscategories: true)
-                      : categoryController.allCategoriesFlat.isEmpty
-                          ? SizedBox(
-                              height: height / 7,
-                              child: const Center(child: DynamicShimmer(iscategories: true)),
-                            )
-                          : CategoriesGrid(),
+                SizedBox(height: BaseSpacing.lg),
 
-                  const SizedBox(height: 24),
+                // ── Trending Now ─────────────────────────────────────
+                const HomeSectionHeader(
+                  title: 'Trending Now',
+                  viewMore: true,
+                ),
 
-                  // ── Trending Now ─────────────────────────────────────
-                  const HomeSectionHeader(title: 'Trending Now', viewMore: true),
+                const HomeSearchBar(),
+                SizedBox(height: BaseSpacing.sm),
+                const HomeSortChips(),
 
-                  const HomeSearchBar(),
-                  const SizedBox(height: 12),
-                  const HomeSortChips(),
+                SizedBox(height: BaseSpacing.md),
 
-                  const SizedBox(height: 12),
+                isLoading
+                    ? const DynamicShimmer()
+                    : _ProductsSection(controller: controller),
 
-                  isLoading ? const DynamicShimmer(isproducts: true) : _ProductsSection(controller: controller),
+                SizedBox(height: BaseSpacing.lg),
 
-                  const SizedBox(height: 24),
+                // ── Staff Picks ──────────────────────────────────────
+                const HomeSectionHeader(title: 'Staff Picks'),
 
-                  // ── Staff Picks ──────────────────────────────────────
-                  const HomeSectionHeader(title: 'Staff Picks'),
-                  const SizedBox(height: 12),
+                const HomeStaffPicks(),
 
-                  const HomeStaffPicks(),
-
-                  const SizedBox(height: 32),
-                ],
-              ),
+                SizedBox(height: BaseSpacing.xxl),
+              ],
             ),
           ),
 
           if (profileController.user.isNull)
             Positioned(
-              left: 12,
-              right: 12,
-              bottom: 12,
+              left: BaseSpacing.sm,
+              right: BaseSpacing.sm,
+              bottom: BaseSpacing.sm,
               child: SafeArea(child: LoginSignupCard()),
             ),
         ],
@@ -184,17 +181,17 @@ class _ProductsSection extends StatelessWidget {
                   size: 64,
                   color: AppColors.greySwatch400,
                 ),
-                const SizedBox(height: 12),
-                const CustomText(
-                  text: 'No products found',
-                  fontSize: AppFontSize.small,
-                  color: AppColors.gray600,
+                SizedBox(height: BaseSpacing.sm),
+                Text(
+                  'No products found',
+                  style: BaseTypography.bodySmall(color: AppColors.gray600),
                 ),
-                const SizedBox(height: 4),
-                const CustomText(
-                  text: 'Try a different category or search term',
-                  fontSize: AppFontSize.verySmall,
-                  color: AppColors.lightGrey7,
+                SizedBox(height: BaseSpacing.xxs),
+                Text(
+                  'Try a different category or search term',
+                  style: BaseTypography.labelSmall(
+                    color: AppColors.lightGrey7,
+                  ).copyWith(fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -205,19 +202,21 @@ class _ProductsSection extends StatelessWidget {
       return Column(
         children: [
           const ProductsGrid(),
-          const SizedBox(height: 16),
+          SizedBox(height: BaseSpacing.md),
           if (controller.hasMoreProducts.value && !isFetching)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
-              child: AppButton(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimen.allPadding,
+              ),
+              child: OutlineButton(
                 onPressed: controller.loadMoreProducts,
                 label: 'Load More Products',
               ),
             ),
           if (isFetching)
-            const Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(),
+            Padding(
+              padding: EdgeInsets.all(BaseSpacing.lg),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       );

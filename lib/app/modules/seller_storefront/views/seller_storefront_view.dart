@@ -30,25 +30,32 @@ class SellerStorefrontView extends StatelessWidget {
           child: CustomScrollView(
             controller: c.scrollController,
             slivers: [
-              SliverToBoxAdapter(child: StorefrontHeader(store: store, c: c)),
+              SliverToBoxAdapter(
+                child: StorefrontHeader(store: store, c: c),
+              ),
               const SliverToBoxAdapter(child: SizedBox(height: 18)),
               SliverToBoxAdapter(child: StorefrontFilterBar(c: c)),
               const SliverToBoxAdapter(child: SizedBox(height: 18)),
               SliverToBoxAdapter(child: _SectionHeader(c: c)),
               _ProductsSliver(c: c),
               SliverToBoxAdapter(
-                child: Obx(() => c.isLoadingMore.value
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                child: Obx(
+                  () => c.isLoadingMore.value
+                      ? const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
                           ),
-                        ),
-                      )
-                    : const SizedBox(height: 24)),
+                        )
+                      : const SizedBox(height: 24),
+                ),
               ),
             ],
           ),
@@ -211,7 +218,11 @@ class _NotFoundState extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: AppColors.black2),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 16,
+                color: AppColors.black2,
+              ),
             ),
           ),
         ),
@@ -227,7 +238,11 @@ class _NotFoundState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.storefront_outlined, size: 40, color: AppColors.lightGrey2),
+                child: const Icon(
+                  Icons.storefront_outlined,
+                  size: 40,
+                  color: AppColors.lightGrey2,
+                ),
               ),
               const SizedBox(height: 16),
               const CustomText(
@@ -246,7 +261,10 @@ class _NotFoundState extends StatelessWidget {
               GestureDetector(
                 onTap: () => Get.back(),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AppColors.primaryColor, AppColors.accentColor],

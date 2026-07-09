@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
+import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:file_picker/file_picker.dart';
@@ -125,9 +128,10 @@ const _kApiToProductType = {
 };
 
 class AddSellerProductController extends GetxController {
-  final _repo        = SellerProductRepository();
-  final _sellerRepo  = SellerRepository();
-  final _uploadRepo  = UploadRepository();
+  final _repo         = SellerProductRepository();
+  final _sellerRepo   = SellerRepository();
+  final _uploadRepo   = UploadRepository();
+  final _categoryRepo = CategoryRepository();
 
   final Rx<AddProductStep> step = AddProductStep.type.obs;
   final Rx<ProductTypeOption?> selectedType = Rx(null);
@@ -136,6 +140,16 @@ class AddSellerProductController extends GetxController {
   // Allowed types fetched from the store's registered product types.
   final RxList<ProductTypeOption> _allowedTypes = <ProductTypeOption>[].obs;
   final RxBool isLoadingTypes = true.obs;
+
+  // ── Subcategory (optional) ────────────────────────────────────────────────
+  // The store's own main category (admin-curated, fixed at store creation).
+  // Subcategories are optional — a seller may pick one of the existing
+  // subcategories under it, add a new one on the fly, or leave it unset.
+  String? _mainCategoryId;
+  final RxList<CategoryModel> subcategories = <CategoryModel>[].obs;
+  final RxBool isLoadingSubcategories = false.obs;
+  final Rxn<String> selectedSubCategoryId = Rxn<String>();
+  final RxString selectedSubCategoryName = ''.obs;
 
   // ── Core form reactive values ─────────────────────────────────────────────
   final RxString productName = ''.obs;
@@ -242,9 +256,52 @@ class AddSellerProductController extends GetxController {
           .toList();
 
       if (mapped.isNotEmpty) _allowedTypes.assignAll(mapped);
+
+      _mainCategoryId = store.categoryId;
+      if (_mainCategoryId != null && _mainCategoryId!.isNotEmpty) {
+        unawaited(_loadSubcategories());
+      }
     } finally {
       isLoadingTypes.value = false;
     }
+  }
+
+  // ── Subcategory (optional) ────────────────────────────────────────────────
+
+  Future<void> _loadSubcategories() async {
+    final mainId = _mainCategoryId;
+    if (mainId == null || mainId.isEmpty) return;
+
+    isLoadingSubcategories.value = true;
+    final tree = await _categoryRepo.getCategoryTreeById(mainId);
+    subcategories.assignAll(tree?.children ?? const []);
+    isLoadingSubcategories.value = false;
+  }
+
+  void selectSubCategory(String? categoryId) {
+    selectedSubCategoryId.value = categoryId;
+    selectedSubCategoryName.value =
+        categoryId == null ? '' : (subcategories.firstWhereOrNull((c) => c.id == categoryId)?.name ?? '');
+  }
+
+  /// Lets a seller optionally add a new subcategory under their store's main
+  /// category — main categories stay admin-only, this only ever nests one
+  /// level under an existing one (enforced server-side too).
+  Future<CategoryModel?> createSubcategory(String name) async {
+    final mainId = _mainCategoryId;
+    if (mainId == null || mainId.isEmpty) {
+      ToastUtil.showToast('Your store has no main category set.');
+      return null;
+    }
+    if (name.trim().isEmpty) return null;
+
+    final created = await _categoryRepo.createCategory(name: name.trim(), parentId: mainId);
+    if (created != null) {
+      subcategories.add(created);
+      selectSubCategory(created.id);
+      ToastUtil.showToast('Subcategory added');
+    }
+    return created;
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────────
@@ -407,6 +464,7 @@ class AddSellerProductController extends GetxController {
       tags: tagList,
       images: productImages.toList(),
       isListedOnSolvexo: isListedOnSolvexo.value,
+      subCategoryId: selectedSubCategoryId.value,
       files: files,
       downloadLimit: downloadLimit,
       linkExpiryDays: parsedExpiry,
@@ -459,6 +517,7 @@ class AddSellerProductController extends GetxController {
       tags: tagList,
       images: productImages.toList(),
       isListedOnSolvexo: isListedOnSolvexo.value,
+      subCategoryId: selectedSubCategoryId.value,
     );
   }
 

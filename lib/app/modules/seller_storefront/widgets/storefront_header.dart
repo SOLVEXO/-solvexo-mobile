@@ -1,24 +1,30 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/data/models/storefront/storefront_model.dart';
 import 'package:book_store_app/app/modules/seller_storefront/controllers/seller_storefront_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// The storefront's hero header: a rounded cover photo, an overlapping
-/// circular logo with a verified badge, name/type/badges, a follow-count
-/// stats row, an "About" card, and the follow/share actions.
+/// hexagonal logo with a verified badge, name/type/badges, a stat-box row,
+/// an "ABOUT" card, and the follow/message actions.
 class StorefrontHeader extends StatelessWidget {
   final StorefrontModel store;
   final SellerStorefrontController c;
 
   const StorefrontHeader({super.key, required this.store, required this.c});
 
-  static const double _coverHeight = 200;
-  static const double _logoSize = 88;
-  static const double _coverRadius = 28;
+  static const double _coverHeight = 180;
+  static const double _logoSize = 92;
+  static const double _coverRadius = BaseRadius.xxl;
 
   bool get _isVerified =>
       store.badges.any((b) => b.toLowerCase().contains('verified'));
@@ -36,140 +42,89 @@ class StorefrontHeader extends StatelessWidget {
             children: [
               _Cover(store: store),
               Positioned(
-                top: MediaQuery.of(context).padding.top + 10,
-                left: 16,
+                top: MediaQuery.of(context).padding.top + BaseSpacing.xs + 2,
+                left: BaseSpacing.md,
                 child: _RoundIconButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
+                  icon: AppIcons.chevronLeft,
                   onTap: () => Get.back(),
                 ),
               ),
               Positioned(
-                top: MediaQuery.of(context).padding.top + 10,
-                right: 16,
+                top: MediaQuery.of(context).padding.top + BaseSpacing.xs + 2,
+                right: BaseSpacing.md,
                 child: _RoundIconButton(
-                  icon: Icons.ios_share_rounded,
+                  icon: AppIcons.shareIcon,
                   onTap: c.shareStore,
                 ),
               ),
               Positioned(
                 bottom: 0,
-                left: 20,
-                child: Container(
-                  width: _logoSize,
-                  height: _logoSize,
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.black.withOpacity(0.14),
-                        blurRadius: 14,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(_logoSize / 2),
-                        child: store.logo != null && store.logo!.isNotEmpty
-                            ? CommonImageView(url: store.logo!, fit: BoxFit.cover)
-                            : Container(
-                                color: AppColors.primaryColor.withOpacity(0.1),
-                                alignment: Alignment.center,
-                                child: CustomText(
-                                  text: store.initials,
-                                  fontSize: AppFontSize.veryLarge,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryColor,
-                                ),
-                              ),
-                      ),
-                      if (_isVerified)
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: const BoxDecoration(
-                              color: AppColors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.verified_rounded,
-                              size: 20,
-                              color: AppColors.primaryColor,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                left: BaseSpacing.lg,
+                child: _HexagonAvatar(
+                  store: store,
+                  size: _logoSize,
+                  isVerified: _isVerified,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: BaseSpacing.xs),
 
         // ── Name + sellerType ────────────────────────────────────────────────
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: CustomText(
-                      text: store.name,
-                      fontSize: AppFontSize.large,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.black,
-                      maxLines: 1,
-                    ),
-                  ),
-                ],
+              CustomText(
+                text: store.name,
+                fontWeight: FontWeight.w800,
+                fontSize: AppFontSize.medium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               if (store.sellerType != null && store.sellerType!.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                _Pill(text: _prettify(store.sellerType!), icon: Icons.storefront_rounded),
+                SizedBox(height: BaseSpacing.xs),
+                _Pill(
+                  text: _prettify(store.sellerType!),
+                  icon: Icons.storefront_rounded,
+                ),
               ],
 
-              const SizedBox(height: 14),
+              SizedBox(height: BaseSpacing.md),
 
-              // ── Stats row ─────────────────────────────────────────────────
+              // ── Stat boxes ────────────────────────────────────────────────
               Row(
                 children: [
                   Obx(
-                    () => _StatChip(
-                      icon: Icons.grid_view_rounded,
-                      label: 'Products',
-                      value: c.totalProducts.value.toString(),
+                    () => Expanded(
+                      child: _StatBox(
+                        label: 'Products',
+                        value: '${c.totalProducts.value}',
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: BaseSpacing.sm),
                   // `store` is a plain snapshot (not an Rx) — the parent's
                   // Obx already rebuilds this whole header when it changes,
-                  // so no inner Obx is needed (and none would have anything
-                  // observable to read).
-                  _StatChip(
-                    icon: Icons.people_alt_rounded,
-                    label: 'Followers',
-                    value: '${store.followersCount}',
+                  // so no inner Obx is needed here.
+                  Expanded(
+                    child: _StatBox(
+                      label: 'Followers',
+                      value: '${store.followersCount}',
+                    ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 14),
+              SizedBox(height: BaseSpacing.md),
 
               // ── Actions ───────────────────────────────────────────────────
               Row(
                 children: [
                   Expanded(child: _FollowButton(c: c)),
-                  const SizedBox(width: 10),
+                  SizedBox(width: BaseSpacing.sm),
                   _MessageButton(c: c),
                 ],
               ),
@@ -177,49 +132,27 @@ class StorefrontHeader extends StatelessWidget {
           ),
         ),
 
-        if (store.description != null && store.description!.trim().isNotEmpty) ...[
-          const SizedBox(height: 16),
+        if (store.description != null &&
+            store.description!.trim().isNotEmpty) ...[
+          SizedBox(height: BaseSpacing.md),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.lightGrey3,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    text: 'About the store',
-                    fontSize: AppFontSize.tiny,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.gray600,
-                  ),
-                  const SizedBox(height: 6),
-                  CustomText(
-                    text: store.description!,
-                    fontSize: AppFontSize.verySmall,
-                    color: AppColors.black2,
-                    maxLines: 4,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
+            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg),
+            child: _AboutCard(description: store.description!),
           ),
         ],
 
         if (store.badges.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          SizedBox(height: BaseSpacing.sm + 2),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg),
             child: Wrap(
-              spacing: 6,
-              runSpacing: 6,
+              spacing: BaseSpacing.xs,
+              runSpacing: BaseSpacing.xs,
               children: store.badges
-                  .map((b) => _Pill(text: _prettify(b), icon: Icons.verified_rounded))
+                  .map(
+                    (b) =>
+                        _Pill(text: _prettify(b), icon: Icons.verified_rounded),
+                  )
                   .toList(),
             ),
           ),
@@ -270,7 +203,10 @@ class _Cover extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [AppColors.black.withOpacity(0.28), Colors.transparent],
+                  colors: [
+                    AppColors.black.withOpacity(0.28),
+                    Colors.transparent,
+                  ],
                   stops: const [0.0, 0.45],
                 ),
               ),
@@ -283,7 +219,7 @@ class _Cover extends StatelessWidget {
 }
 
 class _RoundIconButton extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final VoidCallback onTap;
   const _RoundIconButton({required this.icon, required this.onTap});
 
@@ -292,50 +228,194 @@ class _RoundIconButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 36,
-        height: 36,
+        padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: AppColors.black.withOpacity(0.32),
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
-        child: Icon(icon, size: 17, color: AppColors.white),
+        child: SvgIcon(assetName: icon, size: 20, color: AppColors.white),
       ),
     );
   }
 }
 
-class _StatChip extends StatelessWidget {
-  final IconData icon;
+// ─── Hexagon avatar ──────────────────────────────────────────────────────────
+
+class _HexagonClipper extends CustomClipper<Path> {
+  const _HexagonClipper();
+
+  @override
+  Path getClip(Size size) {
+    final w = size.width;
+    final h = size.height;
+    return Path()
+      ..moveTo(w * 0.5, 0)
+      ..lineTo(w, h * 0.25)
+      ..lineTo(w, h * 0.75)
+      ..lineTo(w * 0.5, h)
+      ..lineTo(0, h * 0.75)
+      ..lineTo(0, h * 0.25)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class _HexagonAvatar extends StatelessWidget {
+  final StorefrontModel store;
+  final double size;
+  final bool isVerified;
+
+  const _HexagonAvatar({
+    required this.store,
+    required this.size,
+    required this.isVerified,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasLogo = store.logo != null && store.logo!.isNotEmpty;
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // `PhysicalShape` clips AND shadows to the exact hexagon path —
+          // a plain circular `Container` behind a hexagon `ClipPath` left
+          // round white bulges peeking out past the hexagon's flat edges.
+          PhysicalShape(
+            clipper: const _HexagonClipper(),
+            color: AppColors.white,
+            elevation: 3,
+            shadowColor: AppColors.black.withOpacity(0.3),
+            child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: ClipPath(
+                clipper: const _HexagonClipper(),
+                child: Container(
+                  color: AppColors.primaryColor.withOpacity(0.08),
+                  child: hasLogo
+                      ? CommonImageView(url: store.logo!, fit: BoxFit.cover)
+                      : Center(
+                          child: CustomText(
+                            text: store.initials,
+                            color: AppColors.primaryColor,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 30,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+          if (isVerified)
+            Positioned(
+              bottom: -2,
+              right: -2,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: AppColors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.verified_rounded,
+                  size: 20,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Stat box ────────────────────────────────────────────────────────────────
+
+class _StatBox extends StatelessWidget {
   final String label;
   final String value;
-  const _StatChip({required this.icon, required this.label, required this.value});
+  const _StatBox({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: BaseSpacing.sm,
+        vertical: BaseSpacing.xs + 2,
+      ),
       decoration: BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(BaseRadius.md),
         border: Border.all(color: AppColors.lightGrey2),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 14, color: AppColors.primaryColor),
-          const SizedBox(width: 6),
-          CustomText(
-            text: value,
-            fontSize: AppFontSize.verySmall,
-            fontWeight: FontWeight.w700,
-            color: AppColors.black2,
+          Text(
+            label.toUpperCase(),
+            style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+              letterSpacing: 0.4,
+            ),
           ),
-          const SizedBox(width: 4),
-          CustomText(
-            text: label,
-            fontSize: AppFontSize.tiny,
-            color: AppColors.gray600,
+          SizedBox(height: BaseSpacing.xxs / 2),
+          Text(
+            value,
+            style: BaseTypography.titleMedium(
+              color: AppColors.primaryColor,
+            ).copyWith(fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── About card ──────────────────────────────────────────────────────────────
+
+class _AboutCard extends StatelessWidget {
+  final String description;
+  const _AboutCard({required this.description});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: BaseSpacing.sm + 2,
+        vertical: BaseSpacing.sm + 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(BaseRadius.md),
+        boxShadow: BaseShadows.forLevel(BaseElevation.level1),
+        border: Border(
+          left: BorderSide(color: AppColors.primaryColor, width: 3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ABOUT',
+            style: BaseTypography.labelSmall(color: AppColors.gray600).copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+              fontSize: 10.5,
+            ),
+          ),
+          SizedBox(height: BaseSpacing.xxs + 1),
+          Text(
+            description,
+            style: BaseTypography.bodySmall(color: AppColors.black2),
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -353,11 +433,11 @@ class _MessageButton extends StatelessWidget {
       () => GestureDetector(
         onTap: c.isStartingChat.value ? null : c.messageStore,
         child: Container(
-          width: 44,
-          height: 44,
+          width: 46,
+          height: 46,
           decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(12),
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(BaseRadius.md),
             border: Border.all(color: AppColors.lightGrey2),
           ),
           alignment: Alignment.center,
@@ -365,9 +445,16 @@ class _MessageButton extends StatelessWidget {
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primaryColor,
+                  ),
                 )
-              : const Icon(Icons.chat_bubble_outline_rounded, size: 19, color: AppColors.primaryColor),
+              : const SvgIcon(
+                  assetName: AppIcons.messageIcon,
+                  size: 22,
+                  color: AppColors.primaryColor,
+                ),
         ),
       ),
     );
@@ -382,23 +469,30 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(
+        horizontal: BaseSpacing.sm - 1,
+        vertical: BaseSpacing.xxs + 1,
+      ),
       decoration: BoxDecoration(
         color: AppColors.primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(BaseRadius.pill),
+        border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
             Icon(icon, size: 12, color: AppColors.primaryColor),
-            const SizedBox(width: 4),
+            SizedBox(width: BaseSpacing.xxs),
           ],
-          CustomText(
-            text: text,
-            fontSize: AppFontSize.tiny,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primaryColor,
+          Text(
+            text.toUpperCase(),
+            style: BaseTypography.labelSmall(color: AppColors.primaryColor)
+                .copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 10.5,
+                  letterSpacing: 0.3,
+                ),
           ),
         ],
       ),
@@ -418,8 +512,8 @@ class _FollowButton extends StatelessWidget {
       return GestureDetector(
         onTap: loading ? null : c.toggleFollow,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          height: 44,
+          duration: BaseMotion.normal,
+          height: 46,
           decoration: BoxDecoration(
             gradient: following
                 ? null
@@ -427,9 +521,10 @@ class _FollowButton extends StatelessWidget {
                     colors: [AppColors.primaryColor, AppColors.accentColor],
                   ),
             color: following ? AppColors.white : null,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(BaseRadius.md),
             border: Border.all(
-              color: following ? AppColors.lightGrey2 : Colors.transparent,
+              color: following ? AppColors.primaryColor : Colors.transparent,
+              width: 1.5,
             ),
             boxShadow: following
                 ? null
@@ -457,14 +552,18 @@ class _FollowButton extends StatelessWidget {
                     Icon(
                       following ? Icons.check_rounded : Icons.add_rounded,
                       size: 17,
-                      color: following ? AppColors.black2 : AppColors.white,
+                      color: following
+                          ? AppColors.primaryColor
+                          : AppColors.white,
                     ),
-                    const SizedBox(width: 6),
-                    CustomText(
-                      text: following ? 'Following' : 'Follow Store',
-                      fontSize: AppFontSize.verySmall,
-                      fontWeight: FontWeight.w700,
-                      color: following ? AppColors.black2 : AppColors.white,
+                    SizedBox(width: BaseSpacing.xxs + 2),
+                    Text(
+                      following ? 'Following' : 'Follow Store',
+                      style: BaseTypography.bodySmall(
+                        color: following
+                            ? AppColors.primaryColor
+                            : AppColors.white,
+                      ).copyWith(fontWeight: FontWeight.w700),
                     ),
                   ],
                 ),

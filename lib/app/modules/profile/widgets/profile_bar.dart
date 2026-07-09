@@ -1,9 +1,10 @@
-import 'package:book_store_app/app/components/custom_text.dart';
+// NOTE: no other file in the app references `ProfileBar` — appears to be
+// dead/superseded code. Migrated regardless in case it's revived.
 import 'package:book_store_app/app/components/profile_icon.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,10 +15,7 @@ class ProfileBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: AppDimen.allPadding,
-        horizontal: AppDimen.allPadding,
-      ),
+      padding: EdgeInsets.symmetric(vertical: AppDimen.allPadding, horizontal: AppDimen.allPadding),
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -26,16 +24,17 @@ class ProfileBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          CustomText(
-            text: "Profile",
-            letterSpacing: 2,
-            // color: AppColors.white,
-            fontSize: AppFontSize.medium,
-            fontWeight: FontWeight.w600,
+          Text(
+            "Profile",
+            style: BaseTypography.titleMedium(color: AppColors.black).copyWith(fontWeight: FontWeight.w600, letterSpacing: 2),
           ),
-          GestureDetector(
-            onTap: () => Get.toNamed(Routes.SETTINGS),
-            child: ProfileIcon(iconName: AppIcons.settingIcon),
+          Semantics(
+            button: true,
+            label: 'Settings',
+            child: GestureDetector(
+              onTap: () => Get.toNamed(Routes.SETTINGS),
+              child: ProfileIcon(iconName: AppIcons.settingIcon),
+            ),
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/digital_file_upload_tile.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/product_publish_mode_selector.dart';
+import 'package:book_store_app/app/modules/add_seller_product/widgets/subcategory_picker_sheet.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
@@ -191,6 +192,10 @@ class AddProductDetailsForm extends StatelessWidget {
                     fillColor: AppColors.textfldFillColor,
                   ),
                 ),
+                const SizedBox(height: 16),
+
+                // Subcategory (optional)
+                _SubcategoryField(controller: controller),
                 const SizedBox(height: 16),
 
                 // List on Solvexo Marketplace toggle
@@ -551,6 +556,54 @@ class _UnlimitedToggle extends StatelessWidget {
 
 // ── List on Solvexo toggle ────────────────────────────────────────────────────
 
+class _SubcategoryField extends StatelessWidget {
+  final AddSellerProductController controller;
+  const _SubcategoryField({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return _FormSection(
+      label: 'Subcategory',
+      hint: 'Optional — helps buyers find this product more precisely',
+      child: Obx(
+        () => GestureDetector(
+          onTap: () => SubcategoryPickerSheet.show(context, controller),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.textfldFillColor,
+              borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+              border: Border.all(color: AppColors.lightGrey, width: 0.3),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomText(
+                    text: controller.selectedSubCategoryName.value.isEmpty
+                        ? 'None selected'
+                        : controller.selectedSubCategoryName.value,
+                    fontSize: AppFontSize.verySmall,
+                    color: controller.selectedSubCategoryName.value.isEmpty
+                        ? AppColors.grey
+                        : AppColors.black,
+                  ),
+                ),
+                controller.isLoadingSubcategories.value
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                      )
+                    : const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.grey),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ListedToggle extends StatelessWidget {
   final AddSellerProductController controller;
   const _ListedToggle({required this.controller});
@@ -831,6 +884,10 @@ class _DigitalFields extends StatelessWidget {
                 ],
               )),
         ),
+        const SizedBox(height: 16),
+
+        // Subcategory (optional)
+        _SubcategoryField(controller: controller),
         const SizedBox(height: 16),
 
         // List on Solvexo toggle (shared)

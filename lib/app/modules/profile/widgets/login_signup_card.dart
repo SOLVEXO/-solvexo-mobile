@@ -1,10 +1,11 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,70 +16,58 @@ class LoginSignupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(BaseSpacing.sm + 2),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-
-        /// 🔥 Gradient background (premium look)
+        borderRadius: BorderRadius.circular(BaseRadius.xxl - 6),
         gradient: AppColors.appbarGradient,
-
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withOpacity(0.2),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: BaseShadows.forLevel(BaseElevation.level3),
       ),
-
       child: Row(
         children: [
-          /// 🔥 APP LOGO
+          // App logo
           Container(
             height: 45,
             width: 45,
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(BaseSpacing.xs),
             decoration: BoxDecoration(
               color: AppColors.white.withOpacity(0.15),
               borderRadius: BorderRadius.circular(AppDimen.borderRadius),
             ),
             child: CommonImageView(
               radius: BorderRadius.circular(AppDimen.borderRadius),
-              imagePath: AppImages.logoImage, // 👈 your logo
+              imagePath: AppImages.logoImage,
               fit: BoxFit.contain,
             ),
           ),
 
-          const SizedBox(width: 12),
+          SizedBox(width: BaseSpacing.sm),
 
-          /// 🔹 TEXT
+          // Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomText(
-                  text: "Login to continue",
-                  color: AppColors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppFontSize.regular,
+                Text(
+                  "Login to continue",
+                  style: BaseTypography.titleMedium(color: AppColors.white).copyWith(fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 2),
-                CustomText(
-                  text: "Access your cart & orders instantly",
-                  color: AppColors.white.withOpacity(0.9),
-                  fontSize: AppFontSize.small2,
+                SizedBox(height: BaseSpacing.xxs / 2),
+                Text(
+                  "Access your cart & orders instantly",
+                  style: BaseTypography.bodySmall(color: AppColors.white.withOpacity(0.9)),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(width: 10),
+          SizedBox(width: BaseSpacing.xs + 2),
 
-          /// 🔥 BUTTON
+          // Button
           Expanded(
-            child: AppButton(
+            child: PrimaryButton(
               onPressed: () => Get.toNamed(Routes.authTabView),
               label: "LOGIN",
+              compact: true,
             ),
           ),
         ],

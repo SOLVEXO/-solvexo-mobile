@@ -2,30 +2,23 @@ import 'dart:io';
 
 import 'package:book_store_app/app/components/app_image_picker.dart';
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
+import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
+import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-const List<String> kStoreCategories = [
-  'Education & Learning',
-  'Arts & Crafts',
-  'Fashion & Apparel',
-  'Electronics',
-  'Food & Beverage',
-  'Health & Beauty',
-  'Home & Garden',
-  'Sports & Outdoors',
-  'Books & Media',
-  'Services & Consulting',
-  'Others',
-];
-
 class SellerStoreProfileController extends GetxController {
-  final _repo       = SellerRepository();
-  final _uploadRepo = UploadRepository();
+  final _repo         = SellerRepository();
+  final _uploadRepo   = UploadRepository();
+  final _categoryRepo = CategoryRepository();
+
+  // Admin-curated main categories a seller picks from.
+  final RxList<CategoryModel> mainCategories = <CategoryModel>[].obs;
+  final RxBool isLoadingCategories = false.obs;
 
   // ── Single source of truth ────────────────────────────────────────────────
   final Rx<StoreModel?> store = Rx<StoreModel?>(null);
@@ -37,13 +30,22 @@ class SellerStoreProfileController extends GetxController {
 
   // ── Edit-only state ───────────────────────────────────────────────────────
   final Rx<File?> logoFile = Rx<File?>(null);
-  final RxString editCategory = ''.obs; // drives the category dropdown
+  final RxString editCategory = ''.obs;   // display name shown in the dropdown
+  final RxString editCategoryId = ''.obs; // real category _id sent to the backend
 
   late final TextEditingController nameCtrl;
   late final TextEditingController descCtrl;
 
   // ── Computed ──────────────────────────────────────────────────────────────
   bool get canSave => nameCtrl.text.trim().isNotEmpty;
+
+  /// The current store's category name, resolved from its `categoryId` —
+  /// used for read-only display (the raw id is meaningless to a user).
+  String get categoryName {
+    final id = store.value?.categoryId;
+    if (id == null || id.isEmpty) return '—';
+    return mainCategories.firstWhereOrNull((c) => c.id == id)?.name ?? '—';
+  }
 
   // Stats — placeholder values until a dedicated stats API is integrated
   int get productCount => 0;
@@ -67,6 +69,7 @@ class SellerStoreProfileController extends GetxController {
     nameCtrl = TextEditingController();
     descCtrl = TextEditingController();
     _loadStore();
+    _fetchMainCategories();
   }
 
   @override
@@ -91,11 +94,25 @@ class SellerStoreProfileController extends GetxController {
 
   Future<void> refreshData() => _loadStore();
 
+  Future<void> _fetchMainCategories() async {
+    isLoadingCategories.value = true;
+    final trees = await _categoryRepo.getAllCategoryTrees();
+    mainCategories.assignAll(trees.where((c) => c.isParent));
+    isLoadingCategories.value = false;
+  }
+
   // ── Edit actions ──────────────────────────────────────────────────────────
-  void startEditing() {
+  Future<void> startEditing() async {
     nameCtrl.text = store.value?.name ?? '';
     descCtrl.text = store.value?.description ?? '';
-    editCategory.value = store.value?.categoryId ?? '';
+
+    if (mainCategories.isEmpty && !isLoadingCategories.value) {
+      await _fetchMainCategories();
+    }
+    editCategoryId.value = store.value?.categoryId ?? '';
+    editCategory.value =
+        mainCategories.firstWhereOrNull((c) => c.id == editCategoryId.value)?.name ?? '';
+
     isEditing.value = true;
   }
 
@@ -104,7 +121,10 @@ class SellerStoreProfileController extends GetxController {
     isEditing.value = false;
   }
 
-  void pickCategory(String cat) => editCategory.value = cat;
+  void pickCategory(String name) {
+    editCategory.value = name;
+    editCategoryId.value = mainCategories.firstWhereOrNull((c) => c.name == name)?.id ?? '';
+  }
 
   void pickLogo() {
     AppImagePicker.show(
@@ -162,7 +182,7 @@ class SellerStoreProfileController extends GetxController {
       storeId:      store.value?.id ?? '',
       name:         nameCtrl.text.trim(),
       logoUrl:      logoUrl,
-      categoryId:   editCategory.value,
+      categoryId:   editCategoryId.value,
       description:  descCtrl.text.trim(),
       productTypes: store.value?.productTypes ?? [],
     );

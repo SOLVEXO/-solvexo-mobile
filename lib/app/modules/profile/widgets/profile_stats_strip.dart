@@ -1,10 +1,11 @@
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,34 +14,38 @@ class ProfileStatsStrip extends StatelessWidget {
   final ProfileController controller;
   const ProfileStatsStrip({super.key, required this.controller});
 
+  // Was `Get.put(AddressController())` *inside* the Obx builder below —
+  // that re-ran (and replaced the shared, live `AddressController`) on
+  // every single reactive rebuild triggered by `controller.user`, not just
+  // once per widget build. Guarding + hoisting it out of the builder fixes
+  // both the repeated replacement and the unnecessary work.
+  AddressController get _addressController {
+    if (!Get.isRegistered<AddressController>()) Get.put(AddressController());
+    return Get.find<AddressController>();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final addressController = _addressController;
     return Obx(() {
       final user = controller.user.value;
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
+        padding: EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 18),
+          padding: EdgeInsets.symmetric(vertical: BaseSpacing.md + 2),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(
               AppDimen.serviceCountTileRadius,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
+            boxShadow: BaseShadows.forLevel(BaseElevation.level1),
           ),
           child: Obx(() {
-            final addressController = Get.put(AddressController());
             return Row(
               children: [
                 _StatCell(
                   value: user != null
-                      ? "${Get.find<MyOrdersController>().orders.length}"
+                      ? "${Get.put(MyOrdersController()).orders.length}"
                       : '0',
                   label: 'Orders',
                 ),
@@ -77,17 +82,18 @@ class _StatCell extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomText(
-            text: value,
-            fontSize: AppFontSize.small,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primaryColor,
+          Text(
+            value,
+            style: BaseTypography.bodyMedium(
+              color: AppColors.primaryColor,
+            ).copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 2),
-          CustomText(
-            text: label,
-            fontSize: AppFontSize.tiny,
-            color: AppColors.grey,
+          SizedBox(height: BaseSpacing.xxs / 2),
+          Text(
+            label,
+            style: BaseTypography.labelSmall(
+              color: AppColors.grey,
+            ).copyWith(fontWeight: FontWeight.w400),
           ),
         ],
       ),

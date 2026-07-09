@@ -1,8 +1,9 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/theme/base_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,7 +18,7 @@ class ProfileHero extends StatelessWidget {
       final user = controller.user.value;
       return Container(
         width: double.infinity,
-        padding: EdgeInsets.fromLTRB(20, topPad + 20, 20, 52),
+        padding: EdgeInsets.fromLTRB(BaseSpacing.xl, topPad + BaseSpacing.xl, BaseSpacing.xl, BaseSpacing.xxl + BaseSpacing.xxl),
         decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
         child: Column(children: [
           // Avatar
@@ -28,66 +29,45 @@ class ProfileHero extends StatelessWidget {
               color: AppColors.white.withOpacity(0.2),
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.white, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.black.withOpacity(0.2),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+              boxShadow: BaseShadows.forLevel(BaseElevation.level4),
             ),
             alignment: Alignment.center,
             child: user?.profileImage != null
                 ? ClipOval(
-                    child: CommonImageView(
-                      url: user!.profileImage,
-                      width: 84,
-                      height: 84,
-                      fit: BoxFit.cover,
-                    ),
+                    child: CommonImageView(url: user!.profileImage, width: 84, height: 84, fit: BoxFit.cover),
                   )
-                : CustomText(
-                    text: controller.initials,
-                    fontSize: AppFontSize.large,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.white,
+                : Text(
+                    controller.initials,
+                    style: BaseTypography.headlineLarge(color: AppColors.white).copyWith(fontWeight: FontWeight.bold),
                   ),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: BaseSpacing.sm + 2),
           // Name + verified
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            CustomText(
-              text: user?.name ?? 'User',
-              fontSize: AppFontSize.medium,
-              fontWeight: FontWeight.bold,
-              color: AppColors.white,
+            Text(
+              user?.name ?? 'User',
+              style: BaseTypography.titleMedium(color: AppColors.white).copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             if (user?.isEmailVerified == true) ...[
-              const SizedBox(width: 6),
+              SizedBox(width: BaseSpacing.xxs + 2),
               const Icon(Icons.verified_rounded, color: AppColors.blue, size: 18),
             ],
           ]),
-          const SizedBox(height: 4),
+          SizedBox(height: BaseSpacing.xxs),
           // Email
-          CustomText(
-            text: user?.email ?? '',
-            fontSize: AppFontSize.verySmall,
-            color: AppColors.white.withOpacity(0.75),
-          ),
-          const SizedBox(height: 10),
+          Text(user?.email ?? '', style: BaseTypography.bodySmall(color: AppColors.white.withOpacity(0.75))),
+          SizedBox(height: BaseSpacing.xs + 2),
           // Buyer badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm + 2, vertical: BaseSpacing.xxs + 1),
             decoration: BoxDecoration(
               color: AppColors.white.withOpacity(0.18),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(BaseRadius.pill),
             ),
-            child: const CustomText(
-              text: 'Buyer Account',
-              fontSize: AppFontSize.tiny,
-              fontWeight: FontWeight.w600,
-              color: AppColors.white,
+            child: Text(
+              'Buyer Account',
+              style: BaseTypography.labelSmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w600),
             ),
           ),
         ]),

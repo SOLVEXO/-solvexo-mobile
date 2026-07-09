@@ -7,13 +7,22 @@ import 'package:book_store_app/app/modules/myorders/widgets/order_items.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/product_detail_summary.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/status_stepper.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class OrderTrackingView extends StatelessWidget {
   final int index;
   OrderTrackingView({super.key, required this.index});
-  final controller = Get.put(MyOrdersController());
+
+  // Was unconditional `Get.put(MyOrdersController())` — this screen is
+  // pushed (not a tab) every time an order is tapped from `MyOrdersView`,
+  // so it was replacing that tab's live, shared `MyOrdersController`
+  // (with its filtered list / selected tab state) on every single tap.
+  MyOrdersController get controller {
+    if (!Get.isRegistered<MyOrdersController>()) Get.put(MyOrdersController());
+    return Get.find<MyOrdersController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,23 +31,23 @@ class OrderTrackingView extends StatelessWidget {
       appBar: CustomAppBarTwo(title: controller.filteredOrders[index].orderNumber),
       body: SingleChildScrollView(
         physics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(BaseSpacing.md),
         child: Column(
           children: [
             StatusStepper(),
-            const SizedBox(height: 10),
+            SizedBox(height: BaseSpacing.xs + 2),
             DeliveryStatusBar(),
-            const SizedBox(height: 10),
+            SizedBox(height: BaseSpacing.xs + 2),
             OrderInfo(index: index),
-            const SizedBox(height: 16),
+            SizedBox(height: BaseSpacing.md),
             OrderItems(index: index),
-            const SizedBox(height: 16),
+            SizedBox(height: BaseSpacing.md),
             ProductDetailSummary(index: index),
           ],
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl, vertical: BaseSpacing.xl),
         child: CustomActionButtons(index: index),
       ),
     );
