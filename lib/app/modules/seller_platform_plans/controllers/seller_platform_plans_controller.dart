@@ -1,5 +1,8 @@
+import 'package:book_store_app/app/data/models/platform_plans/platform_addon_model.dart';
+import 'package:book_store_app/app/data/models/platform_plans/platform_entitlements_model.dart';
+import 'package:book_store_app/app/data/models/platform_plans/platform_invoice_model.dart';
+import 'package:book_store_app/app/data/models/platform_plans/platform_plan_model.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_subscription_model.dart';
-import 'package:book_store_app/app/data/models/platform_plans/platform_tier_model.dart';
 import 'package:book_store_app/app/data/repositories/platform_plans_repository.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/foundation.dart';
@@ -11,11 +14,16 @@ class SellerPlatformPlansController extends GetxController {
   String storeId = '';
   final RxBool isLoading = true.obs;
   final RxBool isUpdating = false.obs;
-  final RxString billingInterval = 'monthly'.obs; // toggle for the pricing screen
+  final RxString billingInterval = 'monthly'.obs; // pricing-section toggle
 
-  final RxList<PlatformTierModel> tiers = <PlatformTierModel>[].obs;
-  final RxDouble posAddonMonthlyPriceUSD = 29.0.obs;
+  final RxList<PlatformPlanModel> plans = <PlatformPlanModel>[].obs;
   final Rx<PlatformSubscriptionModel?> myPlan = Rx<PlatformSubscriptionModel?>(null);
+  final Rx<PlatformEntitlementsModel?> entitlements = Rx<PlatformEntitlementsModel?>(null);
+  final RxList<PlatformAddonModel> addons = <PlatformAddonModel>[].obs;
+  final RxList<PlatformInvoiceModel> invoices = <PlatformInvoiceModel>[].obs;
+  final RxInt invoicesTotal = 0.obs;
+
+  List<PlatformAddonModel> get activeAddons => addons.where((a) => a.isActive).toList();
 
   @override
   void onInit() {
@@ -36,11 +44,21 @@ class SellerPlatformPlansController extends GetxController {
   @override
   Future<void> refresh() async {
     isLoading.value = true;
-    final results = await Future.wait([_repo.getTiers(), _repo.getMyPlan(storeId)]);
-    final tiersResult = results[0] as ({List<PlatformTierModel> tiers, double posAddonMonthlyPriceUSD});
-    tiers.assignAll(tiersResult.tiers);
-    posAddonMonthlyPriceUSD.value = tiersResult.posAddonMonthlyPriceUSD;
+    final results = await Future.wait([
+      _repo.getPublicPlans(),
+      _repo.getStorePlan(storeId),
+      _repo.getEntitlements(storeId),
+      _repo.getAddons(storeId),
+      _repo.getInvoices(storeId, limit: 10),
+    ]);
+    plans.assignAll(results[0] as List<PlatformPlanModel>);
     myPlan.value = results[1] as PlatformSubscriptionModel?;
+    entitlements.value = results[2] as PlatformEntitlementsModel?;
+    addons.assignAll(results[3] as List<PlatformAddonModel>);
+    final invoiceResult =
+        results[4] as ({List<PlatformInvoiceModel> invoices, int total, int pages});
+    invoices.assignAll(invoiceResult.invoices);
+    invoicesTotal.value = invoiceResult.total;
     isLoading.value = false;
   }
 
@@ -48,51 +66,42 @@ class SellerPlatformPlansController extends GetxController {
     billingInterval.value = billingInterval.value == 'monthly' ? 'yearly' : 'monthly';
   }
 
-  bool isCurrentTier(String tier) => myPlan.value?.tier == tier;
+  bool isCurrentPlan(PlatformPlanModel plan) => myPlan.value?.plan?.id == plan.id;
 
-  Future<void> selectTier(PlatformTierModel tier) async {
+  Future<void> selectPlan(PlatformPlanModel plan) async {
     if (isUpdating.value) return;
-    if (isCurrentTier(tier.tier) && myPlan.value?.billingInterval == billingInterval.value) return;
+    if (isCurrentPlan(plan) && myPlan.value?.billingInterval == billingInterval.value) return;
 
     isUpdating.value = true;
     try {
-      final isFirstUpgrade = myPlan.value == null || myPlan.value!.isStarter;
-      final updated = isFirstUpgrade
-          ? await _repo.subscribe(storeId, tier: tier.tier, billingInterval: billingInterval.value)
-          : await _repo.changeTier(storeId, tier: tier.tier, billingInterval: billingInterval.value);
-      if (updated != null) myPlan.value = updated;
+      final updated = await _repo.changePlan(
+        storeId,
+        planId: plan.id,
+        billingInterval: billingInterval.value,
+      );
+      // Refresh everything — a plan change moves entitlements/limits too.
+      if (updated != null) await refresh();
     } finally {
       isUpdating.value = false;
     }
   }
 
-  Future<void> cancelToStarter({bool atPeriodEnd = true}) async {
+  Future<void> purchaseAddon(String addonType, {int quantity = 1}) async {
     if (isUpdating.value) return;
     isUpdating.value = true;
     try {
-      final ok = await _repo.cancelToStarter(storeId, atPeriodEnd: atPeriodEnd);
+      final ok = await _repo.purchaseAddon(storeId, addonType: addonType, quantity: quantity);
       if (ok) await refresh();
     } finally {
       isUpdating.value = false;
     }
   }
 
-  Future<void> subscribeToPosAddon() async {
+  Future<void> cancelAddon(PlatformAddonModel addon) async {
     if (isUpdating.value) return;
     isUpdating.value = true;
     try {
-      final ok = await _repo.subscribeToPosAddon(storeId);
-      if (ok) await refresh();
-    } finally {
-      isUpdating.value = false;
-    }
-  }
-
-  Future<void> cancelPosAddon() async {
-    if (isUpdating.value) return;
-    isUpdating.value = true;
-    try {
-      final ok = await _repo.cancelPosAddon(storeId);
+      final ok = await _repo.cancelAddon(storeId, addon.id);
       if (ok) await refresh();
     } finally {
       isUpdating.value = false;

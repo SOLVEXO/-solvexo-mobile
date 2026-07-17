@@ -137,24 +137,32 @@ class _TypeCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomText(text: data.emoji, fontSize: 40),
-            const SizedBox(height: 10),
-            CustomText(
-              text: data.name,
-              fontSize: AppFontSize.small2,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? AppColors.primaryColor : AppColors.black,
-            ),
-            const SizedBox(height: 4),
-            CustomText(
-              text: data.subtitle,
-              fontSize: AppFontSize.tiny,
-              color: AppColors.grey,
-            ),
-          ],
+        // FittedBox keeps this shrink-to-fit regardless of how large the
+        // emoji's responsive .sp scaling ends up on a given device — on some
+        // screen sizes fontSize: 40 was rendering far larger than 40pt,
+        // overflowing the grid cell's fixed (aspect-ratio-driven) height.
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomText(text: data.emoji, fontSize: 40),
+              const SizedBox(height: 10),
+              CustomText(
+                text: data.name,
+                fontSize: AppFontSize.small2,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? AppColors.primaryColor : AppColors.black,
+              ),
+              const SizedBox(height: 4),
+              CustomText(
+                text: data.subtitle,
+                fontSize: AppFontSize.tiny,
+                color: AppColors.grey,
+              ),
+            ],
+          ),
         ),
       ),
     );

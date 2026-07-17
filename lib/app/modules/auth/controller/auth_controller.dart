@@ -175,33 +175,16 @@ class AuthController extends BaseController {
         return;
       }
 
-      // 2. Send to backend
-      final response = await _authRepository.socialLogin(dto);
+      // 2. Send to backend — AuthRepository.socialLogin persists tokens/user itself
+      final auth = await _authRepository.socialLogin(dto);
 
-      if (response == null || response['success'] != true) {
+      if (auth == null) {
         _showError('Google sign in failed. Please try again.');
         return;
       }
 
-      // 3. Save tokens
-      final token = response['data']['token']['accessToken'];
-      final refreshToken = response['data']['token']['refreshToken'];
-
-      await AppPreferences.setTokens(
-        accessToken: token,
-        refreshToken: refreshToken,
-      );
-
-      final userRole = response['data']['user']?['role'] as String? ?? 'user';
-      await AppPreferences.saveUserData(
-        userId: response['data']['user']?['_id'] as String? ?? '',
-        name: dto.userName,
-        email: dto.email,
-        role: userRole,
-      );
-
-      _navigateByRole(userRole);
-      _showSuccess('Welcome ${dto.userName}!');
+      _navigateByRole(auth.user.role);
+      _showSuccess('Welcome ${auth.user.name}!');
     } catch (e) {
       debugPrint('❌ Google sign in error: $e');
       _showError('Google sign in failed: ${e.toString()}');
@@ -217,29 +200,15 @@ class AuthController extends BaseController {
       final dto = await _socialAuth.signInWithFacebook();
       if (dto == null) return;
 
-      final response = await _authRepository.socialLogin(dto);
+      final auth = await _authRepository.socialLogin(dto);
 
-      if (response == null || response['success'] != true) {
+      if (auth == null) {
         _showError('Facebook sign in failed. Please try again.');
         return;
       }
 
-      final token = response['data']['token']['accessToken'];
-      final refreshToken = response['data']['token']['refreshToken'];
-
-      await AppPreferences.setTokens(
-        accessToken: token,
-        refreshToken: refreshToken,
-      );
-      final fbRole = response['data']['user']?['role'] as String? ?? 'user';
-      await AppPreferences.saveUserData(
-        userId: response['data']['user']?['_id'] as String? ?? '',
-        name: dto.userName,
-        email: dto.email,
-        role: fbRole,
-      );
-      _navigateByRole(fbRole);
-      _showSuccess('Welcome ${dto.userName}!');
+      _navigateByRole(auth.user.role);
+      _showSuccess('Welcome ${auth.user.name}!');
     } catch (e) {
       debugPrint('❌ Facebook sign in error: $e');
       _showError('Facebook sign in failed: ${e.toString()}');
@@ -255,28 +224,14 @@ class AuthController extends BaseController {
       final dto = await _socialAuth.signInWithApple();
       if (dto == null) return;
 
-      final response = await _authRepository.socialLogin(dto);
+      final auth = await _authRepository.socialLogin(dto);
 
-      if (response == null || response['success'] != true) {
+      if (auth == null) {
         _showError('Apple sign in failed. Please try again.');
         return;
       }
 
-      final token = response['data']['token']['accessToken'];
-      final refreshToken = response['data']['token']['refreshToken'];
-
-      await AppPreferences.setTokens(
-        accessToken: token,
-        refreshToken: refreshToken,
-      );
-      final appleRole = response['data']['user']?['role'] as String? ?? 'user';
-      await AppPreferences.saveUserData(
-        userId: response['data']['user']?['_id'] as String? ?? '',
-        name: dto.userName,
-        email: dto.email,
-        role: appleRole,
-      );
-      _navigateByRole(appleRole);
+      _navigateByRole(auth.user.role);
       _showSuccess('Welcome!');
     } catch (e) {
       debugPrint('❌ Apple sign in error: $e');

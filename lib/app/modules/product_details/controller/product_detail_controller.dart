@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/data/models/rating/review_model.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/rating_repository.dart';
+import 'package:book_store_app/app/data/repositories/search_repository.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
@@ -32,6 +35,16 @@ class ProductDetailController extends GetxController {
   final RxList<ReviewModel> reviews = <ReviewModel>[].obs;
   final Rx<ReviewStats> reviewStats = const ReviewStats().obs;
   final RxBool isLoadingReviews = true.obs;
+
+  /// Backend sort keys — labels resolved in the view.
+  static const reviewSortOptions = <String>[
+    'newest',
+    'most_helpful',
+    'highest_rating',
+    'lowest_rating',
+    'oldest',
+  ];
+  final RxString reviewSort = 'newest'.obs;
 
   // ─── Quantity ─────────────────────────────────────────────────────────────
   final RxInt productQty = 1.obs;
@@ -103,6 +116,10 @@ class ProductDetailController extends GetxController {
           '✅ Loaded product: ${response.product.name} '
           'with ${response.variants.length} variants',
         );
+
+        // Feed the "Recently Viewed" strip (local prefs + backend when
+        // logged in) — fire-and-forget, never blocks the screen.
+        unawaited(SearchRepository().recordProductView(productId));
       } else {
         ToastUtil.showToast('Product not found');
         Get.back();
@@ -120,10 +137,44 @@ class ProductDetailController extends GetxController {
   Future<void> fetchReviews() async {
     if (productId.isEmpty) return;
     isLoadingReviews.value = true;
-    final result = await _ratingRepository.getProductReviews(productId);
+    final result = await _ratingRepository.getProductReviews(
+      productId,
+      sort: reviewSort.value,
+    );
     reviewStats.value = result.stats;
     reviews.assignAll(result.reviews);
     isLoadingReviews.value = false;
+  }
+
+  void changeReviewSort(String sort) {
+    if (reviewSort.value == sort) return;
+    reviewSort.value = sort;
+    fetchReviews();
+  }
+
+  /// Optimistically flips the vote, then reconciles with the backend's
+  /// authoritative count (reverts on failure).
+  Future<void> toggleReviewHelpful(ReviewModel review) async {
+    final index = reviews.indexWhere((r) => r.reviewId == review.reviewId);
+    if (index == -1) return;
+
+    final optimistic = review.copyWith(
+      helpfulByMe: !review.helpfulByMe,
+      helpfulCount: review.helpfulCount + (review.helpfulByMe ? -1 : 1),
+    );
+    reviews[index] = optimistic;
+
+    final result = await _ratingRepository.toggleHelpful(review.reviewId);
+    final currentIndex = reviews.indexWhere((r) => r.reviewId == review.reviewId);
+    if (currentIndex == -1) return;
+    if (result == null) {
+      reviews[currentIndex] = review;
+    } else {
+      reviews[currentIndex] = review.copyWith(
+        helpfulCount: result.helpfulCount,
+        helpfulByMe: result.helpfulByMe,
+      );
+    }
   }
 
   // ─── 2. Fetch variant by ID (when user taps a specific variant) ───────────
@@ -238,6 +289,13 @@ class ProductDetailController extends GetxController {
   /// Price from selected variant, fallback to product computed price
   double get displayPrice =>
       selectedVariant.value?.price ?? product.value?.price ?? 0.0;
+
+  /// Compare-at (original/crossed-out) price, if the active variant has one
+  double? get displayCompareAtPrice =>
+      selectedVariant.value?.compareAtPrice ?? product.value?.compareAtPrice;
+
+  bool get hasDiscount =>
+      displayCompareAtPrice != null && displayCompareAtPrice! > displayPrice;
 
   /// Stock from selected variant, fallback to product total stock
   int get displayStock =>

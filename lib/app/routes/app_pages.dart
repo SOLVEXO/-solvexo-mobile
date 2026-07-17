@@ -19,8 +19,24 @@ import '../modules/seller_two_factor/bindings/seller_two_factor_binding.dart';
 import '../modules/seller_two_factor/views/seller_two_factor_view.dart';
 import '../modules/seller_language/bindings/seller_language_binding.dart';
 import '../modules/seller_language/views/seller_language_view.dart';
-import '../modules/seller_ai_studio/bindings/seller_ai_studio_binding.dart';
-import '../modules/seller_ai_studio/views/seller_ai_studio_view.dart';
+import '../modules/ai_studio/bindings/ai_studio_hub_binding.dart';
+import '../modules/ai_studio/views/ai_studio_hub_view.dart';
+import '../modules/ai_studio/bindings/ai_studio_history_binding.dart';
+import '../modules/ai_studio/views/ai_studio_history_view.dart';
+import '../modules/ai_studio/bindings/ai_generation_detail_binding.dart';
+import '../modules/ai_studio/views/ai_generation_detail_view.dart';
+import '../modules/ai_studio/bindings/listing_writer_binding.dart';
+import '../modules/ai_studio/views/listing_writer_view.dart';
+import '../modules/ai_studio/bindings/seo_booster_binding.dart';
+import '../modules/ai_studio/views/seo_booster_view.dart';
+import '../modules/ai_studio/bindings/email_campaign_binding.dart';
+import '../modules/ai_studio/views/email_campaign_view.dart';
+import '../modules/ai_studio/bindings/worksheet_builder_binding.dart';
+import '../modules/ai_studio/views/worksheet_builder_view.dart';
+import '../modules/ai_studio/bindings/price_optimizer_binding.dart';
+import '../modules/ai_studio/views/price_optimizer_view.dart';
+import '../modules/ai_studio/bindings/image_enhancer_binding.dart';
+import '../modules/ai_studio/views/image_enhancer_view.dart';
 import '../modules/seller_messages/bindings/seller_messages_binding.dart';
 import '../modules/seller_messages/views/seller_messages_view.dart';
 import '../modules/messaging/bindings/conversations_binding.dart';
@@ -51,6 +67,8 @@ import '../modules/pos_daily_report/bindings/pos_daily_report_binding.dart';
 import '../modules/pos_daily_report/views/pos_daily_report_view.dart';
 import '../modules/seller_pos_management/bindings/seller_pos_management_binding.dart';
 import '../modules/seller_pos_management/views/seller_pos_management_view.dart';
+import '../modules/seller_pos_locations/bindings/seller_pos_locations_binding.dart';
+import '../modules/seller_pos_locations/views/seller_pos_locations_view.dart';
 import '../modules/seller_analytics/bindings/seller_analytics_binding.dart';
 import '../modules/seller_finance/bindings/seller_finance_binding.dart';
 import '../modules/seller_finance/views/seller_finance_view.dart';
@@ -62,8 +80,16 @@ import '../modules/seller_subscriptions/bindings/seller_subscriptions_binding.da
 import '../modules/seller_subscriptions/views/seller_subscriptions_view.dart';
 import '../modules/seller_platform_plans/bindings/seller_platform_plans_binding.dart';
 import '../modules/seller_platform_plans/views/seller_platform_plans_view.dart';
+import '../modules/seller_seo/bindings/seller_seo_binding.dart';
+import '../modules/seller_seo/views/seller_seo_view.dart';
+import '../modules/seller_seo_products/bindings/seller_seo_products_binding.dart';
+import '../modules/seller_seo_products/views/seller_seo_products_view.dart';
+import '../modules/seller_activity_log/bindings/seller_activity_log_binding.dart';
+import '../modules/seller_activity_log/views/seller_activity_log_view.dart';
 import '../modules/loyalty_rewards/bindings/loyalty_rewards_binding.dart';
 import '../modules/loyalty_rewards/views/loyalty_rewards_view.dart';
+import '../modules/my_memberships/bindings/my_memberships_binding.dart';
+import '../modules/my_memberships/views/my_memberships_view.dart';
 import '../modules/seller_edit_profile/bindings/seller_edit_profile_binding.dart';
 import '../modules/seller_edit_profile/views/seller_edit_profile_view.dart';
 import '../modules/seller/bindings/seller_binding.dart';
@@ -114,16 +140,15 @@ import '../modules/ordertracker/views/tracker_order_view.dart';
 import '../modules/otp/binding/otp_binding.dart';
 import '../modules/otp/views/get_notified.dart';
 import '../modules/otp/views/otp_view.dart';
-import '../modules/payment/bindings/payment_binding.dart';
-import '../modules/payment/views/authentication_view.dart';
 import '../modules/payment/views/payment_success_view.dart';
-import '../modules/payment/views/payment_view.dart';
 import '../modules/privacy_policy/bindings/privacy_policy_binding.dart';
 import '../modules/privacy_policy/views/privacy_policy_view.dart';
 import '../modules/product_details/binding/product_detail_binding.dart';
 import '../modules/product_details/views/product_details_view.dart';
 import '../modules/seller_storefront/bindings/seller_storefront_binding.dart';
 import '../modules/seller_storefront/views/seller_storefront_view.dart';
+import '../modules/stores/bindings/stores_binding.dart';
+import '../modules/stores/views/stores_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/refund_request/bindings/refund_request_binding.dart';
@@ -132,8 +157,6 @@ import '../modules/reset_password/bindings/new_password_binding.dart';
 import '../modules/reset_password/views/new_password_view.dart';
 import '../modules/search/bindings/search_binding.dart';
 import '../modules/search/views/search_view.dart';
-import '../modules/settings/bindings/settings_binding.dart';
-import '../modules/settings/views/settings_view.dart';
 import '../modules/splash_screen/bindings/splash_screen_binding.dart';
 import '../modules/splash_screen/views/splash_screen_view.dart';
 import '../modules/sub_category/binding/sub_category_binding.dart';
@@ -212,6 +235,11 @@ class AppPages {
       binding: SellerStorefrontBinding(),
     ),
     GetPage(
+      name: Routes.storesView,
+      page: () => StoresView(),
+      binding: StoresBinding(),
+    ),
+    GetPage(
       name: Routes.searchView,
       page: () => SearchView(),
       binding: SearchBinding(),
@@ -227,19 +255,8 @@ class AppPages {
       binding: CheckoutBinding(),
     ),
     GetPage(
-      name: Routes.paymentView,
-      page: () => PaymentView(),
-      binding: PaymentBinding(),
-    ),
-    GetPage(
-      name: Routes.authenticationView,
-      page: () => AuthenticationView(),
-      binding: PaymentBinding(),
-    ),
-    GetPage(
       name: Routes.paymentSuccessView,
       page: () => PaymentSuccessView(),
-      binding: PaymentBinding(),
     ),
     GetPage(
       name: Routes.profileView,
@@ -316,11 +333,11 @@ class AppPages {
       page: () => const NewPasswordView(),
       binding: NewPasswordBinding(),
     ),
-    GetPage(
-      name: Routes.SETTINGS,
-      page: () => const SettingsView(),
-      binding: SettingsBinding(),
-    ),
+    // GetPage(
+    //   name: Routes.SETTINGS,
+    //   page: () => const SettingsView(),
+    //   binding: SettingsBinding(),
+    // ),
     GetPage(
       name: Routes.CHANGE_PASSWORD,
       page: () => ChangePasswordView(),
@@ -433,9 +450,29 @@ class AppPages {
       binding: SellerPlatformPlansBinding(),
     ),
     GetPage(
+      name: Routes.sellerSeo,
+      page: () => const SellerSeoView(),
+      binding: SellerSeoBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerSeoProducts,
+      page: () => const SellerSeoProductsView(),
+      binding: SellerSeoProductsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerActivityLog,
+      page: () => SellerActivityLogView(),
+      binding: SellerActivityLogBinding(),
+    ),
+    GetPage(
       name: Routes.loyaltyRewards,
       page: () => LoyaltyRewardsView(),
       binding: LoyaltyRewardsBinding(),
+    ),
+    GetPage(
+      name: Routes.myMemberships,
+      page: () => MyMembershipsView(),
+      binding: MyMembershipsBinding(),
     ),
     GetPage(
       name: Routes.sellerEditProfile,
@@ -444,8 +481,48 @@ class AppPages {
     ),
     GetPage(
       name: Routes.sellerAiStudio,
-      page: () => SellerAiStudioView(),
-      binding: SellerAiStudioBinding(),
+      page: () => const AiStudioHubView(),
+      binding: AiStudioHubBinding(),
+    ),
+    GetPage(
+      name: Routes.aiStudioHistory,
+      page: () => const AiStudioHistoryView(),
+      binding: AiStudioHistoryBinding(),
+    ),
+    GetPage(
+      name: Routes.aiStudioGenerationDetail,
+      page: () => const AiGenerationDetailView(),
+      binding: AiGenerationDetailBinding(),
+    ),
+    GetPage(
+      name: Routes.aiStudioListingWriter,
+      page: () => const ListingWriterView(),
+      binding: ListingWriterBinding(),
+    ),
+    GetPage(
+      name: Routes.aiStudioSeoBooster,
+      page: () => const SeoBoosterView(),
+      binding: SeoBoosterBinding(),
+    ),
+    GetPage(
+      name: Routes.aiStudioEmailCampaigns,
+      page: () => const EmailCampaignView(),
+      binding: EmailCampaignBinding(),
+    ),
+    GetPage(
+      name: Routes.aiStudioWorksheetBuilder,
+      page: () => const WorksheetBuilderView(),
+      binding: WorksheetBuilderBinding(),
+    ),
+    GetPage(
+      name: Routes.aiStudioPriceOptimizer,
+      page: () => const PriceOptimizerView(),
+      binding: PriceOptimizerBinding(),
+    ),
+    GetPage(
+      name: Routes.aiStudioImageEnhancer,
+      page: () => const ImageEnhancerView(),
+      binding: ImageEnhancerBinding(),
     ),
     GetPage(
       name: Routes.sellerSettings,
@@ -521,6 +598,11 @@ class AppPages {
       name: Routes.sellerPosManagement,
       page: () => SellerPosManagementView(),
       binding: SellerPosManagementBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerPosLocations,
+      page: () => SellerPosLocationsView(),
+      binding: SellerPosLocationsBinding(),
     ),
     GetPage(
       name: Routes.posProducts,

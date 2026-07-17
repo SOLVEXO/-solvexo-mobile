@@ -21,6 +21,13 @@ class CategoryController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxList<CategoryModel> searchResults = <CategoryModel>[].obs;
 
+  // ─── Rail selection (CategoryView's split layout) ─────────────────────────
+  // null = "All": the grid shows every root category; otherwise it shows the
+  // selected root's subcategories.
+  final Rxn<CategoryModel> railSelection = Rxn<CategoryModel>();
+
+  void selectRail(CategoryModel? category) => railSelection.value = category;
+
   @override
   void onInit() {
     super.onInit();
@@ -59,6 +66,21 @@ class CategoryController extends GetxController {
       isLoading.value = true;
       final trees = await _categoryRepo.getAllCategoryTrees();
       categoryTrees.assignAll(trees);
+
+      // Re-resolve the rail selection against the fresh instances so a
+      // refresh never leaves the grid rendering a stale subtree.
+      final selectedId = railSelection.value?.id;
+      if (selectedId != null) {
+        CategoryModel? match;
+        for (final t in trees) {
+          if (t.id == selectedId) {
+            match = t;
+            break;
+          }
+        }
+        railSelection.value = match;
+      }
+
       debugPrint('✅ Loaded ${trees.length} category trees');
     } catch (e) {
       debugPrint('❌ Error loading categories: $e');

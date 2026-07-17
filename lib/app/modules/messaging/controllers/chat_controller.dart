@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:book_store_app/app/data/models/messaging/conversation_model.dart';
 import 'package:book_store_app/app/data/models/messaging/message_model.dart';
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
+import 'package:book_store_app/app/network/messaging_socket_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -30,12 +31,23 @@ class ChatController extends GetxController {
   final RxBool isLoadingOlder = false.obs;
   final RxBool hasOlder = false.obs;
 
+  // Realtime (MessagingGateway) — typing + online state of the other party.
+  final RxBool peerIsTyping = false.obs;
+  final RxBool peerIsOnline = false.obs;
+
   final TextEditingController textController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
   String? _nextCursor;
   Timer? _pollTimer;
   static const _pollInterval = Duration(seconds: 4);
+
+  final MessagingSocketService _socket = MessagingSocketService.instance;
+  final List<StreamSubscription> _socketSubs = [];
+  VoidCallback? _presenceCleanup;
+  Timer? _typingStopTimer;
+  Timer? _peerTypingTimeout;
+  bool _sentTyping = false;
 
   @override
   void onInit() {
@@ -56,6 +68,14 @@ class ChatController extends GetxController {
   @override
   void onClose() {
     _pollTimer?.cancel();
+    _typingStopTimer?.cancel();
+    _peerTypingTimeout?.cancel();
+    if (_sentTyping) _socket.sendTyping(conversationId, false);
+    _presenceCleanup?.call();
+    for (final sub in _socketSubs) {
+      sub.cancel();
+    }
+    _socket.leaveConversation(conversationId);
     textController.dispose();
     scrollController.dispose();
     super.onClose();
@@ -84,7 +104,140 @@ class ChatController extends GetxController {
     }
 
     await loadMessages(initial: true);
-    _pollTimer = Timer.periodic(_pollInterval, (_) => loadMessages(silent: true));
+    // Polling stays as a fallback: silent polls no-op while the socket is
+    // live, so a dropped connection degrades to the old 4s refresh.
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (!_socket.isConnected.value) loadMessages(silent: true);
+    });
+
+    await _connectRealtime();
+  }
+
+  // ── Realtime (Socket.IO /messaging) ──────────────────────────────────────
+
+  Future<void> _connectRealtime() async {
+    // Listeners first — if the socket is already live, `join-conversation`
+    // answers with `messaging:joined` immediately and we'd miss it otherwise.
+    _socketSubs.add(_socket.onNewMessage.listen((data) {
+      final msg = MessageModel.fromJson(data);
+      if (msg.conversationId != conversationId) return;
+      if (messages.any((m) => m.id == msg.id)) return;
+      messages.add(msg);
+      if (msg.senderId != myUserId) {
+        _peerTypingTimeout?.cancel();
+        peerIsTyping.value = false;
+        _repo.markSeen(conversationId: conversationId, lastMessageId: msg.id);
+      }
+    }));
+
+    _socketSubs.add(_socket.onMessageEdited.listen((data) {
+      final msg = MessageModel.fromJson(data);
+      if (msg.conversationId != conversationId) return;
+      final index = messages.indexWhere((m) => m.id == msg.id);
+      if (index != -1) messages[index] = msg;
+    }));
+
+    _socketSubs.add(_socket.onMessageDeleted.listen((data) {
+      final messageId = (data['messageId'] ?? '').toString();
+      final index = messages.indexWhere((m) => m.id == messageId);
+      if (index == -1) return;
+      final m = messages[index];
+      messages[index] = MessageModel(
+        id: m.id,
+        conversationId: m.conversationId,
+        senderId: m.senderId,
+        senderRole: m.senderRole,
+        type: m.type,
+        text: m.text,
+        attachments: m.attachments,
+        productShare: m.productShare,
+        replyTo: m.replyTo,
+        status: m.status,
+        seenByUserIds: m.seenByUserIds,
+        isEdited: m.isEdited,
+        isDeleted: true,
+        deletedByUsers: m.deletedByUsers,
+        createdAt: m.createdAt,
+      );
+    }));
+
+    _socketSubs.add(_socket.onMessagesSeen.listen((data) {
+      if ((data['conversationId'] ?? '').toString() != conversationId) return;
+      if ((data['userId'] ?? '').toString() == myUserId) return;
+      // The peer read the thread — flip my messages to 'seen'.
+      for (var i = 0; i < messages.length; i++) {
+        final m = messages[i];
+        if (m.senderId != myUserId || m.status == 'seen') continue;
+        messages[i] = MessageModel(
+          id: m.id,
+          conversationId: m.conversationId,
+          senderId: m.senderId,
+          senderRole: m.senderRole,
+          type: m.type,
+          text: m.text,
+          attachments: m.attachments,
+          productShare: m.productShare,
+          replyTo: m.replyTo,
+          status: 'seen',
+          seenByUserIds: m.seenByUserIds,
+          isEdited: m.isEdited,
+          isDeleted: m.isDeleted,
+          deletedByUsers: m.deletedByUsers,
+          createdAt: m.createdAt,
+        );
+      }
+      messages.refresh();
+    }));
+
+    _socketSubs.add(_socket.onTyping.listen((data) {
+      if ((data['conversationId'] ?? '').toString() != conversationId) return;
+      if ((data['userId'] ?? '').toString() == myUserId) return;
+      final isTyping = data['isTyping'] == true;
+      peerIsTyping.value = isTyping;
+      _peerTypingTimeout?.cancel();
+      if (isTyping) {
+        // Safety net in case the peer's "stopped typing" event never arrives.
+        _peerTypingTimeout = Timer(const Duration(seconds: 6), () {
+          peerIsTyping.value = false;
+        });
+      }
+    }));
+
+    _socketSubs.add(_socket.onJoined.listen((data) {
+      if ((data['conversationId'] ?? '').toString() != conversationId) return;
+      peerIsOnline.value = data['otherOnline'] == true;
+      final otherUserId = (data['otherUserId'] ?? '').toString();
+      _presenceCleanup?.call();
+      _presenceCleanup = _socket.subscribePresence(otherUserId, (online) {
+        peerIsOnline.value = online;
+      });
+    }));
+
+    await _socket.ensureConnected();
+    _socket.joinConversation(conversationId);
+  }
+
+  /// Hook for the input bar's onChanged — emits `typing: true` immediately
+  /// and `typing: false` after 2.5s of inactivity.
+  void onInputChanged(String value) {
+    if (value.trim().isEmpty) {
+      _stopTyping();
+      return;
+    }
+    if (!_sentTyping) {
+      _sentTyping = true;
+      _socket.sendTyping(conversationId, true);
+    }
+    _typingStopTimer?.cancel();
+    _typingStopTimer = Timer(const Duration(milliseconds: 2500), _stopTyping);
+  }
+
+  void _stopTyping() {
+    _typingStopTimer?.cancel();
+    if (_sentTyping) {
+      _sentTyping = false;
+      _socket.sendTyping(conversationId, false);
+    }
   }
 
   bool get isBlocked => conversation.value?.isBlocked(myRole) ?? false;
@@ -137,6 +290,7 @@ class ChatController extends GetxController {
     if (text.isEmpty || isSending.value || isBlocked) return;
 
     textController.clear();
+    _stopTyping();
     isSending.value = true;
     final msg = await _repo.sendMessage(conversationId, type: 'text', text: text);
     isSending.value = false;

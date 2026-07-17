@@ -7,6 +7,11 @@ class CheckoutItem {
   final int quantity;
   final String productType; // 'physical' or 'digital'
 
+  /// Non-null only when a subscriber (member) discount was applied
+  /// server-side — `price` already reflects the discounted amount, this is
+  /// the pre-discount unit price kept for strikethrough display.
+  final double? originalPrice;
+
   CheckoutItem({
     this.id,
     required this.name,
@@ -15,7 +20,10 @@ class CheckoutItem {
     required this.price,
     required this.quantity,
     this.productType = 'physical',
+    this.originalPrice,
   });
+
+  bool get hasMemberDiscount => originalPrice != null && originalPrice! > price;
 
   factory CheckoutItem.fromJson(Map<String, dynamic> json) {
     return CheckoutItem(
@@ -26,6 +34,7 @@ class CheckoutItem {
       price: double.parse(json['price'].toString()),
       quantity: json['quantity'],
       productType: json['productType'] as String? ?? 'physical',
+      originalPrice: json['originalPrice'] != null ? double.parse(json['originalPrice'].toString()) : null,
     );
   }
 
@@ -37,5 +46,6 @@ class CheckoutItem {
     "price": price,
     "quantity": quantity,
     "productType": productType,
+    "originalPrice": originalPrice,
   };
 }

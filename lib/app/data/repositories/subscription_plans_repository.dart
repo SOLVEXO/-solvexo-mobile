@@ -13,9 +13,9 @@ class SubscriptionPlansRepository {
 
   // ─── Plans ────────────────────────────────────────────────────────────────
 
-  Future<List<SubscriptionPlanModel>> listPlans() async {
+  Future<List<SubscriptionPlanModel>> listPlans(String storeId) async {
     try {
-      final response = await _client.get(ApiConstants.subscriptionPlans, requiresAuth: true);
+      final response = await _client.get(ApiConstants.subscriptionPlans(storeId), requiresAuth: true);
       if (response.data['success'] == true) {
         return (response.data['data'] as List).cast<Map<String, dynamic>>().map(SubscriptionPlanModel.fromJson).toList();
       }
@@ -30,7 +30,8 @@ class SubscriptionPlansRepository {
     }
   }
 
-  Future<SubscriptionPlanModel?> createPlan({
+  Future<SubscriptionPlanModel?> createPlan(
+    String storeId, {
     required String name,
     String? description,
     required double monthlyPriceUSD,
@@ -40,7 +41,7 @@ class SubscriptionPlansRepository {
   }) async {
     try {
       final response = await _client.post(
-        ApiConstants.subscriptionPlans,
+        ApiConstants.subscriptionPlans(storeId),
         data: {
           'name': name,
           if (description != null) 'description': description,
@@ -67,6 +68,7 @@ class SubscriptionPlansRepository {
   }
 
   Future<SubscriptionPlanModel?> updatePlan(
+    String storeId,
     String planId, {
     String? name,
     String? description,
@@ -78,7 +80,7 @@ class SubscriptionPlansRepository {
   }) async {
     try {
       final response = await _client.patch(
-        ApiConstants.subscriptionPlanById(planId),
+        ApiConstants.subscriptionPlanById(storeId, planId),
         data: {
           if (name != null) 'name': name,
           if (description != null) 'description': description,
@@ -105,10 +107,10 @@ class SubscriptionPlansRepository {
     }
   }
 
-  Future<bool> archivePlan(String planId, {bool force = false}) async {
+  Future<bool> archivePlan(String storeId, String planId, {bool force = false}) async {
     try {
       final response = await _client.delete(
-        '${ApiConstants.subscriptionPlanById(planId)}?force=$force',
+        '${ApiConstants.subscriptionPlanById(storeId, planId)}?force=$force',
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
@@ -128,9 +130,9 @@ class SubscriptionPlansRepository {
 
   // ─── Dashboard ────────────────────────────────────────────────────────────
 
-  Future<SubscriptionDashboardModel> getDashboard() async {
+  Future<SubscriptionDashboardModel> getDashboard(String storeId) async {
     try {
-      final response = await _client.get(ApiConstants.subscriptionsDashboard, requiresAuth: true);
+      final response = await _client.get(ApiConstants.subscriptionsDashboard(storeId), requiresAuth: true);
       if (response.data['success'] == true) {
         return SubscriptionDashboardModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
@@ -147,7 +149,8 @@ class SubscriptionPlansRepository {
 
   // ─── Subscribers ──────────────────────────────────────────────────────────
 
-  Future<({List<SubscriberModel> subscribers, int total, int pages})> listSubscriptions({
+  Future<({List<SubscriberModel> subscribers, int total, int pages})> listSubscriptions(
+    String storeId, {
     int page = 1,
     int limit = 20,
     String? status,
@@ -155,7 +158,7 @@ class SubscriptionPlansRepository {
   }) async {
     try {
       final response = await _client.get(
-        ApiConstants.subscriptionsList,
+        ApiConstants.subscriptionsList(storeId),
         queryParameters: {
           'page': page,
           'limit': limit,
@@ -181,9 +184,9 @@ class SubscriptionPlansRepository {
     }
   }
 
-  Future<SubscriberModel?> getSubscriptionById(String id) async {
+  Future<SubscriberModel?> getSubscriptionById(String storeId, String id) async {
     try {
-      final response = await _client.get(ApiConstants.subscriptionById(id), requiresAuth: true);
+      final response = await _client.get(ApiConstants.subscriptionById(storeId, id), requiresAuth: true);
       if (response.data['success'] == true) {
         return SubscriberModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
@@ -198,10 +201,10 @@ class SubscriptionPlansRepository {
     }
   }
 
-  Future<bool> pauseSubscription(String id) => _patchStatus(ApiConstants.subscriptionPause(id));
-  Future<bool> resumeSubscription(String id) => _patchStatus(ApiConstants.subscriptionResume(id));
-  Future<bool> cancelSubscription(String id, {bool atPeriodEnd = false}) =>
-      _patchStatus(ApiConstants.subscriptionCancel(id, atPeriodEnd: atPeriodEnd));
+  Future<bool> pauseSubscription(String storeId, String id) => _patchStatus(ApiConstants.subscriptionPause(storeId, id));
+  Future<bool> resumeSubscription(String storeId, String id) => _patchStatus(ApiConstants.subscriptionResume(storeId, id));
+  Future<bool> cancelSubscription(String storeId, String id, {bool atPeriodEnd = false}) =>
+      _patchStatus(ApiConstants.subscriptionCancel(storeId, id, atPeriodEnd: atPeriodEnd));
 
   Future<bool> _patchStatus(String url) async {
     try {

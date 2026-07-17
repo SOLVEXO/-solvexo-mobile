@@ -8,6 +8,8 @@ class StorefrontModel {
   final String? coverImage;
   final String? description;
   final int followersCount;
+  final double averageRating;
+  final int reviewCount;
   final String? sellerType;
   final List<String> badges;
 
@@ -20,6 +22,8 @@ class StorefrontModel {
     this.coverImage,
     this.description,
     required this.followersCount,
+    this.averageRating = 0,
+    this.reviewCount = 0,
     this.sellerType,
     this.badges = const [],
   });
@@ -35,6 +39,8 @@ class StorefrontModel {
         coverImage: json['coverImage'] as String?,
         description: json['description'] as String?,
         followersCount: json['followersCount'] as int? ?? 0,
+        averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0,
+        reviewCount: json['reviewCount'] as int? ?? 0,
         sellerType: json['sellerType'] as String?,
         badges: (json['badges'] as List?)?.cast<String>() ?? const [],
       );

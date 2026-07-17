@@ -1,7 +1,10 @@
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
-import 'package:book_store_app/app/data/models/platform_plans/platform_subscription_model.dart';
-import 'package:book_store_app/app/data/models/platform_plans/platform_tier_model.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/data/models/platform_plans/platform_addon_model.dart';
+import 'package:book_store_app/app/data/models/platform_plans/platform_entitlements_model.dart';
+import 'package:book_store_app/app/data/models/platform_plans/platform_invoice_model.dart';
+import 'package:book_store_app/app/data/models/platform_plans/platform_plan_model.dart';
+import 'package:book_store_app/app/data/models/platform_plans/platform_subscription_model.dart';
 import 'package:book_store_app/app/modules/seller_platform_plans/controllers/seller_platform_plans_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
@@ -12,38 +15,40 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-/// Current tier, renewal date, credit balance, and the cancel action —
-/// mirrors the seller's OWN plan status, distinct from `SubscribersTab`
-/// (which lists the seller's buyers).
-class MyPlanCard extends StatelessWidget {
-  final PlatformSubscriptionModel plan;
-  final SellerPlatformPlansController controller;
-  const MyPlanCard({super.key, required this.plan, required this.controller});
+String _fmtDate(DateTime? d) => d == null ? '—' : DateFormat('MMM d, yyyy').format(d);
 
-  Color get _statusColor => switch (plan.status) {
+// ── Current plan card ────────────────────────────────────────────────────────
+
+class MyPlanCard extends StatelessWidget {
+  final PlatformSubscriptionModel sub;
+  const MyPlanCard({super.key, required this.sub});
+
+  Color get _statusColor => switch (sub.status) {
         'active' => AppColors.greenSuccess,
-        'past_due' => AppColors.amberDark,
+        'trialing' => AppColors.amberDark,
+        'past_due' => AppColors.red,
         _ => AppColors.gray600,
       };
 
-  String get _statusLabel {
-    if (plan.hasPendingDowngrade) return 'Cancels on ${_fmt(plan.canceledAt)}';
-    return switch (plan.status) {
-      'active' => 'Active',
-      'past_due' => 'Payment past due',
-      _ => 'Canceled',
-    };
-  }
-
-  String _fmt(DateTime? d) => d == null ? '—' : DateFormat('MMM d, yyyy').format(d);
+  String get _statusLabel => switch (sub.status) {
+        'active' => 'Active',
+        'trialing' => 'Trial',
+        'past_due' => 'Payment past due',
+        _ => 'Canceled',
+      };
 
   @override
   Widget build(BuildContext context) {
-    final tierName = plan.tierConfig?.name ?? plan.tier;
+    final plan = sub.plan;
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(BaseSpacing.md),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [AppColors.primaryColor, AppColors.primaryColorLight], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        gradient: const LinearGradient(
+          colors: [AppColors.primaryColor, AppColors.primaryColorLight],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(BaseRadius.lg),
         boxShadow: BaseShadows.forLevel(BaseElevation.level1),
       ),
@@ -52,123 +57,207 @@ class MyPlanCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              CustomText(text: 'Your Plan', color: AppColors.white.withOpacity(0.85), fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
-              const Spacer(),
+              Expanded(
+                child: CustomText(
+                  text: 'Your Plan',
+                  color: AppColors.white.withOpacity(0.85),
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
                 decoration: BoxDecoration(color: _statusColor, borderRadius: BorderRadius.circular(BaseRadius.pill)),
-                child: CustomText(text: _statusLabel, color: AppColors.white, fontSize: 10.5, fontWeight: FontWeight.w700),
+                child: CustomText(
+                  text: _statusLabel,
+                  color: AppColors.white,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
-          SizedBox(height: BaseSpacing.xs),
-          CustomText(text: tierName, color: AppColors.white, fontSize: AppFontSize.regular, fontWeight: FontWeight.bold),
-          if (plan.amountUSD > 0) ...[
-            SizedBox(height: 2),
+          SizedBox(height: BaseSpacing.xxs),
+          CustomText(
+            text: plan?.name ?? 'Free',
+            color: AppColors.white,
+            fontSize: AppFontSize.large,
+            fontWeight: FontWeight.bold,
+          ),
+          if (sub.amountUSD > 0)
             CustomText(
-              text: '\$${plan.amountUSD.toStringAsFixed(0)}/${plan.billingInterval == 'yearly' ? 'yr' : 'mo'}${plan.nextBillingDate != null ? ' · renews ${_fmt(plan.nextBillingDate)}' : ''}',
+              text:
+                  '\$${sub.amountUSD.toStringAsFixed(0)}/${sub.billingInterval == 'yearly' ? 'yr' : 'mo'}${sub.nextBillingDate != null ? ' · renews ${_fmtDate(sub.nextBillingDate)}' : ''}',
+              color: AppColors.white.withOpacity(0.9),
+              fontSize: AppFontSize.verySmall,
+            ),
+          if (sub.isTrialing && sub.trialEndsAt != null)
+            CustomText(
+              text: 'Trial ends ${_fmtDate(sub.trialEndsAt)}',
               color: AppColors.white.withOpacity(0.9),
               fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-          if (plan.creditBalanceUSD > 0) ...[
-            SizedBox(height: 2),
-            CustomText(text: 'Credit balance: \$${plan.creditBalanceUSD.toStringAsFixed(2)}', color: AppColors.white.withOpacity(0.85), fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
-          ],
-          if (!plan.isStarter && !plan.hasPendingDowngrade) ...[
-            SizedBox(height: BaseSpacing.sm),
-            GestureDetector(
-              onTap: () => _confirmCancel(context),
-              child: CustomText(text: 'Cancel plan', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700, textDecoration: TextDecoration.underline),
+          if (sub.creditBalanceUSD > 0)
+            CustomText(
+              text: 'Credit balance: \$${sub.creditBalanceUSD.toStringAsFixed(2)}',
+              color: AppColors.white.withOpacity(0.85),
+              fontSize: AppFontSize.tiny,
             ),
-          ],
         ],
       ),
     );
   }
-
-  void _confirmCancel(BuildContext context) {
-    CustomConfirmDialog.show(
-      context,
-      title: 'Cancel your plan?',
-      message: 'You\'ll keep ${plan.tierConfig?.name ?? plan.tier} access until ${_fmt(plan.currentPeriodEnd)}, then move to Starter (free).',
-      confirmLabel: 'Cancel Plan',
-      confirmColor: AppColors.red,
-      onConfirm: () => controller.cancelToStarter(atPeriodEnd: true),
-    );
-  }
 }
 
-/// The $29/mo POS add-on row — eligibility-gated on Basic+ tier, separate
-/// purchase from the platform tier itself.
-class PosAddonCard extends StatelessWidget {
-  final PlatformSubscriptionModel plan;
-  final SellerPlatformPlansController controller;
-  const PosAddonCard({super.key, required this.plan, required this.controller});
+// ── Usage / entitlements card ────────────────────────────────────────────────
+
+class UsageCard extends StatelessWidget {
+  final PlatformEntitlementsModel data;
+  const UsageCard({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
-    final active = plan.posAddon.active;
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.all(BaseSpacing.sm + 2),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(BaseRadius.lg),
         boxShadow: BaseShadows.forLevel(BaseElevation.level1),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.md)),
-            child: Icon(Icons.point_of_sale_rounded, color: AppColors.primaryColor, size: 20),
+          CustomText(
+            text: 'Usage',
+            color: AppColors.black2,
+            fontSize: AppFontSize.small2,
+            fontWeight: FontWeight.bold,
           ),
-          SizedBox(width: BaseSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(text: 'POS Add-on', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
-                CustomText(
-                  text: active ? 'Active · \$${plan.posAddonMonthlyPriceUSD.toStringAsFixed(0)}/mo' : (plan.posAddonEligible ? '\$${plan.posAddonMonthlyPriceUSD.toStringAsFixed(0)}/mo · run in-store checkout' : 'Requires Basic tier or above'),
-                  color: AppColors.gray600,
-                  fontSize: AppFontSize.tiny,
-                  fontWeight: FontWeight.w600,
+          SizedBox(height: BaseSpacing.sm),
+          _UsageBar(label: 'Products', usage: data.products),
+          SizedBox(height: BaseSpacing.sm),
+          _UsageBar(label: 'Staff accounts', usage: data.staffAccounts),
+          SizedBox(height: BaseSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: _MiniStat(
+                  label: 'POS locations',
+                  value: data.maxPosLocations == -1 ? 'Unlimited' : 'Up to ${data.maxPosLocations}',
                 ),
-              ],
-            ),
+              ),
+              SizedBox(width: BaseSpacing.sm),
+              Expanded(
+                child: _MiniStat(
+                  label: 'AI credits',
+                  value: '${data.aiCreditsBalance} left',
+                ),
+              ),
+              SizedBox(width: BaseSpacing.sm),
+              Expanded(
+                child: _MiniStat(
+                  label: 'Transaction fee',
+                  value: '${(data.transactionFeeRate * 100).toStringAsFixed(1)}%',
+                ),
+              ),
+            ],
           ),
-          _actionButton(active),
         ],
       ),
     );
   }
+}
 
-  Widget _actionButton(bool active) {
-    return Obx(() {
-      if (controller.isUpdating.value) {
-        return const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor));
-      }
-      if (active) {
-        return TextButton(
-          onPressed: controller.cancelPosAddon,
-          child: CustomText(text: 'Cancel', color: AppColors.red, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
-        );
-      }
-      return TextButton(
-        onPressed: plan.posAddonEligible ? controller.subscribeToPosAddon : null,
-        child: CustomText(
-          text: plan.posAddonEligible ? 'Activate' : 'Locked',
-          color: plan.posAddonEligible ? AppColors.primaryColor : AppColors.lightGrey,
-          fontSize: AppFontSize.tiny,
-          fontWeight: FontWeight.w700,
+class _UsageBar extends StatelessWidget {
+  final String label;
+  final EntitlementUsage usage;
+  const _UsageBar({required this.label, required this.usage});
+
+  @override
+  Widget build(BuildContext context) {
+    final nearLimit = !usage.isUnlimited && usage.ratio >= 0.8;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: CustomText(
+                text: label,
+                color: AppColors.gray600,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            CustomText(
+              text: usage.label,
+              color: nearLimit ? AppColors.amberDark : AppColors.black2,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w700,
+            ),
+          ],
         ),
-      );
-    });
+        SizedBox(height: BaseSpacing.xxs),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(BaseRadius.pill),
+          child: Container(
+            height: 6,
+            width: double.infinity,
+            color: AppColors.lightGrey10,
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: usage.isUnlimited ? 0.06 : usage.ratio,
+              child: Container(color: nearLimit ? AppColors.amberDark : AppColors.primaryColor),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
+
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final String value;
+  const _MiniStat({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: BaseSpacing.xs),
+      decoration: BoxDecoration(
+        color: AppColors.lightGrey10,
+        borderRadius: BorderRadius.circular(BaseRadius.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomText(
+            text: label,
+            color: AppColors.gray600,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: 2),
+          CustomText(
+            text: value,
+            color: AppColors.black2,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w700,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Billing interval toggle ──────────────────────────────────────────────────
 
 class BillingIntervalToggle extends StatelessWidget {
   final SellerPlatformPlansController controller;
@@ -184,103 +273,517 @@ class BillingIntervalToggle extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _segment('Monthly', !isYearly, () => controller.billingInterval.value == 'monthly' ? null : controller.toggleBillingInterval()),
-            _segment('Yearly · save 2mo', isYearly, () => controller.billingInterval.value == 'yearly' ? null : controller.toggleBillingInterval()),
+            _segment('Monthly', !isYearly, () {
+              if (isYearly) controller.toggleBillingInterval();
+            }),
+            _segment('Yearly', isYearly, () {
+              if (!isYearly) controller.toggleBillingInterval();
+            }),
           ],
         ),
       );
     });
   }
 
-  Widget _segment(String label, bool selected, VoidCallback? onTap) {
+  Widget _segment(String label, bool selected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: BaseMotion.normal,
         padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm, vertical: BaseSpacing.xs),
-        decoration: BoxDecoration(color: selected ? AppColors.primaryColor : AppColors.transparent, borderRadius: BorderRadius.circular(BaseRadius.pill)),
-        child: CustomText(text: label, color: selected ? AppColors.white : AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primaryColor : AppColors.transparent,
+          borderRadius: BorderRadius.circular(BaseRadius.pill),
+        ),
+        child: CustomText(
+          text: label,
+          color: selected ? AppColors.white : AppColors.gray600,
+          fontSize: AppFontSize.tiny,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
 }
 
-class TierCard extends StatelessWidget {
-  final PlatformTierModel tier;
+// ── Plan card ────────────────────────────────────────────────────────────────
+
+class PlanCard extends StatelessWidget {
+  final PlatformPlanModel plan;
   final bool isCurrent;
   final bool isYearly;
   final SellerPlatformPlansController controller;
-  const TierCard({super.key, required this.tier, required this.isCurrent, required this.isYearly, required this.controller});
+  const PlanCard({
+    super.key,
+    required this.plan,
+    required this.isCurrent,
+    required this.isYearly,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final price = isYearly ? (tier.yearlyPriceUSD ?? tier.monthlyPriceUSD * 12) : tier.monthlyPriceUSD;
-    final myPlan = controller.myPlan.value;
-    final isDowngrade = myPlan != null && myPlan.tierConfig != null && tier.monthlyPriceUSD < myPlan.tierConfig!.monthlyPriceUSD;
+    final price = plan.priceFor(isYearly ? 'yearly' : 'monthly');
+    return Container(
+      padding: EdgeInsets.all(BaseSpacing.sm + 2),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(BaseRadius.lg),
+        boxShadow: BaseShadows.forLevel(BaseElevation.level1),
+        border: Border.all(color: isCurrent ? AppColors.primaryColor : AppColors.transparent, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: CustomText(
+                  text: plan.name,
+                  color: AppColors.black2,
+                  fontSize: AppFontSize.extraSmall,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              if (plan.badge != null && plan.badge!.isNotEmpty && !isCurrent)
+                _Chip(text: plan.badge!, color: AppColors.amberDark),
+              if (isCurrent) _Chip(text: 'Current Plan', color: AppColors.primaryColor),
+            ],
+          ),
+          CustomText(
+            text: plan.isCustomPricing
+                ? 'Custom pricing'
+                : plan.isFree
+                    ? 'Free'
+                    : '\$${price.toStringAsFixed(0)}/${isYearly ? 'yr' : 'mo'}',
+            color: AppColors.primaryColor,
+            fontSize: AppFontSize.small2,
+            fontWeight: FontWeight.bold,
+          ),
+          if (plan.trialDays > 0 && !isCurrent)
+            CustomText(
+              text: '${plan.trialDays}-day free trial',
+              color: AppColors.greenSuccess,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
+            ),
+          if (plan.description != null && plan.description!.isNotEmpty) ...[
+            SizedBox(height: BaseSpacing.xxs),
+            CustomText(
+              text: plan.description!,
+              color: AppColors.gray600,
+              fontSize: AppFontSize.tiny,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          SizedBox(height: BaseSpacing.xs),
+          ...plan.featureBullets.map(
+            (f) => Padding(
+              padding: EdgeInsets.only(bottom: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.check_circle_outline_rounded, size: 13, color: AppColors.greenSuccess),
+                  SizedBox(width: BaseSpacing.xxs),
+                  Expanded(
+                    child: CustomText(text: f, color: AppColors.gray600, fontSize: AppFontSize.tiny),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: BaseSpacing.xs),
+          if (!isCurrent && !plan.isCustomPricing)
+            Obx(
+              () => GestureDetector(
+                onTap: controller.isUpdating.value ? null : () => _confirmChange(context),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs + 2),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: controller.isUpdating.value ? AppColors.lightGrey10 : AppColors.primaryColor,
+                    borderRadius: BorderRadius.circular(BaseRadius.md),
+                  ),
+                  child: controller.isUpdating.value
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                        )
+                      : CustomText(
+                          text: 'Switch to ${plan.name}',
+                          color: AppColors.white,
+                          fontSize: AppFontSize.tiny,
+                          fontWeight: FontWeight.w700,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
-    return PressableScale(
-      onTap: isCurrent ? null : () => controller.selectTier(tier),
-      child: Container(
+  void _confirmChange(BuildContext context) {
+    final price = plan.priceFor(isYearly ? 'yearly' : 'monthly');
+    CustomConfirmDialog.show(
+      context,
+      title: 'Switch to ${plan.name}?',
+      message: plan.isFree
+          ? 'Your store will move to the free ${plan.name} plan.'
+          : 'You\'ll be billed \$${price.toStringAsFixed(0)}/${isYearly ? 'year' : 'month'}'
+              '${plan.trialDays > 0 ? ' after a ${plan.trialDays}-day free trial' : ''}. '
+              'Unused time on your current plan is credited automatically.',
+      confirmLabel: 'Switch Plan',
+      onConfirm: () => controller.selectPlan(plan),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String text;
+  final Color color;
+  const _Chip({required this.text, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
+      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
+      child: CustomText(text: text, color: color, fontSize: 10.5, fontWeight: FontWeight.w700),
+    );
+  }
+}
+
+// ── Add-ons card ─────────────────────────────────────────────────────────────
+
+class AddonsCard extends StatelessWidget {
+  final SellerPlatformPlansController controller;
+  const AddonsCard({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(BaseSpacing.sm + 2),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(BaseRadius.lg),
+        boxShadow: BaseShadows.forLevel(BaseElevation.level1),
+      ),
+      child: Obx(() {
+        final active = controller.activeAddons;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: CustomText(
+                    text: 'Add-ons',
+                    color: AppColors.black2,
+                    fontSize: AppFontSize.small2,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _showCatalogSheet(context),
+                  child: CustomText(
+                    text: '+ Add',
+                    color: AppColors.primaryColor,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            if (active.isEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: BaseSpacing.sm),
+                child: CustomText(
+                  text: 'No active add-ons — boost your plan with extras.',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                ),
+              )
+            else
+              ...active.map((a) => _AddonRow(addon: a, controller: controller)),
+          ],
+        );
+      }),
+    );
+  }
+
+  void _showCatalogSheet(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          BaseSpacing.lg, BaseSpacing.sm, BaseSpacing.lg,
+          MediaQuery.of(context).padding.bottom + BaseSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: EdgeInsets.only(bottom: BaseSpacing.md),
+                decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            CustomText(
+              text: 'Add-ons',
+              color: AppColors.black2,
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.bold,
+            ),
+            SizedBox(height: BaseSpacing.sm),
+            ...kAddonCatalog.map(
+              (entry) => InkWell(
+                onTap: () {
+                  Get.back();
+                  CustomConfirmDialog.show(
+                    context,
+                    title: 'Buy ${entry.name}?',
+                    message:
+                        '\$${entry.unitPriceUSD.toStringAsFixed(0)}${entry.recurring ? '/month, cancel anytime' : ' one-time'}.',
+                    confirmLabel: 'Buy',
+                    onConfirm: () => controller.purchaseAddon(entry.type),
+                  );
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs + 1),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomText(
+                              text: entry.name,
+                              color: AppColors.black2,
+                              fontSize: AppFontSize.verySmall,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            CustomText(
+                              text: entry.description,
+                              color: AppColors.gray600,
+                              fontSize: AppFontSize.tiny,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: BaseSpacing.xs),
+                      CustomText(
+                        text: '\$${entry.unitPriceUSD.toStringAsFixed(0)}${entry.recurring ? '/mo' : ''}',
+                        color: AppColors.primaryColor,
+                        fontSize: AppFontSize.verySmall,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+    );
+  }
+}
+
+class _AddonRow extends StatelessWidget {
+  final PlatformAddonModel addon;
+  final SellerPlatformPlansController controller;
+  const _AddonRow({required this.addon, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final entry = addonCatalogEntry(addon.addonType);
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: entry?.name ?? addon.addonType,
+                  color: AppColors.black2,
+                  fontSize: AppFontSize.verySmall,
+                  fontWeight: FontWeight.w700,
+                ),
+                CustomText(
+                  text:
+                      '\$${addon.priceUSD.toStringAsFixed(0)}${addon.recurring ? '/mo' : ' one-time'}${addon.quantity > 1 ? ' · ×${addon.quantity}' : ''}${addon.nextBillingDate != null ? ' · renews ${_fmtDate(addon.nextBillingDate)}' : ''}',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          if (addon.recurring)
+            GestureDetector(
+              onTap: () => CustomConfirmDialog.show(
+                context,
+                title: 'Cancel ${entry?.name ?? 'add-on'}?',
+                message: 'It stays active until the end of the current billing period.',
+                confirmLabel: 'Cancel Add-on',
+                confirmColor: AppColors.red,
+                onConfirm: () => controller.cancelAddon(addon),
+              ),
+              child: CustomText(
+                text: 'Cancel',
+                color: AppColors.red,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Billing history card ─────────────────────────────────────────────────────
+
+/// The store's recent platform-plan invoices
+/// (`GET /api/platform-plans/:storeId/invoices`).
+class BillingHistoryCard extends StatelessWidget {
+  final SellerPlatformPlansController controller;
+  const BillingHistoryCard({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.invoices.isEmpty) return const SizedBox.shrink();
+
+      return Container(
+        width: double.infinity,
         padding: EdgeInsets.all(BaseSpacing.sm + 2),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(BaseRadius.lg),
           boxShadow: BaseShadows.forLevel(BaseElevation.level1),
-          border: Border.all(color: isCurrent ? AppColors.primaryColor : AppColors.transparent, width: 1.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Expanded(child: CustomText(text: tier.name, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700)),
-                if (isCurrent)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
-                    decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-                    child: CustomText(text: 'Current Plan', color: AppColors.primaryColor, fontSize: 10.5, fontWeight: FontWeight.w700),
+                Expanded(
+                  child: CustomText(
+                    text: 'Billing History',
+                    color: AppColors.black2,
+                    fontSize: AppFontSize.small2,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (controller.invoicesTotal.value > controller.invoices.length)
+                  CustomText(
+                    text: 'Last ${controller.invoices.length} of ${controller.invoicesTotal.value}',
+                    color: AppColors.gray600,
+                    fontSize: AppFontSize.tiny,
                   ),
               ],
             ),
-            CustomText(
-              text: tier.isFree ? 'Free' : '\$${price.toStringAsFixed(0)}/${isYearly ? 'yr' : 'mo'}',
-              color: AppColors.primaryColor,
-              fontSize: AppFontSize.small2,
-              fontWeight: FontWeight.bold,
-            ),
             SizedBox(height: BaseSpacing.xs),
-            ...tier.features.map((f) => Padding(
-                  padding: EdgeInsets.only(bottom: 2),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.check_circle_outline_rounded, size: 13, color: AppColors.greenSuccess),
-                      SizedBox(width: BaseSpacing.xxs),
-                      Expanded(child: CustomText(text: f, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                )),
-            SizedBox(height: BaseSpacing.xs),
-            if (!isCurrent)
-              Obx(() => Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs + 2),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: controller.isUpdating.value ? AppColors.lightGrey10 : (isDowngrade ? AppColors.lightGrey10 : AppColors.primaryColor),
-                      borderRadius: BorderRadius.circular(BaseRadius.md),
-                    ),
-                    child: controller.isUpdating.value
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor))
-                        : CustomText(
-                            text: isDowngrade ? 'Downgrade' : 'Upgrade',
-                            color: isDowngrade ? AppColors.gray600 : AppColors.white,
-                            fontSize: AppFontSize.tiny,
-                            fontWeight: FontWeight.w700,
-                          ),
-                  )),
+            ...controller.invoices.map((invoice) => _InvoiceRow(invoice: invoice)),
           ],
         ),
+      );
+    });
+  }
+}
+
+class _InvoiceRow extends StatelessWidget {
+  final PlatformInvoiceModel invoice;
+  const _InvoiceRow({required this.invoice});
+
+  Color get _statusColor => switch (invoice.status) {
+        'paid' => AppColors.greenSuccess,
+        'pending' => AppColors.amberDark,
+        'failed' => AppColors.red,
+        _ => AppColors.gray600, // refunded / partially_refunded
+      };
+
+  String get _statusLabel => switch (invoice.status) {
+        'paid' => 'Paid',
+        'pending' => 'Pending',
+        'failed' => 'Failed',
+        'refunded' => 'Refunded',
+        'partially_refunded' => 'Partial refund',
+        _ => invoice.status,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: invoice.invoiceNumber,
+                  color: AppColors.black2,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                CustomText(
+                  text: _fmtDate(invoice.paidAt ?? invoice.createdAt),
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              CustomText(
+                text: '\$${invoice.amountUSD.toStringAsFixed(2)}',
+                color: AppColors.black2,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w700,
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 2),
+                decoration: BoxDecoration(
+                  color: _statusColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(BaseRadius.pill),
+                ),
+                child: CustomText(
+                  text: _statusLabel,
+                  color: _statusColor,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

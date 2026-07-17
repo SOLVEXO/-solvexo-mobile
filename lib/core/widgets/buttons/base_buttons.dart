@@ -97,14 +97,31 @@ class _BaseButton extends StatelessWidget {
           IconTheme(data: IconThemeData(color: fg, size: 20), child: leadingIcon!),
           SizedBox(width: _ButtonMetrics.iconGap + BaseSpacing.xxs),
         ],
-        CustomText(
-          text: label,
-          color: fg,
-          fontSize: compact ? 13 : 15,
-          fontWeight: FontWeight.w600,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        // Flexible is what lets the ellipsis actually engage — without it a
+        // narrow button (half-width Row slots, loading spinner + long label)
+        // overflows instead of truncating. Only for expanding buttons:
+        // shrink-wrap ones (GhostButton) can sit in unbounded Rows, where a
+        // flex child would throw instead of helping.
+        if (expand)
+          Flexible(
+            child: CustomText(
+              text: label,
+              color: fg,
+              fontSize: compact ? 13 : 15,
+              fontWeight: FontWeight.w600,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          )
+        else
+          CustomText(
+            text: label,
+            color: fg,
+            fontSize: compact ? 13 : 15,
+            fontWeight: FontWeight.w600,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
       ],
     );
 

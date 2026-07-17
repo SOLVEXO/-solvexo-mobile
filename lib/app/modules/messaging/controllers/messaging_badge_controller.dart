@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
+import 'package:book_store_app/app/network/messaging_socket_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:get/get.dart';
 
@@ -8,9 +9,8 @@ import 'package:get/get.dart';
 /// `GetInstance._insert`, which no-ops if already registered) that keeps a
 /// buyer's total unread-message count fresh for the `MainAppBar` badge.
 ///
-/// There is no WebSocket layer in `solvexo-api`'s messaging module, so this
-/// polls periodically instead of pushing — good enough for a badge count
-/// that doesn't need sub-second accuracy.
+/// Primary signal is the `MessagingGateway` socket's `conversation:update`
+/// push; the poll timer stays as a fallback for when the socket is down.
 class MessagingBadgeController extends GetxController {
   final MessagingRepository _repo = MessagingRepository();
 
@@ -19,11 +19,18 @@ class MessagingBadgeController extends GetxController {
   Timer? _timer;
   static const _pollInterval = Duration(seconds: 20);
 
+  final MessagingSocketService _socket = MessagingSocketService.instance;
+  StreamSubscription? _updateSub;
+
   @override
   void onInit() {
     super.onInit();
     refreshUnreadCount();
-    _timer = Timer.periodic(_pollInterval, (_) => refreshUnreadCount());
+    _timer = Timer.periodic(_pollInterval, (_) {
+      if (!_socket.isConnected.value) refreshUnreadCount();
+    });
+    _socket.ensureConnected();
+    _updateSub = _socket.onConversationUpdate.listen((_) => refreshUnreadCount());
   }
 
   Future<void> refreshUnreadCount() async {
@@ -41,6 +48,7 @@ class MessagingBadgeController extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
+    _updateSub?.cancel();
     super.onClose();
   }
 }

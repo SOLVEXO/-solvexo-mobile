@@ -24,17 +24,29 @@ class StoresStatsStrip extends StatelessWidget {
         child: IntrinsicHeight(
           child: Row(
             children: [
-              _StatCell(value: '${controller.stores.length}', label: 'Stores'),
+              _StatCell(value: '${controller.storeCount}', label: 'Stores'),
               _VertLine(),
-              _StatCell(value: '10', label: 'Products'),
+              _StatCell(
+                value: '${controller.totalProducts}',
+                label: 'Products',
+              ),
               _VertLine(),
-              _StatCell(value: '\$222', label: 'Revenue'),
+              _StatCell(
+                value: '\$${_fmtRevenue(controller.totalRevenue)}',
+                label: 'Revenue',
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+/// Compact money label: 999.5 → "999.50", 12,340 → "12.3k".
+String _fmtRevenue(double n) {
+  if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}k';
+  return n == n.roundToDouble() ? n.toStringAsFixed(0) : n.toStringAsFixed(2);
 }
 
 class _StatCell extends StatelessWidget {

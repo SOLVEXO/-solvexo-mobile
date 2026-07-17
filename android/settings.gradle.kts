@@ -23,7 +23,11 @@ plugins {
     // START: FlutterFire Configuration
     id("com.google.gms.google-services") version("4.3.15") apply false
     // END: FlutterFire Configuration
-    id("org.jetbrains.kotlin.android") version "2.1.0" apply false
+    // Bumped from 2.1.0: flutter_stripe's native stripe-android dependency
+    // ships kotlin-stdlib metadata compiled with Kotlin 2.3.x, which an
+    // older Kotlin compiler can't read ("Module was compiled with an
+    // incompatible version of Kotlin").
+    id("org.jetbrains.kotlin.android") version "2.3.10" apply false
 }
 
 include(":app")

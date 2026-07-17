@@ -85,6 +85,31 @@ class ConversationTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      // Buyer with an active priority_support membership —
+                      // the backend already sorts these to the top.
+                      if (conversation.isPriority) ...[
+                        SizedBox(width: BaseSpacing.xxs),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxs + 2, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.amberDark.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(BaseRadius.pill),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.workspace_premium_rounded, size: 11, color: AppColors.amberDark),
+                              SizedBox(width: 2),
+                              const CustomText(
+                                text: 'Priority',
+                                color: AppColors.amberDark,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       SizedBox(width: BaseSpacing.xs),
                       CustomText(
                         text: _relativeTime(conversation.updatedAt),

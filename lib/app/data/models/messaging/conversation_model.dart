@@ -74,6 +74,10 @@ class ConversationModel {
   final int buyerUnread;
   final int sellerUnread;
   final bool isPinned;
+
+  /// Buyer has an active priority_support benefit at this store — the seller
+  /// inbox sorts these first (server-side) and shows a badge.
+  final bool isPriority;
   final bool isArchived;
   final bool isMuted;
   final bool blockedByBuyer;
@@ -91,6 +95,7 @@ class ConversationModel {
     this.buyerUnread = 0,
     this.sellerUnread = 0,
     this.isPinned = false,
+    this.isPriority = false,
     this.isArchived = false,
     this.isMuted = false,
     this.blockedByBuyer = false,
@@ -121,6 +126,7 @@ class ConversationModel {
         buyerUnread: json['buyerUnread'] as int? ?? 0,
         sellerUnread: json['sellerUnread'] as int? ?? 0,
         isPinned: json['isPinned'] as bool? ?? false,
+        isPriority: json['isPriority'] as bool? ?? false,
         isArchived: json['isArchived'] as bool? ?? false,
         isMuted: json['isMuted'] as bool? ?? false,
         blockedByBuyer: json['blockedByBuyer'] as bool? ?? false,

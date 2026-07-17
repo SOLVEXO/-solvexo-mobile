@@ -46,10 +46,16 @@ class WishlistIconCount extends StatelessWidget {
                   top: -6,
                   right: BaseSpacing.xs,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxs, vertical: BaseSpacing.xxs / 2),
-                    constraints: const BoxConstraints(minWidth: 15, minHeight: 15),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: BaseSpacing.xxs,
+                      vertical: BaseSpacing.xxs / 2,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 15,
+                      minHeight: 15,
+                    ),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryColorLight,
+                      color: AppColors.red,
                       borderRadius: BorderRadius.circular(BaseRadius.xxl),
                       boxShadow: BaseShadows.forLevel(BaseElevation.level1),
                     ),

@@ -14,12 +14,11 @@ abstract class Routes {
   static const subCategoryView = '/category/sub_category';
   static const productDetailsView = '/category/product_details';
   static const sellerStorefront = '/store/storefront';
+  static const storesView = '/store/stores';
   static const searchView = '/search';
   static const cartView = '/cart';
   static const checkoutView = '/checkout';
-  static const paymentView = '/payment';
   static const paymentSuccessView = '/payment/payment_success_view';
-  static const authenticationView = '/payment/authentication_view';
   static const profileView = '/profile';
   static const myOrdersView = '/profile/myorders';
   static const orderTrackingView = '/profile/myorders/order_tracking';
@@ -80,9 +79,27 @@ abstract class Routes {
   static const sellerLoyalty = '/seller/loyalty';
   static const sellerSubscriptionPlans = '/seller/subscription-plans';
   static const sellerPlatformPlan = '/seller/platform-plan';
+  static const sellerSeo = '/seller/seo';
+  static const sellerSeoProducts = '/seller/seo/products';
+  static const sellerActivityLog = '/seller/activity-log';
+
+  // Seller — AI Studio (6 seller-only AI tools + credits/history).
+  // `sellerAiStudio` above (already linked from seller-home quick actions) is
+  // the hub route — no separate constant for it here to avoid a duplicate path.
+  static const aiStudioHistory = '/seller/ai-studio/history';
+  static const aiStudioGenerationDetail = '/seller/ai-studio/generation-detail';
+  static const aiStudioListingWriter = '/seller/ai-studio/listing-writer';
+  static const aiStudioSeoBooster = '/seller/ai-studio/seo-booster';
+  static const aiStudioEmailCampaigns = '/seller/ai-studio/email-campaigns';
+  static const aiStudioWorksheetBuilder = '/seller/ai-studio/worksheet-builder';
+  static const aiStudioPriceOptimizer = '/seller/ai-studio/price-optimizer';
+  static const aiStudioImageEnhancer = '/seller/ai-studio/image-enhancer';
 
   // Buyer — loyalty & rewards for a specific store
   static const loyaltyRewards = '/loyalty-rewards';
+
+  // Buyer — store memberships (subscriptions)
+  static const myMemberships = '/my-memberships';
 
   // POS sub-screens
   static const posOrders = '/pos/orders';
@@ -91,6 +108,7 @@ abstract class Routes {
 
   // Seller POS management
   static const sellerPosManagement = '/seller/pos-management';
+  static const sellerPosLocations = '/seller/pos-locations';
 
   // POS entry flow
   static const posPinLogin = '/pos/pin-login';

@@ -62,10 +62,11 @@ class CheckoutView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _deliveryAddress(),
+                if (!controller.isAllDigital) _deliveryAddress(),
                 _voucherSection(size),
                 _orderList(),
-                shippingSection(size),
+                _subscriptionUpsell(),
+                if (!controller.isAllDigital) shippingSection(size),
                 _summary(),
                 SizedBox(height: BaseSpacing.xl),
               ],
@@ -183,9 +184,9 @@ class CheckoutView extends StatelessWidget {
         children: [
           Obx(
             () => CouponCodeListTile(
-              isSubtitle: controller.voucherApplied.value,
-              subTitle: "Get \$5.00 discount off",
-              title: controller.voucherApplied.value ? "GETFIVE" : "Use Voucher",
+              isSubtitle: controller.hasCouponApplied,
+              subTitle: "You saved \$${controller.couponDiscountUSD.value.toStringAsFixed(2)} — tap to remove",
+              title: controller.hasCouponApplied ? controller.appliedCouponCode.value : "Use Voucher",
               onTap: () => controller.useVoucher(size),
             ),
           ),
@@ -230,14 +231,34 @@ class CheckoutView extends StatelessWidget {
                           fontSize: AppFontSize.extraSmall,
                         ),
                         _ProductTypeBadge(type: item.productType),
+                        if (item.hasMemberDiscount) const _MemberPriceBadge(),
                       ],
                     ),
-                    trailing: CustomText(
-                      text: "\$${(item.price * item.quantity).toStringAsFixed(2)}",
-                      color: AppColors.black,
-                      fontSize: AppFontSize.extraSmall,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    trailing: item.hasMemberDiscount
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              CustomText(
+                                text: "\$${(item.originalPrice! * item.quantity).toStringAsFixed(2)}",
+                                color: AppColors.gray600,
+                                fontSize: AppFontSize.tiny,
+                                textDecoration: TextDecoration.lineThrough,
+                              ),
+                              CustomText(
+                                text: "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+                                color: AppColors.primaryColor,
+                                fontSize: AppFontSize.extraSmall,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ],
+                          )
+                        : CustomText(
+                            text: "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+                            color: AppColors.black,
+                            fontSize: AppFontSize.extraSmall,
+                            fontWeight: FontWeight.bold,
+                          ),
                   ),
                 ),
               )
@@ -310,6 +331,64 @@ class CheckoutView extends StatelessWidget {
     });
   }
 
+  // ── Subscription upsell ───────────────────────────────────────────────────
+  // Server-computed: shown only for stores in this cart the buyer is NOT
+  // subscribed to whose plan would have saved money on this exact order.
+
+  Widget _subscriptionUpsell() {
+    return Obx(() {
+      if (controller.savingsHints.isEmpty) return const SizedBox.shrink();
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md),
+        child: Column(
+          spacing: BaseSpacing.xs,
+          children: controller.savingsHints
+              .map(
+                (hint) => GestureDetector(
+                  onTap: () => controller.openStoreFromHint(hint),
+                  child: Container(
+                    padding: EdgeInsets.all(BaseSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(BaseRadius.md),
+                      border: Border.all(color: AppColors.primaryColor.withOpacity(0.25)),
+                    ),
+                    child: Row(
+                      spacing: BaseSpacing.xs + 2,
+                      children: [
+                        const Icon(Icons.workspace_premium_outlined, color: AppColors.primaryColor, size: 22),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CustomText(
+                                text:
+                                    "Save \$${hint.potentialSavingsUSD.toStringAsFixed(2)} on this order",
+                                color: AppColors.black2,
+                                fontSize: AppFontSize.verySmall,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              CustomText(
+                                text: "Join ${hint.storeName}'s ${hint.planName} plan for member pricing",
+                                color: AppColors.gray600,
+                                fontSize: AppFontSize.tiny,
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (hint.storeSlug.isNotEmpty)
+                          const Icon(Icons.chevron_right_rounded, color: AppColors.primaryColor, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+      );
+    });
+  }
+
   // ── Summary ───────────────────────────────────────────────────────────────
 
   Widget _summary() {
@@ -319,11 +398,35 @@ class CheckoutView extends StatelessWidget {
         () => Column(
           children: [
             _summaryRow("Subtotal (${controller.totalItems} items)", controller.subtotal.toStringAsFixed(2)),
-            _summaryRow("Shipping Cost", controller.shippingCost.value.toStringAsFixed(2)),
-            if (controller.voucherApplied.value)
-              _summaryRow("Discount (GETFIVE)", "- ${controller.discount.toStringAsFixed(2)}"),
+            if (!controller.isAllDigital)
+              _summaryRow("Shipping Cost", controller.shippingCost.value.toStringAsFixed(2)),
+            if (controller.hasCouponApplied)
+              _summaryRow(
+                "Discount (${controller.appliedCouponCode.value})",
+                "- ${controller.couponDiscountUSD.value.toStringAsFixed(2)}",
+              ),
             const Divider(),
             _summaryRow("Total", controller.total.toStringAsFixed(2), bold: true, color: AppColors.primaryColor),
+            // Member savings are already baked into the item prices above —
+            // this is a "you saved" note, not another deduction.
+            if (controller.subscriberSavings.value > 0)
+              Padding(
+                padding: EdgeInsets.only(top: BaseSpacing.xs),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: BaseSpacing.xxs,
+                  children: [
+                    const Icon(Icons.workspace_premium_outlined, size: 15, color: AppColors.greenSuccess),
+                    CustomText(
+                      text:
+                          "You saved \$${controller.subscriberSavings.value.toStringAsFixed(2)} with your membership",
+                      color: AppColors.greenSuccess,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ],
+                ),
+              ),
             SizedBox(height: BaseSpacing.xs),
             CustomText(text: "Get reward points 10", color: AppColors.lightGrey, fontSize: AppFontSize.extraSmall),
           ],
@@ -389,6 +492,8 @@ class _BottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final isPlacing = controller.isPlacingOrder.value;
+      final isPaying = paymentController.isProcessing.value;
+      final busy = isPlacing || isPaying;
 
       return Container(
         padding: EdgeInsets.fromLTRB(BaseSpacing.xl, BaseSpacing.sm + 2, BaseSpacing.xl, BaseSpacing.xxl - 8),
@@ -406,21 +511,45 @@ class _BottomBar extends StatelessWidget {
                 child: OutlineButton(
                   label: "Cash on Delivery",
                   isLoading: isPlacing,
-                  onPressed: isPlacing ? null : controller.placeCodOrder,
+                  onPressed: busy ? null : controller.placeCodOrder,
                 ),
               ),
             if (controller.canPayOnline)
               Expanded(
                 child: PrimaryButton(
-                  label: "Pay Online",
-                  icon: const Icon(Icons.lock_outline_rounded),
-                  onPressed: () => paymentController.paymentMethodBottomSheet(size),
+                  label: isPaying ? "Processing..." : "Pay Online",
+                  icon: isPaying ? null : const Icon(Icons.lock_outline_rounded),
+                  isLoading: isPaying,
+                  onPressed: busy ? null : paymentController.payWithStripe,
                 ),
               ),
           ],
         ),
       );
     });
+  }
+}
+
+// ── Member price badge ────────────────────────────────────────────────────────
+
+class _MemberPriceBadge extends StatelessWidget {
+  const _MemberPriceBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxs + 2, vertical: BaseSpacing.xxs / 2),
+      decoration: BoxDecoration(
+        color: AppColors.greenSuccess.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(BaseRadius.xs),
+      ),
+      child: const CustomText(
+        text: 'Member price',
+        color: AppColors.greenSuccess,
+        fontSize: AppFontSize.tiny,
+        fontWeight: FontWeight.w600,
+      ),
+    );
   }
 }
 

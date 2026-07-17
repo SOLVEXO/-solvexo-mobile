@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CartIconWithCount extends StatelessWidget {
-  CartIconWithCount({super.key});
+  final Color? color;
+  final double? size;
+  CartIconWithCount({super.key, this.color, this.size});
   final BottomNavController bottombarcontroller = Get.put(
     BottomNavController(),
   );
@@ -21,7 +23,8 @@ class CartIconWithCount extends StatelessWidget {
           onPressed: () => Get.toNamed(Routes.cartView),
           isPadding: false,
           assetName: AppIcons.cartIcon,
-          size: 22,
+          color: color,
+          size: size,
         ),
         Positioned(
           top: -6,

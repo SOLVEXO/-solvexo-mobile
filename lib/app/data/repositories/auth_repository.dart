@@ -4,10 +4,13 @@ import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
+import 'package:book_store_app/app/network/messaging_socket_service.dart';
+import 'package:book_store_app/app/network/notifications_socket_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 
 class AuthRepository {
   final BaseClient _baseClient = BaseClient();
@@ -16,7 +19,7 @@ class AuthRepository {
   // SOCIAL LOGIN
   // ─────────────────────────────────────────
 
-  Future<Map<String, dynamic>?> socialLogin(SocialLoginModel dto) async {
+  Future<AuthResponseModel?> socialLogin(SocialLoginModel dto) async {
     try {
       debugPrint('🔄 Social login: ${dto.authProvider} - ${dto.email}');
 
@@ -26,8 +29,21 @@ class AuthRepository {
       );
 
       if (response.data['success'] == true) {
+        final auth = AuthResponseModel.fromJson(response.data);
+
+        await AppPreferences.setTokens(
+          accessToken: auth.token.accessToken,
+          refreshToken: auth.token.refreshToken,
+        );
+        await AppPreferences.saveUserData(
+          userId: auth.user.id,
+          name: auth.user.name,
+          email: auth.user.email,
+          role: auth.user.role,
+        );
+
         debugPrint('✅ Social login successful');
-        return response.data;
+        return auth;
       }
 
       return null;
@@ -257,6 +273,14 @@ class AuthRepository {
     } finally {
       // ALWAYS clear local data
       await AppPreferences.clearPreference();
+      // Tear down the realtime messaging socket so the next login doesn't
+      // reuse this user's authenticated connection.
+      if (Get.isRegistered<MessagingSocketService>()) {
+        Get.find<MessagingSocketService>().disconnect();
+      }
+      if (Get.isRegistered<NotificationsSocketService>()) {
+        Get.find<NotificationsSocketService>().disconnect();
+      }
     }
   }
 

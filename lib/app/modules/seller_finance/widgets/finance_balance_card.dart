@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/seller_finance/controllers/seller_finance_controller.dart';
+import 'package:book_store_app/app/modules/seller_finance/widgets/finance_request_payout_sheet.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -100,7 +101,7 @@ class FinanceBalanceCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   CustomText(
                     text:
-                        '\$${controller.availableBalance.value.toStringAsFixed(2)}',
+                        '\$${controller.availableBalance.toStringAsFixed(2)}',
                     fontSize: AppFontSize.large,
                     color: AppColors.white,
                     fontWeight: FontWeight.w800,
@@ -112,25 +113,25 @@ class FinanceBalanceCard extends StatelessWidget {
                         icon: AppIcons.cross,
                         label: 'Pending',
                         value:
-                            '\$${controller.pendingBalance.value.toStringAsFixed(2)}',
+                            '\$${controller.pendingBalance.toStringAsFixed(2)}',
                       ),
                       const SizedBox(width: 10),
                       _MetaChip(
                         icon: AppIcons.calenderIcon,
                         label: 'Next payout',
-                        value: controller.nextPayoutDate.value,
+                        value: controller.nextPayoutDate,
                         valueColor: AppColors.primaryColor,
                       ),
                       const SizedBox(width: 10),
                       _MetaChip(
                         icon: AppIcons.bankIcon,
                         label: 'Method',
-                        value: controller.paymentMethod.value,
+                        value: controller.paymentMethod,
                       ),
                     ],
                   ),
                   const SizedBox(height: 18),
-                  _RequestPayoutButton(),
+                  _RequestPayoutButton(controller: controller),
                 ],
               ),
             ),
@@ -185,12 +186,13 @@ class _MetaChip extends StatelessWidget {
 }
 
 class _RequestPayoutButton extends StatelessWidget {
-  const _RequestPayoutButton();
+  final SellerFinanceController controller;
+  const _RequestPayoutButton({required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => FinanceRequestPayoutSheet.show(context, controller),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 13),

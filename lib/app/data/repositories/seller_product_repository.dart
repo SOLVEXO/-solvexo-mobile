@@ -8,6 +8,39 @@ import 'package:flutter/material.dart';
 class SellerProductRepository {
   final BaseClient _client = BaseClient();
 
+  // ─── GET /api/inventory/low-stock-summary/:storeId ─────────────────────────
+  // Store-wide low-stock alert for the seller dashboard — not paginated,
+  // returns just the items that need restocking attention.
+
+  Future<({int count, List<Map<String, dynamic>> items})> fetchLowStockSummary({
+    required String storeId,
+  }) async {
+    try {
+      final response = await _client.get(
+        ApiConstants.lowStockSummary(storeId),
+        requiresAuth: true,
+      );
+
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        return (
+          count: data['count'] as int? ?? 0,
+          items: (data['items'] as List).cast<Map<String, dynamic>>(),
+        );
+      }
+
+      return (count: 0, items: <Map<String, dynamic>>[]);
+    } on DioException catch (e) {
+      debugPrint('❌ fetchLowStockSummary DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return (count: 0, items: <Map<String, dynamic>>[]);
+    } catch (e) {
+      debugPrint('❌ fetchLowStockSummary error: $e');
+      return (count: 0, items: <Map<String, dynamic>>[]);
+    }
+  }
+
   // ─── GET /api/inventory/getStoreInventory/:storeId ────────────────────────
 
   Future<({List<Map<String, dynamic>> products, int totalProducts, bool hasMore})>

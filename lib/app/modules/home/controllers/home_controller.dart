@@ -1,10 +1,14 @@
 import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/app/data/repositories/banners_repository.dart';
+import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
+import 'package:book_store_app/app/data/repositories/stores_repository.dart';
+import 'package:book_store_app/app/data/models/storefront/store_list_item_model.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
+import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/home/models/banner_model.dart';
 import 'package:book_store_app/app/modules/address/models/address_model.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
@@ -17,6 +21,8 @@ class HomeController extends BaseController {
   final ProductRepository _productRepository = ProductRepository();
   final CategoryRepository _categoryRepository = CategoryRepository();
   final BannersRepository _bannersRepository = BannersRepository();
+  final CartRepository _cartRepository = CartRepository();
+  final StoresRepository _storesRepository = StoresRepository();
 
   // ─── UI State ─────────────────────────────────────────────────────────────
   final RxList<BannerModel> banners = <BannerModel>[].obs;
@@ -42,6 +48,12 @@ class HomeController extends BaseController {
 
   // CategoryModel from getAllCategoryTrees — may have nested children
   final RxList<CategoryModel> categories = <CategoryModel>[].obs;
+
+  // Home's "Top Stores" row — shimmer is gated by the shared `isLoading`
+  // flag (see initializeHome/refreshHome), same as Banner/Products, so every
+  // section's shimmer appears and disappears together instead of each
+  // section flickering independently as its own fetch happens to finish.
+  final RxList<StoreListItemModel> topStores = <StoreListItemModel>[].obs;
 
   // ─── Favourite map ────────────────────────────────────────────────────────
   final RxMap<String, bool> favouriteMap = <String, bool>{}.obs;
@@ -101,6 +113,19 @@ class HomeController extends BaseController {
     }
   }
 
+  // ─── 1b. Top Stores ───────────────────────────────────────────────────────
+
+  Future<void> fetchTopStores() async {
+    try {
+      final result = await _storesRepository.getTopStores(limit: 10);
+      if (result != null) topStores.assignAll(result);
+      debugPrint('✅ Top stores loaded: ${topStores.length}');
+    } catch (e) {
+      debugPrint('❌ Error loading top stores: $e');
+      topStores.clear();
+    }
+  }
+
   // ─── 2. Initialize ────────────────────────────────────────────────────────
 
   Future<void> initializeHome() async {
@@ -109,6 +134,7 @@ class HomeController extends BaseController {
       await fetchCategories();
       await fetchFeaturedProducts();
       await fetchProducts();
+      await fetchTopStores();
     } catch (e) {
       debugPrint('❌ Error initializing home: $e');
     } finally {
@@ -300,6 +326,33 @@ class HomeController extends BaseController {
     }
   }
 
+  /// Quick add-to-cart from a product card (no variant picker available
+  /// there) — always uses the first variant and quantity 1, same fallback
+  /// the wishlist heart already relies on.
+  Future<void> quickAddToCart(ProductModel product) async {
+    if (product.variants.isEmpty) {
+      ToastUtil.showToast('Product is not available');
+      return;
+    }
+    if (!product.inStock) {
+      ToastUtil.showToast('Product is out of stock');
+      return;
+    }
+    final variant = product.variants.first;
+    try {
+      final cart = await _cartRepository.addToCart(
+        productId: product.id,
+        productVariantId: variant.id,
+        quantity: 1,
+      );
+      if (!Get.isRegistered<CartController>()) Get.put(CartController());
+      Get.find<CartController>().addToCartBackend(cart: cart);
+      ToastUtil.showToast('${product.name} added to cart');
+    } catch (e) {
+      ToastUtil.showToast('Failed to add to cart');
+    }
+  }
+
   /// Search — filters the already-loaded list instantly;
   /// fetches fresh results from the server after a tab reset
   void searchProducts(String query) {
@@ -356,7 +409,8 @@ class HomeController extends BaseController {
     categoryController.isLoading.value = true;
 
     try {
-      // Run both refreshes in parallel
+      // Run both refreshes in parallel — initializeHome() already chains
+      // fetchTopStores() internally, so it isn't listed again here.
       await Future.wait([initializeHome(), categoryController.refresh()]);
     } finally {
       // Both will set their own loading to false inside their methods,

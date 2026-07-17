@@ -179,6 +179,14 @@ class _ReportsLinksRow extends StatelessWidget {
           onTap: () => Get.toNamed(Routes.posAuditLog),
         ),
       ),
+      const SizedBox(width: 10),
+      Expanded(
+        child: _LinkChip(
+          icon: Icons.store_mall_directory_outlined,
+          label: 'Locations',
+          onTap: () => Get.toNamed(Routes.sellerPosLocations),
+        ),
+      ),
     ]);
   }
 }

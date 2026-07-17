@@ -1,5 +1,4 @@
 import 'package:book_store_app/app/routes/app_pages.dart';
-import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -32,81 +31,6 @@ class SettingsController extends GetxController {
 
   final RxString name = ''.obs;
   final RxString email = ''.obs;
-
-  List<SettingsSection> get sections => [
-    SettingsSection(
-      header: 'ACCOUNT',
-      tiles: [
-        SettingsTile(
-          icon: AppIcons.editIcon,
-          title: 'Edit Profile',
-          onTap: () => Get.toNamed(Routes.editProfileView),
-        ),
-        SettingsTile(
-          icon: AppIcons.changePassword,
-          title: 'Change Password',
-          onTap: () => Get.toNamed(Routes.CHANGE_PASSWORD),
-        ),
-        SettingsTile(
-          icon: AppIcons.locationIcon,
-          title: 'My Addresses',
-          onTap: () => Get.toNamed(Routes.addressView),
-        ),
-        SettingsTile(
-          icon: AppIcons.ordersIcon,
-          title: 'My Orders',
-          onTap: () => Get.toNamed(Routes.myOrdersView),
-        ),
-      ],
-    ),
-    SettingsSection(
-      header: 'PREFERENCES',
-      tiles: [
-        SettingsTile(
-          icon: AppIcons.notificationIcon,
-          title: 'Notifications',
-          onTap: () {},
-        ),
-        SettingsTile(
-          icon: AppIcons.languageIcon,
-          title: 'Language',
-          trailing: 'English',
-          onTap: () {},
-        ),
-      ],
-    ),
-    SettingsSection(
-      header: 'SUPPORT',
-      tiles: [
-        SettingsTile(
-          icon: AppIcons.privacy,
-          title: 'Privacy Policy',
-          onTap: () => Get.toNamed(Routes.PRIVACY_POLICY),
-        ),
-        SettingsTile(
-          icon: AppIcons.aboutIcon,
-          title: 'About App',
-          onTap: () => Get.toNamed(Routes.ABOUT),
-        ),
-      ],
-    ),
-    SettingsSection(
-      header: 'DANGER ZONE',
-      tiles: [
-        SettingsTile(
-          icon: AppIcons.logoutIcon,
-          title: 'Sign Out',
-          isDanger: true,
-          onTap: signOut,
-        ),
-        SettingsTile(
-          icon: AppIcons.deleteIcon,
-          title: 'Delete Account',
-          isDanger: true,
-        ),
-      ],
-    ),
-  ];
 
   @override
   void onInit() {

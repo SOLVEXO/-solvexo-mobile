@@ -2,6 +2,7 @@ import 'package:book_store_app/app/data/models/rating/review_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -102,15 +103,28 @@ class RatingRepository {
     }
   }
 
+  /// [sort]: newest | oldest | highest_rating | lowest_rating | most_helpful.
+  /// Sends auth when logged in so the backend can fill `helpfulByMe`
+  /// (the route uses an optional-JWT guard, so guests still work).
   Future<({ReviewStats stats, List<ReviewModel> reviews, bool hasMore})> getProductReviews(
     String productId, {
     int page = 1,
     int limit = 10,
+    String? sort,
+    bool? hasMedia,
+    bool? verifiedOnly,
   }) async {
     try {
       final response = await _client.get(
         ApiConstants.productReviews(productId),
-        queryParameters: {'page': page, 'limit': limit},
+        requiresAuth: await AppPreferences.isLoggedIn(),
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+          if (sort != null) 'sort': sort,
+          if (hasMedia == true) 'hasMedia': 'true',
+          if (verifiedOnly == true) 'verifiedOnly': 'true',
+        },
       );
       final data = response.data['data'] as Map<String, dynamic>;
       final pagination = data['pagination'] as Map<String, dynamic>? ?? {};
@@ -130,6 +144,28 @@ class RatingRepository {
     } catch (e) {
       debugPrint('❌ getProductReviews error: $e');
       return (stats: const ReviewStats(), reviews: <ReviewModel>[], hasMore: false);
+    }
+  }
+
+  /// Toggles the caller's "helpful" vote on a review. Returns the new
+  /// `(helpfulCount, helpfulByMe)` from the backend, or null on failure.
+  Future<({int helpfulCount, bool helpfulByMe})?> toggleHelpful(String reviewId) async {
+    try {
+      final response = await _client.post(ApiConstants.reviewHelpful(reviewId));
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>? ?? {};
+        return (
+          helpfulCount: data['helpfulCount'] as int? ?? 0,
+          helpfulByMe: data['helpfulByMe'] as bool? ?? false,
+        );
+      }
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint('❌ toggleHelpful error: $e');
+      return null;
     }
   }
 }

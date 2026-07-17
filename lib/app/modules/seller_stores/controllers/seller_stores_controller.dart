@@ -42,6 +42,8 @@ class SellerStore {
     plan: m.plan,
     sellerType: m.sellerType,
     isActive: m.isActive,
+    productCount: m.productCount,
+    totalSales: m.totalSalesUSD,
   );
 }
 
@@ -60,6 +62,8 @@ class SellerStoresController extends GetxController {
   final RxString userProfileImage = ''.obs;
 
   int get storeCount => stores.length;
+  int get totalProducts => stores.fold(0, (sum, s) => sum + s.productCount);
+  double get totalRevenue => stores.fold(0.0, (sum, s) => sum + s.totalSales);
 
   @override
   void onInit() {

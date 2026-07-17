@@ -1,4 +1,3 @@
-import 'package:book_store_app/app/base_view/base_view_screen.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
@@ -7,6 +6,7 @@ import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/horizontal_product_card.dart';
 import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
+import 'package:book_store_app/app/modules/stores/widgets/store_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
@@ -38,7 +38,10 @@ class SearchView extends StatelessWidget {
               CustomTextField(
                 controller: c.textController,
                 onChanged: c.onSearchChanged,
-                onFieldSubmitted: c.performSearch,
+                onFieldSubmitted: (value) {
+                  c.performSearch(value);
+                  c.performStoreSearch(value);
+                },
                 suffixIcon: c.searchText.isNotEmpty
                     ? SvgIcon(
                         assetName: AppIcons.cross,
@@ -54,43 +57,46 @@ class SearchView extends StatelessWidget {
                 ),
                 hintText: "Search",
               ),
-              // No Results Message
-              Obx(
-                () => c.showResults.value && !c.loading.value && !c.hasResults
-                    ? Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: BaseSpacing.xxl - 2,
-                          horizontal: BaseSpacing.xxl - 2,
+              // No Results Message — tab-aware (products vs stores)
+              Obx(() {
+                final onStoresTab = c.searchTab.value == 1;
+                final isEmpty = onStoresTab ? c.storeResults.isEmpty : !c.hasResults;
+                if (!(c.showResults.value && !c.loading.value && isEmpty)) {
+                  return const SizedBox();
+                }
+                return Container(
+                  padding: EdgeInsets.symmetric(
+                    vertical: BaseSpacing.xxl - 2,
+                    horizontal: BaseSpacing.xxl - 2,
+                  ),
+                  child: Center(
+                    child: Column(
+                      spacing: BaseSpacing.xs,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 80,
+                          color: AppColors.shimmerBase,
                         ),
-                        child: Center(
-                          child: Column(
-                            spacing: BaseSpacing.xs,
-                            children: [
-                              Icon(
-                                Icons.search_off,
-                                size: 80,
-                                color: AppColors.shimmerBase,
-                              ),
-                              CustomText(
-                                text: "No Products Found",
-                                textAlign: TextAlign.center,
-                                color: AppColors.black,
-                                fontSize: AppFontSize.small2,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              CustomText(
-                                text:
-                                    "Try different keywords or check our recommendations",
-                                textAlign: TextAlign.center,
-                                color: AppColors.gray600,
-                                fontSize: AppFontSize.tiny,
-                              ),
-                            ],
-                          ),
+                        CustomText(
+                          text: onStoresTab ? "No Stores Found" : "No Products Found",
+                          textAlign: TextAlign.center,
+                          color: AppColors.black,
+                          fontSize: AppFontSize.small2,
+                          fontWeight: FontWeight.w600,
                         ),
-                      )
-                    : const SizedBox(),
-              ),
+                        CustomText(
+                          text:
+                              "Try different keywords or check our recommendations",
+                          textAlign: TextAlign.center,
+                          color: AppColors.gray600,
+                          fontSize: AppFontSize.tiny,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
 
               // Recent Searches Header
               Obx(
@@ -121,11 +127,21 @@ class SearchView extends StatelessWidget {
 
               SizedBox(height: BaseSpacing.xl),
 
+              // Products / Stores tabs — only once there's something to switch between
+              Obx(
+                () => c.showResults.value && (c.hasResults || c.storeResults.isNotEmpty)
+                    ? _searchTypeTabs()
+                    : const SizedBox(),
+              ),
+
               // Section Header (Products/Last Seen/Recommended)
               Obx(() {
-                if (c.showResults.value && c.hasResults) {
-                  return _sectionHeader("Search Results (${c.resultsCount})");
-                } else if (c.searchText.value.isEmpty) {
+                if (c.showResults.value && (c.hasResults || c.storeResults.isNotEmpty)) {
+                  final count = c.searchTab.value == 1 ? c.storeResults.length : c.resultsCount;
+                  final label = c.searchTab.value == 1 ? 'Stores' : 'Products';
+                  return _sectionHeader("$label ($count)");
+                } else if (c.searchText.value.isEmpty &&
+                    c.lastSeenProducts.isNotEmpty) {
                   return _sectionHeader("Recently Viewed");
                 } else if (c.showSuggestions.value && !c.hasResults) {
                   return _sectionHeader("Recommended Products");
@@ -153,10 +169,20 @@ class SearchView extends StatelessWidget {
     );
   }
 
-  /// Results body with backend products
+  /// Results body — branches on the Products/Stores tab.
   Widget _resultsBody() {
-    return Obx(
-      () => c.loading.value
+    return Obx(() {
+      if (c.searchTab.value == 1) {
+        return ListView.builder(
+          itemCount: c.storeResults.length,
+          itemBuilder: (_, i) => Padding(
+            padding: EdgeInsets.only(bottom: BaseSpacing.sm),
+            child: StoreCard(store: c.storeResults[i]),
+          ),
+        );
+      }
+
+      return c.loading.value
           ? Center(
               child: Padding(
                 padding: EdgeInsets.all(BaseSpacing.xxl + BaseSpacing.xl),
@@ -181,8 +207,48 @@ class SearchView extends StatelessWidget {
                   ),
                 );
               },
-            ),
+            );
+    });
+  }
+
+  /// Products / Stores segmented toggle shown above the results list.
+  Widget _searchTypeTabs() {
+    return Padding(
+      padding: EdgeInsets.only(bottom: BaseSpacing.sm),
+      child: Row(
+        children: [
+          _typeTab(label: 'Products', index: 0),
+          SizedBox(width: BaseSpacing.md),
+          _typeTab(label: 'Stores', index: 1),
+        ],
+      ),
     );
+  }
+
+  Widget _typeTab({required String label, required int index}) {
+    return Obx(() {
+      final selected = c.searchTab.value == index;
+      return GestureDetector(
+        onTap: () => c.switchSearchTab(index),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: BaseSpacing.xxs, horizontal: BaseSpacing.xs),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                width: 2,
+                color: selected ? AppColors.primaryColor : AppColors.background,
+              ),
+            ),
+          ),
+          child: CustomText(
+            text: label,
+            color: selected ? AppColors.primaryColor : AppColors.gray600,
+            fontSize: AppFontSize.extraSmall,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          ),
+        ),
+      );
+    });
   }
 
   /// Recent searches header
@@ -223,6 +289,7 @@ class SearchView extends StatelessWidget {
           onTap: () {
             c.textController.text = item;
             c.performSearch(item);
+            c.performStoreSearch(item);
           },
           child: Padding(
             padding: EdgeInsets.only(bottom: BaseSpacing.lg - 5),
@@ -286,34 +353,10 @@ class SearchView extends StatelessWidget {
     );
   }
 
-  /// Last seen/recently viewed list
+  /// Last seen/recently viewed list — hidden entirely until there is real
+  /// history (no placeholder thumbnails).
   Widget _lastSeenList(double w) {
-    if (c.lastSeenProducts.isEmpty) {
-      // Fallback to dummy images
-      return SizedBox(
-        height: 80,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: c.lastSeenImages.length,
-          separatorBuilder: (_, __) => SizedBox(width: BaseSpacing.sm),
-          itemBuilder: (_, index) {
-            final item = c.lastSeenImages[index];
-            return Container(
-              width: w / 5,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(BaseRadius.md),
-                color: AppColors.shimmerHighlight,
-              ),
-              child: CommonImageView(
-                imagePath: item,
-                fit: BoxFit.cover,
-                radius: BorderRadius.circular(BaseRadius.md),
-              ),
-            );
-          },
-        ),
-      );
-    }
+    if (c.lastSeenProducts.isEmpty) return const SizedBox();
 
     // Real backend products
     return SizedBox(

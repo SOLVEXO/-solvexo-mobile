@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:book_store_app/app/data/repositories/notifications_repository.dart';
 import 'package:book_store_app/app/notification/local_notification_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,6 +13,7 @@ class FcmService {
 
   String? _fcmToken;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  final NotificationsRepository _notificationsRepository = NotificationsRepository();
 
   FcmService._();
 
@@ -49,6 +51,7 @@ class FcmService {
     // if (!Platform.isIOS) {
     _fcmToken = await _firebaseMessaging.getToken();
     debugPrint("FCM token: $_fcmToken");
+    await registerDeviceToken();
     // } else {
     //   debugPrint("⚠️ Skipping FCM token generation on iOS simulator.");
 
@@ -116,6 +119,27 @@ class FcmService {
     log("UnSubscribing to my user ID $userId");
     await _firebaseMessaging.unsubscribeFromTopic(userId.toString());
     log("UnSubscribed $userId");
+    await removeDeviceToken();
+  }
+
+  /// Registers this device's FCM token with the backend device-token registry
+  /// (`api/notifications/device-token`) so push can target this install
+  /// directly instead of relying on topic broadcast. No-ops for guests.
+  Future<void> registerDeviceToken() async {
+    final token = _fcmToken;
+    if (token == null || token.isEmpty) return;
+    if (!await AppPreferences.isLoggedIn()) return;
+
+    final platform = Platform.isIOS ? 'ios' : 'android';
+    await _notificationsRepository.registerDeviceToken(token, platform);
+  }
+
+  /// Call on logout — de-registers this device so a signed-out install stops
+  /// receiving pushes meant for the previous user.
+  Future<void> removeDeviceToken() async {
+    final token = _fcmToken;
+    if (token == null || token.isEmpty) return;
+    await _notificationsRepository.removeDeviceToken(token);
   }
 
   String? get fcmToken => _fcmToken ?? "";

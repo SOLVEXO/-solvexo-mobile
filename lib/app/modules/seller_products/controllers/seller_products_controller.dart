@@ -101,6 +101,9 @@ class SellerProduct {
 
     final String name = json['name'] as String? ?? '';
 
+    // Digital config is nested under `digital` (null for physical products).
+    final digitalJson = json['digital'] as Map<String, dynamic>?;
+
     return SellerProduct(
       id: json['productId'] as String? ?? '',
       sku: json['sku'] as String?,
@@ -109,11 +112,23 @@ class SellerProduct {
       image: json['image'] as String?,
       images: (json['images'] as List?)?.cast<String>() ?? const [],
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      compareAtPrice: (json['compareAtPrice'] as num?)?.toDouble(),
       type: type,
       status: status,
       sold: json['allTimeSales'] as int? ?? 0,
       stock: stock,
       scheduledAt: rawScheduledAt != null ? DateTime.tryParse(rawScheduledAt) : null,
+      description: json['description'] as String?,
+      size: json['size'] as String?,
+      color: json['color'] as String?,
+      shippingWeight: json['shippingWeight'] as String?,
+      tags: (json['tags'] as List?)?.cast<String>() ?? const [],
+      digitalFiles: (digitalJson?['files'] as List?)?.cast<Map<String, dynamic>>() ?? const [],
+      downloadLimit: digitalJson?['downloadLimit'] as String? ?? 'unlimited',
+      linkExpiryDays: digitalJson?['linkExpiryDays'] as int?,
+      pdfStampingEnabled: digitalJson?['pdfStampingEnabled'] as bool? ?? false,
+      licenseType: digitalJson?['licenseType'] as String? ?? 'personal',
+      buyerDeliveryMessage: digitalJson?['buyerDeliveryMessage'] as String?,
     );
   }
 

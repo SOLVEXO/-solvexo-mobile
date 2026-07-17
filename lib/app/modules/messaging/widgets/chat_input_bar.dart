@@ -72,6 +72,7 @@ class ChatInputBar extends StatelessWidget {
                   filled: true,
                   fillColor: AppColors.background,
                   borderRadius: BorderRadius.circular(BaseRadius.xxxl),
+                  onChanged: c.onInputChanged,
                   onFieldSubmitted: (_) => c.sendText(),
                 ),
               ),

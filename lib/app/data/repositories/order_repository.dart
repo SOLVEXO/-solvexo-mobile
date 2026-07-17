@@ -1,7 +1,9 @@
-import 'package:book_store_app/app/modules/checkout/models/order_request_model.dart';
+import 'package:book_store_app/app/data/models/orders/digital_download_file_model.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
+import 'package:book_store_app/app/network/dio_exception_handler.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -38,38 +40,6 @@ class OrderRepository {
     }
   }
 
-  /// Place new order
-  Future<OrderModel?> placeOrder(OrderRequestModel orderData) async {
-    try {
-      // final token = await AppPreferences.getAccessTokenAsync();
-
-      debugPrint('🔄 Placing order...');
-      debugPrint('Order data: ${orderData.toJson()}');
-
-      final response = await _baseClient.post(
-        ApiConstants.orders,
-
-        data: orderData.toJson(),
-      );
-
-      debugPrint('✅ Place Order Response: ${response.data}');
-
-      // ✅ NestJS returns: { success: true, message: "...", data: {...} }
-      if (response.statusCode == 201 && response.data['success'] == true) {
-        final order = OrderModel.fromJson(response.data['data']);
-        debugPrint('✅ Order created: ${order.orderId}');
-        return order;
-      }
-
-      return null;
-    } catch (e) {
-      if (e is DioException) {
-        debugPrint("❌ BACKEND ERROR BODY:");
-        debugPrint("${e.response?.data}");
-      }
-      rethrow;
-    }
-  }
 
   /// Get single order by ID
   Future<OrderModel?> getOrderById(String orderId) async {
@@ -168,6 +138,64 @@ class OrderRepository {
     } catch (e) {
       debugPrint('❌ Update to Paid error: $e');
       rethrow;
+    }
+  }
+
+  // ─── Digital product delivery ──────────────────────────────────────────────
+
+  /// GET /api/orders/download-url — signed, short-lived (10-min) tokens for
+  /// every file in a purchased digital product. Requires the order to be paid.
+  Future<List<DigitalDownloadFile>> getDigitalDownloadLinks({
+    required String orderId,
+    required String productId,
+  }) async {
+    try {
+      final response = await _baseClient.get(
+        ApiConstants.ordersDownloadUrl,
+        queryParameters: {'orderId': orderId, 'productId': productId},
+        requiresAuth: true,
+      );
+
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        return (data['files'] as List? ?? [])
+            .map((e) => DigitalDownloadFile.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to get download link.');
+      return [];
+    } on DioException catch (e) {
+      debugPrint('❌ getDigitalDownloadLinks DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return [];
+    } catch (e) {
+      debugPrint('❌ getDigitalDownloadLinks error: $e');
+      ToastUtil.showToast('Failed to get download link.');
+      return [];
+    }
+  }
+
+  /// Fetches the raw bytes for one token'd file (the `download-file` /
+  /// `stream-pdf-token` endpoints are token-authenticated, not JWT-header
+  /// authenticated — the backend streams the file itself, not JSON).
+  Future<List<int>?> fetchDigitalFileBytes(DigitalDownloadFile file) async {
+    try {
+      final response = await _baseClient.get(
+        '${ApiConstants.baseUrl}${file.endpoint}',
+        queryParameters: {'token': file.token},
+        responseType: ResponseType.bytes,
+      );
+      return response.data as List<int>;
+    } on DioException catch (e) {
+      debugPrint('❌ fetchDigitalFileBytes DioException: ${e.response?.statusCode}');
+      ToastUtil.showToast('Download link expired or invalid. Please try again.');
+      return null;
+    } catch (e) {
+      debugPrint('❌ fetchDigitalFileBytes error: $e');
+      ToastUtil.showToast('Failed to download file.');
+      return null;
     }
   }
 }

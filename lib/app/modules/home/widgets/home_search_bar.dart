@@ -9,41 +9,56 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeSearchBar extends StatelessWidget {
-  const HomeSearchBar({super.key});
+  final Widget? child;
+  const HomeSearchBar({super.key, this.child});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<HomeController>();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
-      child: CustomTextField(
-        isborder: true,
-        fillColor: AppColors.textfldFillColor,
-        controller: controller.searchTextCtrl,
-        onChanged: controller.searchProducts,
-        hintText: 'Search products…',
-        borderBorderradius: AppDimen.borderRadius,
-        borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-        prefixIcon: SvgIcon(
-          assetName: AppIcons.searchIcon,
-          size: 20,
-          color: AppColors.iosGrey,
-        ),
-        suffixIcon: Obx(
-          () => controller.searchQuery.value.isNotEmpty
-              ? GestureDetector(
-                  onTap: controller.clearSearch,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm),
-                    child: const SvgIcon(
-                      assetName: AppIcons.cross,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                )
-              : SizedBox(width: BaseSpacing.sm),
-        ),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
+      padding: const EdgeInsets.fromLTRB(AppDimen.allPadding, 0, 5, 0),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppDimen.allPadding),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomTextField(
+              // isborder: true,
+              isDecoration: false,
+              controller: controller.searchTextCtrl,
+              onChanged: controller.searchProducts,
+              hintText: 'Search products…',
+              borderBorderradius: AppDimen.borderRadius,
+              borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+              prefixIcon: SvgIcon(
+                assetName: AppIcons.searchIcon,
+                size: 20,
+                color: AppColors.iosGrey,
+              ),
+              suffixIcon: Obx(
+                () => controller.searchQuery.value.isNotEmpty
+                    ? GestureDetector(
+                        onTap: controller.clearSearch,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: BaseSpacing.sm,
+                          ),
+                          child: const SvgIcon(
+                            assetName: AppIcons.cross,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      )
+                    : SizedBox(width: BaseSpacing.sm),
+              ),
+            ),
+          ),
+          Container(child: child),
+        ],
       ),
     );
   }

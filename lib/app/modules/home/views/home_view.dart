@@ -14,6 +14,7 @@ import 'package:book_store_app/app/modules/home/widgets/home_search_filter_row.d
 import 'package:book_store_app/app/modules/home/widgets/home_section_header.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_staff_picks.dart';
 import 'package:book_store_app/app/modules/home/widgets/products_grid.dart';
+import 'package:book_store_app/app/modules/home/widgets/top_stores_row.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -63,19 +64,19 @@ class HomeView extends BaseView<HomeController> {
   @override
   Color? get backgroundColor => AppColors.background;
 
-  @override
-  Widget? buildFloatingActionButton(BuildContext context) {
-    return FloatingActionButton(
-      backgroundColor: AppColors.primaryColor,
-      tooltip: 'AI Product Assistant',
-      onPressed: () => Get.toNamed(Routes.CHAT),
-      child: SvgIcon(
-        assetName: AppIcons.assistantIcon,
-        size: 30,
-        color: AppColors.background.withOpacity(0.8),
-      ),
-    );
-  }
+  // @override
+  // Widget? buildFloatingActionButton(BuildContext context) {
+  //   return FloatingActionButton(
+  //     backgroundColor: AppColors.primaryColor,
+  //     tooltip: 'AI Product Assistant',
+  //     onPressed: () => Get.toNamed(Routes.CHAT),
+  //     child: SvgIcon(
+  //       assetName: AppIcons.assistantIcon,
+  //       size: 30,
+  //       color: AppColors.background.withOpacity(0.8),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget buildBody(BuildContext context) {
@@ -118,7 +119,19 @@ class HomeView extends BaseView<HomeController> {
                 // ── Promotional banner ───────────────────────────────
                 isLoading ? BannerShimmer() : BannerCarousel(),
 
-                SizedBox(height: BaseSpacing.lg),
+                // SizedBox(height: BaseSpacing.sm),
+
+                // ── Top Stores ────────────────────────────────────────
+                HomeSectionHeader(
+                  title: 'Top Stores',
+                  viewMore: true,
+                  onViewMore: () => Get.toNamed(Routes.storesView),
+                ),
+
+                // SizedBox(height: BaseSpacing.sm),
+                TopStoresRow(),
+
+                SizedBox(height: BaseSpacing.sm),
 
                 // ── Trending Now ─────────────────────────────────────
                 const HomeSectionHeader(
@@ -126,8 +139,7 @@ class HomeView extends BaseView<HomeController> {
                   viewMore: true,
                 ),
 
-                SizedBox(height: BaseSpacing.sm),
-
+                // SizedBox(height: BaseSpacing.sm),
                 isLoading
                     ? const DynamicShimmer()
                     : _ProductsSection(controller: controller),

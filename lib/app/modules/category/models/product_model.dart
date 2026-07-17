@@ -9,6 +9,7 @@ class ProductVariant {
   final String? size;
   final String? color;
   final double price;
+  final double? compareAtPrice;
   final int? stock; // null = unlimited
   final List<String> images;
   final String status;
@@ -22,6 +23,7 @@ class ProductVariant {
     this.size,
     this.color,
     required this.price,
+    this.compareAtPrice,
     required this.stock,
     required this.images,
     required this.status,
@@ -46,6 +48,7 @@ class ProductVariant {
   bool get isInStock => stock == null || stock! > 0;
   // Large sentinel so qty-cap comparisons work without special-casing nulls
   int get resolvedStock => stock ?? 999999;
+  bool get hasDiscount => compareAtPrice != null && compareAtPrice! > price;
 
   factory ProductVariant.fromJson(Map<String, dynamic> json) {
     return ProductVariant(
@@ -55,6 +58,9 @@ class ProductVariant {
       size: json['size'],
       color: json['color'],
       price: (json['price'] ?? 0).toDouble(),
+      compareAtPrice: json['compareAtPrice'] != null
+          ? (json['compareAtPrice'] as num).toDouble()
+          : null,
       stock: _parseStock(json['stock']),
       images: List<String>.from(json['images'] ?? []),
       status: json['status'] ?? 'active',
@@ -75,6 +81,7 @@ class ProductVariant {
       'size': size,
       'color': color,
       'price': price,
+      'compareAtPrice': compareAtPrice,
       'stock': stock,
       'images': images,
       'status': status,
@@ -219,6 +226,18 @@ class ProductModel {
     if (variants.isEmpty) return 0.0;
     return variants.map((v) => v.price).reduce((a, b) => a < b ? a : b);
   }
+
+  /// The variant that determines the displayed "starting from" price
+  ProductVariant? get _cheapestVariant {
+    if (variants.isEmpty) return null;
+    return variants.reduce((a, b) => a.price < b.price ? a : b);
+  }
+
+  /// Compare-at (original/crossed-out) price of the cheapest variant, if set
+  double? get compareAtPrice => _cheapestVariant?.compareAtPrice;
+
+  /// True when the cheapest variant has a real discount to show
+  bool get hasDiscount => _cheapestVariant?.hasDiscount ?? false;
 
   /// Most expensive variant price
   double get maxPrice {

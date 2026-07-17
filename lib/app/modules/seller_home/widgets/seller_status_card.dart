@@ -129,13 +129,18 @@ class _LiveBadge extends StatelessWidget {
 }
 
 // ── Trend badge ───────────────────────────────────────────────────────────────
+// Hidden entirely when there's no meaningful comparison (yesterday had zero
+// revenue in the same window) — no fake "+0%" placeholder.
 
 class _TrendBadge extends StatelessWidget {
-  final double change;
+  final double? change;
   const _TrendBadge({required this.change});
 
   @override
   Widget build(BuildContext context) {
+    final change = this.change;
+    if (change == null) return const SizedBox.shrink();
+
     final isUp = change >= 0;
     final color = isUp ? AppColors.greenSuccess : AppColors.red;
     return Container(
@@ -168,6 +173,9 @@ class _TrendBadge extends StatelessWidget {
 }
 
 // ── Stats row ─────────────────────────────────────────────────────────────────
+// Only Orders + Avg Order — Visitors/Conv. Rate were removed since the
+// backend has no storefront visit-tracking to compute them from (no fake
+// data per project convention).
 
 class _StatsRow extends StatelessWidget {
   final SellerHomeController controller;
@@ -184,13 +192,6 @@ class _StatsRow extends StatelessWidget {
               _StatCell(
                 label: 'Orders',
                 value: controller.ordersCount.value.toString(),
-              ),
-              _Divider(),
-              _StatCell(label: 'Visitors', value: controller.visitors.value),
-              _Divider(),
-              _StatCell(
-                label: 'Conv. Rate',
-                value: '${controller.conversionRate.value}%',
               ),
               _Divider(),
               _StatCell(

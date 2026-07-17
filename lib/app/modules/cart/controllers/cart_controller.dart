@@ -251,9 +251,24 @@ class CartController extends BaseController {
 
   Future<void> proceedToCheckout() async {
     if (isCheckingOut.value) return;
+
+    // Only the ticked cart lines go to checkout — without this the backend
+    // defaults to checking out the ENTIRE cart.
+    final selected = cartItems
+        .where((item) => item.isSelected)
+        .map((item) => {
+              'productId': item.productId,
+              'variantId': item.productVariantId,
+            })
+        .toList();
+    if (selected.isEmpty) {
+      ToastUtil.showToast('Select at least one item to checkout');
+      return;
+    }
+
     isCheckingOut.value = true;
     try {
-      final result = await _checkoutRepository.createCheckout();
+      final result = await _checkoutRepository.createCheckout(items: selected);
       if (result != null) {
         Get.toNamed(Routes.checkoutView, arguments: result);
       }

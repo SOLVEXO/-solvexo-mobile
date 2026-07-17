@@ -5,6 +5,7 @@ import 'package:book_store_app/app/modules/seller_platform_plans/controllers/sel
 import 'package:book_store_app/app/modules/seller_platform_plans/widgets/platform_plan_widgets.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,7 +24,9 @@ class SellerPlatformPlansView extends GetView<SellerPlatformPlansController> {
           );
         }
 
-        final plan = controller.myPlan.value;
+        final sub = controller.myPlan.value;
+        final entitlements = controller.entitlements.value;
+
         return CustomRefreshWrapper(
           onRefresh: controller.refresh,
           child: ListView(
@@ -34,10 +37,13 @@ class SellerPlatformPlansView extends GetView<SellerPlatformPlansController> {
               BaseSpacing.xxl * 2,
             ),
             children: [
-              if (plan != null) MyPlanCard(plan: plan, controller: controller),
+              if (sub != null) MyPlanCard(sub: sub),
+              if (sub != null) SizedBox(height: BaseSpacing.sm),
+              if (entitlements != null) UsageCard(data: entitlements),
+              if (entitlements != null) SizedBox(height: BaseSpacing.sm),
+              AddonsCard(controller: controller),
               SizedBox(height: BaseSpacing.sm),
-              if (plan != null)
-                PosAddonCard(plan: plan, controller: controller),
+              BillingHistoryCard(controller: controller),
               SizedBox(height: BaseSpacing.lg),
               Row(
                 children: [
@@ -45,6 +51,7 @@ class SellerPlatformPlansView extends GetView<SellerPlatformPlansController> {
                     child: CustomText(
                       text: 'Compare Plans',
                       color: AppColors.black2,
+                      fontSize: AppFontSize.small2,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -52,24 +59,35 @@ class SellerPlatformPlansView extends GetView<SellerPlatformPlansController> {
                 ],
               ),
               SizedBox(height: BaseSpacing.sm),
-              Obx(
-                () => Column(
-                  children: controller.tiers
+              Obx(() {
+                if (controller.plans.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: BaseSpacing.xl),
+                    child: Center(
+                      child: CustomText(
+                        text: 'No plans available right now',
+                        color: AppColors.gray600,
+                        fontSize: AppFontSize.tiny,
+                      ),
+                    ),
+                  );
+                }
+                return Column(
+                  children: controller.plans
                       .map(
-                        (tier) => Padding(
+                        (plan) => Padding(
                           padding: EdgeInsets.only(bottom: BaseSpacing.sm),
-                          child: TierCard(
-                            tier: tier,
-                            isCurrent: controller.isCurrentTier(tier.tier),
-                            isYearly:
-                                controller.billingInterval.value == 'yearly',
+                          child: PlanCard(
+                            plan: plan,
+                            isCurrent: controller.isCurrentPlan(plan),
+                            isYearly: controller.billingInterval.value == 'yearly',
                             controller: controller,
                           ),
                         ),
                       )
                       .toList(),
-                ),
-              ),
+                );
+              }),
             ],
           ),
         );

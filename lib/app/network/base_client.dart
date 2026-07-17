@@ -31,6 +31,7 @@ class BaseClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     bool requiresAuth = true,
+    Map<String, dynamic>? headers,
   }) async {
     final dio = await DioService.getDio();
     debugPrint("POST → $url");
@@ -43,6 +44,7 @@ class BaseClient {
         // FormData: leave null so Dio auto-sets multipart/form-data + boundary.
         // Everything else: explicitly application/json.
         contentType: data is FormData ? null : 'application/json',
+        headers: headers,
         extra: {'requiresAuth': requiresAuth},
       ),
     );
@@ -70,6 +72,7 @@ class BaseClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     bool requiresAuth = true,
+    Map<String, dynamic>? headers,
   }) async {
     final dio = await DioService.getDio();
     debugPrint("PATCH → $url");
@@ -80,6 +83,7 @@ class BaseClient {
       queryParameters: queryParameters,
       options: Options(
         contentType: data is FormData ? null : 'application/json',
+        headers: headers,
         extra: {'requiresAuth': requiresAuth},
       ),
     );

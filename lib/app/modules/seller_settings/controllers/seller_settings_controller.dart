@@ -94,6 +94,11 @@ class SellerSettingsController extends GetxController {
           title: 'POS Management',
           onTap: () => Get.toNamed(Routes.sellerPosManagement),
         ),
+        SettingsTile(
+          emoji: AppIcons.reportIcon,
+          title: 'Activity Log',
+          onTap: () => Get.toNamed(Routes.sellerActivityLog),
+        ),
       ],
     ),
     SettingsSection(
@@ -113,6 +118,16 @@ class SellerSettingsController extends GetxController {
           emoji: AppIcons.cardIcon,
           title: 'Subscription Plans',
           onTap: () => Get.toNamed(Routes.sellerSubscriptionPlans),
+        ),
+        SettingsTile(
+          emoji: AppIcons.aiStudioIcon,
+          title: 'AI Studio',
+          onTap: () => Get.toNamed(Routes.sellerAiStudio),
+        ),
+        SettingsTile(
+          emoji: AppIcons.searchIcon,
+          title: 'SEO',
+          onTap: () => Get.toNamed(Routes.sellerSeo),
         ),
       ],
     ),
@@ -171,15 +186,15 @@ class SellerSettingsController extends GetxController {
       tiles: [
         SettingsTile(
           emoji: AppIcons.logoutIcon,
-          title: 'Sign Out',
+          title: 'Logout',
           isDanger: true,
-          onTap: signOut,
+          onTap: () => Get.offAllNamed(Routes.sellerStores),
         ),
-        SettingsTile(
-          emoji: AppIcons.deleteIcon,
-          title: 'Delete Account',
-          isDanger: true,
-        ),
+        // SettingsTile(
+        //   emoji: AppIcons.deleteIcon,
+        //   title: 'Delete Account',
+        //   isDanger: true,
+        // ),
       ],
     ),
   ];

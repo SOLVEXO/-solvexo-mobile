@@ -126,11 +126,11 @@ class _IconBadge extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: AppColors.primaryColor.withOpacity(0.1),
+            color: AppColors.primaryColor,
             borderRadius: BorderRadius.circular(BaseRadius.md),
           ),
           alignment: Alignment.center,
-          child: SvgIcon(assetName: icon, size: 22, color: AppColors.black2),
+          child: SvgIcon(assetName: icon, size: 25, color: AppColors.white),
         ),
         if (count > 0)
           Positioned(

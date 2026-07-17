@@ -1,9 +1,11 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/components/wishlist_heart_button.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
+import 'package:book_store_app/app/modules/home/widgets/notched_image_box.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
@@ -20,15 +22,15 @@ class ProductCard extends StatelessWidget {
 
   final homeController = Get.find<HomeController>();
 
-  // Was `Get.put(ProductController())` as a field initializer — since a
-  // grid renders many `ProductCard`s, this replaced the app-wide
-  // `ProductController` singleton (which also holds category/pagination
-  // filter state) once per card, every rebuild. `Get.find` reuses the one
-  // instance the relevant binding already created.
   ProductController get productController {
     if (!Get.isRegistered<ProductController>()) Get.put(ProductController());
     return Get.find<ProductController>();
   }
+
+  // Half the add-to-cart button sits below the image box, overlapping into
+  // the text zone — this is how much bottom room the image box must give up.
+  static const double _cartButtonSize = 30;
+  static const double _cartButtonOverlap = _cartButtonSize / 2;
 
   @override
   Widget build(BuildContext context) {
@@ -40,57 +42,75 @@ class ProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(BaseRadius.lg),
           boxShadow: BaseShadows.forLevel(BaseElevation.level1),
         ),
+        padding: EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image — exactly 50% of card height ───────────────────
+            // ── Image box — peach background + terracotta notched border ──────
             Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(BaseRadius.lg)),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: _cartButtonOverlap),
                 child: Stack(
-                  fit: StackFit.expand,
+                  clipBehavior: Clip.none,
                   children: [
-                    product.images.isNotEmpty
-                        ? CommonImageView(
-                            url: product.images.first,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            color: AppColors.languageBg,
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.image_outlined,
-                              color: AppColors.lightGrey7,
-                              size: 40,
-                            ),
-                          ),
-                    // Wishlist heart — top right
+                    Positioned.fill(
+                      child: NotchedImageBox(
+                        heartGap: BaseSpacing.xs,
+                        heartSize: 28,
+                        radius: BaseRadius.lg,
+                        // height/width: double.infinity forces CommonImageView
+                        // to fill the box regardless of the image's own
+                        // aspect ratio — without this it sizes to the image's
+                        // natural dimensions and leaves blank space around it.
+                        child: product.images.isNotEmpty
+                            ? CommonImageView(
+                                url: product.images.first,
+                                fit: BoxFit.cover,
+                                height: double.infinity,
+                                width: double.infinity,
+                              )
+                            : const Icon(
+                                Icons.image_outlined,
+                                color: AppColors.lightGrey7,
+                                size: 40,
+                              ),
+                      ),
+                    ),
+
+                    // Wishlist heart — sitting inside the notch, top right
                     Positioned(
-                      top: BaseSpacing.xs,
+                      top: 0,
+                      right: 0,
+                      child: WishlistHeartButton(
+                        productId: product.id,
+                        variantId: product.variants.isNotEmpty
+                            ? product.variants.first.id
+                            : '',
+                      ),
+                    ),
+
+                    // Add to cart — overlaps the bottom-right corner of the
+                    // image box, same as the reference design's bag button.
+                    Positioned(
+                      bottom: -_cartButtonOverlap,
                       right: BaseSpacing.xs,
-                      child: Obx(
-                        () => GestureDetector(
-                          onTap: () => homeController.addorRemoveWishList(
-                            product.id,
-                            product.variants.isNotEmpty
-                                ? product.variants.first.id
-                                : '',
+                      child: GestureDetector(
+                        onTap: () => homeController.quickAddToCart(product),
+                        child: Container(
+                          width: _cartButtonSize,
+                          height: _cartButtonSize,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor,
+                            shape: BoxShape.circle,
+                            boxShadow: BaseShadows.forLevel(
+                              BaseElevation.level1,
+                            ),
                           ),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: AppColors.white.withOpacity(0.88),
-                              shape: BoxShape.circle,
-                              boxShadow: BaseShadows.forLevel(BaseElevation.level1),
-                            ),
-                            alignment: Alignment.center,
-                            child: SvgIcon(
-                              assetName: homeController.isFavourite(product.id)
-                                  ? AppIcons.heartFill
-                                  : AppIcons.heartIcon,
-                              size: 14,
-                            ),
+                          alignment: Alignment.center,
+                          child: SvgIcon(
+                            assetName: AppIcons.shoppingBag,
+                            size: 14,
+                            color: AppColors.white,
                           ),
                         ),
                       ),
@@ -99,43 +119,60 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // ── Text — exactly 50% of card height ────────────────────
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(BaseSpacing.sm - 1, BaseSpacing.sm - 2, BaseSpacing.sm - 1, BaseSpacing.sm - 2),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Name + seller/rating grouped at the top
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CustomText(
-                          text: product.name,
-                          color: AppColors.black2,
-                          fontSize: AppFontSize.tiny,
-                          fontWeight: FontWeight.w700,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+            // ── Text — sized to content, no forced empty space ─────────
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                BaseSpacing.xs,
+                BaseSpacing.xs,
+                BaseSpacing.xs,
+                BaseSpacing.xxs,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomText(
+                    text: product.name,
+                    color: AppColors.black2,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w700,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: BaseSpacing.xxs),
+                  _SellerRatingRow(product: product),
+                  SizedBox(height: BaseSpacing.xxs),
+                  product.hasDiscount
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            CustomText(
+                              text:
+                                  '\$${product.compareAtPrice!.toStringAsFixed(0)}',
+                              color: AppColors.gray600,
+                              fontSize: AppFontSize.tiny,
+                              fontWeight: FontWeight.w500,
+                              textDecoration: TextDecoration.lineThrough,
+                            ),
+                            SizedBox(width: BaseSpacing.xxs),
+                            CustomText(
+                              text: '\$${product.price.toStringAsFixed(0)}',
+                              color: AppColors.primaryColor,
+                              fontSize: AppFontSize.verySmall,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ],
+                        )
+                      : CustomText(
+                          text: product.hasPriceRange
+                              ? '\$${product.price.toStringAsFixed(0)} – \$${product.maxPrice.toStringAsFixed(0)}'
+                              : '\$${product.price.toStringAsFixed(0)}',
+                          color: AppColors.primaryColor,
+                          fontSize: AppFontSize.verySmall,
+                          fontWeight: FontWeight.w800,
                         ),
-                        SizedBox(height: BaseSpacing.xxs),
-                        _SellerRatingRow(product: product),
-                      ],
-                    ),
-
-                    // Price pinned to bottom of text zone
-                    CustomText(
-                      text: product.hasPriceRange
-                          ? '\$${product.price.toStringAsFixed(0)} – \$${product.maxPrice.toStringAsFixed(0)}'
-                          : '\$${product.price.toStringAsFixed(0)}',
-                      color: AppColors.primaryColor,
-                      fontSize: AppFontSize.verySmall,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ],

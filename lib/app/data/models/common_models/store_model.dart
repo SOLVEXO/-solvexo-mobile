@@ -71,6 +71,10 @@ class StoreModel {
   final List<StoreShift> shifts;
   final String sellerName;
   final String sellerEmail;
+
+  /// Per-store stats attached by GET /api/store/my-stores.
+  final int productCount;
+  final double totalSalesUSD;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -93,6 +97,8 @@ class StoreModel {
     required this.shifts,
     required this.sellerName,
     required this.sellerEmail,
+    this.productCount = 0,
+    this.totalSalesUSD = 0,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -139,6 +145,8 @@ class StoreModel {
             [],
         sellerName: json['sellerName'] as String? ?? '',
         sellerEmail: json['sellerEmail'] as String? ?? '',
+        productCount: json['productCount'] as int? ?? 0,
+        totalSalesUSD: (json['totalSalesUSD'] as num?)?.toDouble() ?? 0,
         createdAt: json['createdAt'] != null
             ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
             : DateTime.now(),

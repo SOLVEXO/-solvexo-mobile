@@ -26,6 +26,40 @@ class SellerAnalyticsRepository {
     };
   }
 
+  /// Seller dashboard's "Today's Revenue" live card — today-so-far vs the
+  /// same elapsed window yesterday. `revenueChangePercent` is null when
+  /// yesterday had no revenue in that window (no meaningful "% change" from
+  /// zero). Deliberately has no visitors/conversion-rate fields — the
+  /// backend has no storefront visit-tracking to compute them from.
+  Future<({double revenue, double? revenueChangePercent, int ordersCount, double avgOrderValue})> getTodaySummary(
+    String storeId,
+  ) async {
+    const empty = (revenue: 0.0, revenueChangePercent: null, ordersCount: 0, avgOrderValue: 0.0);
+    try {
+      final response = await _client.get(
+        ApiConstants.analyticsToday,
+        queryParameters: {'storeId': storeId},
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        return (
+          revenue: (data['revenue'] as num?)?.toDouble() ?? 0.0,
+          revenueChangePercent: (data['revenueChangePercent'] as num?)?.toDouble(),
+          ordersCount: data['ordersCount'] as int? ?? 0,
+          avgOrderValue: (data['avgOrderValue'] as num?)?.toDouble() ?? 0.0,
+        );
+      }
+      return empty;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return empty;
+    } catch (e) {
+      debugPrint('❌ getTodaySummary error: $e');
+      return empty;
+    }
+  }
+
   Future<AnalyticsOverviewModel> getOverview(String storeId, String range, {String? from, String? to}) async {
     try {
       final response = await _client.get(

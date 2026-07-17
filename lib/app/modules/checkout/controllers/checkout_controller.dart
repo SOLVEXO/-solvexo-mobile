@@ -3,13 +3,11 @@ import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/shimmer/trip_shimmer.dart';
-import 'package:book_store_app/app/data/repositories/order_repository.dart';
 import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
 import 'package:book_store_app/app/data/repositories/shipping_repository.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/checkout/models/create_checkout_response.dart';
-import 'package:book_store_app/app/modules/checkout/models/order_request_model.dart';
 import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -32,16 +30,22 @@ class CheckoutController extends GetxController {
   final rewardController = TextEditingController();
   final voucherController = TextEditingController();
   final RxString rewardPointCode = "123".obs;
-  final RxString voucherCode = "456".obs;
 
   /// Address
   RxString address = "".obs;
 
-  /// Voucher & Rewards
-  RxBool voucherApplied = false.obs;
+  /// Reward points — still a local placeholder (not backed by any API yet;
+  /// unrelated to the coupon feature below).
   RxBool rewardPointsUsed = false.obs;
-  static const double voucherDiscount = 5.0;
   static const double rewardPointDiscount = 0.0; // optional for future
+
+  /// Coupon — validated server-side against the seller's real coupon
+  /// records (POST /api/checkout/apply-coupon), scoped to whichever store
+  /// in the cart the code belongs to.
+  final RxString appliedCouponCode = ''.obs;
+  final RxDouble couponDiscountUSD = 0.0.obs;
+  final RxBool isApplyingCoupon = false.obs;
+  bool get hasCouponApplied => appliedCouponCode.value.isNotEmpty;
 
   RxDouble shippingCost = 0.0.obs;
   final RxList<ShippingOption> shippingOptions = <ShippingOption>[].obs;
@@ -53,6 +57,22 @@ class CheckoutController extends GetxController {
   // Allowed payment methods from the create-checkout API response
   final RxList<String> _allowedPaymentMethods = <String>[].obs;
 
+  // ── Subscriber (membership) benefits — all server-computed ────────────────
+  // Total member savings already baked into item prices (display-only).
+  final RxDouble subscriberSavings = 0.0.obs;
+
+  // Upsell hints for stores in this cart the buyer isn't subscribed to.
+  final RxList<SubscriptionSavingsHint> savingsHints = <SubscriptionSavingsHint>[].obs;
+
+  void openStoreFromHint(SubscriptionSavingsHint hint) {
+    if (hint.storeSlug.isEmpty) return;
+    Get.toNamed(Routes.sellerStorefront, arguments: hint.storeSlug);
+  }
+
+  /// Read by [PaymentController] to initiate a Stripe payment for this
+  /// checkout — set once `_loadInitialData()` resolves.
+  String get checkoutId => _checkoutId;
+
   bool get canPayCOD =>
       _allowedPaymentMethods.isEmpty ||
       _allowedPaymentMethods.contains('cash_on_delivery');
@@ -61,7 +81,8 @@ class CheckoutController extends GetxController {
       _allowedPaymentMethods.isEmpty ||
       _allowedPaymentMethods.contains('stripe');
 
-  /// True when every item is digital (kept for fallback display logic).
+  /// True when every item is digital — drives hiding the address/shipping
+  /// sections (backend already excludes shipping for digital-only checkouts).
   bool get isAllDigital =>
       orderItems.isNotEmpty &&
       orderItems.every((item) => item.productType == 'digital');
@@ -83,16 +104,21 @@ class CheckoutController extends GetxController {
       );
       shippingCost.value = response.checkout.shippingFee;
       _allowedPaymentMethods.assignAll(response.allowedPaymentMethods);
+      subscriberSavings.value = response.summary.subscriberSavingsUSD;
+      savingsHints.assignAll(response.subscriptionSavingsHints);
     }
 
-    await fetchShippingZones();
+    // Digital-only carts never ship — skip the zone fetch entirely so
+    // `shippingCost` stays at the backend's `0` rather than being
+    // auto-overridden by the first available physical shipping option.
+    if (!isAllDigital) await fetchShippingZones();
     isLoading.value = false;
   }
 
   @override
   Future<void> refresh() async {
     isLoading.value = true;
-    await fetchShippingZones();
+    if (!isAllDigital) await fetchShippingZones();
     isLoading.value = false;
   }
 
@@ -123,8 +149,6 @@ class CheckoutController extends GetxController {
       isLoadingShipping.value = false;
     }
   }
-
-  final OrderRepository _orderRepository = OrderRepository();
 
   RxBool isPlacingOrder = false.obs;
 
@@ -203,64 +227,18 @@ class CheckoutController extends GetxController {
     isPlacingOrder.value = true;
     try {
       final success = await _checkoutRepository.placeCodOrder(_checkoutId);
-      if (success) {
-        Get.find<CartController>().clearCart();
-        Get.offAllNamed(Routes.paymentSuccessView);
-      }
+      if (success) onPaymentSuccess();
     } finally {
       isPlacingOrder.value = false;
     }
   }
 
-  Future<void> placeOrder() async {
-    try {
-      // final defaultAddr = addressController.defaultAddress;
-
-      isPlacingOrder.value = true;
-
-      final request = OrderRequestModel(
-        orderItems: orderItems.map((e) {
-          return OrderItemRequest(
-            product: e.id!,
-            name: e.name,
-            quantity: e.quantity,
-            price: e.price,
-            image: e.image,
-          );
-        }).toList(),
-        shippingAddress: ShippingAddressRequest(
-          fullName: '',
-          phone: '',
-          addressLine1: '',
-          city: '',
-          state: '',
-          zipCode: '',
-          // fullName: defaultAddr.,
-          // phone: defaultAddr.phoneNumber,
-          // addressLine1: defaultAddr.addressLine1,
-          // addressLine2: defaultAddr.addressLine2,
-          // city: defaultAddr.city,
-          // state: defaultAddr.state,
-          // zipCode: defaultAddr.zipCode,
-
-          // country: defaultAddr.country,
-        ),
-        paymentMethod: "cash_on_delivery",
-        itemsPrice: subtotal,
-        shippingPrice: shippingCost.value,
-        taxPrice: 0,
-        totalPrice: total,
-      );
-
-      await _orderRepository.placeOrder(request);
-
-      Get.find<CartController>().clearCart();
-      Get.offAllNamed(Routes.paymentSuccessView);
-    } catch (e) {
-      ToastUtil.showToast("Failed to place order");
-    } finally {
-      isPlacingOrder.value = false;
-    }
+  /// Shared by COD and Stripe checkout: re-sync the cart from the server
+  /// (only the checked-out lines were removed server-side, so unselected
+  /// lines must stay) and hand off to the success screen.
+  void onPaymentSuccess() {
+    Get.find<CartController>().fetchCart();
+    Get.offAllNamed(Routes.paymentSuccessView);
   }
 
   Future<void> selectShippingOption(ShippingOption option) async {
@@ -291,15 +269,19 @@ class CheckoutController extends GetxController {
     });
   }
 
+  /// Tapping the voucher tile either opens the code-entry sheet (nothing
+  /// applied yet) or removes the currently-applied coupon (tap again to undo).
   void useVoucher(Size size) {
+    if (hasCouponApplied) {
+      removeCouponCode();
+      return;
+    }
     useCouponBottomSheet(
       size,
       voucherController,
       "Enter Coupon code",
       false,
-      () {
-        applyVoucher(size);
-      },
+      applyCouponCode,
     );
   }
 
@@ -314,14 +296,43 @@ class CheckoutController extends GetxController {
     }
   }
 
-  void applyVoucher(Size size) {
-    if (voucherController.text == voucherCode.value) {
-      voucherApplied.value = true;
-      Get.back();
-      voucherController.clear();
-    } else {
-      voucherApplied.value = false;
-      Get.back();
+  /// Validates the typed code against the seller's real coupon records.
+  /// Keeps the sheet open on failure (backend's message is shown via toast)
+  /// so the buyer can correct a typo without reopening it.
+  Future<void> applyCouponCode() async {
+    final code = voucherController.text.trim();
+    if (code.isEmpty || _checkoutId.isEmpty || isApplyingCoupon.value) return;
+
+    isApplyingCoupon.value = true;
+    try {
+      final response = await _checkoutRepository.applyCoupon(checkoutId: _checkoutId, code: code);
+      if (response.success && response.result != null) {
+        appliedCouponCode.value = response.result!.couponCode;
+        couponDiscountUSD.value = response.result!.couponDiscountUSD;
+        shippingCost.value = response.result!.shippingFee;
+        voucherController.clear();
+        Get.back();
+        ToastUtil.showToast('Coupon "${response.result!.couponCode}" applied');
+      } else {
+        ToastUtil.showToast(response.message ?? 'Invalid coupon code');
+      }
+    } finally {
+      isApplyingCoupon.value = false;
+    }
+  }
+
+  Future<void> removeCouponCode() async {
+    if (_checkoutId.isEmpty || isApplyingCoupon.value) return;
+    isApplyingCoupon.value = true;
+    try {
+      final result = await _checkoutRepository.removeCoupon(_checkoutId);
+      if (result != null) {
+        appliedCouponCode.value = '';
+        couponDiscountUSD.value = 0.0;
+        shippingCost.value = result.shippingFee;
+      }
+    } finally {
+      isApplyingCoupon.value = false;
     }
   }
 
@@ -411,14 +422,17 @@ class CheckoutController extends GetxController {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 5,
             children: [
-              CustomText(text: "Reward Points", fontSize: AppFontSize.small2),
+              CustomText(
+                text: isRewardPoint ? "Reward Points" : "Coupon Code",
+                fontSize: AppFontSize.small2,
+              ),
               CustomTextField(
                 controller: controller,
                 isborder: true,
                 borderRadius: BorderRadius.circular(15),
                 filled: true,
                 fillColor: AppColors.background,
-                hintText: "Enter your Coupon code",
+                hintText: isRewardPoint ? "Enter your reward code" : "Enter your coupon code",
               ),
               isRewardPoint
                   ? Row(
@@ -433,7 +447,10 @@ class CheckoutController extends GetxController {
                     )
                   : SizedBox(),
               SizedBox(height: isRewardPoint ? 15 : 30),
-              AppButton(label: "Apply", onPressed: onPressed),
+              Obx(() => AppButton(
+                    label: isApplyingCoupon.value ? "Applying..." : "Apply",
+                    onPressed: isApplyingCoupon.value ? null : onPressed,
+                  )),
             ],
           ),
         ),
@@ -442,11 +459,7 @@ class CheckoutController extends GetxController {
   }
 
   double get discount {
-    double totalDiscount = 0.0;
-
-    if (voucherApplied.value) {
-      totalDiscount += voucherDiscount;
-    }
+    double totalDiscount = couponDiscountUSD.value;
 
     // Future extension
     if (rewardPointsUsed.value) {

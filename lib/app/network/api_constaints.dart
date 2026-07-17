@@ -81,7 +81,8 @@ class ApiConstants {
   static const String getAdresses = "$baseUrl/address/getMyAddresses";
   static const String getDefaultAddress = "$baseUrl/address/getDefaultAddress";
   static const String updateAddress = "$baseUrl/address/update-address";
-  static String deleteAddress(String id) => "$baseUrl/address/delete-address/$id";
+  static String deleteAddress(String id) =>
+      "$baseUrl/address/delete-address/$id";
   static String getAddressById(String id) =>
       "$baseUrl/address/get-address-by-id/$id";
   static String setDefaultAddress(String id) =>
@@ -96,6 +97,11 @@ class ApiConstants {
   static String returnRequest(String orderId) =>
       "$apiPrefix/orders/return-request/$orderId";
 
+  // Digital product delivery — signed, short-lived download tokens.
+  // `endpoint` in each returned file is relative (e.g. "/api/orders/download-file"),
+  // so it's joined with `baseUrl` (not `apiPrefix`, it already includes "/api").
+  static const String ordersDownloadUrl = "$apiPrefix/orders/download-url";
+
   // ============ Rating / Review Endpoints ============
   static const String addReview = "$apiPrefix/rating/add-review";
   static const String myReviews = "$apiPrefix/rating/my-reviews";
@@ -103,12 +109,23 @@ class ApiConstants {
   static String deleteReview(String reviewId) => "$apiPrefix/rating/$reviewId";
   static String productReviews(String productId) =>
       "$apiPrefix/rating/product/$productId";
+  static String reviewHelpful(String reviewId) =>
+      "$apiPrefix/rating/$reviewId/helpful";
   static String storeReviews(String storeId) =>
       "$apiPrefix/rating/store-reviews/$storeId";
   static String replyToReview(String reviewId) =>
       "$apiPrefix/rating/reply/$reviewId";
   static String editReviewReply(String reviewId) =>
       "$apiPrefix/rating/edit-reply/$reviewId";
+
+  // ============ Search Endpoints ============
+  // Keyword product search + per-user recent searches / recently viewed
+  // (`solvexo-api`'s `api/search/*`, SearchController).
+  static const String searchProducts = '$apiPrefix/search/products';
+  static const String recentSearches = '$apiPrefix/search/recent';
+  static String deleteRecentSearch(String searchId) =>
+      '$apiPrefix/search/recent/$searchId';
+  static const String recentlyViewed = '$apiPrefix/search/recently-viewed';
 
   // Cart endpoints
   static const String getCart = '$apiPrefix/cart/get-cart';
@@ -128,7 +145,11 @@ class ApiConstants {
   static const String createCheckout = "$apiPrefix/checkout/create-checkout";
   static const String addShippingInCheckout =
       "$apiPrefix/checkout/addShippingInCheckout";
+  static const String applyCoupon = "$apiPrefix/checkout/apply-coupon";
+  static const String removeCoupon = "$apiPrefix/checkout/remove-coupon";
   static const String codPayment = "$apiPrefix/payment/cod-payment";
+  static const String initiatePayment = "$apiPrefix/payment/initiate-payment";
+  static const String paymentStatus = "$apiPrefix/payment/status";
   static const String getShippingZones = "$apiPrefix/checkout/getShippingZones";
   // ============ Seller / Store Endpoints ============
   static const String createStore = "$apiPrefix/store/create-store";
@@ -148,6 +169,13 @@ class ApiConstants {
   static String storeFollowStatus(String storeId) =>
       "$apiPrefix/store/$storeId/follow-status";
 
+  // ============ Stores Browse / Search Endpoints ============
+  // Buyer-facing store discovery — browse/sort (?page&limit&sort&category&q),
+  // home-row top stores, and keyword search under api/search/* (SearchController).
+  static const String publicStores = '$apiPrefix/store/public';
+  static const String topStores = '$apiPrefix/store/public/top';
+  static const String searchStores = '$apiPrefix/search/stores';
+
   // ============ Seller / Product Endpoints ============
   static const String addPhysicalProduct =
       "$apiPrefix/products/add-physical-product";
@@ -156,6 +184,8 @@ class ApiConstants {
   static const String editProduct = "$apiPrefix/products/edit-product";
   static String getStoreInventory(String storeId) =>
       "$apiPrefix/inventory/getStoreInventory/$storeId";
+  static String lowStockSummary(String storeId) =>
+      "$apiPrefix/inventory/low-stock-summary/$storeId";
   static String sellerOrders(String storeId) =>
       "$apiPrefix/orders/seller-orders/$storeId";
   static String markOrderPaid(String orderId) =>
@@ -242,6 +272,11 @@ class ApiConstants {
   static String posAuditLogs(String storeId) =>
       '$apiPrefix/pos/audit-logs/$storeId';
 
+  // ============ Activity Log Endpoints (store-wide, seller-only) ============
+  static String activityLog(String storeId) => '$apiPrefix/activity-log/$storeId';
+  static String activityLogStats(String storeId) => '$apiPrefix/activity-log/$storeId/stats';
+  static String activityLogExport(String storeId) => '$apiPrefix/activity-log/$storeId/export';
+
   // ============ Messaging Endpoints ============
   static const String startConversation = '$apiPrefix/messaging/conversations';
   static const String conversations = '$apiPrefix/messaging/conversations';
@@ -315,54 +350,157 @@ class ApiConstants {
   static String loyaltyRedeem(String storeId) =>
       '$apiPrefix/loyalty/$storeId/redeem';
 
-  // ============ Subscription Plans Endpoints — seller ============
-  static const String subscriptionPlans = '$apiPrefix/seller/subscription-plans';
-  static String subscriptionPlanById(String id) =>
-      '$apiPrefix/seller/subscription-plans/$id';
-  static const String subscriptionsDashboard =
-      '$apiPrefix/seller/subscriptions/dashboard';
-  static const String subscriptionsList = '$apiPrefix/seller/subscriptions';
-  static String subscriptionById(String id) =>
-      '$apiPrefix/seller/subscriptions/$id';
-  static String subscriptionPause(String id) =>
-      '$apiPrefix/seller/subscriptions/$id/pause';
-  static String subscriptionResume(String id) =>
-      '$apiPrefix/seller/subscriptions/$id/resume';
-  static String subscriptionCancel(String id, {bool atPeriodEnd = false}) =>
-      '$apiPrefix/seller/subscriptions/$id/cancel?atPeriodEnd=$atPeriodEnd';
+  // ============ Subscription Plans Endpoints — seller (store-scoped) ============
+  static String subscriptionPlans(String storeId) =>
+      '$apiPrefix/subscriptions/$storeId/plans';
+  static String subscriptionPlanById(String storeId, String id) =>
+      '$apiPrefix/subscriptions/$storeId/plans/$id';
+  static String subscriptionsDashboard(String storeId) =>
+      '$apiPrefix/subscriptions/$storeId/dashboard';
+  static String subscriptionsList(String storeId) =>
+      '$apiPrefix/subscriptions/$storeId/subscribers';
+  static String subscriptionById(String storeId, String id) =>
+      '$apiPrefix/subscriptions/$storeId/subscribers/$id';
+  static String subscriptionPause(String storeId, String id) =>
+      '$apiPrefix/subscriptions/$storeId/subscribers/$id/pause';
+  static String subscriptionResume(String storeId, String id) =>
+      '$apiPrefix/subscriptions/$storeId/subscribers/$id/resume';
+  static String subscriptionCancel(
+    String storeId,
+    String id, {
+    bool atPeriodEnd = false,
+  }) =>
+      '$apiPrefix/subscriptions/$storeId/subscribers/$id/cancel?atPeriodEnd=$atPeriodEnd';
 
   // ============ Seller Analytics Endpoints ============
   // All GET, storeId/range/from/to passed as query params via BaseClient's
   // `queryParameters` (same convention as coupons/loyalty/subscriptions).
-  static const String analyticsOverview = '$apiPrefix/seller/analytics/overview';
-  static const String analyticsRevenueOverTime = '$apiPrefix/seller/analytics/revenue-over-time';
-  static const String analyticsOrdersOverTime = '$apiPrefix/seller/analytics/orders-over-time';
-  static const String analyticsTrafficSources = '$apiPrefix/seller/analytics/traffic-sources';
-  static const String analyticsTopProducts = '$apiPrefix/seller/analytics/top-products';
-  static const String analyticsCustomers = '$apiPrefix/seller/analytics/customers';
-  static const String analyticsProductPerformance = '$apiPrefix/seller/analytics/products/performance';
-  static const String analyticsInventoryInsights = '$apiPrefix/seller/analytics/inventory-insights';
-  static const String analyticsPaymentMethods = '$apiPrefix/seller/analytics/payment-methods';
-  static const String analyticsRevenueBreakdown = '$apiPrefix/seller/analytics/revenue-breakdown';
+  static const String analyticsToday = '$apiPrefix/seller/analytics/today';
+  static const String analyticsOverview =
+      '$apiPrefix/seller/analytics/overview';
+  static const String analyticsRevenueOverTime =
+      '$apiPrefix/seller/analytics/revenue-over-time';
+  static const String analyticsOrdersOverTime =
+      '$apiPrefix/seller/analytics/orders-over-time';
+  static const String analyticsTrafficSources =
+      '$apiPrefix/seller/analytics/traffic-sources';
+  static const String analyticsTopProducts =
+      '$apiPrefix/seller/analytics/top-products';
+  static const String analyticsCustomers =
+      '$apiPrefix/seller/analytics/customers';
+  static const String analyticsProductPerformance =
+      '$apiPrefix/seller/analytics/products/performance';
+  static const String analyticsInventoryInsights =
+      '$apiPrefix/seller/analytics/inventory-insights';
+  static const String analyticsPaymentMethods =
+      '$apiPrefix/seller/analytics/payment-methods';
+  static const String analyticsRevenueBreakdown =
+      '$apiPrefix/seller/analytics/revenue-breakdown';
   static const String analyticsExport = '$apiPrefix/seller/analytics/export';
 
-  // ============ Platform Subscription Endpoints (seller pays marketplace) ============
-  // Distinct from the seller-sells-to-buyers `seller/subscription*` endpoints
-  // above — this is the seller's OWN platform tier (Starter/Basic/Pro/Enterprise)
-  // plus the separate POS add-on purchase.
-  static const String platformTiers = '$apiPrefix/platform-subscriptions/tiers';
-  static String platformMyPlan(String storeId) =>
-      '$apiPrefix/platform-subscriptions/$storeId/my-plan';
-  static String platformSubscribe(String storeId) =>
-      '$apiPrefix/platform-subscriptions/$storeId/subscribe';
-  static String platformChangeTier(String storeId) =>
-      '$apiPrefix/platform-subscriptions/$storeId/change-tier';
-  static String platformCancel(String storeId, {bool atPeriodEnd = false}) =>
-      '$apiPrefix/platform-subscriptions/$storeId/cancel?atPeriodEnd=$atPeriodEnd';
-  static String platformPosAddonSubscribe(String storeId) =>
-      '$apiPrefix/platform-subscriptions/$storeId/pos-addon/subscribe';
-  static String platformPosAddonCancel(String storeId) =>
-      '$apiPrefix/platform-subscriptions/$storeId/pos-addon/cancel';
+  // ============ Seller Finance & Payouts Endpoints ============
+  // Backed by `src/finance` on the API — note these routes do NOT use the
+  // {success,message,data} envelope other modules use; the JSON body IS the
+  // payload (see SellerFinanceRepository for how responses are parsed).
+  static String financeDashboard(String storeId) =>
+      '$apiPrefix/finance/$storeId/dashboard';
+  static String financeTransactions(String storeId) =>
+      '$apiPrefix/finance/$storeId/transactions';
+  static String financeTransactionsExport(String storeId) =>
+      '$apiPrefix/finance/$storeId/transactions/export';
+  static String financeAnalytics(String storeId) =>
+      '$apiPrefix/finance/$storeId/analytics';
+  static String financePayoutRequest(String storeId) =>
+      '$apiPrefix/finance/$storeId/payouts/request';
+  static String financePayouts(String storeId) =>
+      '$apiPrefix/finance/$storeId/payouts';
+  static String financePayoutById(String storeId, String payoutId) =>
+      '$apiPrefix/finance/$storeId/payouts/$payoutId';
+  static String financePayoutMethods(String storeId) =>
+      '$apiPrefix/finance/$storeId/payout-methods';
+  static String financeSetDefaultPayoutMethod(String storeId, String methodId) =>
+      '$apiPrefix/finance/$storeId/payout-methods/$methodId/default';
+  static String financePayoutMethodById(String storeId, String methodId) =>
+      '$apiPrefix/finance/$storeId/payout-methods/$methodId';
+  static String financePayoutSchedule(String storeId) =>
+      '$apiPrefix/finance/$storeId/payout-schedule';
+  static String financeTaxReportsGenerate(String storeId) =>
+      '$apiPrefix/finance/$storeId/tax-reports/generate';
+  static String financeTaxReports(String storeId) =>
+      '$apiPrefix/finance/$storeId/tax-reports';
+
+  // ============ Platform Plan Endpoints (seller pays marketplace) ============
+  // The DB-managed PlatformPlan system (`src/platform-plans`) — distinct from
+  // the seller-sells-to-buyers `seller/subscription*` endpoints above. Owns
+  // plans, entitlements (usage vs limits), and add-on purchases.
+  static const String platformPlansPublic = '$apiPrefix/platform-plans/public';
+  static const String platformSellerOverview =
+      '$apiPrefix/platform-plans/seller/overview';
+  static String platformStorePlan(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId';
+  static String platformEntitlements(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId/entitlements';
+  static String platformChangePlan(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId/change-plan';
+  static String platformInvoices(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId/invoices';
+  static String platformAddons(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId/addons';
+  static String platformCancelAddon(String storeId, String addonId) =>
+      '$apiPrefix/platform-plans/$storeId/addons/$addonId';
+
+  // ============ AI Studio Endpoints (seller-only) ============
+  // Six AI tools + credits/history — backed by `src/ai-studio` on the API.
+  // Credit top-up reuses platformAddons() above (addonType: extra_ai_credits).
+  static String aiStudioCredits(String storeId) =>
+      '$apiPrefix/ai-studio/$storeId/credits';
+  static String aiStudioGenerations(String storeId) =>
+      '$apiPrefix/ai-studio/$storeId/generations';
+  static String aiStudioGeneration(String storeId, String generationId) =>
+      '$apiPrefix/ai-studio/$storeId/generations/$generationId';
+  static String aiStudioAcceptGeneration(String storeId, String generationId) =>
+      '$apiPrefix/ai-studio/$storeId/generations/$generationId/accept';
+  static String aiStudioListingWriter(String storeId) =>
+      '$apiPrefix/ai-studio/$storeId/listing-writer/generate';
+  static String aiStudioSeoBooster(String storeId) =>
+      '$apiPrefix/ai-studio/$storeId/seo-booster/generate';
+  static String aiStudioEmailCampaigns(String storeId) =>
+      '$apiPrefix/ai-studio/$storeId/email-campaigns/generate';
+  static String aiStudioWorksheetBuilder(String storeId) =>
+      '$apiPrefix/ai-studio/$storeId/worksheet-builder/generate';
+  static String aiStudioPriceOptimizer(String storeId) =>
+      '$apiPrefix/ai-studio/$storeId/price-optimizer/generate';
+  static String aiStudioImageEnhancerGenerate(String storeId) =>
+      '$apiPrefix/ai-studio/$storeId/image-enhancer/generate';
+  static String aiStudioImageEnhancerJob(String storeId, String jobId) =>
+      '$apiPrefix/ai-studio/$storeId/image-enhancer/jobs/$jobId';
+
+  // ============ POS Multi-Location Endpoints (store branches) ============
+  static String posLocations(String storeId) =>
+      '$apiPrefix/pos/locations/$storeId';
+  static String posLocationsOverview(String storeId) =>
+      '$apiPrefix/pos/locations/$storeId/overview';
+  static String posLocationById(String storeId, String locationId) =>
+      '$apiPrefix/pos/locations/$storeId/$locationId';
+
+  // ============ SEO Endpoints (seller-only, store-scoped) ============
+  // Backed by `src/seo` on the API — store/product on-page SEO management.
+  // Distinct from `aiStudioSeoBooster` above (an AI Studio content-generation
+  // tool); this is the SEO dashboard/checklist/meta-editor/audit suite.
+  static String seoDashboard(String storeId) =>
+      '$apiPrefix/store/$storeId/seo/dashboard';
+  static String seoStoreMeta(String storeId) =>
+      '$apiPrefix/store/$storeId/seo/store';
+  static String seoStoreChecklist(String storeId) =>
+      '$apiPrefix/store/$storeId/seo/store/checklist';
+  static String seoProducts(String storeId) =>
+      '$apiPrefix/store/$storeId/seo/products';
+  static String seoProductById(String storeId, String productId) =>
+      '$apiPrefix/store/$storeId/seo/products/$productId';
+  static String seoProductsBulkApplyTemplate(String storeId) =>
+      '$apiPrefix/store/$storeId/seo/products/bulk-apply-template';
+  static String seoProductsExport(String storeId) =>
+      '$apiPrefix/store/$storeId/seo/products/export';
 
   // ============ Query Parameters Helper ============
   // For product filtering and search
@@ -406,4 +544,39 @@ class ApiConstants {
 
     return url;
   }
+
+  // ============ Buyer membership endpoints ============
+  // Buyer side of store memberships (`src/subscriptions`) — browse a store's
+  // public plans, subscribe, and self-manage subscriptions/credits.
+  static String buyerStorePlans(String storeId) =>
+      '$apiPrefix/subscriptions/public/$storeId/plans';
+  static const String buyerMembershipSubscribe =
+      '$apiPrefix/subscriptions/subscribe';
+  static const String buyerMyMemberships = '$apiPrefix/subscriptions/my';
+  static String buyerMyMembershipById(String id) =>
+      '$apiPrefix/subscriptions/my/$id';
+  static String buyerMembershipPause(String id) =>
+      '$apiPrefix/subscriptions/my/$id/pause';
+  static String buyerMembershipResume(String id) =>
+      '$apiPrefix/subscriptions/my/$id/resume';
+  static String buyerMembershipCancel(String id, {bool atPeriodEnd = false}) =>
+      '$apiPrefix/subscriptions/my/$id/cancel?atPeriodEnd=$atPeriodEnd';
+  static String buyerMembershipBenefits(String storeId) =>
+      '$apiPrefix/subscriptions/my/benefits/$storeId';
+  static const String buyerMembershipCredits =
+      '$apiPrefix/subscriptions/my/credits';
+
+  // ============ Notifications Endpoints ============
+  static const String notifications = '$apiPrefix/notifications';
+  static const String notificationsUnreadCount =
+      '$apiPrefix/notifications/unread-count';
+  static const String notificationsReadAll =
+      '$apiPrefix/notifications/read-all';
+  static String notificationMarkRead(String id) =>
+      '$apiPrefix/notifications/$id/read';
+  static String deleteNotification(String id) => '$apiPrefix/notifications/$id';
+  static const String notificationDeviceToken =
+      '$apiPrefix/notifications/device-token';
+  static const String notificationPreferences =
+      '$apiPrefix/notifications/preferences';
 }

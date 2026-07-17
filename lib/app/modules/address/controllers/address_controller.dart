@@ -29,6 +29,7 @@ class AddressController extends GetxController {
   final stateCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
   final zipCtrl = TextEditingController();
+  final countryCtrl = TextEditingController();
 
   AddressModel? _editingAddress;
   bool get isEditMode => _editingAddress != null;
@@ -51,6 +52,7 @@ class AddressController extends GetxController {
     stateCtrl.dispose();
     cityCtrl.dispose();
     zipCtrl.dispose();
+    countryCtrl.dispose();
     super.onClose();
   }
 
@@ -110,6 +112,9 @@ class AddressController extends GetxController {
         city: cityCtrl.text.trim(),
         state: stateCtrl.text.trim(),
         zipCode: zipCtrl.text.trim(),
+        country: countryCtrl.text.trim().isEmpty
+            ? null
+            : countryCtrl.text.trim().toUpperCase(),
         isDefault: makeDefault.value,
       );
 
@@ -164,6 +169,7 @@ class AddressController extends GetxController {
     cityCtrl.text = address.city;
     stateCtrl.text = address.state;
     zipCtrl.text = address.zipCode;
+    countryCtrl.text = address.country ?? '';
     makeDefault.value = address.isDefault;
   }
 
@@ -218,6 +224,7 @@ class AddressController extends GetxController {
     stateCtrl.clear();
     cityCtrl.clear();
     zipCtrl.clear();
+    countryCtrl.clear();
     selectedLabel.value = 'Home';
     makeDefault.value = false;
   }

@@ -28,9 +28,9 @@ class ProfileController extends GetxController {
           onTap: () => Get.toNamed(Routes.myOrdersView),
         ),
         SettingsTile(
-          icon: AppIcons.duePayment,
-          title: 'Payment Methods',
-          onTap: () => Get.toNamed(Routes.paymentView),
+          icon: AppIcons.cardIcon,
+          title: 'My Memberships',
+          onTap: () => Get.toNamed(Routes.myMemberships),
         ),
       ],
     ),
@@ -79,16 +79,16 @@ class ProfileController extends GetxController {
       tiles: [
         SettingsTile(
           icon: AppIcons.logoutIcon,
-          title: 'Sign Out',
+          title: 'Logout',
           isDanger: true,
           onTap: logout,
         ),
-        SettingsTile(
-          icon: AppIcons.deleteIcon,
-          title: 'Delete Account',
-          isDanger: true,
-          onTap: deleteAccount,
-        ),
+        // SettingsTile(
+        //   icon: AppIcons.deleteIcon,
+        //   title: 'Delete Account',
+        //   isDanger: true,
+        //   onTap: deleteAccount,
+        // ),
       ],
     ),
   ];
@@ -97,7 +97,9 @@ class ProfileController extends GetxController {
     final n = user.value?.name ?? '';
     final parts = n.trim().split(' ');
     if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    if (parts.isNotEmpty && parts[0].isNotEmpty) return parts[0][0].toUpperCase();
+    if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0][0].toUpperCase();
+    }
     return 'U';
   }
 
@@ -294,10 +296,7 @@ class ProfileController extends GetxController {
                 selectedImageFile.value != null)
               ListTile(
                 leading: Icon(Icons.delete, color: AppColors.red),
-                title: CustomText(
-                  text: 'Remove Photo',
-                  color: AppColors.red,
-                ),
+                title: CustomText(text: 'Remove Photo', color: AppColors.red),
                 onTap: () {
                   Get.back();
                   removeProfileImage();
@@ -364,8 +363,12 @@ class ProfileController extends GetxController {
         token: token,
         name: nameController.text.trim(),
         email: emailController.text.trim(),
-        phone: phoneController.text.trim().isEmpty ? null : phoneController.text.trim(),
-        address: addressController.text.trim().isEmpty ? null : addressController.text.trim(),
+        phone: phoneController.text.trim().isEmpty
+            ? null
+            : phoneController.text.trim(),
+        address: addressController.text.trim().isEmpty
+            ? null
+            : addressController.text.trim(),
         profileImage: imageUrl ?? user.value?.profileImage,
       );
 
@@ -598,10 +601,14 @@ class ProfileController extends GetxController {
       AlertDialog(
         title: CustomText(text: 'Delete Account'),
         content: CustomText(
-          text: 'Are you sure you want to delete your account? This action cannot be undone.',
+          text:
+              'Are you sure you want to delete your account? This action cannot be undone.',
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: CustomText(text: 'Cancel')),
+          TextButton(
+            onPressed: () => Get.back(),
+            child: CustomText(text: 'Cancel'),
+          ),
           ElevatedButton(
             onPressed: () async {
               Get.back();
@@ -625,9 +632,7 @@ class ProfileController extends GetxController {
         return;
       }
 
-      final success = await _authRepository.deleteAccount(
-        token: token,
-      );
+      final success = await _authRepository.deleteAccount(token: token);
 
       if (success) {
         ToastUtil.showToast('Account deleted successfully');

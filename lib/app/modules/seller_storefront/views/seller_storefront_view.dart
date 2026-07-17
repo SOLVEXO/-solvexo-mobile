@@ -4,6 +4,7 @@ import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:book_store_app/app/modules/seller_storefront/controllers/seller_storefront_controller.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_filter_bar.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_header.dart';
+import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_plans_teaser.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -34,6 +35,11 @@ class SellerStorefrontView extends StatelessWidget {
                 child: StorefrontHeader(store: store, c: c),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 18)),
+              // Hidden entirely (renders nothing) when the store has no
+              // active membership plans.
+              SliverToBoxAdapter(
+                child: StorefrontPlansTeaser(storeId: store.storeId, storeName: store.name),
+              ),
               SliverToBoxAdapter(child: StorefrontFilterBar(c: c)),
               const SliverToBoxAdapter(child: SizedBox(height: 18)),
               SliverToBoxAdapter(child: _SectionHeader(c: c)),

@@ -28,7 +28,7 @@ class NotificationsView extends BaseView<NotificationsController> {
       title: "Notifications",
       actions: [
         Obx(() {
-          final count = controller.unreadCount;
+          final count = controller.unreadCount.value;
           if (count == 0) return const SizedBox.shrink();
           return Padding(
             padding: const EdgeInsets.only(right: AppDimen.allPadding),

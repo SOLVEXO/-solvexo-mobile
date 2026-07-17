@@ -32,6 +32,7 @@ class AddAddressView extends StatelessWidget {
             customLableWithField(controller.stateCtrl, "Select state", "State", true),
             customLableWithField(controller.cityCtrl, "Input city", "City", true),
             customLableWithField(controller.zipCtrl, "Input Zip code", "Zip Code", true),
+            customLableWithField(controller.countryCtrl, "Country code e.g. PK, US", "Country (optional)", false),
             Obx(
               () => CheckboxListTile(
                 value: controller.makeDefault.value,

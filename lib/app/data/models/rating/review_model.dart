@@ -53,6 +53,8 @@ class ReviewModel {
   final bool isVerifiedPurchase;
   final SellerReply? sellerReply;
   final bool isFlagged;
+  final int helpfulCount;
+  final bool helpfulByMe;
   final DateTime? createdAt;
 
   const ReviewModel({
@@ -67,10 +69,29 @@ class ReviewModel {
     this.isVerifiedPurchase = false,
     this.sellerReply,
     this.isFlagged = false,
+    this.helpfulCount = 0,
+    this.helpfulByMe = false,
     this.createdAt,
   });
 
   String get commentText => comments.isNotEmpty ? comments.first.text : '';
+
+  ReviewModel copyWith({int? helpfulCount, bool? helpfulByMe}) => ReviewModel(
+        reviewId: reviewId,
+        productId: productId,
+        product: product,
+        customerName: customerName,
+        isOwn: isOwn,
+        rating: rating,
+        comments: comments,
+        media: media,
+        isVerifiedPurchase: isVerifiedPurchase,
+        sellerReply: sellerReply,
+        isFlagged: isFlagged,
+        helpfulCount: helpfulCount ?? this.helpfulCount,
+        helpfulByMe: helpfulByMe ?? this.helpfulByMe,
+        createdAt: createdAt,
+      );
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) => ReviewModel(
         reviewId: (json['reviewId'] ?? json['_id'] ?? '').toString(),
@@ -88,6 +109,8 @@ class ReviewModel {
         isVerifiedPurchase: json['isVerifiedPurchase'] as bool? ?? false,
         sellerReply: json['sellerReply'] != null ? SellerReply.fromJson(json['sellerReply'] as Map<String, dynamic>) : null,
         isFlagged: json['isFlagged'] as bool? ?? false,
+        helpfulCount: json['helpfulCount'] as int? ?? 0,
+        helpfulByMe: json['helpfulByMe'] as bool? ?? false,
         createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'].toString()) : null,
       );
 }

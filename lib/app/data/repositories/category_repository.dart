@@ -54,9 +54,12 @@ class CategoryRepository {
       }
 
       return [];
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return [];
     } catch (e) {
       debugPrint('❌ Error fetching category trees: $e');
-      rethrow;
+      return [];
     }
   }
 
@@ -80,9 +83,12 @@ class CategoryRepository {
       }
 
       return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
     } catch (e) {
       debugPrint('❌ Error fetching category tree by ID: $e');
-      rethrow;
+      return null;
     }
   }
 
@@ -149,9 +155,12 @@ class CategoryRepository {
       }
 
       return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
     } catch (e) {
       debugPrint('❌ Error fetching category by ID: $e');
-      rethrow;
+      return null;
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:book_store_app/app/components/animated_background_circles.dart';
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/splash_screen/controllers/splash_screen_controller.dart';
@@ -8,6 +9,7 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -56,7 +58,7 @@ class SplashView extends StatelessWidget {
                           height: 100,
                           width: 100,
                           decoration: BoxDecoration(
-                            color: AppColors.white,
+                            color: AppColors.background,
                             borderRadius: BorderRadius.circular(BaseRadius.xxl),
                             boxShadow: [
                               // Base shadow
@@ -76,9 +78,9 @@ class SplashView extends StatelessWidget {
                             ],
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(BaseSpacing.sm),
-                            child: Image.asset(
-                              AppImages.logoImage,
+                            padding: EdgeInsets.all(3),
+                            child: CommonImageView(
+                              imagePath: AppImages.logoImage,
                               fit: BoxFit.contain,
                             ),
                           ),
@@ -104,7 +106,7 @@ class SplashView extends StatelessWidget {
                             text: 'Solvexo',
                             textAlign: TextAlign.center,
                             color: AppColors.white,
-                            fontSize: 30,
+                            fontSize: AppFontSize.large,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 1.5,
                           ),
@@ -117,7 +119,9 @@ class SplashView extends StatelessWidget {
                             height: 1.5,
                             decoration: BoxDecoration(
                               color: AppColors.white.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(BaseRadius.xs),
+                              borderRadius: BorderRadius.circular(
+                                BaseRadius.xs,
+                              ),
                             ),
                           ),
 
@@ -136,7 +140,9 @@ class SplashView extends StatelessWidget {
                                       () => CustomText(
                                         text: controller.currentSlogan,
                                         textAlign: TextAlign.center,
-                                        color: AppColors.white.withOpacity(0.85),
+                                        color: AppColors.white.withOpacity(
+                                          0.85,
+                                        ),
                                         fontSize: 13.5,
                                         fontWeight: FontWeight.w400,
                                         letterSpacing: 0.5,
@@ -157,7 +163,9 @@ class SplashView extends StatelessWidget {
 
                 // ── Bottom logo mark + loading dots ──────────────────────
                 Padding(
-                  padding: EdgeInsets.only(bottom: BaseSpacing.xxl + BaseSpacing.xxs),
+                  padding: EdgeInsets.only(
+                    bottom: BaseSpacing.xxl + BaseSpacing.xxs,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [

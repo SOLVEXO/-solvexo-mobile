@@ -1,9 +1,58 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/data/models/finance/finance_transaction_model.dart';
 import 'package:book_store_app/app/modules/seller_finance/controllers/seller_finance_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+
+extension _TransactionTypeVisuals on FinanceTransactionType {
+  IconData get icon {
+    switch (this) {
+      case FinanceTransactionType.sale:
+        return Icons.arrow_downward_rounded;
+      case FinanceTransactionType.payout:
+        return Icons.arrow_upward_rounded;
+      case FinanceTransactionType.fee:
+        return Icons.percent_rounded;
+      case FinanceTransactionType.refund:
+        return Icons.keyboard_return_rounded;
+      case FinanceTransactionType.adjustment:
+        return Icons.sync_alt_rounded;
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case FinanceTransactionType.sale:
+        return const Color(0xFF16A34A);
+      case FinanceTransactionType.payout:
+        return const Color(0xFF2563EB);
+      case FinanceTransactionType.fee:
+        return const Color(0xFFF59E0B);
+      case FinanceTransactionType.refund:
+        return const Color(0xFFDC2626);
+      case FinanceTransactionType.adjustment:
+        return const Color(0xFF7C3AED);
+    }
+  }
+
+  Color get bgColor {
+    switch (this) {
+      case FinanceTransactionType.sale:
+        return const Color(0xFFDCFCE7);
+      case FinanceTransactionType.payout:
+        return const Color(0xFFDBEAFE);
+      case FinanceTransactionType.fee:
+        return const Color(0xFFFEF3C7);
+      case FinanceTransactionType.refund:
+        return const Color(0xFFFEE2E2);
+      case FinanceTransactionType.adjustment:
+        return const Color(0xFFF3E8FF);
+    }
+  }
+}
 
 class FinanceTransactionList extends StatelessWidget {
   final SellerFinanceController controller;
@@ -21,7 +70,13 @@ class FinanceTransactionList extends StatelessWidget {
           _FilterChips(controller: controller),
           const SizedBox(height: 12),
           Obx(() {
-            final list = controller.filteredTransactions;
+            if (controller.isLoadingTransactions.value) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 30),
+                child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor)),
+              );
+            }
+            final list = controller.transactions;
             if (list.isEmpty) {
               return Container(
                 padding: const EdgeInsets.all(30),
@@ -47,9 +102,31 @@ class FinanceTransactionList extends StatelessWidget {
               );
             }
             return Column(
-              children: List.generate(list.length, (i) {
-                return _TransactionCard(tx: list[i]);
-              }),
+              children: [
+                ...List.generate(list.length, (i) => _TransactionCard(tx: list[i])),
+                if (controller.hasMoreTransactions)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, bottom: 6),
+                    child: controller.isLoadingMoreTransactions.value
+                        ? const Center(
+                            child: SizedBox(
+                              width: 20, height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: controller.loadMoreTransactions,
+                            child: const Center(
+                              child: CustomText(
+                                text: 'Load more',
+                                color: AppColors.primaryColor,
+                                fontSize: AppFontSize.verySmall,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                  ),
+              ],
             );
           }),
         ],
@@ -74,33 +151,38 @@ class _SectionHeader extends StatelessWidget {
             color: AppColors.black2,
           ),
         ),
-        GestureDetector(
-          onTap: () {},
-          child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                  color: AppColors.primaryColor.withOpacity(0.2)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.download_rounded,
-                    size: 13, color: AppColors.primaryColor),
-                SizedBox(width: 5),
-                CustomText(
-                  text: 'Export',
-                  fontSize: AppFontSize.tiny,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryColor,
+        Obx(() => GestureDetector(
+              onTap: controller.isExportingTransactions.value ? null : controller.exportTransactions,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                      color: AppColors.primaryColor.withOpacity(0.2)),
                 ),
-              ],
-            ),
-          ),
-        ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (controller.isExportingTransactions.value)
+                      const SizedBox(
+                        width: 13, height: 13,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                      )
+                    else
+                      const Icon(Icons.download_rounded,
+                          size: 13, color: AppColors.primaryColor),
+                    const SizedBox(width: 5),
+                    const CustomText(
+                      text: 'Export',
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryColor,
+                    ),
+                  ],
+                ),
+              ),
+            )),
       ],
     );
   }
@@ -162,17 +244,8 @@ class _FilterChips extends StatelessWidget {
 }
 
 class _TransactionCard extends StatelessWidget {
-  final FinanceTransaction tx;
+  final FinanceTransactionModel tx;
   const _TransactionCard({required this.tx});
-
-  IconData get _icon {
-    switch (tx.type) {
-      case TransactionType.sale:    return Icons.arrow_downward_rounded;
-      case TransactionType.payout:  return Icons.arrow_upward_rounded;
-      case TransactionType.fee:     return Icons.percent_rounded;
-      case TransactionType.refund:  return Icons.keyboard_return_rounded;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +274,7 @@ class _TransactionCard extends StatelessWidget {
               color: tx.type.bgColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(_icon, size: 18, color: tx.type.color),
+            child: Icon(tx.type.icon, size: 18, color: tx.type.color),
           ),
           const SizedBox(width: 12),
           // Description + date
@@ -223,7 +296,7 @@ class _TransactionCard extends StatelessWidget {
                     _TypePill(type: tx.type),
                     const SizedBox(width: 8),
                     CustomText(
-                      text: tx.date,
+                      text: DateFormat('MMM d').format(tx.createdAt),
                       fontSize: AppFontSize.tiny,
                       color: AppColors.lightGrey5,
                     ),
@@ -241,13 +314,13 @@ class _TransactionCard extends StatelessWidget {
                 text: tx.formattedAmount,
                 fontSize: AppFontSize.small2,
                 fontWeight: FontWeight.w700,
-                color: tx.type.isPositive
+                color: tx.isCredit
                     ? AppColors.darkGreen
                     : const Color(0xFFDC2626),
               ),
               const SizedBox(height: 3),
               CustomText(
-                text: '\$${tx.balance.toStringAsFixed(2)}',
+                text: '\$${tx.balanceAfter.toStringAsFixed(2)}',
                 fontSize: AppFontSize.tiny,
                 color: AppColors.lightGrey5,
               ),
@@ -260,7 +333,7 @@ class _TransactionCard extends StatelessWidget {
 }
 
 class _TypePill extends StatelessWidget {
-  final TransactionType type;
+  final FinanceTransactionType type;
   const _TypePill({required this.type});
 
   @override

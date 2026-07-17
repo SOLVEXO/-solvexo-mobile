@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:book_store_app/app/data/models/storefront/store_list_item_model.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
+import 'package:book_store_app/app/data/repositories/search_repository.dart';
+import 'package:book_store_app/app/data/repositories/stores_repository.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
-import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +11,13 @@ import 'package:get/get.dart';
 
 class SearchBarController extends GetxController {
   final ProductRepository _productRepository = ProductRepository();
+  final SearchRepository _searchRepository = SearchRepository();
+  final StoresRepository _storesRepository = StoresRepository();
   final TextEditingController textController = TextEditingController();
+
+  /// Backend history is used when logged in; guests keep the old
+  /// SharedPreferences behaviour.
+  bool _isLoggedIn = false;
 
   // ─── UI state ──────────────────────────────────────────────────────────────
   final RxString searchText = ''.obs;
@@ -24,6 +32,14 @@ class SearchBarController extends GetxController {
   final RxList<ProductModel> filteredProducts = <ProductModel>[].obs;
   final RxList<ProductModel> suggestions = <ProductModel>[].obs;
 
+  // ─── Stores tab ───────────────────────────────────────────────────────────
+  // 0 = Products, 1 = Stores — both are fetched together on every search so
+  // switching tabs is instant (see performSearch's Future.wait below).
+  final RxInt searchTab = 0.obs;
+  final RxList<StoreListItemModel> storeResults = <StoreListItemModel>[].obs;
+
+  void switchSearchTab(int index) => searchTab.value = index;
+
   // ─── Favourites ───────────────────────────────────────────────────────────
   final RxMap<String, bool> favouriteMap = <String, bool>{}.obs;
 
@@ -34,6 +50,11 @@ class SearchBarController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _init();
+  }
+
+  Future<void> _init() async {
+    _isLoggedIn = await AppPreferences.isLoggedIn();
     loadRecentSearches();
     loadRecentlyViewed();
     loadPopularSearches();
@@ -72,16 +93,18 @@ class SearchBarController extends GetxController {
       );
     }
 
-    // Debounced API call — 400ms feels natural for search
+    // Debounced API call — 400ms feels natural for search. Products and
+    // stores are searched together so switching tabs is instant.
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () {
       performSearch(value);
+      performStoreSearch(value);
     });
   }
 
   // ─── 2. Main search ───────────────────────────────────────────────────────
-  // Uses getProductsByCategory without a categoryId so the backend returns
-  // all products matching the search query (same pattern as HomeController).
+  // Server-side keyword search (`api/search/products`). When logged in the
+  // backend also records the term into the user's search history.
 
   Future<void> performSearch(String query) async {
     final trimmed = query.trim();
@@ -91,26 +114,17 @@ class SearchBarController extends GetxController {
     showResults.value = true;
 
     try {
-      final response = await _productRepository.getProductsByCategory(
-        categoryId: null, // search across all categories
+      final response = await _searchRepository.searchProducts(
+        trimmed,
         page: 1,
         limit: 50,
       );
 
       if (response != null && response.products.isNotEmpty) {
-        // Client-side name/description filter on top of API results
-        final matched = response.products
-            .where(
-              (p) =>
-                  p.name.toLowerCase().contains(trimmed.toLowerCase()) ||
-                  p.description.toLowerCase().contains(trimmed.toLowerCase()),
-            )
-            .toList();
+        final matched = response.products;
 
         filteredProducts.assignAll(matched);
-        allProducts.assignAll(
-          response.products,
-        ); // cache full list for suggestions
+        allProducts.assignAll(matched); // cache for instant suggestions
 
         // Top suggestion is the closest name match
         suggestions.assignAll(
@@ -126,12 +140,10 @@ class SearchBarController extends GetxController {
         addToRecentSearches(trimmed);
 
         debugPrint('🔍 Search "$trimmed" → ${matched.length} results');
-
-        if (matched.isEmpty) {
-          showResults.value = false;
-          ToastUtil.showToast('No products found for "$trimmed"');
-        }
       } else {
+        // A no-hit search is still worth remembering — the backend recorded
+        // it too, so keep local state consistent.
+        addToRecentSearches(trimmed);
         filteredProducts.clear();
         suggestions.clear();
         showResults.value = false;
@@ -148,6 +160,22 @@ class SearchBarController extends GetxController {
     }
   }
 
+  /// Store keyword search (`api/search/stores`) — kept independent of
+  /// [performSearch]'s loading/showResults flags so a slow store search never
+  /// blocks the (usually faster) product results tab.
+  Future<void> performStoreSearch(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return;
+
+    try {
+      final result = await _storesRepository.searchStores(q: trimmed, page: 1, limit: 20);
+      storeResults.assignAll(result.stores);
+    } catch (e) {
+      debugPrint('❌ Store search error: $e');
+      storeResults.clear();
+    }
+  }
+
   // ─── 3. Select a suggestion ───────────────────────────────────────────────
 
   void selectSuggestion(ProductModel product) {
@@ -155,6 +183,7 @@ class SearchBarController extends GetxController {
     searchText.value = product.name;
     showSuggestions.value = false;
     performSearch(product.name);
+    performStoreSearch(product.name);
   }
 
   // ─── 4. Clear ─────────────────────────────────────────────────────────────
@@ -170,6 +199,8 @@ class SearchBarController extends GetxController {
     suggestions.clear();
     showResults.value = false;
     showSuggestions.value = false;
+    storeResults.clear();
+    searchTab.value = 0;
   }
 
   // ─── 5. Filters ───────────────────────────────────────────────────────────
@@ -238,15 +269,30 @@ class SearchBarController extends GetxController {
   void sortResults(String sortBy) => applyFilters(sortBy: sortBy);
 
   // ─── 6. Recent searches ───────────────────────────────────────────────────
+  // Logged in → backend history (`api/search/recent`, synced across devices);
+  // guest → the old SharedPreferences list.
 
   final RxList<String> recentSearches = <String>[].obs;
   final RxBool showAll = false.obs;
+
+  /// Backend id per (lowercased) query — needed for per-entry deletion.
+  final Map<String, String> _searchIdByQuery = {};
 
   List<String> get shownRecentSearches =>
       showAll.value ? recentSearches : recentSearches.take(4).toList();
 
   Future<void> loadRecentSearches() async {
     try {
+      if (_isLoggedIn) {
+        final entries = await _searchRepository.getRecentSearches();
+        if (entries != null) {
+          _searchIdByQuery
+            ..clear()
+            ..addEntries(entries.map((e) => MapEntry(e.query.toLowerCase(), e.searchId)));
+          recentSearches.assignAll(entries.map((e) => e.query));
+        }
+        return;
+      }
       final saved = await AppPreferences.getRecentSearches();
       if (saved != null) recentSearches.assignAll(saved);
     } catch (e) {
@@ -255,6 +301,7 @@ class SearchBarController extends GetxController {
   }
 
   Future<void> _saveRecentSearches() async {
+    if (_isLoggedIn) return; // backend is the source of truth when logged in
     try {
       await AppPreferences.saveRecentSearches(recentSearches);
     } catch (e) {
@@ -265,16 +312,25 @@ class SearchBarController extends GetxController {
   void addToRecentSearches(String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return;
-    recentSearches.remove(trimmed);
+    // Optimistic local update (dedup case-insensitively, same as backend).
+    recentSearches.removeWhere((s) => s.toLowerCase() == trimmed.toLowerCase());
     recentSearches.insert(0, trimmed);
     if (recentSearches.length > 10) {
       recentSearches.removeRange(10, recentSearches.length);
     }
     _saveRecentSearches();
+    // Backend recorded the term during the search itself — re-fetch quietly
+    // so the new entry's id is known for deletion.
+    if (_isLoggedIn) unawaited(loadRecentSearches());
   }
 
   void deleteRecent(String value) {
     recentSearches.remove(value);
+    if (_isLoggedIn) {
+      final id = _searchIdByQuery.remove(value.toLowerCase());
+      if (id != null) unawaited(_searchRepository.deleteRecentSearch(id));
+      return;
+    }
     _saveRecentSearches();
   }
 
@@ -282,40 +338,47 @@ class SearchBarController extends GetxController {
 
   void clearRecentSearches() {
     recentSearches.clear();
+    if (_isLoggedIn) {
+      _searchIdByQuery.clear();
+      unawaited(_searchRepository.clearRecentSearches());
+      return;
+    }
     _saveRecentSearches();
   }
 
   // ─── 7. Recently viewed ───────────────────────────────────────────────────
+  // Logged in → one backend call with fresh product data; guest → re-fetch
+  // each locally-stored id like before.
 
   final RxList<ProductModel> lastSeenProducts = <ProductModel>[].obs;
 
-  /// Fallback images shown before lastSeenProducts loads
-  final List<String> lastSeenImages = List.filled(6, AppImages.sampleProduct);
-
   Future<void> loadRecentlyViewed() async {
     try {
+      if (_isLoggedIn) {
+        final products = await _searchRepository.getRecentlyViewed(limit: 10);
+        if (products != null) lastSeenProducts.assignAll(products);
+        return;
+      }
+
       final ids = await AppPreferences.getRecentlyViewedProductIds();
       if (ids == null || ids.isEmpty) return;
 
+      final products = <ProductModel>[];
       for (final id in ids.take(6)) {
         final product = await _productRepository.getProductById(id);
-        if (product != null) lastSeenProducts.add(product);
+        if (product != null) products.add(product);
       }
+      lastSeenProducts.assignAll(products);
     } catch (e) {
       debugPrint('❌ Error loading recently viewed: $e');
     }
   }
 
+  /// Records locally + on the backend (via SearchRepository) and refreshes
+  /// the strip so the tapped product surfaces immediately.
   Future<void> addToRecentlyViewed(String productId) async {
-    try {
-      final ids = await AppPreferences.getRecentlyViewedProductIds() ?? [];
-      ids.remove(productId);
-      ids.insert(0, productId);
-      if (ids.length > 20) ids.removeRange(20, ids.length);
-      await AppPreferences.saveRecentlyViewedProductIds(ids);
-    } catch (e) {
-      debugPrint('❌ Error saving recently viewed: $e');
-    }
+    await _searchRepository.recordProductView(productId);
+    unawaited(loadRecentlyViewed());
   }
 
   // ─── 8. Popular searches ──────────────────────────────────────────────────

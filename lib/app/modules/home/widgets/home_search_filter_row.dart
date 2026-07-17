@@ -63,30 +63,24 @@ class HomeSearchFilterRow extends StatelessWidget {
     // `HomeSearchBar` already pads itself symmetrically to the screen edge,
     // so only the filter button needs an explicit right inset here — an
     // outer padding on this whole row would double up on the left.
-    return Row(
-      children: [
-        const Expanded(child: HomeSearchBar()),
-        Padding(
-          padding: EdgeInsets.only(right: BaseSpacing.md),
-          child: GestureDetector(
-            onTap: () => _showFilterSheet(context),
-            child: Container(
-              width: 48,
-              height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor,
-                borderRadius: BorderRadius.circular(BaseRadius.md),
-              ),
-              alignment: Alignment.center,
-              child: SvgIcon(
-                assetName: AppIcons.filterIcon,
-                color: AppColors.white,
-                size: 27,
-              ),
-            ),
+    return HomeSearchBar(
+      child: GestureDetector(
+        onTap: () => _showFilterSheet(context),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor,
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: SvgIcon(
+            assetName: AppIcons.filterIcon,
+            color: AppColors.white,
+            size: 27,
           ),
         ),
-      ],
+      ),
     );
   }
 }

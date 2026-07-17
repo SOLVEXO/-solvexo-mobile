@@ -35,7 +35,18 @@ class SubCategoryView extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: CustomFloatingButton(),
       screenName: c.categoryName,
-      actions: [CartIconWithCount(), SizedBox(width: BaseSpacing.xxs + 3), WishlistIconCount()],
+      actions: [
+        Container(
+          padding: EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: AppColors.accentColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: CartIconWithCount(color: AppColors.white, size: 20),
+        ),
+        SizedBox(width: BaseSpacing.xxs + 3),
+        WishlistIconCount(),
+      ],
       child: RefreshIndicator(
         color: AppColors.primaryColor,
         onRefresh: c.refresh,
@@ -59,6 +70,7 @@ class _SubCategoryBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: BaseSpacing.xs + 2),
         // ── Banner ──────────────────────────────────────────────────
         const BannerCarousel(),
 
@@ -124,10 +136,18 @@ class _SectionHeader extends StatelessWidget {
         Container(
           width: 4,
           height: 18,
-          decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.xs)),
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor,
+            borderRadius: BorderRadius.circular(BaseRadius.xs),
+          ),
         ),
         SizedBox(width: BaseSpacing.xs),
-        CustomText(text: title, color: AppColors.textPrimary, fontSize: AppFontSize.small, fontWeight: FontWeight.w700),
+        CustomText(
+          text: title,
+          color: AppColors.textPrimary,
+          fontSize: AppFontSize.small,
+          fontWeight: FontWeight.w700,
+        ),
       ],
     );
   }
@@ -139,7 +159,11 @@ class _ChipData {
   final String? imageUrl;
   final int index;
 
-  const _ChipData({required this.label, required this.imageUrl, required this.index});
+  const _ChipData({
+    required this.label,
+    required this.imageUrl,
+    required this.index,
+  });
 }
 
 class _SubCategoryChips extends StatelessWidget {
@@ -153,8 +177,12 @@ class _SubCategoryChips extends StatelessWidget {
       final items = <_ChipData>[
         _ChipData(label: 'All', imageUrl: null, index: 0),
         ...c.subCategories.asMap().entries.map(
-              (e) => _ChipData(label: e.value.name, imageUrl: e.value.image, index: e.key + 1),
-            ),
+          (e) => _ChipData(
+            label: e.value.name,
+            imageUrl: e.value.image,
+            index: e.key + 1,
+          ),
+        ),
       ];
 
       if (items.length == 1) {
@@ -183,13 +211,23 @@ class _SubCategoryChips extends StatelessWidget {
                     duration: BaseMotion.normal,
                     width: 72,
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primaryColor.withOpacity(0.08) : AppColors.white,
+                      color: isSelected
+                          ? AppColors.primaryColor.withOpacity(0.08)
+                          : AppColors.white,
                       borderRadius: BorderRadius.circular(BaseRadius.lg),
                       border: Border.all(
-                        color: isSelected ? AppColors.primaryColor : AppColors.transparent,
+                        color: isSelected
+                            ? AppColors.primaryColor
+                            : AppColors.transparent,
                         width: 1.5,
                       ),
-                      boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -202,14 +240,27 @@ class _SubCategoryChips extends StatelessWidget {
                             color: isSelected
                                 ? AppColors.primaryColor.withOpacity(0.12)
                                 : AppColors.primaryColor.withOpacity(0.06),
-                            borderRadius: BorderRadius.circular(BaseRadius.md - 1),
+                            borderRadius: BorderRadius.circular(
+                              BaseRadius.md - 1,
+                            ),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(BaseRadius.md - 1),
-                            child: chip.imageUrl != null && chip.imageUrl!.isNotEmpty
-                                ? CommonImageView(url: chip.imageUrl, width: 44, height: 44, fit: BoxFit.cover)
+                            borderRadius: BorderRadius.circular(
+                              BaseRadius.md - 1,
+                            ),
+                            child:
+                                chip.imageUrl != null &&
+                                    chip.imageUrl!.isNotEmpty
+                                ? CommonImageView(
+                                    url: chip.imageUrl,
+                                    width: 44,
+                                    height: 44,
+                                    fit: BoxFit.cover,
+                                  )
                                 : Icon(
-                                    chip.index == 0 ? Icons.grid_view_rounded : Icons.category_rounded,
+                                    chip.index == 0
+                                        ? Icons.grid_view_rounded
+                                        : Icons.category_rounded,
                                     color: AppColors.primaryColor,
                                     size: 26,
                                   ),
@@ -221,7 +272,9 @@ class _SubCategoryChips extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.clip,
                           textAlign: TextAlign.center,
-                          color: isSelected ? AppColors.primaryColor : AppColors.textPrimary,
+                          color: isSelected
+                              ? AppColors.primaryColor
+                              : AppColors.textPrimary,
                           fontSize: AppFontSize.tiny,
                           fontWeight: FontWeight.w600,
                         ),
@@ -268,7 +321,8 @@ class _ProductGrid extends StatelessWidget {
               crossAxisSpacing: 14,
               childAspectRatio: 0.60,
             ),
-            itemBuilder: (_, i) => ProductCard(product: c.products[i], index: i),
+            itemBuilder: (_, i) =>
+                ProductCard(product: c.products[i], index: i),
           ),
 
           // ── Load more button ─────────────────────────────────────
@@ -296,7 +350,10 @@ class _ProductGrid extends StatelessWidget {
         baseColor: AppColors.lightGrey.withOpacity(0.5),
         highlightColor: AppColors.lightGrey.withOpacity(0.9),
         child: Container(
-          decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(BaseRadius.lg)),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(BaseRadius.lg),
+          ),
         ),
       ),
     );
@@ -311,8 +368,15 @@ class _ProductGrid extends StatelessWidget {
             Container(
               width: 72,
               height: 72,
-              decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.08), borderRadius: BorderRadius.circular(BaseRadius.xxl)),
-              child: Icon(Icons.inventory_2_outlined, size: 40, color: AppColors.primaryColor),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(BaseRadius.xxl),
+              ),
+              child: Icon(
+                Icons.inventory_2_outlined,
+                size: 40,
+                color: AppColors.primaryColor,
+              ),
             ),
             SizedBox(height: BaseSpacing.xs + 2),
             CustomText(
@@ -322,7 +386,12 @@ class _ProductGrid extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
             SizedBox(height: BaseSpacing.xxs + 2),
-            CustomText(text: 'Try a different subcategory', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+            CustomText(
+              text: 'Try a different subcategory',
+              color: AppColors.gray600,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
+            ),
           ],
         ),
       ),
@@ -341,7 +410,9 @@ class _LoadMoreButton extends StatelessWidget {
     return Obx(
       () => Semantics(
         button: true,
-        label: c.isLoadingProducts.value ? 'Loading more products' : 'Load more products',
+        label: c.isLoadingProducts.value
+            ? 'Loading more products'
+            : 'Load more products',
         child: GestureDetector(
           onTap: c.isLoadingProducts.value ? null : c.loadMoreProducts,
           child: Container(
@@ -358,7 +429,10 @@ class _LoadMoreButton extends StatelessWidget {
                   ? SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primaryColor,
+                      ),
                     )
                   : CustomText(
                       text: 'Load More',

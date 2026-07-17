@@ -12,14 +12,15 @@ class FinanceStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final growth = controller.revenueChange;
       final stats = [
         _StatItem(
           icon: Icons.trending_up_rounded,
           iconBg: const Color(0xFFDCFCE7),
           iconColor: AppColors.darkGreen,
           label: 'This Month',
-          value: _compact(controller.monthRevenue.value),
-          badge: '+${controller.revenueChange.value.toInt()}%',
+          value: _compact(controller.monthRevenue),
+          badge: '${growth >= 0 ? '+' : ''}${growth.toInt()}%',
           badgeColor: AppColors.darkGreen,
           badgeBg: const Color(0xFFDCFCE7),
         ),
@@ -28,8 +29,8 @@ class FinanceStatsRow extends StatelessWidget {
           iconBg: const Color(0xFFFEF3C7),
           iconColor: const Color(0xFFD97706),
           label: 'Platform Fees',
-          value: _compact(controller.platformFees.value),
-          badge: '8% rate',
+          value: _compact(controller.platformFees),
+          badge: 'This month',
           badgeColor: const Color(0xFFD97706),
           badgeBg: const Color(0xFFFEF3C7),
         ),
@@ -38,7 +39,7 @@ class FinanceStatsRow extends StatelessWidget {
           iconBg: const Color(0xFFDBEAFE),
           iconColor: const Color(0xFF2563EB),
           label: 'Total Paid Out',
-          value: _compact(controller.totalPaidOut.value),
+          value: _compact(controller.totalPaidOut),
           badge: 'All time',
           badgeColor: const Color(0xFF2563EB),
           badgeBg: const Color(0xFFDBEAFE),
@@ -48,8 +49,8 @@ class FinanceStatsRow extends StatelessWidget {
           iconBg: const Color(0xFFFEE2E2),
           iconColor: const Color(0xFFDC2626),
           label: 'Pending Tax',
-          value: _compact(controller.pendingTax.value),
-          badge: 'Q3 est.',
+          value: _compact(controller.pendingTax),
+          badge: 'Est.',
           badgeColor: const Color(0xFFDC2626),
           badgeBg: const Color(0xFFFEE2E2),
         ),

@@ -1,13 +1,21 @@
+import 'dart:typed_data';
+
 import 'package:book_store_app/core/base/base_controller.dart';
+import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/data/models/orders/digital_download_file_model.dart';
 import 'package:book_store_app/app/data/repositories/order_repository.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
+import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart';
 import 'package:book_store_app/app/modules/myorders/models/order_timeline.dart';
 import 'package:book_store_app/app/data/models/enums/enums.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 class MyOrdersController extends BaseController {
   RxInt selectedTab = 0.obs;
@@ -20,6 +28,65 @@ class MyOrdersController extends BaseController {
   @override
   RxBool isLoading = false.obs;
   RxList<OrderModel> orders = <OrderModel>[].obs;
+
+  // ── Digital product delivery ──────────────────────────────────────────────
+  final RxSet<String> downloadingItemIds = <String>{}.obs;
+
+  bool isDownloading(String itemId) => downloadingItemIds.contains(itemId);
+
+  /// Fetches signed download tokens for a purchased digital item, then either
+  /// downloads its single file directly or lets the buyer pick which file
+  /// (when a product bundles more than one).
+  Future<void> downloadDigitalItem(String orderId, OrderItem item) async {
+    if (downloadingItemIds.contains(item.itemId)) return;
+    downloadingItemIds.add(item.itemId);
+    try {
+      final files = await _orderRepository.getDigitalDownloadLinks(
+        orderId: orderId,
+        productId: item.productId,
+      );
+      if (files.isEmpty) return;
+      if (files.length == 1) {
+        await _downloadAndShare(files.first);
+      } else {
+        _pickFileThenDownload(files);
+      }
+    } finally {
+      downloadingItemIds.remove(item.itemId);
+    }
+  }
+
+  void _pickFileThenDownload(List<DigitalDownloadFile> files) {
+    Get.bottomSheet(
+      CustomBottomSheet(
+        title: 'Choose a file',
+        widget: ListView.separated(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          itemCount: files.length,
+          separatorBuilder: (_, __) => const Divider(height: 1),
+          itemBuilder: (_, i) {
+            final f = files[i];
+            return ListTile(
+              leading: const Icon(Icons.insert_drive_file_outlined, color: AppColors.primaryColor),
+              title: CustomText(text: f.fileName, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
+              onTap: () {
+                Get.back();
+                _downloadAndShare(f);
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _downloadAndShare(DigitalDownloadFile file) async {
+    final bytes = await _orderRepository.fetchDigitalFileBytes(file);
+    if (bytes == null) return;
+    final xfile = XFile.fromData(Uint8List.fromList(bytes), name: file.fileName, mimeType: file.mimeType);
+    await SharePlus.instance.share(ShareParams(files: [xfile], subject: file.fileName));
+  }
 
   @override
   void onInit() {

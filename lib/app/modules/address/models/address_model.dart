@@ -11,6 +11,10 @@ class AddressModel {
   final String city;
   final String state;
   final String zipCode;
+
+  /// ISO-3166 alpha-2 country code (e.g. 'US', 'PK') — optional; powers
+  /// revenue-by-country analytics backend-side.
+  final String? country;
   final bool isDefault;
   final String? status;
   final DateTime? createdAt;
@@ -27,6 +31,7 @@ class AddressModel {
     required this.city,
     required this.state,
     required this.zipCode,
+    this.country,
     this.isDefault = false,
     this.status,
     this.createdAt,
@@ -50,6 +55,7 @@ class AddressModel {
       city: (json['city'] as String?) ?? '',
       state: (json['state'] as String?) ?? '',
       zipCode: (json['zipCode'] as String?) ?? '',
+      country: json['country'] as String?,
       isDefault: (json['isDefault'] as bool?) ?? false,
       status: json['status'] as String?,
       createdAt: json['createdAt'] != null
@@ -73,6 +79,7 @@ class AddressModel {
     'city': city,
     'state': state,
     'zipCode': zipCode,
+    if (country != null && country!.isNotEmpty) 'country': country,
     'isDefault': isDefault,
   };
 
@@ -91,6 +98,7 @@ class AddressModel {
       'city': city,
       'state': state,
       'zipCode': zipCode,
+      if (country != null && country!.isNotEmpty) 'country': country,
       'isDefault': isDefault,
     };
   }
@@ -121,6 +129,7 @@ class AddressModel {
     String? city,
     String? state,
     String? zipCode,
+    String? country,
     bool? isDefault,
     String? status,
   }) => AddressModel(
@@ -134,6 +143,7 @@ class AddressModel {
     city: city ?? this.city,
     state: state ?? this.state,
     zipCode: zipCode ?? this.zipCode,
+    country: country ?? this.country,
     isDefault: isDefault ?? this.isDefault,
     status: status ?? this.status,
   );

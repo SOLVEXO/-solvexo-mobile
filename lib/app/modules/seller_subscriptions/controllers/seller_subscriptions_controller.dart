@@ -2,6 +2,8 @@ import 'package:book_store_app/app/data/models/subscriptions/subscriber_model.da
 import 'package:book_store_app/app/data/models/subscriptions/subscription_dashboard_model.dart';
 import 'package:book_store_app/app/data/models/subscriptions/subscription_plan_model.dart';
 import 'package:book_store_app/app/data/repositories/subscription_plans_repository.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 enum SubscriptionsTab { dashboard, plans, subscribers }
@@ -9,6 +11,7 @@ enum SubscriptionsTab { dashboard, plans, subscribers }
 class SellerSubscriptionsController extends GetxController {
   final SubscriptionPlansRepository _repo = SubscriptionPlansRepository();
 
+  String storeId = '';
   final Rx<SubscriptionsTab> tab = SubscriptionsTab.dashboard.obs;
 
   final RxBool isLoadingDashboard = true.obs;
@@ -26,7 +29,17 @@ class SellerSubscriptionsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadDashboard();
+    _init();
+  }
+
+  Future<void> _init() async {
+    storeId = await AppPreferences.getStoreId() ?? '';
+    if (storeId.isEmpty) {
+      debugPrint('⚠️ SellerSubscriptionsController: no storeId in prefs');
+      isLoadingDashboard.value = false;
+      return;
+    }
+    await loadDashboard();
   }
 
   void changeTab(SubscriptionsTab value) {
@@ -45,14 +58,16 @@ class SellerSubscriptionsController extends GetxController {
   }
 
   Future<void> loadDashboard() async {
+    if (storeId.isEmpty) return;
     isLoadingDashboard.value = true;
-    dashboard.value = await _repo.getDashboard();
+    dashboard.value = await _repo.getDashboard(storeId);
     isLoadingDashboard.value = false;
   }
 
   Future<void> loadPlans() async {
+    if (storeId.isEmpty) return;
     isLoadingPlans.value = true;
-    final result = await _repo.listPlans();
+    final result = await _repo.listPlans(storeId);
     plans.assignAll(result);
     _plansLoaded = true;
     isLoadingPlans.value = false;
@@ -68,6 +83,7 @@ class SellerSubscriptionsController extends GetxController {
   }) async {
     isSavingPlan.value = true;
     final created = await _repo.createPlan(
+      storeId,
       name: name,
       description: description,
       monthlyPriceUSD: monthlyPriceUSD,
@@ -95,6 +111,7 @@ class SellerSubscriptionsController extends GetxController {
   }) async {
     isSavingPlan.value = true;
     final updated = await _repo.updatePlan(
+      storeId,
       existing.id,
       name: name,
       description: description,
@@ -114,31 +131,32 @@ class SellerSubscriptionsController extends GetxController {
   }
 
   Future<bool> archivePlan(SubscriptionPlanModel plan, {bool force = false}) async {
-    final ok = await _repo.archivePlan(plan.id, force: force);
+    final ok = await _repo.archivePlan(storeId, plan.id, force: force);
     if (ok) await loadPlans();
     return ok;
   }
 
   Future<void> loadSubscribers() async {
+    if (storeId.isEmpty) return;
     isLoadingSubscribers.value = true;
-    final result = await _repo.listSubscriptions(limit: 100);
+    final result = await _repo.listSubscriptions(storeId, limit: 100);
     subscribers.assignAll(result.subscribers);
     _subscribersLoaded = true;
     isLoadingSubscribers.value = false;
   }
 
   Future<void> pauseSubscriber(SubscriberModel s) async {
-    final ok = await _repo.pauseSubscription(s.id);
+    final ok = await _repo.pauseSubscription(storeId, s.id);
     if (ok) await loadSubscribers();
   }
 
   Future<void> resumeSubscriber(SubscriberModel s) async {
-    final ok = await _repo.resumeSubscription(s.id);
+    final ok = await _repo.resumeSubscription(storeId, s.id);
     if (ok) await loadSubscribers();
   }
 
   Future<void> cancelSubscriber(SubscriberModel s, {bool atPeriodEnd = false}) async {
-    final ok = await _repo.cancelSubscription(s.id, atPeriodEnd: atPeriodEnd);
+    final ok = await _repo.cancelSubscription(storeId, s.id, atPeriodEnd: atPeriodEnd);
     if (ok) await loadSubscribers();
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:book_store_app/app/data/models/messaging/conversation_model.dart';
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
+import 'package:book_store_app/app/network/messaging_socket_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:get/get.dart';
 
@@ -16,6 +17,9 @@ class ConversationsController extends GetxController {
 
   Timer? _pollTimer;
   static const _pollInterval = Duration(seconds: 15);
+
+  final MessagingSocketService _socket = MessagingSocketService.instance;
+  StreamSubscription? _updateSub;
 
   List<ConversationModel> get filteredConversations {
     var result = conversations.toList();
@@ -41,12 +45,19 @@ class ConversationsController extends GetxController {
   void onInit() {
     super.onInit();
     loadConversations();
-    _pollTimer = Timer.periodic(_pollInterval, (_) => loadConversations(silent: true));
+    // Poll only while the realtime socket is down — `conversation:update`
+    // pushes (MessagingGateway) reorder the inbox instantly otherwise.
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (!_socket.isConnected.value) loadConversations(silent: true);
+    });
+    _socket.ensureConnected();
+    _updateSub = _socket.onConversationUpdate.listen((_) => loadConversations(silent: true));
   }
 
   @override
   void onClose() {
     _pollTimer?.cancel();
+    _updateSub?.cancel();
     super.onClose();
   }
 

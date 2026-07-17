@@ -116,13 +116,33 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             SizedBox(width: BaseSpacing.xs + 2),
             Expanded(
-              child: CustomText(
-                text: name,
-                color: AppColors.black2,
-                fontSize: AppFontSize.tiny,
-                fontWeight: FontWeight.w700,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomText(
+                    text: name,
+                    color: AppColors.black2,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w700,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (c.peerIsTyping.value)
+                    CustomText(
+                      text: 'typing…',
+                      color: AppColors.primaryColor,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w500,
+                    )
+                  else if (c.peerIsOnline.value)
+                    CustomText(
+                      text: 'Online',
+                      color: AppColors.green2,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w500,
+                    ),
+                ],
               ),
             ),
           ],

@@ -11,8 +11,13 @@ class CustomLowStockAlert extends StatelessWidget {
   final SellerHomeController controller = Get.find();
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Padding(
+    return Obx(() {
+      final items = controller.lowStockItems;
+      // Nothing to warn about — hide the card entirely rather than showing
+      // "0 items low on stock".
+      if (items.isEmpty) return const SizedBox.shrink();
+
+      return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Container(
           padding: const EdgeInsets.all(14),
@@ -31,15 +36,16 @@ class CustomLowStockAlert extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
-                      text:
-                          '${controller.lowStockItems.length} items low on stock',
+                      text: items.length == 1
+                          ? '1 item low on stock'
+                          : '${items.length} items low on stock',
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: AppColors.amberDark,
                     ),
                     const SizedBox(height: 4),
                     CustomText(
-                      text: controller.lowStockItems.join(', '),
+                      text: items.join(', '),
                       fontSize: 13,
                       color: AppColors.amberDark,
                     ),
@@ -49,7 +55,7 @@ class CustomLowStockAlert extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

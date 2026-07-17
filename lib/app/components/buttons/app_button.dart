@@ -51,12 +51,18 @@ class AppButton extends StatelessWidget {
                     size: isTablet ? 24 : 20,
                   )
                 : const SizedBox()),
+        // No Flexible wrapper here — ElevatedButton.icon's own internal
+        // implementation already wraps icon/label in a Flexible on current
+        // Flutter SDKs; wrapping it again caused a "competing
+        // ParentDataWidgets" crash (two Flexibles claiming the same slot).
         label: CustomText(
           text: label,
           color:
               textColor ?? (isOutlined ? AppColors.accentColor : AppColors.white),
           fontSize: isTablet ? 20 : 16,
           fontWeight: FontWeight.w600,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(45),
