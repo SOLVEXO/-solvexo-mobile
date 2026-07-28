@@ -1,19 +1,15 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
+/// Order summary card used by the Request Refund screen.
 class RecentOrder extends StatelessWidget {
-  final bool isRefundView;
   final OrderModel orders;
   const RecentOrder({
     super.key,
-    this.isRefundView = false,
     required this.orders,
   });
   @override
@@ -84,33 +80,6 @@ class RecentOrder extends StatelessWidget {
             ),
           ],
         ),
-        isRefundView
-            ? SizedBox()
-            : Row(
-                spacing: 20,
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: "Track Order",
-                      onPressed: () {
-                        Get.toNamed(Routes.orderTrackingView);
-                      },
-                      isOutlined: true,
-                      textColor: AppColors.primaryColor,
-                    ),
-                  ),
-                  Expanded(
-                    child: AppButton(
-                      label: "Request Refund",
-                      onPressed: () {
-                        Get.toNamed(Routes.refundRequestView, arguments: order);
-                      },
-                      isOutlined: true,
-                      textColor: AppColors.primaryColor,
-                    ),
-                  ),
-                ],
-              ),
       ],
     );
   }

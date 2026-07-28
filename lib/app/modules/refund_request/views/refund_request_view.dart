@@ -29,7 +29,7 @@ class RefundRequestView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /// Order Header
-              RecentOrder(isRefundView: true, orders: order),
+              RecentOrder(orders: order),
 
               const SizedBox(height: 20),
 

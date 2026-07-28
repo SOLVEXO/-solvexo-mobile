@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/announcement_banner.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_home/controllers/seller_home_controller.dart';
@@ -29,52 +30,77 @@ class SellerHomeView extends StatelessWidget {
             child: CustomRefreshWrapper(
               onRefresh: () => controller.refreshData(),
               child: SingleChildScrollView(
-                child: Obx(
-                  () => controller.isLoading.value
-                      ? const SellerHomeShimmer()
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SellerStatusCard(),
-                            const Divider(
-                              height: 1,
-                              color: AppColors.lightGrey2,
-                            ),
-                            Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: AppColors.background,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(24),
-                                  topRight: Radius.circular(24),
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 16),
-                                  _sectionHeader('Quick Actions'),
-                                  const SizedBox(height: 10),
-                                  SellerQuickActions(),
-                                  const SizedBox(height: 16),
-                                  CustomLowStockAlert(),
-                                  const SizedBox(height: 16),
-                                  _buildRecentOrdersHeader(),
-                                  CustomRecentOrders(),
-                                  const SizedBox(height: 16),
-                                  SellerMessagesSection(),
-                                  const SizedBox(height: 30),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Active announcement banner (audience='sellers') — not
+                    // gated behind the full-page shimmer below, same as the
+                    // buyer home's banner staying visible immediately.
+                    Obx(
+                      () => AnnouncementBanner(
+                        announcement: controller.announcementDismissed.value
+                            ? null
+                            : controller.announcements.firstOrNull,
+                        onDismiss: controller.dismissAnnouncement,
+                      ),
+                    ),
+                    Obx(
+                      () => controller.isLoading.value
+                          ? const SellerHomeShimmer()
+                          : const _SellerHomeContent(),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Loaded-state content (status card, quick actions, orders, messages) ────
+// Split out of `SellerHomeView.build` so the new announcement banner above
+// can sit outside the `isLoading` shimmer-swap without duplicating it.
+class _SellerHomeContent extends StatelessWidget {
+  const _SellerHomeContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SellerStatusCard(),
+        const Divider(height: 1, color: AppColors.lightGrey2),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              _sectionHeader('Quick Actions'),
+              const SizedBox(height: 10),
+              SellerQuickActions(),
+              const SizedBox(height: 16),
+              CustomLowStockAlert(),
+              const SizedBox(height: 16),
+              _buildRecentOrdersHeader(),
+              CustomRecentOrders(),
+              const SizedBox(height: 16),
+              SellerMessagesSection(),
+              const SizedBox(height: 30),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

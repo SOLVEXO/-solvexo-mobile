@@ -34,7 +34,8 @@ class TopStoresRow extends StatelessWidget {
       // Same combined flag Banner/Products gate on in HomeView, so every
       // section's shimmer appears and disappears together on load + refresh
       // instead of each section popping in independently.
-      final isLoading = controller.isLoading.value || categoryController.isLoading.value;
+      final isLoading =
+          controller.isLoading.value || categoryController.isLoading.value;
       if (isLoading) {
         return const _TopStoresShimmer();
       }
@@ -63,7 +64,8 @@ class _TopStoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.toNamed(Routes.sellerStorefront, arguments: {'slug': store.slug}),
+      onTap: () =>
+          Get.toNamed(Routes.sellerStorefront, arguments: {'slug': store.slug}),
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: TopStoresRow._cardWidth,
@@ -76,13 +78,40 @@ class _TopStoreCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipOval(
-              child: CommonImageView(
-                url: store.logo,
-                width: 44,
-                height: 44,
-                fit: BoxFit.cover,
-              ),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipOval(
+                  child: CommonImageView(
+                    url: store.logo,
+                    width: 44,
+                    height: 44,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                if (store.activeCampaign != null)
+                  Positioned(
+                    right: -6,
+                    top: -6,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: BaseSpacing.xxs,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(BaseRadius.xs),
+                        border: Border.all(color: AppColors.white, width: 1.5),
+                      ),
+                      child: CustomText(
+                        text: store.activeCampaign!.label,
+                        color: AppColors.white,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             SizedBox(height: BaseSpacing.xs),
             CustomText(
@@ -152,7 +181,10 @@ class _TopStoresShimmer extends StatelessWidget {
                 Container(
                   width: 44,
                   height: 44,
-                  decoration: const BoxDecoration(color: AppColors.white, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: AppColors.white,
+                    shape: BoxShape.circle,
+                  ),
                 ),
                 SizedBox(height: BaseSpacing.xs),
                 Container(height: 10, width: 84, color: AppColors.white),

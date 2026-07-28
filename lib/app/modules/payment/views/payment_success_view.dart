@@ -13,6 +13,10 @@ class PaymentSuccessView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Present only for a split (mixed digital+physical) order — the amount
+    // the courier will collect in cash for the physical items on delivery.
+    final codAmountDue = Get.arguments is double ? Get.arguments as double : null;
+
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
@@ -38,6 +42,15 @@ class PaymentSuccessView extends StatelessWidget {
                 fontSize: AppFontSize.medium,
                 fontWeight: FontWeight.w600,
               ),
+              if (codAmountDue != null) ...[
+                SizedBox(height: BaseSpacing.sm),
+                CustomText(
+                  text: "Pay \$${codAmountDue.toStringAsFixed(2)} in cash when your physical order is delivered.",
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.verySmall,
+                  textAlign: TextAlign.center,
+                ),
+              ],
               SizedBox(height: BaseSpacing.sm),
               PrimaryButton(
                 onPressed: () => Get.offAllNamed(Routes.mainHome),

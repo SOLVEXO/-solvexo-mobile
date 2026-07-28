@@ -1,6 +1,12 @@
 import 'package:get/get.dart';
+import '../modules/contact_us/bindings/contact_us_binding.dart';
+import '../modules/contact_us/views/contact_us_view.dart';
 import '../modules/notifications/bindings/notifications_binding.dart';
 import '../modules/notifications/views/notifications_view.dart';
+import '../modules/notification_preferences/bindings/notification_preferences_binding.dart';
+import '../modules/notification_preferences/views/notification_preferences_view.dart';
+import '../modules/trending_products/bindings/trending_products_binding.dart';
+import '../modules/trending_products/views/trending_products_view.dart';
 import '../modules/add_seller_product/bindings/add_seller_product_binding.dart';
 import '../modules/add_seller_product/views/add_seller_product_view.dart';
 import '../modules/edit_seller_product/bindings/edit_seller_product_binding.dart';
@@ -90,12 +96,16 @@ import '../modules/loyalty_rewards/bindings/loyalty_rewards_binding.dart';
 import '../modules/loyalty_rewards/views/loyalty_rewards_view.dart';
 import '../modules/my_memberships/bindings/my_memberships_binding.dart';
 import '../modules/my_memberships/views/my_memberships_view.dart';
+import '../modules/worksheet_trial/bindings/worksheet_trial_binding.dart';
+import '../modules/worksheet_trial/views/worksheet_trial_view.dart';
 import '../modules/seller_edit_profile/bindings/seller_edit_profile_binding.dart';
 import '../modules/seller_edit_profile/views/seller_edit_profile_view.dart';
 import '../modules/seller/bindings/seller_binding.dart';
 import '../modules/seller_orders/bindings/seller_order_detail_binding.dart';
 import '../modules/seller_orders/bindings/seller_orders_binding.dart';
 import '../modules/seller_orders/views/seller_order_detail_view.dart';
+import '../modules/seller_returns/bindings/seller_returns_binding.dart';
+import '../modules/seller_returns/views/seller_returns_view.dart';
 import '../modules/seller_products/bindings/seller_products_binding.dart';
 import '../modules/seller_settings/bindings/seller_settings_binding.dart';
 import '../modules/seller_analytics/views/seller_analytics_view.dart';
@@ -145,6 +155,8 @@ import '../modules/privacy_policy/bindings/privacy_policy_binding.dart';
 import '../modules/privacy_policy/views/privacy_policy_view.dart';
 import '../modules/product_details/binding/product_detail_binding.dart';
 import '../modules/product_details/views/product_details_view.dart';
+import '../modules/product_preview/binding/product_preview_binding.dart';
+import '../modules/product_preview/views/product_preview_view.dart';
 import '../modules/seller_storefront/bindings/seller_storefront_binding.dart';
 import '../modules/seller_storefront/views/seller_storefront_view.dart';
 import '../modules/stores/bindings/stores_binding.dart';
@@ -230,6 +242,11 @@ class AppPages {
       binding: ProductDetailBinding(),
     ),
     GetPage(
+      name: Routes.productPreviewView,
+      page: () => ProductPreviewView(),
+      binding: ProductPreviewBinding(),
+    ),
+    GetPage(
       name: Routes.sellerStorefront,
       page: () => SellerStorefrontView(),
       binding: SellerStorefrontBinding(),
@@ -254,14 +271,21 @@ class AppPages {
       page: () => CheckoutView(),
       binding: CheckoutBinding(),
     ),
-    GetPage(
-      name: Routes.paymentSuccessView,
-      page: () => PaymentSuccessView(),
-    ),
+    GetPage(name: Routes.paymentSuccessView, page: () => PaymentSuccessView()),
     GetPage(
       name: Routes.profileView,
       page: () => ProfileView(),
       binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: Routes.notificationPreferences,
+      page: () => NotificationPreferencesView(),
+      binding: NotificationPreferencesBinding(),
+    ),
+    GetPage(
+      name: Routes.trendingProducts,
+      page: () => TrendingProductsView(),
+      binding: TrendingProductsBinding(),
     ),
     GetPage(
       name: Routes.myOrdersView,
@@ -312,6 +336,11 @@ class AppPages {
       name: Routes.faqDetailView,
       page: () => FAQDetailView(),
       binding: FaqBinding(),
+    ),
+    GetPage(
+      name: Routes.contactUsView,
+      page: () => ContactUsView(),
+      binding: ContactUsBinding(),
     ),
     GetPage(
       name: Routes.mapPickerView,
@@ -405,6 +434,11 @@ class AppPages {
       binding: SellerOrderDetailBinding(),
     ),
     GetPage(
+      name: Routes.sellerReturns,
+      page: () => SellerReturnsView(),
+      binding: SellerReturnsBinding(),
+    ),
+    GetPage(
       name: Routes.addSellerProduct,
       page: () => AddSellerProductView(),
       binding: AddSellerProductBinding(),
@@ -473,6 +507,11 @@ class AppPages {
       name: Routes.myMemberships,
       page: () => MyMembershipsView(),
       binding: MyMembershipsBinding(),
+    ),
+    GetPage(
+      name: Routes.worksheetTrial,
+      page: () => const WorksheetTrialView(),
+      binding: WorksheetTrialBinding(),
     ),
     GetPage(
       name: Routes.sellerEditProfile,

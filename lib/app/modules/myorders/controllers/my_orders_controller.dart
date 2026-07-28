@@ -18,12 +18,15 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
 class MyOrdersController extends BaseController {
+  MyOrdersController({OrderRepository? orderRepository})
+    : _orderRepository = orderRepository ?? OrderRepository();
+
   RxInt selectedTab = 0.obs;
   final Rx<OrderDeliveryStatus> currentStatus = OrderDeliveryStatus.deliver.obs;
   int get currentStep =>
       OrderDeliveryStatus.values.indexOf(currentStatus.value);
 
-  final OrderRepository _orderRepository = OrderRepository();
+  final OrderRepository _orderRepository;
 
   @override
   RxBool isLoading = false.obs;
@@ -68,8 +71,15 @@ class MyOrdersController extends BaseController {
           itemBuilder: (_, i) {
             final f = files[i];
             return ListTile(
-              leading: const Icon(Icons.insert_drive_file_outlined, color: AppColors.primaryColor),
-              title: CustomText(text: f.fileName, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
+              leading: const Icon(
+                Icons.insert_drive_file_outlined,
+                color: AppColors.primaryColor,
+              ),
+              title: CustomText(
+                text: f.fileName,
+                fontSize: AppFontSize.extraSmall,
+                fontWeight: FontWeight.w600,
+              ),
               onTap: () {
                 Get.back();
                 _downloadAndShare(f);
@@ -84,8 +94,14 @@ class MyOrdersController extends BaseController {
   Future<void> _downloadAndShare(DigitalDownloadFile file) async {
     final bytes = await _orderRepository.fetchDigitalFileBytes(file);
     if (bytes == null) return;
-    final xfile = XFile.fromData(Uint8List.fromList(bytes), name: file.fileName, mimeType: file.mimeType);
-    await SharePlus.instance.share(ShareParams(files: [xfile], subject: file.fileName));
+    final xfile = XFile.fromData(
+      Uint8List.fromList(bytes),
+      name: file.fileName,
+      mimeType: file.mimeType,
+    );
+    await SharePlus.instance.share(
+      ShareParams(files: [xfile], subject: file.fileName),
+    );
   }
 
   @override
@@ -120,11 +136,17 @@ class MyOrdersController extends BaseController {
   Future<void> refreshOrders() => fetchOrders();
 
   /// Cancel order
-  Future<void> cancelOrder(String orderId, {String reason = 'Cancelled by customer'}) async {
+  Future<void> cancelOrder(
+    String orderId, {
+    String reason = 'Cancelled by customer',
+  }) async {
     try {
       debugPrint('🔄 Cancelling order: $orderId');
 
-      final success = await _orderRepository.cancelOrder(orderId, reason: reason);
+      final success = await _orderRepository.cancelOrder(
+        orderId,
+        reason: reason,
+      );
 
       if (success) {
         ToastUtil.showToast('Order cancelled successfully');
@@ -191,9 +213,11 @@ class MyOrdersController extends BaseController {
         return orders.where((e) => e.orderStatus == 'processing').toList();
       case 3:
         return orders
-            .where((e) =>
-                e.orderStatus == 'shipped' ||
-                e.orderStatus == 'partially_shipped')
+            .where(
+              (e) =>
+                  e.orderStatus == 'shipped' ||
+                  e.orderStatus == 'partially_shipped',
+            )
             .toList();
       case 4:
         return orders.where((e) => e.orderStatus == 'completed').toList();
@@ -204,7 +228,14 @@ class MyOrdersController extends BaseController {
     }
   }
 
-  final tabs = ['All', 'Pending', 'Processing', 'Shipped', 'Completed', 'Cancelled'];
+  final tabs = [
+    'All',
+    'Pending',
+    'Processing',
+    'Shipped',
+    'Completed',
+    'Cancelled',
+  ];
 
   void changeTab(int index) {
     selectedTab.value = index;

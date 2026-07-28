@@ -63,6 +63,7 @@ class SellerRepository {
     required String storeId,
     required String name,
     String? logoUrl,
+    String? coverImageUrl,
     String? categoryId,
     String? description,
     List<String>? productTypes,
@@ -73,6 +74,7 @@ class SellerRepository {
         'storeId': storeId,
         'name': name,
         if ((logoUrl ?? '').isNotEmpty) 'logo': logoUrl,
+        if ((coverImageUrl ?? '').isNotEmpty) 'coverImage': coverImageUrl,
         if ((categoryId ?? '').isNotEmpty) 'categoryId': categoryId,
         if ((description ?? '').isNotEmpty) 'description': description,
         if (productTypes != null && productTypes.isNotEmpty)

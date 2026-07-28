@@ -17,7 +17,9 @@ import 'package:get/get.dart';
 class SellerAnalyticsView extends StatelessWidget {
   SellerAnalyticsView({super.key});
 
-  final SellerAnalyticsController controller = Get.put(SellerAnalyticsController());
+  final SellerAnalyticsController controller = Get.put(
+    SellerAnalyticsController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,12 @@ class SellerAnalyticsView extends StatelessWidget {
           SellerAppBar(title: 'Analytics'),
           Container(
             color: AppColors.white,
-            padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.xs),
+            padding: EdgeInsets.fromLTRB(
+              BaseSpacing.md,
+              BaseSpacing.sm,
+              BaseSpacing.md,
+              BaseSpacing.xs,
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -50,7 +57,7 @@ class SellerAnalyticsView extends StatelessWidget {
           ),
           Container(
             color: AppColors.white,
-            padding: EdgeInsets.only(bottom: BaseSpacing.xs),
+            padding: EdgeInsets.only(bottom: 5),
             child: AnalyticsTabBar(controller: controller),
           ),
           const Divider(height: 1, color: AppColors.lightGrey2),

@@ -1,6 +1,8 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/home/widgets/icon_badge.dart';
 import 'package:book_store_app/app/modules/messaging/controllers/messaging_badge_controller.dart';
+import 'package:book_store_app/app/modules/notifications/controllers/notifications_badge_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -30,6 +32,7 @@ class HomeGreetingHeader extends StatelessWidget {
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
     final messagingBadge = Get.put(MessagingBadgeController());
+    final notificationsBadge = Get.put(NotificationsBadgeController());
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -95,7 +98,7 @@ class HomeGreetingHeader extends StatelessWidget {
           GestureDetector(
             onTap: () => Get.toNamed(Routes.messagesView),
             child: Obx(
-              () => _IconBadge(
+              () => IconBadge(
                 icon: AppIcons.messageIcon,
                 count: messagingBadge.unreadCount.value,
               ),
@@ -104,57 +107,15 @@ class HomeGreetingHeader extends StatelessWidget {
           SizedBox(width: BaseSpacing.xs),
           GestureDetector(
             onTap: () => Get.toNamed(Routes.notifications),
-            child: const _IconBadge(icon: AppIcons.notificationIcon),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IconBadge extends StatelessWidget {
-  final String icon;
-  final int count;
-  const _IconBadge({required this.icon, this.count = 0});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppColors.primaryColor,
-            borderRadius: BorderRadius.circular(BaseRadius.md),
-          ),
-          alignment: Alignment.center,
-          child: SvgIcon(assetName: icon, size: 25, color: AppColors.white),
-        ),
-        if (count > 0)
-          Positioned(
-            top: -4,
-            right: -4,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              decoration: BoxDecoration(
-                color: AppColors.red,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.white, width: 1.2),
-              ),
-              alignment: Alignment.center,
-              child: CustomText(
-                text: count > 9 ? '9+' : count.toString(),
-                color: AppColors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                height: 1,
+            child: Obx(
+              () => IconBadge(
+                icon: AppIcons.notificationIcon,
+                count: notificationsBadge.unreadCount.value,
               ),
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

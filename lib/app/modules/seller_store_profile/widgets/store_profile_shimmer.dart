@@ -112,7 +112,11 @@ class StoreProfileShimmer extends StatelessWidget {
         child: Row(
           children: List.generate(7, (i) {
             if (i.isOdd) {
-              return Container(width: 1, height: 36, color: AppColors.shimmerBase);
+              return Container(
+                width: 1,
+                height: 36,
+                color: AppColors.shimmerBase,
+              );
             }
             return Expanded(
               child: Column(
@@ -146,13 +150,16 @@ class StoreProfileShimmer extends StatelessWidget {
           children: [
             const Skeleton(height: 10, width: 120),
             const SizedBox(height: 12),
-            ...List.generate(lines, (i) => Padding(
-              padding: EdgeInsets.only(bottom: i < lines - 1 ? 8 : 0),
-              child: Skeleton(
-                height: 12,
-                width: i == lines - 1 ? 180 : double.infinity,
+            ...List.generate(
+              lines,
+              (i) => Padding(
+                padding: EdgeInsets.only(bottom: i < lines - 1 ? 8 : 0),
+                child: Skeleton(
+                  height: 12,
+                  width: i == lines - 1 ? 180 : double.infinity,
+                ),
               ),
-            )),
+            ),
           ],
         ),
       ),
@@ -169,31 +176,41 @@ class StoreProfileShimmer extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
         ),
         child: Column(
-          children: List.generate(rows, (i) => Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(
-                  children: [
-                    const Skeleton(width: 36, height: 36, cornerRadius: 10),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Skeleton(height: 10, width: 70),
-                          SizedBox(height: 6),
-                          Skeleton(height: 12, width: 130),
-                        ],
+          children: List.generate(
+            rows,
+            (i) => Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: [
+                      const Skeleton(width: 36, height: 36, cornerRadius: 10),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Skeleton(height: 10, width: 70),
+                            SizedBox(height: 6),
+                            Skeleton(height: 12, width: 130),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              if (i < rows - 1)
-                const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
-            ],
-          )),
+                if (i < rows - 1)
+                  const Divider(
+                    height: 1,
+                    indent: 54,
+                    color: AppColors.lightGrey2,
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );

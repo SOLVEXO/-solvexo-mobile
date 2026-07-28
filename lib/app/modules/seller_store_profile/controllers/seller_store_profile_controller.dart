@@ -6,14 +6,15 @@ import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
+import 'package:book_store_app/app/modules/seller_onboarding/controllers/seller_onboarding_controller.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SellerStoreProfileController extends GetxController {
-  final _repo         = SellerRepository();
-  final _uploadRepo   = UploadRepository();
+  final _repo = SellerRepository();
+  final _uploadRepo = UploadRepository();
   final _categoryRepo = CategoryRepository();
 
   // Admin-curated main categories a seller picks from.
@@ -30,14 +31,21 @@ class SellerStoreProfileController extends GetxController {
 
   // ── Edit-only state ───────────────────────────────────────────────────────
   final Rx<File?> logoFile = Rx<File?>(null);
-  final RxString editCategory = ''.obs;   // display name shown in the dropdown
-  final RxString editCategoryId = ''.obs; // real category _id sent to the backend
+  final Rx<File?> coverFile = Rx<File?>(null);
+  final RxString editCategory = ''.obs; // display name shown in the dropdown
+  final RxString editCategoryId =
+      ''.obs; // real category _id sent to the backend
+
+  // What the store sells (multi-select) — drives which tools (incl. POS)
+  // get enabled server-side via `resolveTools()`.
+  final RxSet<WhatYouSellOption> editProductTypes = <WhatYouSellOption>{}.obs;
 
   late final TextEditingController nameCtrl;
   late final TextEditingController descCtrl;
 
   // ── Computed ──────────────────────────────────────────────────────────────
-  bool get canSave => nameCtrl.text.trim().isNotEmpty;
+  bool get canSave =>
+      nameCtrl.text.trim().isNotEmpty && editProductTypes.isNotEmpty;
 
   /// The current store's category name, resolved from its `categoryId` —
   /// used for read-only display (the raw id is meaningless to a user).
@@ -111,19 +119,38 @@ class SellerStoreProfileController extends GetxController {
     }
     editCategoryId.value = store.value?.categoryId ?? '';
     editCategory.value =
-        mainCategories.firstWhereOrNull((c) => c.id == editCategoryId.value)?.name ?? '';
+        mainCategories
+            .firstWhereOrNull((c) => c.id == editCategoryId.value)
+            ?.name ??
+        '';
+
+    editProductTypes.assignAll(
+      (store.value?.productTypes ?? [])
+          .map((v) => v.asWhatYouSellOption)
+          .whereType<WhatYouSellOption>(),
+    );
 
     isEditing.value = true;
   }
 
   void cancelEditing() {
     logoFile.value = null;
+    coverFile.value = null;
     isEditing.value = false;
   }
 
   void pickCategory(String name) {
     editCategory.value = name;
-    editCategoryId.value = mainCategories.firstWhereOrNull((c) => c.name == name)?.id ?? '';
+    editCategoryId.value =
+        mainCategories.firstWhereOrNull((c) => c.name == name)?.id ?? '';
+  }
+
+  void toggleProductType(WhatYouSellOption option) {
+    if (editProductTypes.contains(option)) {
+      editProductTypes.remove(option);
+    } else {
+      editProductTypes.add(option);
+    }
   }
 
   void pickLogo() {
@@ -142,6 +169,45 @@ class SellerStoreProfileController extends GetxController {
                 name: store.value!.name,
                 slug: store.value!.slug,
                 logo: '',
+                coverImage: store.value!.coverImage,
+                categoryId: store.value!.categoryId,
+                description: store.value!.description,
+                sellerType: store.value!.sellerType,
+                productTypes: store.value!.productTypes,
+                enabledTools: store.value!.enabledTools,
+                plan: store.value!.plan,
+                aiCredits: store.value!.aiCredits,
+                status: store.value!.status,
+                isDelete: store.value!.isDelete,
+                registers: store.value!.registers,
+                shifts: store.value!.shifts,
+                sellerName: store.value!.sellerName,
+                sellerEmail: store.value!.sellerEmail,
+                createdAt: store.value!.createdAt,
+                updatedAt: store.value!.updatedAt,
+              );
+      },
+    );
+  }
+
+  void pickCoverImage() {
+    AppImagePicker.show(
+      title: 'Store Cover Image',
+      canRemove:
+          (coverFile.value != null ||
+          (store.value?.coverImage.isNotEmpty ?? false)),
+      onPicked: (file) => coverFile.value = file,
+      onRemove: () {
+        coverFile.value = null;
+        store.value = store.value == null
+            ? null
+            : StoreModel(
+                id: store.value!.id,
+                sellerId: store.value!.sellerId,
+                name: store.value!.name,
+                slug: store.value!.slug,
+                logo: store.value!.logo,
+                coverImage: '',
                 categoryId: store.value!.categoryId,
                 description: store.value!.description,
                 sellerType: store.value!.sellerType,
@@ -167,7 +233,7 @@ class SellerStoreProfileController extends GetxController {
     if (!canSave || isSaving.value) return;
     isSaving.value = true;
 
-    // Upload logo first if a new file was picked, then pass the URL
+    // Upload logo/cover first if new files were picked, then pass the URLs
     String? logoUrl;
     if (logoFile.value != null) {
       logoUrl = await _uploadRepo.uploadFile(logoFile.value!);
@@ -178,20 +244,32 @@ class SellerStoreProfileController extends GetxController {
       }
     }
 
+    String? coverImageUrl;
+    if (coverFile.value != null) {
+      coverImageUrl = await _uploadRepo.uploadFile(coverFile.value!);
+      if (coverImageUrl == null) {
+        ToastUtil.showToast('Cover image upload failed. Please try again.');
+        isSaving.value = false;
+        return;
+      }
+    }
+
     final updated = await _repo.updateStore(
-      storeId:      store.value?.id ?? '',
-      name:         nameCtrl.text.trim(),
-      logoUrl:      logoUrl,
-      categoryId:   editCategoryId.value,
-      description:  descCtrl.text.trim(),
-      productTypes: store.value?.productTypes ?? [],
+      storeId: store.value?.id ?? '',
+      name: nameCtrl.text.trim(),
+      logoUrl: logoUrl,
+      coverImageUrl: coverImageUrl,
+      categoryId: editCategoryId.value,
+      description: descCtrl.text.trim(),
+      productTypes: editProductTypes.map((o) => o.apiValue).toList(),
     );
 
     isSaving.value = false;
     if (updated == null) return;
 
     logoFile.value = null;
-    store.value    = updated;
+    coverFile.value = null;
+    store.value = updated;
     await AppPreferences.saveStoreName(updated.name);
     isEditing.value = false;
     ToastUtil.showToast('Store profile updated!');

@@ -1,15 +1,31 @@
+import 'dart:async';
+
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 
-class OtpController extends BaseController
-    with GetSingleTickerProviderStateMixin {
-  final AuthRepository _authRepository = AuthRepository();
+class OtpController extends BaseController {
+  OtpController({
+    AuthRepository? authRepository,
+    String? otpType,
+    String? email,
+  }) : _authRepository = authRepository ?? AuthRepository(),
+       otpType = otpType ?? _readArg('type'),
+       email = email ?? _readArg('email');
+
+  static String _readArg(String key) {
+    final args = Get.arguments;
+    if (args is Map) return args[key] ?? '';
+    return '';
+  }
+
+  final AuthRepository _authRepository;
 
   AuthController get _authController {
     if (!Get.isRegistered<AuthController>()) Get.put(AuthController());
@@ -18,34 +34,31 @@ class OtpController extends BaseController
 
   final int otpLength = 6;
 
-  late List<TextEditingController> textControllers;
-  late List<FocusNode> focusNodes;
+  // Single controller — `PinCodeTextField` manages the individual boxes
+  // itself (and, critically, correctly splits a pasted 6-digit code across
+  // all of them; the old per-box `TextField` row truncated pasted text to
+  // 1 character via `maxLength: 1` before `onChanged` ever saw it).
+  final TextEditingController otpTextController = TextEditingController();
+
+  // Drives the package's built-in shake + error-border animation — replaces
+  // the hand-rolled `AnimationController`/`Transform.translate` that used
+  // to live in the view.
+  final StreamController<ErrorAnimationType> errorController =
+      StreamController<ErrorAnimationType>.broadcast();
 
   RxBool resendAvailable = false.obs;
   RxInt timerSec = 60.obs;
+  RxBool isResending = false.obs;
+  RxString errorText = ''.obs;
   @override
   RxBool isLoading = false.obs;
 
-  final String otpType = Get.arguments['type'] ?? "";
-  final String email = Get.arguments['email'] ?? "";
-
-  late AnimationController shakeController;
-  late Animation<double> shakeAnimation;
+  final String otpType;
+  final String email;
 
   @override
   void onInit() {
     super.onInit();
-
-    textControllers = List.generate(otpLength, (_) => TextEditingController());
-    focusNodes = List.generate(otpLength, (_) => FocusNode());
-
-    shakeController = AnimationController(
-      vsync: this,
-      duration: 300.milliseconds,
-    );
-
-    shakeAnimation = Tween(begin: 0.0, end: 12.0).animate(shakeController);
-
     startTimer();
   }
 
@@ -65,51 +78,31 @@ class OtpController extends BaseController
 
   // ================= OTP HELPERS =================
 
-  String get otpCode => textControllers.map((e) => e.text).join();
+  String get otpCode => otpTextController.text;
 
-  void clearOtp() {
-    for (var c in textControllers) {
-      c.clear();
-    }
-    focusNodes.first.requestFocus();
+  void clearOtp() => otpTextController.clear();
+
+  /// Clears the inline error the moment the user starts correcting the code.
+  void onOtpChanged(String value) {
+    if (errorText.value.isNotEmpty) errorText.value = '';
   }
 
-  void handlePaste(String value) {
-    if (value.length != otpLength) return;
-
-    for (int i = 0; i < otpLength; i++) {
-      textControllers[i].text = value[i];
-    }
-
-    submitOtp();
-  }
-
-  // ================= INPUT HANDLING =================
-
-  void onOtpInput(String value, int index) {
-    if (value.length > 1) {
-      handlePaste(value);
-      return;
-    }
-
-    if (value.isEmpty && index > 0) {
-      focusNodes[index - 1].requestFocus();
-      return;
-    }
-
-    if (value.length == 1 && index < otpLength - 1) {
-      focusNodes[index + 1].requestFocus();
-    }
-
-    if (index == otpLength - 1 && otpCode.length == otpLength) {
-      submitOtp();
-    }
+  /// Only offer pin_code_fields' built-in "paste this code?" dialog for a
+  /// clipboard value that actually looks like an OTP.
+  bool canPasteText(String? text) {
+    if (text == null) return false;
+    final trimmed = text.trim();
+    return trimmed.length == otpLength && int.tryParse(trimmed) != null;
   }
 
   // ================= VERIFY OTP =================
 
-  Future<void> submitOtp() async {
-    if (otpCode.length != otpLength) {
+  /// [completedCode] is passed by `PinCodeTextField.onCompleted` — using it
+  /// directly avoids a race where `otpTextController.text` hasn't caught up
+  /// yet when the last digit lands.
+  Future<void> submitOtp([String? completedCode]) async {
+    final code = completedCode ?? otpCode;
+    if (code.length != otpLength) {
       ToastUtil.showToast("Please enter all 6 digits");
       return;
     }
@@ -121,15 +114,16 @@ class OtpController extends BaseController
 
       final auth = await _authRepository.verifyEmailOtp(
         email: email,
-        otp: otpCode,
+        otp: code,
         role: intentRole ?? 'user',
       );
 
       isLoading.value = false;
 
       if (auth == null) {
+        errorText.value = 'Incorrect code. Please try again.';
+        errorController.add(ErrorAnimationType.shake);
         clearOtp();
-        triggerError();
         return;
       }
 
@@ -149,7 +143,7 @@ class OtpController extends BaseController
       isLoading.value = false;
       Get.toNamed(
         Routes.newPasswordView,
-        arguments: {"email": email, "otp": otpCode},
+        arguments: {"email": email, "otp": code},
       );
     }
   }
@@ -157,16 +151,19 @@ class OtpController extends BaseController
   // ================= RESEND =================
 
   Future<void> resendCode() async {
-    if (!resendAvailable.value) return;
+    if (!resendAvailable.value || isResending.value) return;
 
+    isResending.value = true;
     final intentRole = await AppPreferences.getIntentRole();
     final ok = await _authRepository.resendVerificationOtp(
       email,
       role: intentRole ?? 'user',
     );
+    isResending.value = false;
 
     if (ok) {
       ToastUtil.showToast("OTP sent again");
+      errorText.value = '';
       clearOtp();
       startTimer();
     } else {
@@ -174,23 +171,10 @@ class OtpController extends BaseController
     }
   }
 
-  // ================= ERROR ANIMATION =================
-
-  void triggerError() async {
-    await shakeController.forward();
-    shakeController.reverse();
-  }
-
   @override
   void onClose() {
-    for (var c in textControllers) {
-      c.dispose();
-    }
-    for (var f in focusNodes) {
-      f.dispose();
-    }
-
-    shakeController.dispose();
+    otpTextController.dispose();
+    errorController.close();
     super.onClose();
   }
 }

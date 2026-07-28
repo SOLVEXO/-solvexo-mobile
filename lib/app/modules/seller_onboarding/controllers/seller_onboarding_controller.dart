@@ -76,12 +76,42 @@ class WhatYouSellData {
 // ── Static data ────────────────────────────────────────────────────────────────
 
 const kSellerTypes = [
-  SellerTypeData(type: SellerTypeOption.creator, emoji: '🎨', name: 'Creator', description: 'Sell digital art, templates, fonts, music, presets'),
-  SellerTypeData(type: SellerTypeOption.educator, emoji: '📚', name: 'Educator', description: 'Worksheets, lesson plans, curriculum, assessments'),
-  SellerTypeData(type: SellerTypeOption.retailer, emoji: '🏪', name: 'Retailer', description: 'Physical goods, handmade products, branded items'),
-  SellerTypeData(type: SellerTypeOption.brandBusiness, emoji: '💼', name: 'Brand / Business', description: 'Run a full online store with inventory and POS'),
-  SellerTypeData(type: SellerTypeOption.freelancer, emoji: '💻', name: 'Freelancer', description: 'Offer services, bookings, or consulting packages'),
-  SellerTypeData(type: SellerTypeOption.mixOfAbove, emoji: '🌐', name: 'Mix of the above', description: 'I sell across multiple categories and formats'),
+  SellerTypeData(
+    type: SellerTypeOption.creator,
+    emoji: '🎨',
+    name: 'Creator',
+    description: 'Sell digital art, templates, fonts, music, presets',
+  ),
+  SellerTypeData(
+    type: SellerTypeOption.educator,
+    emoji: '📚',
+    name: 'Educator',
+    description: 'Worksheets, lesson plans, curriculum, assessments',
+  ),
+  SellerTypeData(
+    type: SellerTypeOption.retailer,
+    emoji: '🏪',
+    name: 'Retailer',
+    description: 'Physical goods, handmade products, branded items',
+  ),
+  SellerTypeData(
+    type: SellerTypeOption.brandBusiness,
+    emoji: '💼',
+    name: 'Brand / Business',
+    description: 'Run a full online store with inventory and POS',
+  ),
+  SellerTypeData(
+    type: SellerTypeOption.freelancer,
+    emoji: '💻',
+    name: 'Freelancer',
+    description: 'Offer services, bookings, or consulting packages',
+  ),
+  SellerTypeData(
+    type: SellerTypeOption.mixOfAbove,
+    emoji: '🌐',
+    name: 'Mix of the above',
+    description: 'I sell across multiple categories and formats',
+  ),
 ];
 
 const kWhatYouSell = [
@@ -91,7 +121,11 @@ const kWhatYouSell = [
     name: 'Physical Products',
     description: 'Ship items to customers',
     tools: [
-      ActivatedTool('Inventory Manager', AppColors.darkGreen, AppColors.greenContainerInnerColor),
+      ActivatedTool(
+        'Inventory Manager',
+        AppColors.darkGreen,
+        AppColors.greenContainerInnerColor,
+      ),
       ActivatedTool('Shipping Manager', AppColors.iosBlue, AppColors.lightBlue),
     ],
   ),
@@ -101,7 +135,11 @@ const kWhatYouSell = [
     name: 'Digital Downloads',
     description: 'PDFs, files, audio, video',
     tools: [
-      ActivatedTool('Digital Delivery', AppColors.purpleColor, AppColors.lightPurple),
+      ActivatedTool(
+        'Digital Delivery',
+        AppColors.purpleColor,
+        AppColors.lightPurple,
+      ),
     ],
   ),
   WhatYouSellData(
@@ -110,8 +148,16 @@ const kWhatYouSell = [
     name: 'Educational Resources',
     description: 'Worksheets, lesson plans',
     tools: [
-      ActivatedTool('Edu Resource Tools', AppColors.orange, AppColors.lightCameo),
-      ActivatedTool('AI Worksheet Builder', AppColors.primaryColor, AppColors.languageBg),
+      ActivatedTool(
+        'Edu Resource Tools',
+        AppColors.orange,
+        AppColors.lightCameo,
+      ),
+      ActivatedTool(
+        'AI Worksheet Builder',
+        AppColors.primaryColor,
+        AppColors.languageBg,
+      ),
     ],
   ),
   WhatYouSellData(
@@ -120,7 +166,11 @@ const kWhatYouSell = [
     name: 'Services / Bookings',
     description: 'Appointments and packages',
     tools: [
-      ActivatedTool('Booking Calendar', AppColors.accepted, AppColors.acceptedBg),
+      ActivatedTool(
+        'Booking Calendar',
+        AppColors.accepted,
+        AppColors.acceptedBg,
+      ),
     ],
   ),
   WhatYouSellData(
@@ -146,9 +196,20 @@ const kWhatYouSell = [
 ];
 
 const kCountries = [
-  'United States', 'United Kingdom', 'Canada', 'Australia',
-  'Germany', 'France', 'Netherlands', 'UAE', 'Saudi Arabia',
-  'Malaysia', 'Singapore', 'Pakistan', 'India', 'South Africa',
+  'United States',
+  'United Kingdom',
+  'Canada',
+  'Australia',
+  'Germany',
+  'France',
+  'Netherlands',
+  'UAE',
+  'Saudi Arabia',
+  'Malaysia',
+  'Singapore',
+  'Pakistan',
+  'India',
+  'South Africa',
 ];
 
 // ── API value helpers ─────────────────────────────────────────────────────────
@@ -156,12 +217,18 @@ const kCountries = [
 extension SellerTypeApi on SellerTypeOption {
   String get apiValue {
     switch (this) {
-      case SellerTypeOption.creator:       return 'creator';
-      case SellerTypeOption.educator:      return 'educator';
-      case SellerTypeOption.retailer:      return 'retailer';
-      case SellerTypeOption.brandBusiness: return 'brand_business';
-      case SellerTypeOption.freelancer:    return 'freelancer';
-      case SellerTypeOption.mixOfAbove:    return 'mix_of_above';
+      case SellerTypeOption.creator:
+        return 'creator';
+      case SellerTypeOption.educator:
+        return 'educator';
+      case SellerTypeOption.retailer:
+        return 'retailer';
+      case SellerTypeOption.brandBusiness:
+        return 'brand_business';
+      case SellerTypeOption.freelancer:
+        return 'freelancer';
+      case SellerTypeOption.mixOfAbove:
+        return 'mix_of_above';
     }
   }
 }
@@ -169,34 +236,56 @@ extension SellerTypeApi on SellerTypeOption {
 extension WhatYouSellApi on WhatYouSellOption {
   String get apiValue {
     switch (this) {
-      case WhatYouSellOption.physicalProducts:      return 'physical_products';
-      case WhatYouSellOption.digitalDownloads:      return 'digital_downloads';
-      case WhatYouSellOption.educationalResources:  return 'educational_resources';
-      case WhatYouSellOption.servicesBookings:      return 'services_bookings';
-      case WhatYouSellOption.subscriptions:         return 'subscriptions';
-      case WhatYouSellOption.inPersonPos:           return 'in_person_pos';
+      case WhatYouSellOption.physicalProducts:
+        return 'physical_products';
+      case WhatYouSellOption.digitalDownloads:
+        return 'digital_downloads';
+      case WhatYouSellOption.educationalResources:
+        return 'educational_resources';
+      case WhatYouSellOption.servicesBookings:
+        return 'services_bookings';
+      case WhatYouSellOption.subscriptions:
+        return 'subscriptions';
+      case WhatYouSellOption.inPersonPos:
+        return 'in_person_pos';
     }
   }
+}
+
+extension WhatYouSellFromApi on String {
+  /// Reverse of [WhatYouSellApi.apiValue] — used to rehydrate a store's saved
+  /// `productTypes` (backend strings) back into [WhatYouSellOption]s for edit UIs.
+  WhatYouSellOption? get asWhatYouSellOption =>
+      WhatYouSellOption.values.firstWhereOrNull((o) => o.apiValue == this);
 }
 
 // ── Controller ─────────────────────────────────────────────────────────────────
 
 class SellerOnboardingController extends GetxController {
+  SellerOnboardingController({
+    SellerRepository? sellerRepository,
+    UploadRepository? uploadRepository,
+    CategoryRepository? categoryRepository,
+  }) : _sellerRepo = sellerRepository ?? SellerRepository(),
+       _uploadRepo = uploadRepository ?? UploadRepository(),
+       _categoryRepo = categoryRepository ?? CategoryRepository();
+
   // Starts at storeInfo — account creation is handled by AuthController
   final Rx<OnboardingStep> step = OnboardingStep.storeInfo.obs;
   final RxBool isSaving = false.obs;
   Rx<StoreModel?> createdStore = Rx(null);
 
-  final _sellerRepo   = SellerRepository();
-  final _uploadRepo   = UploadRepository();
-  final _categoryRepo = CategoryRepository();
+  final SellerRepository _sellerRepo;
+  final UploadRepository _uploadRepo;
+  final CategoryRepository _categoryRepo;
 
   // Step 1 — Store Info
-  final RxString    storeName        = ''.obs;
-  final RxString    storeCategory    = ''.obs; // display name shown in the picker
-  final RxString    storeCategoryId  = ''.obs; // real category _id sent to the backend
-  final RxString    storeDescription = ''.obs;
-  final Rx<File?>   logoFile         = Rx<File?>(null);
+  final RxString storeName = ''.obs;
+  final RxString storeCategory = ''.obs; // display name shown in the picker
+  final RxString storeCategoryId =
+      ''.obs; // real category _id sent to the backend
+  final RxString storeDescription = ''.obs;
+  final Rx<File?> logoFile = Rx<File?>(null);
 
   // Admin-curated main categories a seller picks from — sellers cannot
   // create these themselves, only choose one.
@@ -356,12 +445,12 @@ class SellerOnboardingController extends GetxController {
     }
 
     final store = await _sellerRepo.createStore(
-      name:         storeName.value.trim(),
-      sellerType:   sellerType.value?.apiValue ?? 'creator',
+      name: storeName.value.trim(),
+      sellerType: sellerType.value?.apiValue ?? 'creator',
       productTypes: whatYouSell.map((o) => o.apiValue).toList(),
-      description:  storeDescription.value.trim(),
-      categoryId:   storeCategoryId.value.trim(),
-      logoUrl:      logoUrl,
+      description: storeDescription.value.trim(),
+      categoryId: storeCategoryId.value.trim(),
+      logoUrl: logoUrl,
     );
 
     isSaving.value = false;
@@ -445,18 +534,30 @@ class _PickerSheet extends StatelessWidget {
               shrinkWrap: true,
               padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: items.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, indent: 20, color: AppColors.lightGrey2),
+              separatorBuilder: (_, __) => const Divider(
+                height: 1,
+                indent: 20,
+                color: AppColors.lightGrey2,
+              ),
               itemBuilder: (_, i) {
                 final isSelected = items[i] == selected;
                 return ListTile(
                   title: CustomText(
                     text: items[i],
                     fontSize: 15,
-                    color: isSelected ? AppColors.primaryColor : AppColors.black,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected
+                        ? AppColors.primaryColor
+                        : AppColors.black,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                   trailing: isSelected
-                      ? const Icon(Icons.check_rounded, color: AppColors.primaryColor, size: 18)
+                      ? const Icon(
+                          Icons.check_rounded,
+                          color: AppColors.primaryColor,
+                          size: 18,
+                        )
                       : null,
                   onTap: () {
                     onSelect(items[i]);

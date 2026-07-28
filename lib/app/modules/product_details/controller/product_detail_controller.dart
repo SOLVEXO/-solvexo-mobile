@@ -218,6 +218,10 @@ class ProductDetailController extends GetxController {
   // ─── 4. Quantity controls ─────────────────────────────────────────────────
 
   void increaseQty() {
+    if (product.value?.isDigital ?? false) {
+      productQty.value++;
+      return;
+    }
     final maxStock =
         selectedVariant.value?.resolvedStock ?? product.value?.stock ?? 0;
     if (productQty.value < maxStock) {
@@ -241,18 +245,21 @@ class ProductDetailController extends GetxController {
     }
 
     final variant = selectedVariant.value;
-    final stockAvailable = variant?.resolvedStock ?? p.stock;
 
-    if (stockAvailable == 0) {
-      ToastUtil.showToast('Product is out of stock');
-      return;
-    }
+    if (!p.isDigital) {
+      final stockAvailable = variant?.resolvedStock ?? p.stock;
 
-    if (productQty.value > stockAvailable) {
-      ToastUtil.showToast('Not enough stock available');
-      return;
+      if (stockAvailable == 0) {
+        ToastUtil.showToast('Product is out of stock');
+        return;
+      }
+
+      if (productQty.value > stockAvailable) {
+        ToastUtil.showToast('Not enough stock available');
+        return;
+      }
     }
-    if (variant!.id.isEmpty) {
+    if (variant == null || variant.id.isEmpty) {
       ToastUtil.showToast('Please select a variant first');
       return;
     }

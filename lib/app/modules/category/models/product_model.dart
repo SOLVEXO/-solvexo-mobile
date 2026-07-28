@@ -11,6 +11,7 @@ class ProductVariant {
   final double price;
   final double? compareAtPrice;
   final int? stock; // null = unlimited
+  final bool unlimitedStock; // server-side flag; takes priority over `stock`
   final List<String> images;
   final String status;
   final DateTime createdAt;
@@ -25,6 +26,7 @@ class ProductVariant {
     required this.price,
     this.compareAtPrice,
     required this.stock,
+    this.unlimitedStock = false,
     required this.images,
     required this.status,
     required this.createdAt,
@@ -44,10 +46,10 @@ class ProductVariant {
     return int.tryParse(s);
   }
 
-  bool get isUnlimited => stock == null;
-  bool get isInStock => stock == null || stock! > 0;
+  bool get isUnlimited => unlimitedStock || stock == null;
+  bool get isInStock => isUnlimited || stock! > 0;
   // Large sentinel so qty-cap comparisons work without special-casing nulls
-  int get resolvedStock => stock ?? 999999;
+  int get resolvedStock => isUnlimited ? 999999 : (stock ?? 999999);
   bool get hasDiscount => compareAtPrice != null && compareAtPrice! > price;
 
   factory ProductVariant.fromJson(Map<String, dynamic> json) {
@@ -62,6 +64,7 @@ class ProductVariant {
           ? (json['compareAtPrice'] as num).toDouble()
           : null,
       stock: _parseStock(json['stock']),
+      unlimitedStock: json['unlimitedStock'] == true,
       images: List<String>.from(json['images'] ?? []),
       status: json['status'] ?? 'active',
       createdAt: DateTime.parse(
@@ -83,11 +86,58 @@ class ProductVariant {
       'price': price,
       'compareAtPrice': compareAtPrice,
       'stock': stock,
+      'unlimitedStock': unlimitedStock,
       'images': images,
       'status': status,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
+  }
+}
+
+// ─── Active campaign (marketing sale) badge ────────────────────────────────
+// Attached server-side (`attachCampaignBadges`, src/products/products.service.ts)
+// whenever a platform-sponsored campaign is running (applies to every store)
+// or a seller-sponsored campaign this product's store has joined is active —
+// null otherwise. Drives the red "sale" tag on the product card.
+class ActiveCampaign {
+  final String campaignId;
+  final String name;
+  final String? discountType; // 'percentage' | 'fixed'
+  final double? discountValue;
+  final DateTime? endDate;
+
+  const ActiveCampaign({
+    required this.campaignId,
+    required this.name,
+    this.discountType,
+    this.discountValue,
+    this.endDate,
+  });
+
+  factory ActiveCampaign.fromJson(Map<String, dynamic> json) {
+    return ActiveCampaign(
+      campaignId: (json['campaignId'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      discountType: json['discountType'] as String?,
+      discountValue: (json['discountValue'] as num?)?.toDouble(),
+      endDate: json['endDate'] != null
+          ? DateTime.tryParse(json['endDate'].toString())
+          : null,
+    );
+  }
+
+  /// e.g. "20% OFF" / "$5 OFF" — falls back to "SALE" when the campaign is
+  /// purely promotional (no configured discount).
+  String get badgeLabel {
+    if (discountValue == null) return 'SALE';
+    if (discountType == 'percentage') {
+      return '${discountValue!.toStringAsFixed(0)}% OFF';
+    }
+    if (discountType == 'fixed') {
+      return '\$${discountValue!.toStringAsFixed(0)} OFF';
+    }
+    return 'SALE';
   }
 }
 
@@ -102,7 +152,16 @@ class ProductModel {
   final CategoryModel? category;
   final List<String> images;
   final List<ProductVariant> variants;
-  final String type; // 'physical' | 'digital'
+  final String type; // 'physical' | 'digital' | 'educational'
+
+  // Only set when type == 'educational'. See EducationLevel enum values in
+  // the backend (`src/products/schemas/product.schema.ts`).
+  final String? educationLevel;
+  final String? customLevel; // raw seller text, only when educationLevel == 'other'
+  final String? normalizedCustomLevel; // server-derived, grouping/filtering only
+
+  // digital.previewAvailable — server-derived, only meaningful when isDigital
+  final bool previewAvailable;
 
   // Seller / store — only populated by the product-detail endpoint.
   final String? sellerName;
@@ -123,6 +182,10 @@ class ProductModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // Active marketing campaign (platform-wide sale, or a seller sale this
+  // product's store joined) — null when nothing is currently running.
+  final ActiveCampaign? activeCampaign;
+
   ProductModel({
     required this.id,
     required this.name,
@@ -134,6 +197,10 @@ class ProductModel {
     required this.images,
     required this.variants,
     this.type = 'physical',
+    this.educationLevel,
+    this.customLevel,
+    this.normalizedCustomLevel,
+    this.previewAvailable = false,
     required this.viewCount,
     required this.wishlistCount,
     required this.purchaseCount,
@@ -148,6 +215,7 @@ class ProductModel {
     this.storeName,
     this.storeLogo,
     this.storeFollowersCount = 0,
+    this.activeCampaign,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -177,6 +245,12 @@ class ProductModel {
           .map((v) => ProductVariant.fromJson(v as Map<String, dynamic>))
           .toList(),
       type: json['type'] as String? ?? 'physical',
+      educationLevel: json['educationLevel'] as String?,
+      customLevel: json['customLevel'] as String?,
+      normalizedCustomLevel: json['normalizedCustomLevel'] as String?,
+      previewAvailable: json['digital'] is Map
+          ? (json['digital']['previewAvailable'] == true)
+          : false,
       viewCount: json['viewCount'] ?? 0,
       wishlistCount: json['wishlistCount'] ?? 0,
       purchaseCount: json['purchaseCount'] ?? 0,
@@ -195,6 +269,9 @@ class ProductModel {
       storeName: json['storeName'] as String?,
       storeLogo: json['storeLogo'] as String?,
       storeFollowersCount: json['storeFollowersCount'] as int? ?? 0,
+      activeCampaign: json['activeCampaign'] is Map
+          ? ActiveCampaign.fromJson(json['activeCampaign'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -249,6 +326,8 @@ class ProductModel {
   bool get hasPriceRange => price != maxPrice;
 
   bool get isDigital => type.toLowerCase() == 'digital';
+  bool get isEducational => type.toLowerCase() == 'educational';
+  bool get isOnSale => activeCampaign != null;
 
   /// Total stock across active variants. Returns 999999 if any variant is unlimited.
   int get stock {
@@ -259,7 +338,7 @@ class ProductModel {
 
   /// True when at least one active variant is in stock (or product is digital).
   bool get inStock {
-    if (isDigital) return true;
+    if (isDigital || isEducational) return true;
     return variants.any((v) => v.status == 'active' && v.isInStock);
   }
 
@@ -286,6 +365,88 @@ class ProductModel {
       (v) =>
           (color == null || v.color == color) &&
           (size == null || v.size == size),
+    );
+  }
+}
+
+// ─── Education level taxonomy (Tier-1, shared by seller forms + buyer filters) ─
+// Mirrors the backend's `EducationLevel` enum exactly
+// (`src/products/schemas/product.schema.ts`).
+class EducationLevelOption {
+  final String value;
+  final String label;
+  const EducationLevelOption(this.value, this.label);
+}
+
+const List<EducationLevelOption> kEducationLevels = [
+  EducationLevelOption('preschool', 'Preschool'),
+  EducationLevelOption('primary_school', 'Primary School'),
+  EducationLevelOption('middle_school', 'Middle School'),
+  EducationLevelOption('secondary_school', 'Secondary School'),
+  EducationLevelOption('college', 'College'),
+  EducationLevelOption('university', 'University'),
+  EducationLevelOption('professional_courses', 'Professional Courses'),
+  EducationLevelOption('islamic_education', 'Islamic Education'),
+  EducationLevelOption('other', 'Other'),
+];
+
+String educationLevelLabel(String? value) {
+  if (value == null) return '';
+  return kEducationLevels
+      .firstWhereOrNull((e) => e.value == value)
+      ?.label ??
+      value;
+}
+
+// ─── Education-level facets (buyer filter chips) ──────────────────────────────
+class EducationLevelFacet {
+  final String level;
+  final int count;
+
+  const EducationLevelFacet({required this.level, required this.count});
+
+  factory EducationLevelFacet.fromJson(Map<String, dynamic> json) {
+    return EducationLevelFacet(
+      level: json['level'] as String? ?? '',
+      count: json['count'] as int? ?? 0,
+    );
+  }
+}
+
+class EducationOtherLevelFacet {
+  final String slug;
+  final String displayName;
+  final int count;
+
+  const EducationOtherLevelFacet({
+    required this.slug,
+    required this.displayName,
+    required this.count,
+  });
+
+  factory EducationOtherLevelFacet.fromJson(Map<String, dynamic> json) {
+    return EducationOtherLevelFacet(
+      slug: json['slug'] as String? ?? '',
+      displayName: json['displayName'] as String? ?? '',
+      count: json['count'] as int? ?? 0,
+    );
+  }
+}
+
+class EducationFacetsResult {
+  final List<EducationLevelFacet> levels;
+  final List<EducationOtherLevelFacet> otherLevels;
+
+  const EducationFacetsResult({required this.levels, required this.otherLevels});
+
+  factory EducationFacetsResult.fromJson(Map<String, dynamic> json) {
+    return EducationFacetsResult(
+      levels: (json['levels'] as List? ?? [])
+          .map((e) => EducationLevelFacet.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      otherLevels: (json['otherLevels'] as List? ?? [])
+          .map((e) => EducationOtherLevelFacet.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

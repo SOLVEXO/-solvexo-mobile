@@ -8,7 +8,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SubCategoryController extends GetxController {
-  final ProductRepository _productRepository = ProductRepository();
+  SubCategoryController({
+    ProductRepository? productRepository,
+    String? categoryId,
+    String? categoryName,
+  }) : _productRepository = productRepository ?? ProductRepository(),
+       _initialCategoryId = categoryId,
+       _initialCategoryName = categoryName;
+
+  final ProductRepository _productRepository;
+  final String? _initialCategoryId;
+  final String? _initialCategoryName;
 
   // ─── Arguments ────────────────────────────────────────────────────────────
   late final String categoryId;
@@ -34,6 +44,20 @@ class SubCategoryController extends GetxController {
   final RxDouble currentMaxFilter = 1000.0.obs;
   final RxString selectedBrand = ''.obs;
   final RxDouble selectedRating = 0.0.obs;
+
+  // Education-level facets (Tier-1 + Tier-2 "other" drill-down). Facet counts
+  // are global (not scoped to this category), but the filter section itself
+  // is only shown once any educational products actually appear here — see
+  // [hasEducationalProducts].
+  final Rx<EducationFacetsResult> educationFacets = Rx(
+    const EducationFacetsResult(levels: [], otherLevels: []),
+  );
+  final Rxn<String> selectedEducationLevel = Rxn<String>();
+  final Rxn<String> selectedNormalizedCustomLevel = Rxn<String>();
+
+  bool get hasEducationalProducts =>
+      products.any((p) => p.isEducational) ||
+      selectedEducationLevel.value != null;
 
   final List<double> ratings = [1, 2, 3, 4, 5];
 
@@ -63,14 +87,23 @@ class SubCategoryController extends GetxController {
   void onInit() {
     super.onInit();
     _readArguments();
-    // Run both in parallel — sub-categories chip strip + initial products
-    Future.wait([fetchSubCategories(), fetchProducts()]);
+    // Run in parallel — sub-categories chip strip + initial products + facets
+    Future.wait([
+      fetchSubCategories(),
+      fetchProducts(),
+      fetchEducationFacets(),
+    ]);
+  }
+
+  Future<void> fetchEducationFacets() async {
+    educationFacets.value = await _productRepository.getEducationFacets();
   }
 
   void _readArguments() {
     final args = Get.arguments as Map<String, dynamic>?;
-    categoryId = args?['categoryId'] as String? ?? '';
-    categoryName = args?['categoryName'] as String? ?? 'Products';
+    categoryId = _initialCategoryId ?? args?['categoryId'] as String? ?? '';
+    categoryName =
+        _initialCategoryName ?? args?['categoryName'] as String? ?? 'Products';
     debugPrint(
       '📦 SubCategoryController init — '
       'id: $categoryId, name: $categoryName',
@@ -148,6 +181,8 @@ class SubCategoryController extends GetxController {
         categoryId: effectiveCategoryId.isNotEmpty ? effectiveCategoryId : null,
         page: currentPage.value,
         limit: 20,
+        educationLevel: selectedEducationLevel.value,
+        normalizedCustomLevel: selectedNormalizedCustomLevel.value,
       );
 
       if (response != null) {
@@ -200,7 +235,20 @@ class SubCategoryController extends GetxController {
     maxPrice.value = 1000;
     currentMinFilter.value = 0;
     currentMaxFilter.value = 1000;
+    selectedEducationLevel.value = null;
+    selectedNormalizedCustomLevel.value = null;
     fetchProducts();
+  }
+
+  /// Staged selection (only takes effect once "Apply Filters" is tapped),
+  /// matching the brand/rating chips' behavior.
+  void selectEducationLevel(String? level) {
+    selectedEducationLevel.value = level;
+    if (level != 'other') selectedNormalizedCustomLevel.value = null;
+  }
+
+  void selectNormalizedCustomLevel(String? slug) {
+    selectedNormalizedCustomLevel.value = slug;
   }
 
   void openFilterBottomSheet() {

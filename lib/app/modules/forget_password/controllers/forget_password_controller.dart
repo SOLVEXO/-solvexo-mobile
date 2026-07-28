@@ -7,7 +7,10 @@ import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 
 class ForgotPasswordController extends BaseController {
-  final AuthRepository _authRepository = AuthRepository();
+  ForgotPasswordController({AuthRepository? authRepository})
+    : _authRepository = authRepository ?? AuthRepository();
+
+  final AuthRepository _authRepository;
 
   final emailController = TextEditingController();
 
@@ -36,13 +39,12 @@ class ForgotPasswordController extends BaseController {
 
       Get.toNamed(
         Routes.otpView,
-        arguments: {
-          'email': email,
-          'type': 'password_reset',
-        },
+        arguments: {'email': email, 'type': 'password_reset'},
       );
     } else {
-      ToastUtil.showToast("Failed to send OTP. Check your email and try again.");
+      ToastUtil.showToast(
+        "Failed to send OTP. Check your email and try again.",
+      );
     }
   }
 

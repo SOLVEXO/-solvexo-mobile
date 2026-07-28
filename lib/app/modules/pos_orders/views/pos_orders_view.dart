@@ -30,42 +30,53 @@ class PosOrdersView extends StatelessWidget {
                 return const PosTransactionsShimmer();
               }
               final txns = controller.filteredSales;
-              if (txns.isEmpty) return const PosTransactionsEmpty();
+
               return CustomRefreshWrapper(
                 onRefresh: controller.refreshData,
-                child: SingleChildScrollView(
-                  controller: controller.scrollController,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _FilterHeader(controller: controller),
-                      PosStatsRow(controller: controller),
-                      const Divider(height: 1, color: AppColors.lightGrey2),
-                      ListView.separated(
-                        padding: const EdgeInsets.all(AppDimen.allPadding),
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: txns.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (_, i) => PosTransactionCard(
-                          sale: txns[i],
-                          controller: controller,
+                child: txns.isEmpty
+                    ? PosTransactionsEmpty()
+                    : SingleChildScrollView(
+                        controller: controller.scrollController,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _FilterHeader(controller: controller),
+                            PosStatsRow(controller: controller),
+                            const Divider(
+                              height: 1,
+                              color: AppColors.lightGrey2,
+                            ),
+                            ListView.separated(
+                              padding: const EdgeInsets.all(
+                                AppDimen.allPadding,
+                              ),
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: txns.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (_, i) => PosTransactionCard(
+                                sale: txns[i],
+                                controller: controller,
+                              ),
+                            ),
+                            if (controller.isLoadingMore.value)
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      if (controller.isLoadingMore.value)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
               );
             }),
           ),
@@ -139,10 +150,15 @@ class _FilterHeader extends StatelessWidget {
             () => GestureDetector(
               onTap: () => _showStatusFilterSheet(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.background,
-                  borderRadius: BorderRadius.circular(AppDimen.draggableBorderRadius),
+                  borderRadius: BorderRadius.circular(
+                    AppDimen.draggableBorderRadius,
+                  ),
                   border: Border.all(color: AppColors.lightGrey2),
                 ),
                 child: Row(
@@ -157,7 +173,11 @@ class _FilterHeader extends StatelessWidget {
                       color: AppColors.black2,
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: AppColors.black2),
+                    const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 16,
+                      color: AppColors.black2,
+                    ),
                   ],
                 ),
               ),
@@ -171,7 +191,9 @@ class _FilterHeader extends StatelessWidget {
   void _showStatusFilterSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
         child: Column(
@@ -180,7 +202,10 @@ class _FilterHeader extends StatelessWidget {
             Container(
               width: 36,
               height: 4,
-              decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(
+                color: AppColors.lightGrey2,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
             const SizedBox(height: 16),
             const CustomText(
@@ -198,12 +223,17 @@ class _FilterHeader extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   title: CustomText(
-                    text: s == 'All' ? 'All Statuses' : (s.capitalizeFirst ?? s).replaceAll('_', ' '),
+                    text: s == 'All'
+                        ? 'All Statuses'
+                        : (s.capitalizeFirst ?? s).replaceAll('_', ' '),
                     fontSize: AppFontSize.verySmall,
                     color: AppColors.black2,
                   ),
                   trailing: controller.statusFilter.value == s
-                      ? const Icon(Icons.check_rounded, color: AppColors.primaryColor)
+                      ? const Icon(
+                          Icons.check_rounded,
+                          color: AppColors.primaryColor,
+                        )
                       : null,
                 ),
               ),

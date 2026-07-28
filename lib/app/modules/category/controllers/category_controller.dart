@@ -7,7 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CategoryController extends GetxController {
-  final CategoryRepository _categoryRepo = CategoryRepository();
+  CategoryController({CategoryRepository? categoryRepository})
+    : _categoryRepo = categoryRepository ?? CategoryRepository();
+
+  final CategoryRepository _categoryRepo;
 
   var expandedIds = <String>{}.obs;
 

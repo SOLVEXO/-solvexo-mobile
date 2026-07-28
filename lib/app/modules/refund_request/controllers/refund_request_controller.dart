@@ -37,20 +37,15 @@ class RefundRequestController extends GetxController {
     final note = messageController.text.trim();
     final reason = note.isEmpty ? issueLabel : '$issueLabel — $note';
 
-    try {
-      isLoading.value = true;
-      final success = await _orderRepo.requestReturn(orderId: order.orderId, reason: reason);
+    isLoading.value = true;
+    final success = await _orderRepo.requestReturn(orderId: order.orderId, reason: reason);
+    isLoading.value = false;
 
-      if (success) {
-        CustomAppSnackbar.success("Refund request submitted");
-        Get.back();
-      } else {
-        CustomAppSnackbar.error("Refund request failed");
-      }
-    } catch (e) {
-      CustomAppSnackbar.error("Failed to submit refund");
-    } finally {
-      isLoading.value = false;
+    if (success) {
+      CustomAppSnackbar.success("Refund request submitted");
+      Get.back();
     }
+    // On failure the repository already surfaces the specific backend
+    // message (e.g. "Order not yet delivered") via ToastUtil.
   }
 }

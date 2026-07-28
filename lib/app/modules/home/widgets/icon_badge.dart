@@ -1,0 +1,52 @@
+import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:flutter/material.dart';
+
+class IconBadge extends StatelessWidget {
+  final String icon;
+  final int count;
+  const IconBadge({super.key, required this.icon, this.count = 0});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor,
+            borderRadius: BorderRadius.circular(BaseRadius.md),
+          ),
+          alignment: Alignment.center,
+          child: SvgIcon(assetName: icon, size: 25, color: AppColors.white),
+        ),
+        if (count > 0)
+          Positioned(
+            top: -4,
+            right: -4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              decoration: BoxDecoration(
+                color: AppColors.red,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.white, width: 1.2),
+              ),
+              alignment: Alignment.center,
+              child: CustomText(
+                text: count > 9 ? '9+' : count.toString(),
+                color: AppColors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                height: 1,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}

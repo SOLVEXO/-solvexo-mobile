@@ -1,4 +1,6 @@
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
+import 'package:book_store_app/app/data/repositories/auth_repository.dart';
+import 'package:book_store_app/app/data/repositories/notifications_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
@@ -6,6 +8,7 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -34,6 +37,8 @@ class SettingsSection {
 
 class SellerSettingsController extends GetxController {
   final _repo = SellerRepository();
+  final _notificationsRepo = NotificationsRepository();
+  final _authRepository = AuthRepository();
   final RxBool isLoading = false.obs;
 
   // ── Profile ─────────────────────────────────────────────────────────────────
@@ -42,7 +47,8 @@ class SellerSettingsController extends GetxController {
   final RxString email = 'alex@myshop.com'.obs;
   final RxString plan = 'Professional Plan'.obs;
 
-  // ── Notification toggles ────────────────────────────────────────────────────
+  // ── Notification toggles (mirror `NotificationPreference.prefs` — 'orders'
+  // gates both new-order and low-stock alerts on the backend) ────────────────
   final RxBool newOrdersNotif = true.obs;
   final RxBool customerMessagesNotif = true.obs;
   final RxBool lowStockNotif = true.obs;
@@ -51,6 +57,10 @@ class SellerSettingsController extends GetxController {
   final RxString storeName = 'My Shop'.obs;
   final RxString paymentMethods = 'Card, Cash, PayPal'.obs;
   final RxString shippingZones = '3 zones configured'.obs;
+
+  // Only stores that opted into `in_person_pos` (via onboarding or Edit
+  // Store) get a POS Management tile — digital-only stores never see it.
+  final RxBool posEnabled = true.obs;
 
   // ── Account settings ────────────────────────────────────────────────────────
   final RxBool twoFactorEnabled = true.obs;
@@ -89,11 +99,12 @@ class SellerSettingsController extends GetxController {
           trailing: shippingZones.value,
           onTap: () => Get.toNamed(Routes.sellerShipping),
         ),
-        SettingsTile(
-          emoji: AppIcons.posIcon,
-          title: 'POS Management',
-          onTap: () => Get.toNamed(Routes.sellerPosManagement),
-        ),
+        if (posEnabled.value)
+          SettingsTile(
+            emoji: AppIcons.posIcon,
+            title: 'POS Management',
+            onTap: () => Get.toNamed(Routes.sellerPosManagement),
+          ),
         SettingsTile(
           emoji: AppIcons.reportIcon,
           title: 'Activity Log',
@@ -182,6 +193,16 @@ class SellerSettingsController extends GetxController {
       ],
     ),
     SettingsSection(
+      header: 'SUPPORT',
+      tiles: [
+        SettingsTile(
+          emoji: AppIcons.emailIcon,
+          title: 'Contact Us',
+          onTap: () => Get.toNamed(Routes.contactUsView),
+        ),
+      ],
+    ),
+    SettingsSection(
       header: 'DANGER ZONE',
       tiles: [
         SettingsTile(
@@ -190,11 +211,12 @@ class SellerSettingsController extends GetxController {
           isDanger: true,
           onTap: () => Get.offAllNamed(Routes.sellerStores),
         ),
-        // SettingsTile(
-        //   emoji: AppIcons.deleteIcon,
-        //   title: 'Delete Account',
-        //   isDanger: true,
-        // ),
+        SettingsTile(
+          emoji: AppIcons.deleteIcon,
+          title: 'Delete Account',
+          isDanger: true,
+          onTap: deleteAccount,
+        ),
       ],
     ),
   ];
@@ -220,15 +242,27 @@ class SellerSettingsController extends GetxController {
 
     // ── Store data (awaited — ensures sections rebuild with correct name) ──
     await _loadStoreData();
+    await _loadNotificationPrefs();
     _applyUser(Get.find<ProfileController>().user.value);
     isLoading.value = false;
+  }
+
+  Future<void> _loadNotificationPrefs() async {
+    final data = await _notificationsRepo.getPreferences();
+    final prefs = data?['prefs'] as Map<String, dynamic>? ?? const {};
+    newOrdersNotif.value = prefs['orders'] as bool? ?? true;
+    customerMessagesNotif.value = prefs['messages'] as bool? ?? true;
+    lowStockNotif.value = prefs['orders'] as bool? ?? true;
   }
 
   Future<void> _loadStoreData() async {
     final storeId = await AppPreferences.getStoreId();
     if (storeId == null || storeId.isEmpty) return;
     final store = await _repo.getStoreById(storeId);
-    if (store != null) storeName.value = store.name;
+    if (store != null) {
+      storeName.value = store.name;
+      posEnabled.value = store.enabledTools.contains('pos_register');
+    }
   }
 
   void _applyUser(UserModel? user) {
@@ -246,6 +280,7 @@ class SellerSettingsController extends GetxController {
       _applyUser(Get.find<ProfileController>().user.value);
     } catch (_) {}
     await _loadStoreData();
+    await _loadNotificationPrefs();
     isLoading.value = false;
   }
 
@@ -267,5 +302,46 @@ class SellerSettingsController extends GetxController {
         await Get.find<AuthController>().logout();
       },
     );
+  }
+
+  /// Delete account — also suspends all stores owned by this seller
+  /// (backend: DELETE api/users/profile, branches on req.user.role).
+  void deleteAccount() {
+    showCustomDialog(
+      title: 'Delete Account',
+      content:
+          'Are you sure you want to delete your account? This will also '
+          'suspend your store(s). This action cannot be undone.',
+      leftButtonName: 'Cancel',
+      rightButtonName: 'Delete',
+      requireDeleteConfirmation: true,
+      onLeftButtonTap: () => Get.back(),
+      onRightButtonTap: () async {
+        await _performDeleteAccount();
+      },
+    );
+  }
+
+  Future<void> _performDeleteAccount() async {
+    try {
+      final token = await AppPreferences.getAccessTokenAsync();
+
+      if (token == null || token.isEmpty) {
+        ToastUtil.showToast('Session expired');
+        return;
+      }
+
+      final success = await _authRepository.deleteAccount(token: token);
+
+      if (success) {
+        ToastUtil.showToast('Account deleted successfully');
+        await Get.find<AuthController>().logout();
+      } else {
+        ToastUtil.showToast('Failed to delete account');
+      }
+    } catch (e) {
+      debugPrint('Error deleting account: $e');
+      ToastUtil.showToast('Failed to delete account');
+    }
   }
 }

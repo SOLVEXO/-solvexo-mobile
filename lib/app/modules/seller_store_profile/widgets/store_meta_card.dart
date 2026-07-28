@@ -18,40 +18,59 @@ class StoreMetaCard extends StatelessWidget {
         decoration: _cardDeco(),
         child: Obx(() {
           final s = c.store.value;
-          return Column(children: [
-            StoreInfoRow(
-              icon: AppIcons.dashboardIcon,
-              label: 'Category',
-              value: c.categoryName,
-            ),
-            const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
-            StoreInfoRow(
-              icon: AppIcons.calenderIcon,
-              label: 'Member Since',
-              value: s != null
-                  ? '${_monthName(s.createdAt.month)} ${s.createdAt.year}'
-                  : '—',
-            ),
-            const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
-            StoreInfoRow(
-              icon: AppIcons.cartIcon,
-              label: 'Store Status',
-              value: s?.isActive == true ? 'Active & Verified' : 'Inactive',
-            ),
-          ]);
+          return Column(
+            children: [
+              StoreInfoRow(
+                icon: AppIcons.dashboardIcon,
+                label: 'Category',
+                value: c.categoryName,
+              ),
+              const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
+              StoreInfoRow(
+                icon: AppIcons.calenderIcon,
+                label: 'Member Since',
+                value: s != null
+                    ? '${_monthName(s.createdAt.month)} ${s.createdAt.year}'
+                    : '—',
+              ),
+              const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
+              StoreInfoRow(
+                icon: AppIcons.cartIcon,
+                label: 'Store Status',
+                value: s?.isActive == true ? 'Active & Verified' : 'Inactive',
+              ),
+            ],
+          );
         }),
       ),
     );
   }
 
   String _monthName(int m) => const [
-    '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ][m];
 }
 
 BoxDecoration _cardDeco() => BoxDecoration(
   color: AppColors.white,
   borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-  boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+  boxShadow: [
+    BoxShadow(
+      color: AppColors.black.withOpacity(0.04),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ],
 );

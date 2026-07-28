@@ -1,25 +1,34 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
+
 import 'package:book_store_app/app/data/repositories/notifications_repository.dart';
 import 'package:book_store_app/app/notification/local_notification_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+/// Owns the whole push-notification lifecycle: requesting the OS permission,
+/// obtaining the FCM token, registering/refreshing/removing it with the
+/// backend's device-token registry (`api/notifications/device-token`), and
+/// showing a local notification for foreground pushes.
+///
+/// Call [init] once right after a successful login/register/OTP-verify (and
+/// on app start for an already-logged-in user) — see call sites in
+/// `AuthRepository` and `SplashScreenController`. Call [signOut] from
+/// logout so a signed-out install stops receiving the previous user's pushes.
 class FcmService {
   static final FcmService _instance = FcmService._();
 
   String? _fcmToken;
+  bool _initialized = false;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final NotificationsRepository _notificationsRepository = NotificationsRepository();
 
   FcmService._();
 
-  factory FcmService() {
-    return _instance;
-  }
+  factory FcmService() => _instance;
 
   Future<void> setPresentationOptions({
     bool alert = true,
@@ -33,44 +42,93 @@ class FcmService {
     );
   }
 
-  Future<void> init() async {
-    _firebaseMessaging.requestPermission(
-      sound: true,
-      badge: true,
-      alert: true,
-      carPlay: false,
-      provisional: false,
-      announcement: false,
-      criticalAlert: false,
-    );
+  /// Requests the OS permission, obtains the token, registers it with the
+  /// backend, and wires up foreground/opened-app listeners. Safe to call
+  /// more than once (e.g. once from the splash screen for a returning user,
+  /// again after a fresh login) — only runs the one-time listener setup
+  /// once, but always re-checks permission/token/subscription so a token
+  /// rotated since the last call, or a permission granted after being
+  /// previously denied, still gets picked up.
+  ///
+  /// Every call site invokes this with `unawaited(...)` so a slow/failing
+  /// push setup never blocks login/navigation — which means nothing is
+  /// there to catch a thrown error. It must never throw.
+  Future<NotificationSettings?> init() async {
+    try {
+      final settings = await _firebaseMessaging.requestPermission(
+        sound: true,
+        badge: true,
+        alert: true,
+        carPlay: false,
+        provisional: false,
+        announcement: false,
+        criticalAlert: false,
+      );
 
-    await setPresentationOptions();
+      await setPresentationOptions();
 
-    await Future.delayed(const Duration(milliseconds: 1));
+      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional) {
+        // On iOS, `getToken()` needs the native APNs token first — right
+        // after `requestPermission()` resolves, APNs registration is still
+        // in flight, so calling it immediately throws
+        // `apns-token-not-set`. Poll briefly for it; on the iOS Simulator
+        // (which never receives a real APNs token) this will simply time
+        // out and skip token registration rather than crash.
+        if (Platform.isIOS) {
+          await _waitForApnsToken();
+        }
 
-    // if (!Platform.isIOS) {
-    _fcmToken = await _firebaseMessaging.getToken();
-    debugPrint("FCM token: $_fcmToken");
-    await registerDeviceToken();
-    // } else {
-    //   debugPrint("⚠️ Skipping FCM token generation on iOS simulator.");
+        try {
+          _fcmToken = await _firebaseMessaging.getToken();
+          debugPrint("FCM token: $_fcmToken");
+          await registerDeviceToken();
+          await subscribeToUserId();
+        } catch (e) {
+          debugPrint("⚠️ FCM getToken failed (ignored): $e");
+        }
+      }
 
-    // var settings = await _firebaseMessaging.getNotificationSettings();
-    // debugPrint("not settings: ${settings.sound}");
+      _setupListeners();
+      return settings;
+    } catch (e) {
+      debugPrint("⚠️ FcmService.init failed (ignored): $e");
+      return null;
+    }
+  }
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      debugPrint("Push received: ${message.data}");
-      var remoteNotification = message.notification;
-      if (remoteNotification != null) {
-        if (Platform.isAndroid) {
-          var channel = LocalNotificationService().channel;
+  Future<void> _waitForApnsToken() async {
+    for (var attempt = 0; attempt < 5; attempt++) {
+      final apnsToken = await _firebaseMessaging.getAPNSToken();
+      if (apnsToken != null) return;
+      await Future.delayed(const Duration(seconds: 1));
+    }
+    debugPrint("⚠️ No APNS token after retries (simulator, or APNs not yet ready)");
+  }
 
+  void _setupListeners() {
+    if (!_initialized) {
+      _initialized = true;
+
+      // Token can rotate (app restore on new device, cleared app data,
+      // token expiry) — without this the backend keeps sending to a dead
+      // token and push silently stops working until reinstall.
+      _firebaseMessaging.onTokenRefresh.listen((newToken) async {
+        _fcmToken = newToken;
+        debugPrint("FCM token refreshed: $newToken");
+        await registerDeviceToken();
+      });
+
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+        debugPrint("Push received (foreground): ${message.data}");
+        final remoteNotification = message.notification;
+        if (remoteNotification != null && Platform.isAndroid) {
+          final channel = LocalNotificationService().channel;
           LocalNotificationService().flutterLocalNotificationsPlugin.show(
-            id: int.parse(channel.id),
+            id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
             title: remoteNotification.title,
             body: remoteNotification.body,
             notificationDetails: NotificationDetails(
-              // iOS: const IOSNotificationDetails(),
               android: AndroidNotificationDetails(
                 channel.id,
                 channel.name,
@@ -78,47 +136,51 @@ class FcmService {
                 icon: 'notif_icon',
               ),
             ),
-            payload: Platform.isAndroid ? jsonEncode(message.data) : null,
+            payload: jsonEncode(message.data),
           );
         }
-      }
-    });
+      });
 
-    ///This is called when notification is clicked on background
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint("onMessageOpenedApp from bg ${message.data}");
-
-      // var payload = NotificationItem.fromJson(message.data);
-
-      // NavigationService.navigateFromNotification(payload);
-    });
-    FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);
+      /// Called when a push notification is tapped from the background.
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        debugPrint("onMessageOpenedApp: ${message.data}");
+      });
+    }
   }
 
   Future<Map<String, dynamic>?> getInitialMessage() async {
-    var remote = await _firebaseMessaging.getInitialMessage();
+    final remote = await _firebaseMessaging.getInitialMessage();
     return remote?.data;
   }
 
-  static Future<void> _onBackgroundMessage(RemoteMessage event) async {
-    log("fcm data background: ${event.data}");
-    // DashboardController.onBackgroundTap(event.data);
+  /// Real OS-level permission state — for surfacing in the notification
+  /// preferences UI instead of only a backend `pushEnabled` toggle that
+  /// has no bearing on whether push can actually reach the device.
+  Future<AuthorizationStatus> getPermissionStatus() async {
+    final settings = await _firebaseMessaging.getNotificationSettings();
+    return settings.authorizationStatus;
+  }
+
+  /// Deep-links into the OS app-settings screen so a user who denied the
+  /// permission can re-enable it without reinstalling.
+  Future<void> openNotificationSettings() async {
+    await openAppSettings();
   }
 
   Future<void> subscribeToUserId() async {
-    var userId = AppPreferences.getUserId();
+    final userId = await AppPreferences.getUserId();
+    if (userId == null || userId.isEmpty) return;
 
-    log("Subscribing to my user ID $userId");
-    await _firebaseMessaging.subscribeToTopic(userId.toString());
-    log("Subscribed $userId");
+    debugPrint("Subscribing to topic $userId");
+    await _firebaseMessaging.subscribeToTopic(userId);
   }
 
   Future<void> unsubscribeToUserId() async {
-    var userId = AppPreferences.getUserId();
-
-    log("UnSubscribing to my user ID $userId");
-    await _firebaseMessaging.unsubscribeFromTopic(userId.toString());
-    log("UnSubscribed $userId");
+    final userId = await AppPreferences.getUserId();
+    if (userId != null && userId.isNotEmpty) {
+      debugPrint("Unsubscribing from topic $userId");
+      await _firebaseMessaging.unsubscribeFromTopic(userId);
+    }
     await removeDeviceToken();
   }
 
@@ -142,5 +204,10 @@ class FcmService {
     await _notificationsRepository.removeDeviceToken(token);
   }
 
-  String? get fcmToken => _fcmToken ?? "";
+  /// Full teardown for logout: unsubscribe from the topic and remove the
+  /// device token, so the very next push after sign-out never reaches this
+  /// install.
+  Future<void> signOut() => unsubscribeToUserId();
+
+  String? get fcmToken => _fcmToken;
 }

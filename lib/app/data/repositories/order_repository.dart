@@ -102,10 +102,21 @@ class OrderRepository {
 
       debugPrint('✅ Return Request Response: ${response.data}');
 
-      return response.data['success'] == true;
+      if (response.data['success'] == true) return true;
+
+      ToastUtil.showToast(
+        response.data['message'] as String? ?? 'Failed to submit refund request.',
+      );
+      return false;
+    } on DioException catch (e) {
+      debugPrint('❌ Return Request DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return false;
     } catch (e) {
       debugPrint('❌ Return Request error: $e');
-      rethrow;
+      ToastUtil.showToast('Failed to submit refund request.');
+      return false;
     }
   }
 

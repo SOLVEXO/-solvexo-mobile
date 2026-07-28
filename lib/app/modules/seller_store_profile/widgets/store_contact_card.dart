@@ -18,19 +18,21 @@ class StoreContactCard extends StatelessWidget {
         decoration: _cardDeco(),
         child: Obx(() {
           final email = c.store.value?.sellerEmail ?? '';
-          return Column(children: [
-            StoreInfoRow(
-              icon: AppIcons.emailIcon,
-              label: 'Email',
-              value: email.isEmpty ? '—' : email,
-            ),
-            const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
-            const StoreInfoRow(
-              icon: AppIcons.phoneIcon,
-              label: 'Phone',
-              value: '—',
-            ),
-          ]);
+          return Column(
+            children: [
+              StoreInfoRow(
+                icon: AppIcons.emailIcon,
+                label: 'Email',
+                value: email.isEmpty ? '—' : email,
+              ),
+              const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
+              const StoreInfoRow(
+                icon: AppIcons.phoneIcon,
+                label: 'Phone',
+                value: '—',
+              ),
+            ],
+          );
         }),
       ),
     );
@@ -40,5 +42,11 @@ class StoreContactCard extends StatelessWidget {
 BoxDecoration _cardDeco() => BoxDecoration(
   color: AppColors.white,
   borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-  boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+  boxShadow: [
+    BoxShadow(
+      color: AppColors.black.withOpacity(0.04),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ],
 );

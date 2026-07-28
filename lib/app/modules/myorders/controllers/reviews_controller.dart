@@ -9,7 +9,10 @@ import 'package:get/get.dart';
 /// Expects `Get.arguments` as `{'orderId': String, 'item': OrderItem}`,
 /// set by whichever "Write Review" button navigated here.
 class ReviewsController extends GetxController {
-  final RatingRepository _repo = RatingRepository();
+  ReviewsController({RatingRepository? repository})
+    : _repo = repository ?? RatingRepository();
+
+  final RatingRepository _repo;
 
   String orderId = '';
   OrderItem? item;

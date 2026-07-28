@@ -20,60 +20,62 @@ class DashboardBottomNav extends StatelessWidget {
       final profileController = Get.put(ProfileController());
       final user = profileController.user.value;
       final userProfile = user?.profileImage ?? "";
-      return Container(
-        height: 60,
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withOpacity(showShadow ? 0.1 : 0),
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(
-              index: 0,
-              icon: AppIcons.home,
-              isActive: activeTab == 0,
-              onTap: () {
-                controller.changeTab(0);
-                // homeController.refreshHome();
-              },
-            ),
-            _buildNavItem(
-              index: 1,
-              icon: AppIcons.searchIcon,
-              isActive: activeTab == 1,
-              onTap: () => controller.changeTab(1),
-              iconSize: 25,
-            ),
-            _buildNavItem(
-              index: 2,
-              icon: AppIcons.billsIcon,
-              isActive: activeTab == 2,
-              onTap: () => controller.changeTab(2),
-              iconSize: 25,
-            ),
-            _buildNavItem(
-              index: 3,
-              icon: AppIcons.cartIcon,
-              isCartIcon: true,
-              isActive: activeTab == 3,
-              onTap: () => controller.changeTab(3),
-            ),
-            _buildNavItem(
-              index: 4,
-              profile: true,
-              url: userProfile.isEmpty ? null : userProfile,
-              icon: activeTab == 4 ? AppIcons.moreFill : AppIcons.more,
-              isActive: activeTab == 4,
-              onTap: () => controller.changeTab(4),
-            ),
-          ],
+      return SafeArea(
+        child: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.black.withOpacity(showShadow ? 0.1 : 0),
+                blurRadius: 10,
+                offset: Offset(0, -2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(
+                index: 0,
+                icon: AppIcons.home,
+                isActive: activeTab == 0,
+                onTap: () {
+                  controller.changeTab(0);
+                  // homeController.refreshHome();
+                },
+              ),
+              _buildNavItem(
+                index: 1,
+                icon: AppIcons.searchIcon,
+                isActive: activeTab == 1,
+                onTap: () => controller.changeTab(1),
+                iconSize: 25,
+              ),
+              _buildNavItem(
+                index: 2,
+                icon: AppIcons.billsIcon,
+                isActive: activeTab == 2,
+                onTap: () => controller.changeTab(2),
+                iconSize: 25,
+              ),
+              _buildNavItem(
+                index: 3,
+                icon: AppIcons.cartIcon,
+                isCartIcon: true,
+                isActive: activeTab == 3,
+                onTap: () => controller.changeTab(3),
+              ),
+              _buildNavItem(
+                index: 4,
+                profile: true,
+                url: userProfile.isEmpty ? null : userProfile,
+                icon: activeTab == 4 ? AppIcons.moreFill : AppIcons.more,
+                isActive: activeTab == 4,
+                onTap: () => controller.changeTab(4),
+              ),
+            ],
+          ),
         ),
       );
     });

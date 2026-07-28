@@ -31,19 +31,27 @@ class ProductsGrid extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: _gridHPad),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: controller.filteredProducts.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: cols,
-              mainAxisSpacing: BaseSpacing.md - 2,
-              crossAxisSpacing: _crossGap,
-              mainAxisExtent: cellHeight,
-            ),
-            itemBuilder: (_, i) => ProductCard(
-              product: controller.filteredProducts[i],
-              index: i,
+          // Reactivity lives here, inside the widget's own build — the caller
+          // instantiates this as `const ProductsGrid()`, and a const instance
+          // is `identical` across parent rebuilds, so Flutter's element diff
+          // skips rebuilding it entirely unless the observable read is inside
+          // its own Obx (Obx subscribes directly and rebuilds independently
+          // of whether the parent widget instance changed).
+          child: Obx(
+            () => GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: controller.filteredProducts.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: cols,
+                mainAxisSpacing: BaseSpacing.md - 2,
+                crossAxisSpacing: _crossGap,
+                mainAxisExtent: cellHeight,
+              ),
+              itemBuilder: (_, i) => ProductCard(
+                product: controller.filteredProducts[i],
+                index: i,
+              ),
             ),
           ),
         );

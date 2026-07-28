@@ -5,6 +5,7 @@ import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/controllers/seller_store_profile_controller.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_about_card.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_contact_card.dart';
+import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_edit_cover_section.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_edit_form_card.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_edit_logo_section.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_edit_save_bar.dart';
@@ -92,8 +93,8 @@ class SellerStoreProfileView extends StatelessWidget {
         body: c.isLoading.value
             ? const StoreProfileShimmer()
             : c.isEditing.value
-                ? _EditBody(c: c)
-                : _ProfileBody(c: c),
+            ? _EditBody(c: c)
+            : _ProfileBody(c: c),
         bottomNavigationBar: c.isEditing.value
             ? StoreEditSaveBar(
                 c: c,
@@ -162,6 +163,8 @@ class _EditBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           StoreEditLogoSection(c: c),
+          const SizedBox(height: 16),
+          StoreEditCoverSection(c: c),
           const SizedBox(height: 16),
           StoreEditFormCard(c: c),
           const SizedBox(height: 24),

@@ -9,6 +9,7 @@ import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,7 +23,7 @@ class StorefrontHeader extends StatelessWidget {
   const StorefrontHeader({super.key, required this.store, required this.c});
 
   static const double _coverHeight = 180;
-  static const double _logoSize = 92;
+  static const double _logoSize = 100;
   static const double _coverRadius = BaseRadius.xxl;
 
   bool get _isVerified =>
@@ -57,7 +58,7 @@ class StorefrontHeader extends StatelessWidget {
                 ),
               ),
               Positioned(
-                bottom: 0,
+                bottom: -Get.height / 100,
                 left: BaseSpacing.lg,
                 child: _HexagonAvatar(
                   store: store,
@@ -227,39 +228,16 @@ class _RoundIconButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.black.withOpacity(0.32),
-          shape: BoxShape.circle,
+          color: AppColors.primaryColor,
+          borderRadius: BorderRadius.circular(AppDimen.borderRadius),
         ),
         alignment: Alignment.center,
-        child: SvgIcon(assetName: icon, size: 20, color: AppColors.white),
+        child: SvgIcon(assetName: icon, size: 22, color: AppColors.white),
       ),
     );
   }
-}
-
-// ─── Hexagon avatar ──────────────────────────────────────────────────────────
-
-class _HexagonClipper extends CustomClipper<Path> {
-  const _HexagonClipper();
-
-  @override
-  Path getClip(Size size) {
-    final w = size.width;
-    final h = size.height;
-    return Path()
-      ..moveTo(w * 0.5, 0)
-      ..lineTo(w, h * 0.25)
-      ..lineTo(w, h * 0.75)
-      ..lineTo(w * 0.5, h)
-      ..lineTo(0, h * 0.75)
-      ..lineTo(0, h * 0.25)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
 class _HexagonAvatar extends StatelessWidget {
@@ -280,34 +258,32 @@ class _HexagonAvatar extends StatelessWidget {
       width: size,
       height: size,
       child: Stack(
-        clipBehavior: Clip.none,
         children: [
-          // `PhysicalShape` clips AND shadows to the exact hexagon path —
-          // a plain circular `Container` behind a hexagon `ClipPath` left
-          // round white bulges peeking out past the hexagon's flat edges.
-          PhysicalShape(
-            clipper: const _HexagonClipper(),
-            color: AppColors.white,
-            elevation: 3,
-            shadowColor: AppColors.black.withOpacity(0.3),
-            child: Padding(
-              padding: const EdgeInsets.all(3),
-              child: ClipPath(
-                clipper: const _HexagonClipper(),
-                child: Container(
-                  color: AppColors.primaryColor.withOpacity(0.08),
-                  child: hasLogo
-                      ? CommonImageView(url: store.logo!, fit: BoxFit.cover)
-                      : Center(
-                          child: CustomText(
-                            text: store.initials,
-                            color: AppColors.primaryColor,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 30,
-                          ),
-                        ),
-                ),
+          Padding(
+            padding: const EdgeInsets.all(3),
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.primaryColor),
               ),
+
+              child: hasLogo
+                  ? CommonImageView(
+                      url: store.logo!,
+                      fit: BoxFit.cover,
+                      radius: BorderRadius.circular(20),
+                    )
+                  : Center(
+                      child: CustomText(
+                        text: store.initials,
+                        color: AppColors.primaryColor,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 30,
+                      ),
+                    ),
             ),
           ),
           if (isVerified)
@@ -320,11 +296,7 @@ class _HexagonAvatar extends StatelessWidget {
                   color: AppColors.white,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.verified_rounded,
-                  size: 20,
-                  color: AppColors.primaryColor,
-                ),
+                child: SvgIcon(assetName: AppIcons.verifiedIcon, size: 20),
               ),
             ),
         ],

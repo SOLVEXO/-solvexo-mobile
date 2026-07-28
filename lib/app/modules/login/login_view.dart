@@ -106,10 +106,14 @@ class LoginView extends StatelessWidget {
           SizedBox(height: BaseSpacing.md),
 
           // ── Social buttons ──────────────────────────────────────────────
-          _SocialRow(
-            onGoogle: authController.signInWithGoogle,
-            onFacebook: authController.signInWithFacebook,
-            onApple: authController.signInWithApple,
+          Obx(
+            () => _SocialRow(
+              onGoogle: authController.signInWithGoogle,
+              onFacebook: authController.signInWithFacebook,
+              onApple: authController.signInWithApple,
+              isBusy: authController.isSocialLoading.value,
+              activeProvider: authController.activeSocialProvider.value,
+            ),
           ),
         ],
       ),
@@ -149,10 +153,14 @@ class _SocialRow extends StatelessWidget {
     required this.onGoogle,
     required this.onFacebook,
     required this.onApple,
+    required this.isBusy,
+    required this.activeProvider,
   });
   final VoidCallback onGoogle;
   final VoidCallback onFacebook;
   final VoidCallback onApple;
+  final bool isBusy;
+  final String activeProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -162,15 +170,25 @@ class _SocialRow extends StatelessWidget {
           icon: AppIcons.googleIcon,
           label: 'Google',
           onTap: onGoogle,
+          disabled: isBusy,
+          isLoading: activeProvider == 'google',
         ),
         SizedBox(width: BaseSpacing.sm),
         _SocialButton(
           icon: AppIcons.facebookIcon,
           label: 'Facebook',
           onTap: onFacebook,
+          disabled: isBusy,
+          isLoading: activeProvider == 'facebook',
         ),
         SizedBox(width: BaseSpacing.sm),
-        _SocialButton(icon: AppIcons.appleIcon, label: 'Apple', onTap: onApple),
+        _SocialButton(
+          icon: AppIcons.appleIcon,
+          label: 'Apple',
+          onTap: onApple,
+          disabled: isBusy,
+          isLoading: activeProvider == 'apple',
+        ),
       ],
     );
   }
@@ -181,39 +199,59 @@ class _SocialButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.disabled = false,
+    this.isLoading = false,
   });
   final String icon;
   final String label;
   final VoidCallback onTap;
+  final bool disabled;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 48,
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.lightGrey2),
-            borderRadius: BorderRadius.circular(BaseRadius.md),
-            color: AppColors.white,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgIcon(assetName: icon, size: 18),
-              SizedBox(width: BaseSpacing.xxs + 1),
-              Flexible(
-                child: CustomText(
-                  text: label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  color: AppColors.black2,
-                  fontSize: AppFontSize.tiny,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+        onTap: disabled ? null : onTap,
+        child: Opacity(
+          opacity: disabled && !isLoading ? 0.5 : 1,
+          child: Container(
+            height: 48,
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.lightGrey2),
+              borderRadius: BorderRadius.circular(BaseRadius.md),
+              color: AppColors.white,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: isLoading
+                  ? [
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(
+                            AppColors.primaryColor,
+                          ),
+                        ),
+                      ),
+                    ]
+                  : [
+                      SvgIcon(assetName: icon, size: 18),
+                      SizedBox(width: BaseSpacing.xxs + 1),
+                      Flexible(
+                        child: CustomText(
+                          text: label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          color: AppColors.black2,
+                          fontSize: AppFontSize.tiny,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+            ),
           ),
         ),
       ),

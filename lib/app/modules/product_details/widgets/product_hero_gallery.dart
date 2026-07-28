@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/cart_icon_with_count.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/components/wishlist_heart_button.dart';
@@ -21,22 +22,42 @@ class ProductHeroGallery extends StatelessWidget {
   final ProductDetailController controller;
   final ProductModel product;
 
-  const ProductHeroGallery({super.key, required this.controller, required this.product});
+  const ProductHeroGallery({
+    super.key,
+    required this.controller,
+    required this.product,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final images = controller.displayImages;
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md, vertical: BaseSpacing.sm),
+        padding: EdgeInsets.symmetric(
+          horizontal: BaseSpacing.md,
+          vertical: BaseSpacing.sm,
+        ),
         child: Column(
           spacing: 20,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _CircleIconButton(assetName: AppIcons.chevronLeft, onTap: () => Get.back()),
-                _CircleIconButton(assetName: AppIcons.shareIcon),
+                _CircleIconButton(
+                  assetName: AppIcons.chevronLeft,
+                  onTap: () => Get.back(),
+                ),
+                Spacer(),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: CartIconWithCount(color: AppColors.white, size: 25),
+                  ),
+                ),
               ],
             ),
             SizedBox(
@@ -52,13 +73,21 @@ class ProductHeroGallery extends StatelessWidget {
                       radius: BaseRadius.lg,
                       child: images.isEmpty
                           ? const Center(
-                              child: Icon(Icons.image_outlined, color: AppColors.lightGrey7, size: 48),
+                              child: Icon(
+                                Icons.image_outlined,
+                                color: AppColors.lightGrey7,
+                                size: 48,
+                              ),
                             )
                           : PageView.builder(
                               controller: controller.imagePageController,
-                              onPageChanged: (i) => controller.imagePage.value = i,
+                              onPageChanged: (i) =>
+                                  controller.imagePage.value = i,
                               itemCount: images.length,
-                              itemBuilder: (_, i) => CommonImageView(url: images[i], fit: BoxFit.contain),
+                              itemBuilder: (_, i) => CommonImageView(
+                                url: images[i],
+                                fit: BoxFit.contain,
+                              ),
                             ),
                     ),
                   ),
@@ -69,7 +98,9 @@ class ProductHeroGallery extends StatelessWidget {
                     right: 0,
                     child: WishlistHeartButton(
                       productId: product.id,
-                      variantId: product.variants.isNotEmpty ? product.variants.first.id : '',
+                      variantId: product.variants.isNotEmpty
+                          ? product.variants.first.id
+                          : '',
                     ),
                   ),
 
@@ -119,12 +150,12 @@ class _CircleIconButton extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: AppColors.white.withOpacity(0.92),
+          color: AppColors.primaryColor,
           borderRadius: BorderRadius.circular(AppDimen.borderRadius),
           boxShadow: BaseShadows.forLevel(BaseElevation.level1),
         ),
         alignment: Alignment.center,
-        child: SvgIcon(assetName: assetName!, size: 22),
+        child: SvgIcon(assetName: assetName!, size: 22, color: AppColors.white),
       ),
     );
   }

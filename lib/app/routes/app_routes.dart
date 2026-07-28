@@ -13,6 +13,7 @@ abstract class Routes {
   static const categoryScreen = '/category_screen';
   static const subCategoryView = '/category/sub_category';
   static const productDetailsView = '/category/product_details';
+  static const productPreviewView = '/category/product_details/preview';
   static const sellerStorefront = '/store/storefront';
   static const storesView = '/store/stores';
   static const searchView = '/search';
@@ -30,6 +31,7 @@ abstract class Routes {
   static const helpCenterView = '/profile/help-center';
   static const faqListView = '/profile/faq_view';
   static const faqDetailView = '/profile/faq_details';
+  static const contactUsView = '/profile/contact-us';
   static const mapPickerView = '/map_picker';
   static const editProfileView = '/edit-profile';
   static const forgetPasswordView = '/forget-password';
@@ -41,6 +43,8 @@ abstract class Routes {
   static const CHAT = '/chat';
   static const WISHLIST = '/wishlist';
   static const notifications = '/notifications';
+  static const notificationPreferences = '/notifications/preferences';
+  static const trendingProducts = '/trending-products';
   static const messagesView = '/messages';
   static const chatView = '/messages/chat';
 
@@ -59,6 +63,7 @@ abstract class Routes {
   static const sellerMessages = '/seller/messages';
   static const sellerOrders = '/seller/orders';
   static const sellerOrderDetail = '/seller/orders/detail';
+  static const sellerReturns = '/seller/returns';
   // Seller settings sub-screens
   static const sellerStoreProfile = '/seller/settings/store-profile';
   static const sellerPaymentMethods = '/seller/settings/payment-methods';
@@ -100,6 +105,9 @@ abstract class Routes {
 
   // Buyer — store memberships (subscriptions)
   static const myMemberships = '/my-memberships';
+
+  // Buyer/guest — free, unauthenticated AI Worksheet Builder trial
+  static const worksheetTrial = '/worksheet-trial';
 
   // POS sub-screens
   static const posOrders = '/pos/orders';

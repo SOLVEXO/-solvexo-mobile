@@ -4,6 +4,8 @@ import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/marketing/coupon_model.dart';
 import 'package:book_store_app/app/modules/seller_coupons/controllers/seller_coupons_controller.dart';
+import 'package:book_store_app/app/modules/seller_coupons/widgets/campaign_card.dart';
+import 'package:book_store_app/app/modules/seller_coupons/widgets/campaigns_shimmer.dart';
 import 'package:book_store_app/app/modules/seller_coupons/widgets/coupon_card.dart';
 import 'package:book_store_app/app/modules/seller_coupons/widgets/coupon_form_sheet.dart';
 import 'package:book_store_app/app/modules/seller_coupons/widgets/coupons_shimmer.dart';
@@ -24,17 +26,30 @@ class SellerCouponsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBarTwo(title: 'Coupons & Discounts'),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => CouponFormSheet.show(context, controller),
-        backgroundColor: AppColors.primaryColor,
-        icon: const Icon(Icons.add_rounded, color: AppColors.white),
-        label: CustomText(text: 'New Coupon', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+      floatingActionButton: Obx(
+        () => controller.segment.value == CouponsScreenSegment.coupons
+            ? FloatingActionButton.extended(
+                onPressed: () => CouponFormSheet.show(context, controller),
+                backgroundColor: AppColors.primaryColor,
+                icon: const Icon(Icons.add_rounded, color: AppColors.white),
+                label: CustomText(text: 'New Coupon', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+              )
+            : const SizedBox.shrink(),
       ),
       body: Column(
         children: [
-          _FilterTabs(controller: controller),
+          _SegmentTabs(controller: controller),
+          Obx(
+            () => controller.segment.value == CouponsScreenSegment.coupons
+                ? _FilterTabs(controller: controller)
+                : const SizedBox.shrink(),
+          ),
           Expanded(
             child: Obx(() {
+              if (controller.segment.value == CouponsScreenSegment.campaigns) {
+                return _buildCampaignsBody(context);
+              }
+
               if (controller.isLoading.value) return const CouponsShimmer();
 
               final items = controller.filteredCoupons;
@@ -64,6 +79,33 @@ class SellerCouponsView extends StatelessWidget {
     );
   }
 
+  Widget _buildCampaignsBody(BuildContext context) {
+    if (controller.isLoadingCampaigns.value) return const CampaignsShimmer();
+
+    final items = controller.campaigns;
+    if (items.isEmpty) return const _CampaignsEmptyState();
+
+    return CustomRefreshWrapper(
+      onRefresh: controller.loadCampaigns,
+      child: ListView.separated(
+        padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.xxl * 2),
+        itemCount: items.length,
+        separatorBuilder: (_, __) => SizedBox(height: BaseSpacing.sm),
+        itemBuilder: (_, i) {
+          final campaign = items[i];
+          return Obx(
+            () => CampaignCard(
+              campaign: campaign,
+              isProcessing: controller.processingCampaignIds.contains(campaign.id),
+              onJoin: () => controller.joinCampaign(campaign),
+              onLeave: () => controller.leaveCampaign(campaign),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   void _confirmDelete(BuildContext context, CouponModel coupon) {
     CustomConfirmDialog.show(
       context,
@@ -72,6 +114,36 @@ class SellerCouponsView extends StatelessWidget {
       confirmLabel: 'Delete',
       confirmColor: AppColors.red,
       onConfirm: () => controller.deleteCoupon(coupon),
+    );
+  }
+}
+
+class _SegmentTabs extends StatelessWidget {
+  final SellerCouponsController controller;
+  const _SegmentTabs({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.white,
+      padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, 0),
+      child: Obx(
+        () => Row(
+          children: [
+            _Tab(
+              label: 'Coupons',
+              selected: controller.segment.value == CouponsScreenSegment.coupons,
+              onTap: () => controller.setSegment(CouponsScreenSegment.coupons),
+            ),
+            SizedBox(width: BaseSpacing.xs),
+            _Tab(
+              label: 'Campaigns',
+              selected: controller.segment.value == CouponsScreenSegment.campaigns,
+              onTap: () => controller.setSegment(CouponsScreenSegment.campaigns),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -159,6 +231,44 @@ class _EmptyState extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxl),
             child: CustomText(text: message, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400, textAlign: TextAlign.center),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CampaignsEmptyState extends StatelessWidget {
+  const _CampaignsEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [AppColors.primaryColor.withOpacity(0.12), AppColors.accentColor.withOpacity(0.06)]),
+              borderRadius: BorderRadius.circular(BaseRadius.xxl),
+            ),
+            alignment: Alignment.center,
+            child: Icon(Icons.campaign_outlined, size: 34, color: AppColors.primaryColor),
+          ),
+          SizedBox(height: BaseSpacing.md),
+          CustomText(text: 'No campaigns available', color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
+          SizedBox(height: BaseSpacing.xxs + 2),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxl),
+            child: CustomText(
+              text: 'Platform campaigns you can join will show up here. Check back later for new promotions.',
+              color: AppColors.gray600,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w400,
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),

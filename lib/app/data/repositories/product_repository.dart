@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/product_details/models/product_detail_response.dart';
+import 'package:book_store_app/app/modules/product_preview/models/product_preview_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -13,12 +14,18 @@ class ProductRepository {
     String? categoryId,
     int page = 1,
     int limit = 10,
+    String? productType,
+    String? educationLevel,
+    String? normalizedCustomLevel,
   }) async {
     try {
       final url = ApiConstants.getProductsByCategory(
         categoryId: categoryId,
         page: page,
         limit: limit,
+        productType: productType,
+        educationLevel: educationLevel,
+        normalizedCustomLevel: normalizedCustomLevel,
       );
       final response = await _baseClient.get(url);
       if (response.data['success'] == true) {
@@ -28,6 +35,41 @@ class ProductRepository {
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
       return null;
+    }
+  }
+
+  /// Buyer-facing, unauthenticated facet counts backing the education-level
+  /// filter chips on category/sub-category browsing.
+  Future<EducationFacetsResult> getEducationFacets() async {
+    try {
+      final response = await _baseClient.get(ApiConstants.educationFacets);
+      if (response.data['success'] == true) {
+        return EducationFacetsResult.fromJson(
+          response.data['data'] as Map<String, dynamic>,
+        );
+      }
+      return const EducationFacetsResult(levels: [], otherLevels: []);
+    } catch (e) {
+      debugPrint("Get Education Facets error --> $e");
+      return const EducationFacetsResult(levels: [], otherLevels: []);
+    }
+  }
+
+  /// Seller-only autocomplete while typing a custom education level.
+  Future<List<String>> getCustomLevelSuggestions(String q) async {
+    if (q.trim().isEmpty) return [];
+    try {
+      final response = await _baseClient.get(
+        ApiConstants.educationCustomLevelSuggestions(q),
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) {
+        return (response.data['data'] as List? ?? []).cast<String>();
+      }
+      return [];
+    } catch (e) {
+      debugPrint("Get Custom Level Suggestions error --> $e");
+      return [];
     }
   }
 
@@ -138,6 +180,23 @@ class ProductRepository {
       );
       if (response.data['success'] == true) {
         return VariantDetailResponse.fromJson(response.data);
+      }
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    }
+  }
+
+  /// Public, pre-purchase preview of a digital product — a watermarked/trimmed
+  /// derivative only, never the original file.
+  Future<ProductPreviewModel?> getProductPreview(String productId) async {
+    try {
+      final response = await _baseClient.get(
+        ApiConstants.getProductPreview(productId),
+      );
+      if (response.data['success'] == true) {
+        return ProductPreviewModel.fromJson(response.data['data']);
       }
       return null;
     } on DioException catch (e) {

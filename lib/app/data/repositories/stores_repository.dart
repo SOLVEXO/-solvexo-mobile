@@ -1,4 +1,6 @@
 import 'package:book_store_app/app/data/models/storefront/store_list_item_model.dart';
+import 'package:book_store_app/app/data/models/store/platform_stats_model.dart';
+import 'package:book_store_app/app/data/models/store/testimonial_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -107,6 +109,45 @@ class StoresRepository {
     } catch (e) {
       debugPrint('❌ getTopStores error: $e');
       return null;
+    }
+  }
+
+  // ─── GET /api/store/public/platform-stats ────────────────────────────────
+  // Unauthenticated, server-cached (600s) homepage trust stats. Non-critical
+  // content — swallow all errors and return null, matching
+  // `BannersRepository`'s philosophy (never a toast, never a crash).
+
+  Future<PlatformStatsModel?> getPlatformStats() async {
+    try {
+      final response = await _client.get(ApiConstants.publicPlatformStats);
+      if (response.data['success'] == true) {
+        return PlatformStatsModel.fromJson(
+          response.data['data'] as Map<String, dynamic>,
+        );
+      }
+      return null;
+    } catch (e) {
+      debugPrint('❌ getPlatformStats error: $e');
+      return null;
+    }
+  }
+
+  // ─── GET /api/store/public/testimonials ──────────────────────────────────
+  // Unauthenticated, server-cached (600s). Non-critical content — same
+  // swallow-all-errors philosophy as above.
+
+  Future<List<TestimonialModel>> getTestimonials({int limit = 6}) async {
+    try {
+      final response = await _client.get(
+        ApiConstants.publicTestimonials(limit: limit),
+      );
+      final list = response.data['data'] as List? ?? [];
+      return List<TestimonialModel>.from(
+        list.map((e) => TestimonialModel.fromJson(e as Map<String, dynamic>)),
+      );
+    } catch (e) {
+      debugPrint('❌ getTestimonials error: $e');
+      return [];
     }
   }
 }

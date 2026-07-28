@@ -20,7 +20,7 @@ class NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => controller.markRead(notification.id),
+      onTap: () => controller.openNotification(notification),
       behavior: HitTestBehavior.opaque,
       child: Container(
         color: notification.isRead

@@ -1,11 +1,16 @@
 import 'package:book_store_app/core/base/base_controller.dart';
+import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
+import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
+import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
+import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +18,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CartController extends BaseController {
-  final CartRepository _cartRepository = CartRepository();
-  final CheckoutRepository _checkoutRepository = CheckoutRepository();
+  CartController({
+    CartRepository? cartRepository,
+    CheckoutRepository? checkoutRepository,
+    WishlistController? wishlistController,
+  }) : _cartRepository = cartRepository ?? CartRepository(),
+       _checkoutRepository = checkoutRepository ?? CheckoutRepository(),
+       wishlistController =
+           wishlistController ??
+           (Get.isRegistered<WishlistController>()
+               ? Get.find<WishlistController>()
+               : Get.put(WishlistController()));
+
+  final CartRepository _cartRepository;
+  final CheckoutRepository _checkoutRepository;
 
   // ─── State ────────────────────────────────────────────────────────────────
   final RxList<CartItem> cartItems = <CartItem>[].obs;
@@ -256,10 +273,12 @@ class CartController extends BaseController {
     // defaults to checking out the ENTIRE cart.
     final selected = cartItems
         .where((item) => item.isSelected)
-        .map((item) => {
-              'productId': item.productId,
-              'variantId': item.productVariantId,
-            })
+        .map(
+          (item) => {
+            'productId': item.productId,
+            'variantId': item.productVariantId,
+          },
+        )
         .toList();
     if (selected.isEmpty) {
       ToastUtil.showToast('Select at least one item to checkout');
@@ -269,12 +288,96 @@ class CartController extends BaseController {
     isCheckingOut.value = true;
     try {
       final result = await _checkoutRepository.createCheckout(items: selected);
-      if (result != null) {
-        Get.toNamed(Routes.checkoutView, arguments: result);
+      if (result.success && result.data != null) {
+        Get.toNamed(Routes.checkoutView, arguments: result.data);
+      } else if (result.addressRequired) {
+        _promptAddDeliveryAddress();
+      } else {
+        ToastUtil.showToast(result.message ?? 'Failed to create checkout');
       }
     } finally {
       isCheckingOut.value = false;
     }
+  }
+
+  /// Shown when the buyer has no saved address at all (the backend resolves
+  /// the delivery address itself and only rejects checkout in that case —
+  /// see `CheckoutRepository.createCheckout`). Adding an address here pushes
+  /// straight to the add-address form; saving it returns here to the cart.
+  void _promptAddDeliveryAddress() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        title: const CustomText(
+          text: 'Delivery Address Required',
+          fontSize: AppFontSize.small,
+          fontWeight: FontWeight.w700,
+          color: AppColors.black2,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.add_location_alt_outlined,
+                color: AppColors.primaryColor,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const CustomText(
+              text: 'You need a delivery address to check out',
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.w700,
+              color: AppColors.black2,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const CustomText(
+              text: 'Add an address so we know where to ship your order.',
+              fontSize: AppFontSize.verySmall,
+              color: AppColors.grey,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: 'Not Now',
+                  isOutlined: true,
+                  onPressed: () => Get.back(),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: AppButton(
+                  label: 'Add Address',
+                  onPressed: () {
+                    Get.back();
+                    if (!Get.isRegistered<AddressController>()) {
+                      Get.put(AddressController());
+                    }
+                    Get.find<AddressController>().clearForm();
+                    Get.toNamed(Routes.addAddressView);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   List<Map<String, dynamic>> getOrderItems() {
@@ -285,7 +388,7 @@ class CartController extends BaseController {
   }
 
   // ─── 10. UI helpers ───────────────────────────────────────────────────────
-  final WishlistController wishlistController = Get.put(WishlistController());
+  final WishlistController wishlistController;
   void moveToWishlist(CartItem item) {
     wishlistController.addToWishlist(
       productId: item.productId,

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:book_store_app/app/data/models/common_models/auth_response_model.dart';
 import 'package:book_store_app/app/data/models/common_models/social_login_model.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
+import 'package:book_store_app/app/notification/fcm_service.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -41,6 +44,8 @@ class AuthRepository {
           email: auth.user.email,
           role: auth.user.role,
         );
+        // Never blocks navigation — push setup failing shouldn't fail login.
+        unawaited(FcmService().init());
 
         debugPrint('✅ Social login successful');
         return auth;
@@ -78,6 +83,7 @@ class AuthRepository {
           email: auth.user.email,
           role: auth.user.role,
         );
+        unawaited(FcmService().init());
 
         return auth;
       }
@@ -192,13 +198,6 @@ class AuthRepository {
     required String password,
     required String role,
   }) async {
-    // String fcmToken = "";
-
-    // try {
-    //   fcmToken = await FcmService().fcmToken ?? "";
-    // } catch (e) {
-    //   debugPrint("FCM not ready: $e");
-    // }
     try {
       final response = await _baseClient.post(
         ApiConstants.login,
@@ -235,6 +234,7 @@ class AuthRepository {
             email: authResponse.user.email,
             role: authResponse.user.role,
           );
+          unawaited(FcmService().init());
 
           debugPrint("✅ Returning authResponse");
           return authResponse;
@@ -262,6 +262,13 @@ class AuthRepository {
 
   // ================= LOGOUT =================
   Future<void> logout() async {
+    // Must run before `clearPreference()` below wipes the user id it reads.
+    try {
+      await FcmService().signOut();
+    } catch (e) {
+      debugPrint('FCM sign-out error (ignored): $e');
+    }
+
     try {
       // final token = await AppPreferences.getAccessTokenAsync();
 

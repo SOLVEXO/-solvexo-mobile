@@ -37,12 +37,12 @@ class SubCategoryView extends StatelessWidget {
       screenName: c.categoryName,
       actions: [
         Container(
-          padding: EdgeInsets.all(5),
+          padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: AppColors.accentColor,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: CartIconWithCount(color: AppColors.white, size: 20),
+          child: CartIconWithCount(color: AppColors.white, size: 25),
         ),
         SizedBox(width: BaseSpacing.xxs + 3),
         WishlistIconCount(),

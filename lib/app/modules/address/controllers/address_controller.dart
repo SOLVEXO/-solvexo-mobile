@@ -40,7 +40,6 @@ class AddressController extends GetxController {
   void onInit() {
     super.onInit();
     fetchAddresses();
-    fetchDefaultAddress();
   }
 
   @override
@@ -75,15 +74,9 @@ class AddressController extends GetxController {
     }
   }
 
-  Future<void> fetchDefaultAddress() async {
-    try {
-      final result = await _repo.fetchDefaultAddress();
-      defaultAddress.value = result;
-    } catch (e) {
-      debugPrint('❌ fetchDefaultAddress error: $e');
-    }
-  }
-
+  /// Backend only flags `isDefault` on an address if the buyer explicitly
+  /// chose one — most addresses are created without it, so fall back to
+  /// the first address rather than showing "no address" when one exists.
   void syncDefaultAddress() {
     try {
       defaultAddress.value = addresses.firstWhere((a) => a.isDefault);

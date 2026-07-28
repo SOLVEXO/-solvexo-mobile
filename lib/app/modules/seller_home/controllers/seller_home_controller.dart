@@ -1,20 +1,46 @@
+import 'package:book_store_app/app/data/models/announcement_model.dart';
 import 'package:book_store_app/app/data/models/messaging/conversation_model.dart';
+import 'package:book_store_app/app/data/repositories/announcements_repository.dart';
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_analytics_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_orders_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
+import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orders_controller.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SellerHomeController extends GetxController {
-  final _ordersRepo = SellerOrdersRepository();
-  final _messagingRepo = MessagingRepository();
-  final _analyticsRepo = SellerAnalyticsRepository();
-  final _productRepo = SellerProductRepository();
+  SellerHomeController({
+    SellerOrdersRepository? ordersRepository,
+    MessagingRepository? messagingRepository,
+    SellerAnalyticsRepository? analyticsRepository,
+    SellerProductRepository? productRepository,
+    AnnouncementsRepository? announcementsRepository,
+    SellerRepository? sellerRepository,
+  }) : _ordersRepo = ordersRepository ?? SellerOrdersRepository(),
+       _messagingRepo = messagingRepository ?? MessagingRepository(),
+       _analyticsRepo = analyticsRepository ?? SellerAnalyticsRepository(),
+       _productRepo = productRepository ?? SellerProductRepository(),
+       _announcementsRepo =
+           announcementsRepository ?? AnnouncementsRepository(),
+       _sellerRepo = sellerRepository ?? SellerRepository();
+
+  final SellerOrdersRepository _ordersRepo;
+  final MessagingRepository _messagingRepo;
+  final SellerAnalyticsRepository _analyticsRepo;
+  final SellerProductRepository _productRepo;
+  final AnnouncementsRepository _announcementsRepo;
+  final SellerRepository _sellerRepo;
 
   final RxBool isLoading = true.obs;
+
+  // Active platform announcements banner (audience='sellers') — unauthenticated,
+  // non-critical content shared with the buyer home via the same
+  // `AnnouncementsRepository`/`AnnouncementBanner` widget.
+  final RxList<AnnouncementModel> announcements = <AnnouncementModel>[].obs;
+  final RxBool announcementDismissed = false.obs;
 
   // Today's Revenue card — real data from `api/seller/analytics/today`.
   // No "visitors"/"conversion rate" fields — the backend has no storefront
@@ -32,9 +58,13 @@ class SellerHomeController extends GetxController {
 
   // POS access is entitlement-based in the merged platform-plans system —
   // every plan includes at least one POS location, so there's no paywall
-  // gate anymore; "Open POS" navigates straight to POS management.
+  // gate anymore; "Open POS" navigates straight to POS management. It's
+  // still hidden entirely for stores that never opted into
+  // `in_person_pos` (e.g. a digital-only store) via `enabledTools`.
+  final RxBool posEnabled = true.obs;
 
-  final RxList<ConversationModel> recentConversations = <ConversationModel>[].obs;
+  final RxList<ConversationModel> recentConversations =
+      <ConversationModel>[].obs;
 
   @override
   void onInit() {
@@ -54,9 +84,31 @@ class SellerHomeController extends GetxController {
         _loadRecentOrders(),
         _loadRecentMessages(),
         _loadLowStock(),
+        _loadAnnouncements(),
+        _loadStoreCapabilities(),
       ]);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> _loadAnnouncements() async {
+    final result = await _announcementsRepo.getActive('sellers');
+    announcements.assignAll(result);
+  }
+
+  void dismissAnnouncement() => announcementDismissed.value = true;
+
+  Future<void> _loadStoreCapabilities() async {
+    try {
+      final storeId = await AppPreferences.getStoreId();
+      if (storeId == null || storeId.isEmpty) return;
+      final store = await _sellerRepo.getStoreById(storeId);
+      if (store != null) {
+        posEnabled.value = store.enabledTools.contains('pos_register');
+      }
+    } catch (e) {
+      debugPrint('❌ _loadStoreCapabilities error: $e');
     }
   }
 
@@ -80,7 +132,9 @@ class SellerHomeController extends GetxController {
       if (storeId == null || storeId.isEmpty) return;
       final result = await _productRepo.fetchLowStockSummary(storeId: storeId);
       lowStockItems.assignAll(
-        result.items.map((item) => item['name'] as String? ?? '').where((name) => name.isNotEmpty),
+        result.items
+            .map((item) => item['name'] as String? ?? '')
+            .where((name) => name.isNotEmpty),
       );
     } catch (e) {
       debugPrint('❌ _loadLowStock error: $e');

@@ -8,7 +8,13 @@ import 'package:get/get.dart';
 
 /// Buyer's message inbox — lists every store conversation they've started.
 class ConversationsController extends GetxController {
-  final MessagingRepository _repo = MessagingRepository();
+  ConversationsController({
+    MessagingRepository? repository,
+    MessagingSocketService? socketService,
+  }) : _repo = repository ?? MessagingRepository(),
+       _socket = socketService ?? MessagingSocketService.instance;
+
+  final MessagingRepository _repo;
 
   final RxList<ConversationModel> conversations = <ConversationModel>[].obs;
   final RxBool isLoading = true.obs;
@@ -18,7 +24,7 @@ class ConversationsController extends GetxController {
   Timer? _pollTimer;
   static const _pollInterval = Duration(seconds: 15);
 
-  final MessagingSocketService _socket = MessagingSocketService.instance;
+  final MessagingSocketService _socket;
   StreamSubscription? _updateSub;
 
   List<ConversationModel> get filteredConversations {
@@ -39,7 +45,8 @@ class ConversationsController extends GetxController {
     return result;
   }
 
-  int get totalUnread => conversations.fold(0, (sum, c) => sum + c.unreadFor('user'));
+  int get totalUnread =>
+      conversations.fold(0, (sum, c) => sum + c.unreadFor('user'));
 
   @override
   void onInit() {
@@ -51,7 +58,9 @@ class ConversationsController extends GetxController {
       if (!_socket.isConnected.value) loadConversations(silent: true);
     });
     _socket.ensureConnected();
-    _updateSub = _socket.onConversationUpdate.listen((_) => loadConversations(silent: true));
+    _updateSub = _socket.onConversationUpdate.listen(
+      (_) => loadConversations(silent: true),
+    );
   }
 
   @override
@@ -76,10 +85,13 @@ class ConversationsController extends GetxController {
   void setUnreadOnly(bool value) => unreadOnly.value = value;
 
   void openChat(ConversationModel c) {
-    Get.toNamed(Routes.chatView, arguments: {
-      'conversationId': c.id,
-      'peerName': c.peerName('user'),
-      'peerAvatar': c.peerAvatar('user'),
-    });
+    Get.toNamed(
+      Routes.chatView,
+      arguments: {
+        'conversationId': c.id,
+        'peerName': c.peerName('user'),
+        'peerAvatar': c.peerAvatar('user'),
+      },
+    );
   }
 }

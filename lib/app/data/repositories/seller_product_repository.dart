@@ -113,7 +113,13 @@ class SellerProductRepository {
     bool pdfStampingEnabled = false,
     String licenseType = 'personal',
     String? buyerDeliveryMessage,
+    // Watermarked/trimmed pre-purchase preview, derived server-side from the
+    // first uploaded file (see solvexo-api ProductsService.prepareDigitalPreview).
+    bool previewEnabled = false,
     List<String> images = const [],
+    // Only meaningful when the product's type is 'educational'.
+    String? educationLevel,
+    String? customLevel,
   }) async {
     try {
       final body = <String, dynamic>{
@@ -127,6 +133,8 @@ class SellerProductRepository {
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
         if (images.isNotEmpty) 'images': images,
+        if (educationLevel != null) 'educationLevel': educationLevel,
+        if (customLevel != null) 'customLevel': customLevel,
         'digital': {
           'files': files,
           'downloadLimit': downloadLimit,
@@ -135,6 +143,7 @@ class SellerProductRepository {
           'licenseType': licenseType,
           if (buyerDeliveryMessage != null && buyerDeliveryMessage.isNotEmpty)
             'buyerDeliveryMessage': buyerDeliveryMessage,
+          'preview': {'enabled': previewEnabled},
         },
       };
 
@@ -181,6 +190,7 @@ class SellerProductRepository {
     String? description,
     double? compareAtPrice,
     int? stock,
+    bool unlimitedStock = false,
     String? size,
     String? color,
     String? shippingWeight,
@@ -199,6 +209,7 @@ class SellerProductRepository {
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
         if (stock != null) 'stock': stock,
+        'unlimitedStock': unlimitedStock,
         if (size != null && size.isNotEmpty) 'size': size,
         if (color != null && color.isNotEmpty) 'color': color,
         if (shippingWeight != null && shippingWeight.isNotEmpty)
@@ -259,6 +270,15 @@ class SellerProductRepository {
     bool pdfStampingEnabled = false,
     String licenseType = 'personal',
     String? buyerDeliveryMessage,
+    // Watermarked/trimmed pre-purchase preview, derived server-side from the
+    // first uploaded file (see solvexo-api ProductsService.prepareDigitalPreview).
+    bool previewEnabled = false,
+    // Set productType to 'educational' (instead of the default 'digital')
+    // plus educationLevel (required) / customLevel (required when 'other')
+    // to publish an educational resource — same endpoint, no dedicated one.
+    String productType = 'digital',
+    String? educationLevel,
+    String? customLevel,
   }) async {
     try {
       final body = <String, dynamic>{
@@ -267,7 +287,7 @@ class SellerProductRepository {
         'price': price,
         'status': status,
         if (scheduledAt != null) 'scheduledAt': scheduledAt,
-        'productType': 'digital',
+        'productType': productType,
         'isListedOnSolvexo': isListedOnSolvexo,
         'images': images,
         'subCategoryId': subCategoryId,
@@ -275,6 +295,8 @@ class SellerProductRepository {
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
         if (tags.isNotEmpty) 'tags': tags,
+        if (educationLevel != null) 'educationLevel': educationLevel,
+        if (customLevel != null) 'customLevel': customLevel,
         'digital': {
           'files': files,
           'downloadLimit': downloadLimit,
@@ -284,6 +306,7 @@ class SellerProductRepository {
           if (buyerDeliveryMessage != null &&
               buyerDeliveryMessage.isNotEmpty)
             'buyerDeliveryMessage': buyerDeliveryMessage,
+          'preview': {'enabled': previewEnabled},
         },
       };
 
@@ -329,6 +352,7 @@ class SellerProductRepository {
     String? description,
     double? compareAtPrice,
     int? stock, // null = unlimited (no stock tracking)
+    bool unlimitedStock = false,
     String? size,
     String? color,
     String? shippingWeight,
@@ -350,6 +374,7 @@ class SellerProductRepository {
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
         if (stock != null) 'stock': stock,
+        'unlimitedStock': unlimitedStock,
         if (size != null && size.isNotEmpty) 'size': size,
         if (color != null && color.isNotEmpty) 'color': color,
         if (shippingWeight != null && shippingWeight.isNotEmpty)

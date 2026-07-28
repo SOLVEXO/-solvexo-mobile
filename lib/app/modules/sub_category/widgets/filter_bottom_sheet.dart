@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/sub_category/controller/sub_category_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -186,6 +187,57 @@ class FilterBottomSheetSubCategory extends StatelessWidget {
                       ],
                     );
                   }),
+
+                  // ── Education Level ──────────────────────────────
+                  Obx(() {
+                    if (!c.hasEducationalProducts) return const SizedBox.shrink();
+                    final levels = c.educationFacets.value.levels;
+                    final otherLevels = c.educationFacets.value.otherLevels;
+                    final isOtherSelected = c.selectedEducationLevel.value == 'other';
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SectionTitle(title: 'Education Level'),
+                        SizedBox(height: BaseSpacing.sm),
+                        Wrap(
+                          spacing: BaseSpacing.xs,
+                          runSpacing: BaseSpacing.xs,
+                          children: [
+                            _SelectableChip(
+                              label: 'All',
+                              isSelected: c.selectedEducationLevel.value == null,
+                              onTap: () => c.selectEducationLevel(null),
+                            ),
+                            for (final level in kEducationLevels)
+                              if (level.value == 'other' || levels.any((l) => l.level == level.value))
+                                _SelectableChip(
+                                  label: level.value == 'other'
+                                      ? 'Other'
+                                      : '${level.label} (${levels.firstWhere((l) => l.level == level.value).count})',
+                                  isSelected: c.selectedEducationLevel.value == level.value,
+                                  onTap: () => c.selectEducationLevel(level.value),
+                                ),
+                          ],
+                        ),
+                        if (isOtherSelected && otherLevels.isNotEmpty) ...[
+                          SizedBox(height: BaseSpacing.sm),
+                          Wrap(
+                            spacing: BaseSpacing.xs,
+                            runSpacing: BaseSpacing.xs,
+                            children: otherLevels
+                                .map((o) => _SelectableChip(
+                                      label: '${o.displayName} (${o.count})',
+                                      isSelected: c.selectedNormalizedCustomLevel.value == o.slug,
+                                      onTap: () => c.selectNormalizedCustomLevel(o.slug),
+                                    ))
+                                .toList(),
+                          ),
+                        ],
+                        SizedBox(height: BaseSpacing.xl),
+                      ],
+                    );
+                  }),
                 ],
               ),
             ),
@@ -222,6 +274,7 @@ class FilterBottomSheetSubCategory extends StatelessWidget {
     if (c.currentMinFilter.value > 0 || c.currentMaxFilter.value < 1000) {
       count++;
     }
+    if (c.selectedEducationLevel.value != null) count++;
     return count;
   }
 }

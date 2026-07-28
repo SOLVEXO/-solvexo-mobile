@@ -8,6 +8,10 @@ class CategoryModel {
   final String status;
   final bool isDelete;
   final List<CategoryModel> children;
+
+  /// Rolled-up active product count (own + all descendants) — only present
+  /// on the `category-tree` endpoint response, not `getCategoryById`.
+  final int? productCount;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -21,6 +25,7 @@ class CategoryModel {
     required this.status,
     required this.isDelete,
     required this.children,
+    this.productCount,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -41,6 +46,7 @@ class CategoryModel {
         children: (json['children'] as List? ?? [])
             .map((child) => CategoryModel.fromJson(child))
             .toList(),
+        productCount: json['productCount'] as int?,
 
         createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
         updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
@@ -61,6 +67,7 @@ class CategoryModel {
       'status': status,
       'isDelete': isDelete,
       'children': children.map((e) => e.toJson()).toList(),
+      if (productCount != null) 'productCount': productCount,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

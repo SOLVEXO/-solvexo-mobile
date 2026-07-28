@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/announcement_banner.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/dynamic_shimmer.dart';
@@ -8,13 +9,17 @@ import 'package:book_store_app/app/data/services/network_controller.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
+import 'package:book_store_app/app/modules/home/widgets/campaigns_section.dart';
 import 'package:book_store_app/app/modules/home/widgets/categories_grid.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_greeting_header.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_search_filter_row.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_section_header.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_staff_picks.dart';
+import 'package:book_store_app/app/modules/home/widgets/platform_stats_strip.dart';
 import 'package:book_store_app/app/modules/home/widgets/products_grid.dart';
+import 'package:book_store_app/app/modules/home/widgets/testimonials_carousel.dart';
 import 'package:book_store_app/app/modules/home/widgets/top_stores_row.dart';
+import 'package:book_store_app/app/modules/home/widgets/worksheet_trial_promo_card.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -100,10 +105,25 @@ class HomeView extends BaseView<HomeController> {
               padding: EdgeInsets.zero,
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
+                // ── Active announcement banner (dismissible) ──────────
+                Obx(
+                  () => AnnouncementBanner(
+                    announcement: controller.announcementDismissed.value
+                        ? null
+                        : controller.announcements.firstOrNull,
+                    onDismiss: controller.dismissAnnouncement,
+                  ),
+                ),
+
                 // ── Greeting ──────────────────────────────────────────
                 const HomeGreetingHeader(),
 
                 SizedBox(height: BaseSpacing.xs),
+
+                // ── Platform trust stats ──────────────────────────────
+                PlatformStatsStrip(),
+
+                SizedBox(height: BaseSpacing.lg),
 
                 // ── Search + filter ───────────────────────────────────
                 const HomeSearchFilterRow(),
@@ -118,6 +138,9 @@ class HomeView extends BaseView<HomeController> {
 
                 // ── Promotional banner ───────────────────────────────
                 isLoading ? BannerShimmer() : BannerCarousel(),
+
+                // ── Active marketing campaigns ─────────────────────────
+                CampaignsSection(),
 
                 // SizedBox(height: BaseSpacing.sm),
 
@@ -134,9 +157,10 @@ class HomeView extends BaseView<HomeController> {
                 SizedBox(height: BaseSpacing.sm),
 
                 // ── Trending Now ─────────────────────────────────────
-                const HomeSectionHeader(
+                HomeSectionHeader(
                   title: 'Trending near you',
                   viewMore: true,
+                  onViewMore: () => Get.toNamed(Routes.trendingProducts),
                 ),
 
                 // SizedBox(height: BaseSpacing.sm),
@@ -150,6 +174,26 @@ class HomeView extends BaseView<HomeController> {
                 const HomeSectionHeader(title: 'Staff Picks'),
 
                 const HomeStaffPicks(),
+
+                SizedBox(height: BaseSpacing.lg),
+
+                // ── What buyers say ───────────────────────────────────
+                Obx(
+                  () => controller.testimonials.isEmpty
+                      ? const SizedBox.shrink()
+                      : const HomeSectionHeader(title: 'What buyers say'),
+                ),
+                TestimonialsCarousel(),
+
+                SizedBox(height: BaseSpacing.lg),
+
+                // ── Free AI Worksheet Builder trial promo ─────────────
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppDimen.allPadding,
+                  ),
+                  child: const WorksheetTrialPromoCard(),
+                ),
 
                 SizedBox(height: BaseSpacing.xxl),
               ],
@@ -212,24 +256,39 @@ class _ProductsSection extends StatelessWidget {
         );
       }
 
+      final shown = controller.filteredProducts.length;
+      final total = controller.totalProductsCount.value;
+
       return Column(
         children: [
           const ProductsGrid(),
           SizedBox(height: BaseSpacing.md),
-          if (controller.hasMoreProducts.value && !isFetching)
+          if (total > 0)
+            CustomText(
+              text: 'Showing $shown of $total products',
+              color: AppColors.gray600,
+              fontSize: AppFontSize.tiny,
+            ),
+          SizedBox(height: BaseSpacing.sm),
+          if (controller.hasMoreProducts.value)
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppDimen.allPadding,
               ),
               child: OutlineButton(
-                onPressed: controller.loadMoreProducts,
-                label: 'Load More Products',
+                onPressed: isFetching ? null : controller.loadMoreProducts,
+                isLoading: isFetching,
+                label: 'Load More',
+                icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                expand: false,
+                compact: true,
               ),
-            ),
-          if (isFetching)
-            Padding(
-              padding: EdgeInsets.all(BaseSpacing.lg),
-              child: const Center(child: CircularProgressIndicator()),
+            )
+          else
+            CustomText(
+              text: "You've reached the end",
+              color: AppColors.lightGrey7,
+              fontSize: AppFontSize.tiny,
             ),
         ],
       );

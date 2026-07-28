@@ -4,6 +4,7 @@ import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/components/unread_count_badge.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/seller/controllers/seller_bottom_nav_controller.dart';
+import 'package:book_store_app/app/modules/notifications/controllers/notifications_badge_controller.dart';
 import 'package:book_store_app/app/modules/seller_messages/controllers/seller_messaging_badge_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -21,6 +22,9 @@ class SellerAppBar extends StatelessWidget {
   );
   final SellerMessagingBadgeController messagingBadge = Get.put(
     SellerMessagingBadgeController(),
+  );
+  final NotificationsBadgeController notificationsBadge = Get.put(
+    NotificationsBadgeController(),
   );
   @override
   Widget build(BuildContext context) {
@@ -87,9 +91,14 @@ class SellerAppBar extends StatelessWidget {
                 color: AppColors.background.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: SvgIcon(
-                assetName: AppIcons.notificationIcon,
-                color: AppColors.white,
+              child: Obx(
+                () => UnreadCountBadge(
+                  count: notificationsBadge.unreadCount.value,
+                  child: SvgIcon(
+                    assetName: AppIcons.notificationIcon,
+                    color: AppColors.white,
+                  ),
+                ),
               ),
             ),
           ),

@@ -7,10 +7,21 @@ import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 
 class ResetPasswordController extends BaseController {
-  final AuthRepository _authRepository = AuthRepository();
+  ResetPasswordController({
+    AuthRepository? authRepository,
+    String? email,
+    String? otp,
+  }) : _authRepository = authRepository ?? AuthRepository(),
+       _initialEmail = email,
+       _initialOtp = otp;
+
+  final AuthRepository _authRepository;
+  final String? _initialEmail;
+  final String? _initialOtp;
 
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   @override
   RxBool isLoading = false.obs;
@@ -23,8 +34,8 @@ class ResetPasswordController extends BaseController {
   @override
   void onInit() {
     super.onInit();
-    email = Get.arguments["email"];
-    otp = Get.arguments["otp"];
+    email = _initialEmail ?? Get.arguments["email"];
+    otp = _initialOtp ?? Get.arguments["otp"];
   }
 
   // ================= VALIDATION =================
@@ -48,12 +59,14 @@ class ResetPasswordController extends BaseController {
   }
 
   void togglePassword() => showPassword.value = !showPassword.value;
-  void toggleConfirmPassword() => showConfirmPassword.value = !showConfirmPassword.value;
+  void toggleConfirmPassword() =>
+      showConfirmPassword.value = !showConfirmPassword.value;
 
   // ================= RESET PASSWORD =================
 
   Future<void> resetPassword() async {
-    if (passwordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
+    if (passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
       ToastUtil.showToast("Please fill all fields");
       return;
     }

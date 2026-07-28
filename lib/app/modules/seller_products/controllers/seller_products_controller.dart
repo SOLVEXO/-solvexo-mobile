@@ -37,7 +37,11 @@ class SellerProduct {
   final bool pdfStampingEnabled;
   final String licenseType;
   final String? buyerDeliveryMessage;
+  final bool previewEnabled;
   final List<String> images;
+  // Educational-only (type == 'Educational')
+  final String? educationLevel;
+  final String? customLevel;
 
   const SellerProduct({
     required this.id,
@@ -64,7 +68,10 @@ class SellerProduct {
     this.pdfStampingEnabled = false,
     this.licenseType = 'personal',
     this.buyerDeliveryMessage,
+    this.previewEnabled = false,
     this.images = const [],
+    this.educationLevel,
+    this.customLevel,
   });
 
   bool get isUnlimitedStock => stock == null;
@@ -117,27 +124,62 @@ class SellerProduct {
       status: status,
       sold: json['allTimeSales'] as int? ?? 0,
       stock: stock,
-      scheduledAt: rawScheduledAt != null ? DateTime.tryParse(rawScheduledAt) : null,
+      scheduledAt: rawScheduledAt != null
+          ? DateTime.tryParse(rawScheduledAt)
+          : null,
       description: json['description'] as String?,
       size: json['size'] as String?,
       color: json['color'] as String?,
       shippingWeight: json['shippingWeight'] as String?,
       tags: (json['tags'] as List?)?.cast<String>() ?? const [],
-      digitalFiles: (digitalJson?['files'] as List?)?.cast<Map<String, dynamic>>() ?? const [],
+      digitalFiles:
+          (digitalJson?['files'] as List?)?.cast<Map<String, dynamic>>() ??
+          const [],
       downloadLimit: digitalJson?['downloadLimit'] as String? ?? 'unlimited',
       linkExpiryDays: digitalJson?['linkExpiryDays'] as int?,
       pdfStampingEnabled: digitalJson?['pdfStampingEnabled'] as bool? ?? false,
       licenseType: digitalJson?['licenseType'] as String? ?? 'personal',
       buyerDeliveryMessage: digitalJson?['buyerDeliveryMessage'] as String?,
+      previewEnabled:
+          (digitalJson?['preview'] as Map?)?['enabled'] as bool? ?? false,
+      educationLevel: json['educationLevel'] as String?,
+      customLevel: json['customLevel'] as String?,
     );
   }
 
   // Deterministic emoji from name so it's consistent across rebuilds
   static String _emojiFromName(String name) {
     const emojis = [
-      '📐', '☕', '🖼️', '➗', '🔬', '🧩', '📚', '📋', '💾', '🎨',
-      '🧴', '👜', '📦', '🕯️', '✏️', '📷', '🎀', '📔', '💧', '🗝️',
-      '🍜', '🐝', '🧸', '🎯', '🏆', '💡', '🔮', '🌿', '📱', '🖥️',
+      '📐',
+      '☕',
+      '🖼️',
+      '➗',
+      '🔬',
+      '🧩',
+      '📚',
+      '📋',
+      '💾',
+      '🎨',
+      '🧴',
+      '👜',
+      '📦',
+      '🕯️',
+      '✏️',
+      '📷',
+      '🎀',
+      '📔',
+      '💧',
+      '🗝️',
+      '🍜',
+      '🐝',
+      '🧸',
+      '🎯',
+      '🏆',
+      '💡',
+      '🔮',
+      '🌿',
+      '📱',
+      '🖥️',
     ];
     if (name.isEmpty) return '📦';
     final idx = name.codeUnits.fold(0, (s, c) => s + c) % emojis.length;
@@ -148,7 +190,10 @@ class SellerProduct {
 // ── Controller ────────────────────────────────────────────────────────────────
 
 class SellerProductsController extends GetxController {
-  final _repo = SellerProductRepository();
+  SellerProductsController({SellerProductRepository? repository})
+    : _repo = repository ?? SellerProductRepository();
+
+  final SellerProductRepository _repo;
 
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
@@ -245,7 +290,8 @@ class SellerProductsController extends GetxController {
       _page = page;
 
       debugPrint(
-          '✅ Loaded ${parsed.length} products (page $page, total ${result.totalProducts})');
+        '✅ Loaded ${parsed.length} products (page $page, total ${result.totalProducts})',
+      );
     } catch (e) {
       debugPrint('❌ _load error: $e');
       errorMessage.value = 'Failed to load products.';

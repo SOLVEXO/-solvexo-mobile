@@ -13,7 +13,14 @@ class CheckoutRepository {
   /// checkout to specific cart lines (`{productId, variantId}` pairs) —
   /// without it the backend checks out the ENTIRE cart, ignoring the
   /// selection checkboxes in the cart UI.
-  Future<CreateCheckoutResponse?> createCheckout({
+  ///
+  /// The backend resolves the buyer's delivery address itself (falling back
+  /// to — and promoting — any saved address if none is explicitly flagged
+  /// default) and only rejects the request when the buyer has NO saved
+  /// address at all. [addressRequired] surfaces that specific case so the
+  /// caller can prompt the buyer to add one instead of showing a generic
+  /// error toast.
+  Future<({bool success, CreateCheckoutResponse? data, bool addressRequired, String? message})> createCheckout({
     List<Map<String, String>>? items,
   }) async {
     try {
@@ -26,23 +33,27 @@ class CheckoutRepository {
       );
 
       if (response.data['success'] == true) {
-        return CreateCheckoutResponse.fromJson(
-          response.data['data'] as Map<String, dynamic>,
+        return (
+          success: true,
+          data: CreateCheckoutResponse.fromJson(response.data['data'] as Map<String, dynamic>),
+          addressRequired: false,
+          message: null,
         );
       }
 
-      ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to create checkout',
-      );
-      return null;
+      final message = response.data['message'] as String?;
+      return (success: false, data: null, addressRequired: _isAddressRequiredMessage(message), message: message ?? 'Failed to create checkout');
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
-      return null;
+      final data = e.response?.data;
+      final message = data is Map ? data['message'] as String? : null;
+      return (success: false, data: null, addressRequired: _isAddressRequiredMessage(message), message: message ?? 'Failed to create checkout');
     } catch (e) {
-      ToastUtil.showToast('Failed to create checkout');
-      return null;
+      return (success: false, data: null, addressRequired: false, message: 'Failed to create checkout');
     }
   }
+
+  bool _isAddressRequiredMessage(String? message) =>
+      message?.toLowerCase().contains('default address') ?? false;
 
   /// POST /api/checkout/addShippingInCheckout
   /// Called whenever the user selects a shipping zone on the checkout screen.
@@ -112,12 +123,11 @@ class CheckoutRepository {
     }
   }
 
-  /// POST /api/checkout/remove-coupon
+  /// DELETE /api/checkout/remove-coupon/:checkoutId
   Future<AddShippingResult?> removeCoupon(String checkoutId) async {
     try {
-      final response = await _client.post(
-        ApiConstants.removeCoupon,
-        data: {'checkoutId': checkoutId},
+      final response = await _client.delete(
+        ApiConstants.removeCoupon(checkoutId),
         requiresAuth: true,
       );
 
@@ -164,13 +174,17 @@ class CheckoutRepository {
   /// Creates (or reuses) a Stripe PaymentIntent for this checkout. [message]
   /// carries the backend's error text on failure (e.g. "not configured yet")
   /// so the caller can show it directly instead of a generic toast.
+  /// [paymentMode] only matters for a mixed (digital + physical) checkout:
+  /// `'full'` charges everything online, `'split'` charges only the digital
+  /// subtotal and leaves the physical portion as COD. Ignored otherwise.
   Future<({bool success, PaymentIntentResult? intent, String? message})> initiatePayment(
-    String checkoutId,
-  ) async {
+    String checkoutId, {
+    String paymentMode = 'full',
+  }) async {
     try {
       final response = await _client.post(
         ApiConstants.initiatePayment,
-        data: {'checkoutId': checkoutId},
+        data: {'checkoutId': checkoutId, 'paymentMode': paymentMode},
         requiresAuth: true,
       );
 
@@ -206,14 +220,11 @@ class CheckoutRepository {
 
       if (response.data['success'] == true) {
         final data = response.data['data'] as Map<String, dynamic>;
-        return PaymentStatusResult(
-          status: data['status'] as String? ?? 'pending',
-          orderIds: (data['orderIds'] as List?)?.cast<String>() ?? const [],
-        );
+        return PaymentStatusResult(status: data['status'] as String? ?? 'pending');
       }
-      return const PaymentStatusResult(status: 'pending', orderIds: []);
+      return const PaymentStatusResult(status: 'pending');
     } catch (e) {
-      return const PaymentStatusResult(status: 'pending', orderIds: []);
+      return const PaymentStatusResult(status: 'pending');
     }
   }
 }
@@ -224,11 +235,15 @@ class AddShippingResult {
   final double shippingFee;
   final double subtotal;
   final double totalAmount;
+  final double digitalSubtotal;
+  final double physicalSubtotal;
 
   AddShippingResult({
     required this.shippingFee,
     required this.subtotal,
     required this.totalAmount,
+    this.digitalSubtotal = 0,
+    this.physicalSubtotal = 0,
   });
 
   factory AddShippingResult.fromJson(Map<String, dynamic> json) {
@@ -236,6 +251,8 @@ class AddShippingResult {
       shippingFee: (json['shippingFee'] ?? 0).toDouble(),
       subtotal: (json['subtotal'] ?? 0).toDouble(),
       totalAmount: (json['totalAmount'] ?? 0).toDouble(),
+      digitalSubtotal: (json['digitalSubtotal'] ?? 0).toDouble(),
+      physicalSubtotal: (json['physicalSubtotal'] ?? 0).toDouble(),
     );
   }
 }
@@ -246,6 +263,8 @@ class CouponApplyResult {
   final double subtotal;
   final double shippingFee;
   final double totalAmount;
+  final double digitalSubtotal;
+  final double physicalSubtotal;
 
   CouponApplyResult({
     required this.couponCode,
@@ -253,6 +272,8 @@ class CouponApplyResult {
     required this.subtotal,
     required this.shippingFee,
     required this.totalAmount,
+    this.digitalSubtotal = 0,
+    this.physicalSubtotal = 0,
   });
 
   factory CouponApplyResult.fromJson(Map<String, dynamic> json) {
@@ -262,6 +283,8 @@ class CouponApplyResult {
       subtotal: (json['subtotal'] ?? 0).toDouble(),
       shippingFee: (json['shippingFee'] ?? 0).toDouble(),
       totalAmount: (json['totalAmount'] ?? 0).toDouble(),
+      digitalSubtotal: (json['digitalSubtotal'] ?? 0).toDouble(),
+      physicalSubtotal: (json['physicalSubtotal'] ?? 0).toDouble(),
     );
   }
 }
@@ -294,9 +317,8 @@ class PaymentIntentResult {
 /// 'pending' | 'completed' | 'failed'
 class PaymentStatusResult {
   final String status;
-  final List<String> orderIds;
 
-  const PaymentStatusResult({required this.status, required this.orderIds});
+  const PaymentStatusResult({required this.status});
 
   bool get isCompleted => status == 'completed';
   bool get isFailed => status == 'failed';

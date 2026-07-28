@@ -11,8 +11,10 @@ import 'package:book_store_app/app/modules/product_details/widgets/product_secti
 import 'package:book_store_app/app/modules/product_details/widgets/product_variant_selector.dart';
 import 'package:book_store_app/app/modules/product_details/widgets/seller_store_card.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -114,6 +116,24 @@ class ProductDetailsView extends StatelessWidget {
 
                       // ── Price + Stock pill ──────────────────────────────
                       ProductPriceStockRow(controller: controller),
+
+                      // ── Preview before you buy (digital products only) ──
+                      if (product.isDigital && product.previewAvailable)
+                        Padding(
+                          padding: EdgeInsets.only(top: BaseSpacing.xs),
+                          child: GhostButton(
+                            label: 'Preview before you buy',
+                            icon: const Icon(
+                              Icons.visibility_outlined,
+                              size: 18,
+                              color: AppColors.primaryColor,
+                            ),
+                            onPressed: () => Get.toNamed(
+                              Routes.productPreviewView,
+                              arguments: {'productId': product.id},
+                            ),
+                          ),
+                        ),
 
                       const Divider(),
 

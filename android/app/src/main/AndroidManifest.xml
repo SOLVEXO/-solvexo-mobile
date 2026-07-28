@@ -52,6 +52,9 @@
       <meta-data
           android:name="com.google.firebase.messaging.default_notification_channel_id"
           android:value="1"/>
+      <meta-data
+          android:name="com.google.firebase.messaging.default_notification_icon"
+          android:resource="@drawable/notif_icon"/>
 
   </application>
 

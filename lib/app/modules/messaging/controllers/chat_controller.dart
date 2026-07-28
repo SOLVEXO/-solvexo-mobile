@@ -15,7 +15,13 @@ import 'package:get/get.dart';
 /// purely a function of `senderId == myUserId`, so one implementation covers
 /// both roles.
 class ChatController extends GetxController {
-  final MessagingRepository _repo = MessagingRepository();
+  ChatController({
+    MessagingRepository? repository,
+    MessagingSocketService? socketService,
+  }) : _repo = repository ?? MessagingRepository(),
+       _socket = socketService ?? MessagingSocketService.instance;
+
+  final MessagingRepository _repo;
 
   late final String conversationId;
   late final String initialPeerName;
@@ -42,7 +48,7 @@ class ChatController extends GetxController {
   Timer? _pollTimer;
   static const _pollInterval = Duration(seconds: 4);
 
-  final MessagingSocketService _socket = MessagingSocketService.instance;
+  final MessagingSocketService _socket;
   final List<StreamSubscription> _socketSubs = [];
   VoidCallback? _presenceCleanup;
   Timer? _typingStopTimer;
@@ -118,57 +124,36 @@ class ChatController extends GetxController {
   Future<void> _connectRealtime() async {
     // Listeners first — if the socket is already live, `join-conversation`
     // answers with `messaging:joined` immediately and we'd miss it otherwise.
-    _socketSubs.add(_socket.onNewMessage.listen((data) {
-      final msg = MessageModel.fromJson(data);
-      if (msg.conversationId != conversationId) return;
-      if (messages.any((m) => m.id == msg.id)) return;
-      messages.add(msg);
-      if (msg.senderId != myUserId) {
-        _peerTypingTimeout?.cancel();
-        peerIsTyping.value = false;
-        _repo.markSeen(conversationId: conversationId, lastMessageId: msg.id);
-      }
-    }));
+    _socketSubs.add(
+      _socket.onNewMessage.listen((data) {
+        final msg = MessageModel.fromJson(data);
+        if (msg.conversationId != conversationId) return;
+        if (messages.any((m) => m.id == msg.id)) return;
+        messages.add(msg);
+        if (msg.senderId != myUserId) {
+          _peerTypingTimeout?.cancel();
+          peerIsTyping.value = false;
+          _repo.markSeen(conversationId: conversationId, lastMessageId: msg.id);
+        }
+      }),
+    );
 
-    _socketSubs.add(_socket.onMessageEdited.listen((data) {
-      final msg = MessageModel.fromJson(data);
-      if (msg.conversationId != conversationId) return;
-      final index = messages.indexWhere((m) => m.id == msg.id);
-      if (index != -1) messages[index] = msg;
-    }));
+    _socketSubs.add(
+      _socket.onMessageEdited.listen((data) {
+        final msg = MessageModel.fromJson(data);
+        if (msg.conversationId != conversationId) return;
+        final index = messages.indexWhere((m) => m.id == msg.id);
+        if (index != -1) messages[index] = msg;
+      }),
+    );
 
-    _socketSubs.add(_socket.onMessageDeleted.listen((data) {
-      final messageId = (data['messageId'] ?? '').toString();
-      final index = messages.indexWhere((m) => m.id == messageId);
-      if (index == -1) return;
-      final m = messages[index];
-      messages[index] = MessageModel(
-        id: m.id,
-        conversationId: m.conversationId,
-        senderId: m.senderId,
-        senderRole: m.senderRole,
-        type: m.type,
-        text: m.text,
-        attachments: m.attachments,
-        productShare: m.productShare,
-        replyTo: m.replyTo,
-        status: m.status,
-        seenByUserIds: m.seenByUserIds,
-        isEdited: m.isEdited,
-        isDeleted: true,
-        deletedByUsers: m.deletedByUsers,
-        createdAt: m.createdAt,
-      );
-    }));
-
-    _socketSubs.add(_socket.onMessagesSeen.listen((data) {
-      if ((data['conversationId'] ?? '').toString() != conversationId) return;
-      if ((data['userId'] ?? '').toString() == myUserId) return;
-      // The peer read the thread — flip my messages to 'seen'.
-      for (var i = 0; i < messages.length; i++) {
-        final m = messages[i];
-        if (m.senderId != myUserId || m.status == 'seen') continue;
-        messages[i] = MessageModel(
+    _socketSubs.add(
+      _socket.onMessageDeleted.listen((data) {
+        final messageId = (data['messageId'] ?? '').toString();
+        final index = messages.indexWhere((m) => m.id == messageId);
+        if (index == -1) return;
+        final m = messages[index];
+        messages[index] = MessageModel(
           id: m.id,
           conversationId: m.conversationId,
           senderId: m.senderId,
@@ -178,40 +163,73 @@ class ChatController extends GetxController {
           attachments: m.attachments,
           productShare: m.productShare,
           replyTo: m.replyTo,
-          status: 'seen',
+          status: m.status,
           seenByUserIds: m.seenByUserIds,
           isEdited: m.isEdited,
-          isDeleted: m.isDeleted,
+          isDeleted: true,
           deletedByUsers: m.deletedByUsers,
           createdAt: m.createdAt,
         );
-      }
-      messages.refresh();
-    }));
+      }),
+    );
 
-    _socketSubs.add(_socket.onTyping.listen((data) {
-      if ((data['conversationId'] ?? '').toString() != conversationId) return;
-      if ((data['userId'] ?? '').toString() == myUserId) return;
-      final isTyping = data['isTyping'] == true;
-      peerIsTyping.value = isTyping;
-      _peerTypingTimeout?.cancel();
-      if (isTyping) {
-        // Safety net in case the peer's "stopped typing" event never arrives.
-        _peerTypingTimeout = Timer(const Duration(seconds: 6), () {
-          peerIsTyping.value = false;
+    _socketSubs.add(
+      _socket.onMessagesSeen.listen((data) {
+        if ((data['conversationId'] ?? '').toString() != conversationId) return;
+        if ((data['userId'] ?? '').toString() == myUserId) return;
+        // The peer read the thread — flip my messages to 'seen'.
+        for (var i = 0; i < messages.length; i++) {
+          final m = messages[i];
+          if (m.senderId != myUserId || m.status == 'seen') continue;
+          messages[i] = MessageModel(
+            id: m.id,
+            conversationId: m.conversationId,
+            senderId: m.senderId,
+            senderRole: m.senderRole,
+            type: m.type,
+            text: m.text,
+            attachments: m.attachments,
+            productShare: m.productShare,
+            replyTo: m.replyTo,
+            status: 'seen',
+            seenByUserIds: m.seenByUserIds,
+            isEdited: m.isEdited,
+            isDeleted: m.isDeleted,
+            deletedByUsers: m.deletedByUsers,
+            createdAt: m.createdAt,
+          );
+        }
+        messages.refresh();
+      }),
+    );
+
+    _socketSubs.add(
+      _socket.onTyping.listen((data) {
+        if ((data['conversationId'] ?? '').toString() != conversationId) return;
+        if ((data['userId'] ?? '').toString() == myUserId) return;
+        final isTyping = data['isTyping'] == true;
+        peerIsTyping.value = isTyping;
+        _peerTypingTimeout?.cancel();
+        if (isTyping) {
+          // Safety net in case the peer's "stopped typing" event never arrives.
+          _peerTypingTimeout = Timer(const Duration(seconds: 6), () {
+            peerIsTyping.value = false;
+          });
+        }
+      }),
+    );
+
+    _socketSubs.add(
+      _socket.onJoined.listen((data) {
+        if ((data['conversationId'] ?? '').toString() != conversationId) return;
+        peerIsOnline.value = data['otherOnline'] == true;
+        final otherUserId = (data['otherUserId'] ?? '').toString();
+        _presenceCleanup?.call();
+        _presenceCleanup = _socket.subscribePresence(otherUserId, (online) {
+          peerIsOnline.value = online;
         });
-      }
-    }));
-
-    _socketSubs.add(_socket.onJoined.listen((data) {
-      if ((data['conversationId'] ?? '').toString() != conversationId) return;
-      peerIsOnline.value = data['otherOnline'] == true;
-      final otherUserId = (data['otherUserId'] ?? '').toString();
-      _presenceCleanup?.call();
-      _presenceCleanup = _socket.subscribePresence(otherUserId, (online) {
-        peerIsOnline.value = online;
-      });
-    }));
+      }),
+    );
 
     await _socket.ensureConnected();
     _socket.joinConversation(conversationId);
@@ -255,7 +273,9 @@ class ChatController extends GetxController {
       isLoading.value = false;
     } else {
       final existingIds = messages.map((m) => m.id).toSet();
-      final newOnes = result.messages.where((m) => !existingIds.contains(m.id)).toList();
+      final newOnes = result.messages
+          .where((m) => !existingIds.contains(m.id))
+          .toList();
       if (newOnes.isNotEmpty) messages.addAll(newOnes);
     }
 
@@ -265,7 +285,11 @@ class ChatController extends GetxController {
   Future<void> loadOlderMessages() async {
     if (!hasOlder.value || isLoadingOlder.value) return;
     isLoadingOlder.value = true;
-    final result = await _repo.getMessages(conversationId, before: _nextCursor, limit: 30);
+    final result = await _repo.getMessages(
+      conversationId,
+      before: _nextCursor,
+      limit: 30,
+    );
     messages.insertAll(0, result.messages);
     _nextCursor = result.nextCursor;
     hasOlder.value = result.hasMore;
@@ -282,7 +306,10 @@ class ChatController extends GetxController {
       }
     }
     if (lastFromOther == null) return;
-    await _repo.markSeen(conversationId: conversationId, lastMessageId: lastFromOther.id);
+    await _repo.markSeen(
+      conversationId: conversationId,
+      lastMessageId: lastFromOther.id,
+    );
   }
 
   Future<void> sendText() async {
@@ -292,7 +319,11 @@ class ChatController extends GetxController {
     textController.clear();
     _stopTyping();
     isSending.value = true;
-    final msg = await _repo.sendMessage(conversationId, type: 'text', text: text);
+    final msg = await _repo.sendMessage(
+      conversationId,
+      type: 'text',
+      text: text,
+    );
     isSending.value = false;
 
     if (msg != null) {
@@ -324,9 +355,14 @@ class ChatController extends GetxController {
     if (conv == null) return;
     final targetId = myRole == 'seller' ? conv.buyerId : conv.sellerId;
     final targetRole = myRole == 'seller' ? 'user' : 'seller';
-    final ok = await _repo.blockUser(targetId: targetId, targetRole: targetRole);
+    final ok = await _repo.blockUser(
+      targetId: targetId,
+      targetRole: targetRole,
+    );
     if (ok) {
-      ToastUtil.showToast('Blocked — you will no longer receive messages from them.');
+      ToastUtil.showToast(
+        'Blocked — you will no longer receive messages from them.',
+      );
       conversation.value = await _repo.getConversationById(conversationId);
     }
   }
@@ -337,6 +373,7 @@ class ChatController extends GetxController {
       targetId: conversationId,
       reason: reason,
     );
-    if (ok) ToastUtil.showToast('Reported. Our team will review this conversation.');
+    if (ok)
+      ToastUtil.showToast('Reported. Our team will review this conversation.');
   }
 }

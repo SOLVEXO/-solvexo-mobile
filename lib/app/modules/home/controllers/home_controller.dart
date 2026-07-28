@@ -1,10 +1,16 @@
 import 'package:book_store_app/core/base/base_controller.dart';
+import 'package:book_store_app/app/data/repositories/announcements_repository.dart';
 import 'package:book_store_app/app/data/repositories/banners_repository.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
+import 'package:book_store_app/app/data/repositories/marketing_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/stores_repository.dart';
+import 'package:book_store_app/app/data/models/announcement_model.dart';
+import 'package:book_store_app/app/data/models/marketing/public_campaign_model.dart';
 import 'package:book_store_app/app/data/models/storefront/store_list_item_model.dart';
+import 'package:book_store_app/app/data/models/store/platform_stats_model.dart';
+import 'package:book_store_app/app/data/models/store/testimonial_model.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
@@ -18,11 +24,42 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeController extends BaseController {
-  final ProductRepository _productRepository = ProductRepository();
-  final CategoryRepository _categoryRepository = CategoryRepository();
-  final BannersRepository _bannersRepository = BannersRepository();
-  final CartRepository _cartRepository = CartRepository();
-  final StoresRepository _storesRepository = StoresRepository();
+  HomeController({
+    ProductRepository? productRepository,
+    CategoryRepository? categoryRepository,
+    BannersRepository? bannersRepository,
+    CartRepository? cartRepository,
+    StoresRepository? storesRepository,
+    MarketingRepository? marketingRepository,
+    AnnouncementsRepository? announcementsRepository,
+    WishlistController? wishlistController,
+    CategoryController? categoryController,
+  }) : _productRepository = productRepository ?? ProductRepository(),
+       _categoryRepository = categoryRepository ?? CategoryRepository(),
+       _bannersRepository = bannersRepository ?? BannersRepository(),
+       _cartRepository = cartRepository ?? CartRepository(),
+       _storesRepository = storesRepository ?? StoresRepository(),
+       _marketingRepository = marketingRepository ?? MarketingRepository(),
+       _announcementsRepository =
+           announcementsRepository ?? AnnouncementsRepository(),
+       wishlistController =
+           wishlistController ??
+           (Get.isRegistered<WishlistController>()
+               ? Get.find<WishlistController>()
+               : Get.put(WishlistController())),
+       categoryController =
+           categoryController ??
+           (Get.isRegistered<CategoryController>()
+               ? Get.find<CategoryController>()
+               : Get.put(CategoryController()));
+
+  final ProductRepository _productRepository;
+  final CategoryRepository _categoryRepository;
+  final BannersRepository _bannersRepository;
+  final CartRepository _cartRepository;
+  final StoresRepository _storesRepository;
+  final MarketingRepository _marketingRepository;
+  final AnnouncementsRepository _announcementsRepository;
 
   // ─── UI State ─────────────────────────────────────────────────────────────
   final RxList<BannerModel> banners = <BannerModel>[].obs;
@@ -39,6 +76,7 @@ class HomeController extends BaseController {
   final RxInt currentPage = 1.obs;
   final RxInt totalPages = 1.obs;
   final RxBool hasMoreProducts = true.obs;
+  final RxInt totalProductsCount = 0.obs;
 
   // ─── Data ─────────────────────────────────────────────────────────────────
   // New ProductModel — variants-based, no top-level price/stock/ratings
@@ -54,6 +92,15 @@ class HomeController extends BaseController {
   // section's shimmer appears and disappears together instead of each
   // section flickering independently as its own fetch happens to finish.
   final RxList<StoreListItemModel> topStores = <StoreListItemModel>[].obs;
+
+  // ─── Public marketing/homepage content (unauthenticated, additive) ───────
+  final RxList<PublicCampaignModel> campaigns = <PublicCampaignModel>[].obs;
+  final Rx<PlatformStatsModel?> platformStats = Rx<PlatformStatsModel?>(null);
+  final RxList<TestimonialModel> testimonials = <TestimonialModel>[].obs;
+  final RxList<AnnouncementModel> announcements = <AnnouncementModel>[].obs;
+  // Local-only UI state — dismissal isn't persisted, it just hides the
+  // banner until the next time this screen is built.
+  final RxBool announcementDismissed = false.obs;
 
   // ─── Favourite map ────────────────────────────────────────────────────────
   final RxMap<String, bool> favouriteMap = <String, bool>{}.obs;
@@ -89,6 +136,7 @@ class HomeController extends BaseController {
     super.onInit();
     initializeHome();
     fetchBanners();
+    fetchHomeExtras();
   }
 
   @override
@@ -125,6 +173,42 @@ class HomeController extends BaseController {
       topStores.clear();
     }
   }
+
+  // ─── 1c. Public marketing/homepage content (unauthenticated, additive) ────
+  // Each fetch swallows its own errors (repository-level) and simply leaves
+  // its list/value empty on failure — the corresponding widget renders
+  // nothing in that case, never a broken section or an error toast.
+
+  Future<void> fetchCampaigns() async {
+    final result = await _marketingRepository.getActiveCampaigns();
+    campaigns.assignAll(result);
+  }
+
+  Future<void> fetchPlatformStats() async {
+    platformStats.value = await _storesRepository.getPlatformStats();
+  }
+
+  Future<void> fetchTestimonials() async {
+    final result = await _storesRepository.getTestimonials(limit: 6);
+    testimonials.assignAll(result);
+  }
+
+  Future<void> fetchAnnouncements() async {
+    final result = await _announcementsRepository.getActive('buyers');
+    announcements.assignAll(result);
+  }
+
+  void dismissAnnouncement() => announcementDismissed.value = true;
+
+  /// Runs all 4 non-critical homepage fetches in parallel — called from
+  /// [onInit] and again on pull-to-refresh, alongside (not blocking) the
+  /// core [initializeHome]/banners fetches.
+  Future<void> fetchHomeExtras() => Future.wait([
+    fetchCampaigns(),
+    fetchPlatformStats(),
+    fetchTestimonials(),
+    fetchAnnouncements(),
+  ]);
 
   // ─── 2. Initialize ────────────────────────────────────────────────────────
 
@@ -207,6 +291,7 @@ class HomeController extends BaseController {
         }
 
         totalPages.value = response.pages;
+        totalProductsCount.value = response.total;
         hasMoreProducts.value = currentPage.value < totalPages.value;
 
         _updateFavouriteMap(response.products);
@@ -295,7 +380,7 @@ class HomeController extends BaseController {
     fetchProducts();
   }
 
-  final wishlistController = Get.put(WishlistController());
+  final WishlistController wishlistController;
 
   /// Toggle favourite (local only for now)
   // void toggleFavourite(String productId) {
@@ -397,7 +482,7 @@ class HomeController extends BaseController {
   Future<void> loadMoreProducts() => fetchProducts(loadMore: true);
 
   /// Full refresh
-  final categoryController = Get.put(CategoryController());
+  final CategoryController categoryController;
 
   // ─── Replace refreshHome in HomeController ────────────────────────────────
   // Both home data and category data reset at the same time so
@@ -411,7 +496,11 @@ class HomeController extends BaseController {
     try {
       // Run both refreshes in parallel — initializeHome() already chains
       // fetchTopStores() internally, so it isn't listed again here.
-      await Future.wait([initializeHome(), categoryController.refresh()]);
+      await Future.wait([
+        initializeHome(),
+        categoryController.refresh(),
+        fetchHomeExtras(),
+      ]);
     } finally {
       // Both will set their own loading to false inside their methods,
       // but guard here just in case

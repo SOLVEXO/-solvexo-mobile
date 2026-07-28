@@ -2,7 +2,7 @@ class ApiConstants {
   static const String baseUrl = "http://localhost:3002";
   // static const String baseUrl = "https://staging.solvexo.store";
 
-  // static const String baseUrl = "http://192.168.1.113:3001";
+  // static const String baseUrl = "http://192.168.1.101:3002";
 
   static const String apiPrefix = "$baseUrl/api";
 
@@ -28,6 +28,7 @@ class ApiConstants {
   static const String resetPassword = "$apiPrefix/auth/reset-password";
 
   static const String faqs = '$apiPrefix/faqs';
+  static const String contactUs = '$apiPrefix/contact';
   // OAuth endpoints
   static const String googleAuth = "$apiPrefix/auth/google";
   static const String facebookAuth = "$apiPrefix/auth/facebook";
@@ -58,11 +59,18 @@ class ApiConstants {
       '$apiPrefix/products/getProductById/$id';
   static String getVariantById(String id) =>
       '$apiPrefix/products/getVariantById/$id';
+  // Public digital-product preview — watermarked/trimmed derivative only,
+  // never the original file (see solvexo-api ProductsService.getProductPreview).
+  static String getProductPreview(String productId) =>
+      '$apiPrefix/products/preview/$productId';
   // ============ Product by Category Endpoint ============
   static String getProductsByCategory({
     String? categoryId,
     int page = 1,
     int limit = 10,
+    String? productType,
+    String? educationLevel,
+    String? normalizedCustomLevel,
   }) {
     String url = '$apiPrefix/products/products-by-category';
     List<String> queryParams = [];
@@ -72,14 +80,30 @@ class ApiConstants {
     }
     queryParams.add('page=$page');
     queryParams.add('limit=$limit');
+    if (productType != null && productType.isNotEmpty) {
+      queryParams.add('productType=$productType');
+    }
+    if (educationLevel != null && educationLevel.isNotEmpty) {
+      queryParams.add('educationLevel=$educationLevel');
+    }
+    if (normalizedCustomLevel != null && normalizedCustomLevel.isNotEmpty) {
+      queryParams.add('normalizedCustomLevel=$normalizedCustomLevel');
+    }
 
     return '$url?${queryParams.join('&')}';
   }
 
+  // Buyer-facing, unauthenticated facet counts backing the education-level
+  // filter chips (Tier-1 `levels` + Tier-2 `otherLevels`).
+  static const String educationFacets = '$apiPrefix/products/education/facets';
+
+  // Seller-only autocomplete while typing a custom level on product creation.
+  static String educationCustomLevelSuggestions(String q) =>
+      '$apiPrefix/products/education/custom-level-suggestions?q=${Uri.encodeQueryComponent(q)}';
+
   // ============ Address Endpoints ============
   static const String addAdresses = "$baseUrl/address/add-address";
   static const String getAdresses = "$baseUrl/address/getMyAddresses";
-  static const String getDefaultAddress = "$baseUrl/address/getDefaultAddress";
   static const String updateAddress = "$baseUrl/address/update-address";
   static String deleteAddress(String id) =>
       "$baseUrl/address/delete-address/$id";
@@ -146,7 +170,8 @@ class ApiConstants {
   static const String addShippingInCheckout =
       "$apiPrefix/checkout/addShippingInCheckout";
   static const String applyCoupon = "$apiPrefix/checkout/apply-coupon";
-  static const String removeCoupon = "$apiPrefix/checkout/remove-coupon";
+  static String removeCoupon(String checkoutId) =>
+      "$apiPrefix/checkout/remove-coupon/$checkoutId";
   static const String codPayment = "$apiPrefix/payment/cod-payment";
   static const String initiatePayment = "$apiPrefix/payment/initiate-payment";
   static const String paymentStatus = "$apiPrefix/payment/status";
@@ -191,6 +216,9 @@ class ApiConstants {
   static String markOrderPaid(String orderId) =>
       "$apiPrefix/orders/mark-paid/$orderId";
   static const String updateOrderStatus = "$apiPrefix/orders/update-status";
+  static const String sellerReturns = "$apiPrefix/orders/returns";
+  static String returnAction(String orderId) =>
+      "$apiPrefix/orders/return-action/$orderId";
 
   // ============ POS Endpoints ============
   // All GET endpoints below intentionally return a bare path — query params
@@ -273,9 +301,12 @@ class ApiConstants {
       '$apiPrefix/pos/audit-logs/$storeId';
 
   // ============ Activity Log Endpoints (store-wide, seller-only) ============
-  static String activityLog(String storeId) => '$apiPrefix/activity-log/$storeId';
-  static String activityLogStats(String storeId) => '$apiPrefix/activity-log/$storeId/stats';
-  static String activityLogExport(String storeId) => '$apiPrefix/activity-log/$storeId/export';
+  static String activityLog(String storeId) =>
+      '$apiPrefix/activity-log/$storeId';
+  static String activityLogStats(String storeId) =>
+      '$apiPrefix/activity-log/$storeId/stats';
+  static String activityLogExport(String storeId) =>
+      '$apiPrefix/activity-log/$storeId/export';
 
   // ============ Messaging Endpoints ============
   static const String startConversation = '$apiPrefix/messaging/conversations';
@@ -319,6 +350,28 @@ class ApiConstants {
       '$apiPrefix/marketing/$storeId/coupons';
   static String couponById(String storeId, String couponId) =>
       '$apiPrefix/marketing/$storeId/coupons/$couponId';
+
+  // ============ Marketing (Campaigns) Endpoints — seller join/leave ========
+  // Campaigns are platform/admin-created; sellers can only browse and
+  // join/leave individual stores into them (never create/edit).
+  static String joinableCampaigns(String storeId) =>
+      '$apiPrefix/marketing/$storeId/campaigns';
+  static String joinCampaign(String storeId, String campaignId) =>
+      '$apiPrefix/marketing/$storeId/campaigns/$campaignId/join';
+  static String leaveCampaign(String storeId, String campaignId) =>
+      '$apiPrefix/marketing/$storeId/campaigns/$campaignId/leave';
+
+  // ============ Public Marketing / Homepage Endpoints (unauthenticated) ====
+  static const String publicActiveCampaigns =
+      '$apiPrefix/public/marketing/campaigns';
+  static const String publicPlatformStats =
+      '$apiPrefix/store/public/platform-stats';
+  static String publicTestimonials({int limit = 6}) =>
+      '$apiPrefix/store/public/testimonials?limit=$limit';
+  static String publicAnnouncements(String audience) =>
+      '$apiPrefix/announcements/active?audience=$audience';
+  static const String publicWorksheetTrial =
+      '$apiPrefix/public/worksheet-builder/try-free';
 
   // ============ Loyalty & Rewards Endpoints — seller ============
   static String loyaltyOverview(String storeId) =>
@@ -418,8 +471,10 @@ class ApiConstants {
       '$apiPrefix/finance/$storeId/payouts/$payoutId';
   static String financePayoutMethods(String storeId) =>
       '$apiPrefix/finance/$storeId/payout-methods';
-  static String financeSetDefaultPayoutMethod(String storeId, String methodId) =>
-      '$apiPrefix/finance/$storeId/payout-methods/$methodId/default';
+  static String financeSetDefaultPayoutMethod(
+    String storeId,
+    String methodId,
+  ) => '$apiPrefix/finance/$storeId/payout-methods/$methodId/default';
   static String financePayoutMethodById(String storeId, String methodId) =>
       '$apiPrefix/finance/$storeId/payout-methods/$methodId';
   static String financePayoutSchedule(String storeId) =>
@@ -448,6 +503,14 @@ class ApiConstants {
       '$apiPrefix/platform-plans/$storeId/addons';
   static String platformCancelAddon(String storeId, String addonId) =>
       '$apiPrefix/platform-plans/$storeId/addons/$addonId';
+  static String platformPreviewChangePlan(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId/preview-change-plan';
+  static String platformCancelPlan(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId/cancel';
+  static String platformReactivatePlan(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId/reactivate';
+  static String platformBillingPortal(String storeId) =>
+      '$apiPrefix/platform-plans/$storeId/billing-portal';
 
   // ============ AI Studio Endpoints (seller-only) ============
   // Six AI tools + credits/history — backed by `src/ai-studio` on the API.

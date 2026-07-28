@@ -58,7 +58,6 @@ class SplashView extends StatelessWidget {
                           height: 100,
                           width: 100,
                           decoration: BoxDecoration(
-                            color: AppColors.background,
                             borderRadius: BorderRadius.circular(BaseRadius.xxl),
                             boxShadow: [
                               // Base shadow
@@ -82,6 +81,8 @@ class SplashView extends StatelessWidget {
                             child: CommonImageView(
                               imagePath: AppImages.logoImage,
                               fit: BoxFit.contain,
+
+                              radius: BorderRadius.circular(BaseRadius.xxl),
                             ),
                           ),
                         ),

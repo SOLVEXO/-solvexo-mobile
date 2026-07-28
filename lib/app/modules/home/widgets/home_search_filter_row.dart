@@ -1,7 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_search_bar.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_sort_chips.dart';
+import 'package:book_store_app/app/modules/home/widgets/icon_badge.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -66,20 +66,7 @@ class HomeSearchFilterRow extends StatelessWidget {
     return HomeSearchBar(
       child: GestureDetector(
         onTap: () => _showFilterSheet(context),
-        child: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: AppColors.primaryColor,
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: SvgIcon(
-            assetName: AppIcons.filterIcon,
-            color: AppColors.white,
-            size: 27,
-          ),
-        ),
+        child: IconBadge(icon: AppIcons.filterIcon),
       ),
     );
   }

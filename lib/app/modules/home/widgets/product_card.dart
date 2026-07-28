@@ -77,6 +77,64 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
 
+                    // Sale + education-level badges — top left, stacked,
+                    // mirrors the heart's top-right placement inside the notch.
+                    if (product.isOnSale ||
+                        (product.isEducational && product.educationLevel != null))
+                      Positioned(
+                        top: BaseSpacing.xxs,
+                        left: BaseSpacing.xxs,
+                        right: BaseSpacing.xxs + 28, // clear the heart button
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (product.isOnSale)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: BaseSpacing.xs,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.red,
+                                  borderRadius: BorderRadius.circular(BaseRadius.sm),
+                                ),
+                                child: CustomText(
+                                  text: product.activeCampaign!.badgeLabel,
+                                  color: AppColors.white,
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w700,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            if (product.isOnSale &&
+                                product.isEducational &&
+                                product.educationLevel != null)
+                              SizedBox(height: BaseSpacing.xxs / 2),
+                            if (product.isEducational && product.educationLevel != null)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: BaseSpacing.xs,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryColor,
+                                  borderRadius: BorderRadius.circular(BaseRadius.sm),
+                                ),
+                                child: CustomText(
+                                  text: educationLevelLabel(product.educationLevel),
+                                  color: AppColors.white,
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w700,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+
                     // Wishlist heart — sitting inside the notch, top right
                     Positioned(
                       top: 0,

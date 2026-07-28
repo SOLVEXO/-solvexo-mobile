@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart'
@@ -12,14 +14,58 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 const List<String> kProductEmojis = [
-  '📐', '☕', '🖼️', '➗', '🔬', '🧩', '📚', '📋', '💾', '🎨',
-  '🧴', '👜', '📦', '🕯️', '✏️', '📷', '🎀', '📔', '💧', '🗝️',
-  '🍜', '🐝', '🧸', '🎯', '🏆', '💡', '🔮', '🌿', '📱', '🖥️',
+  '📐',
+  '☕',
+  '🖼️',
+  '➗',
+  '🔬',
+  '🧩',
+  '📚',
+  '📋',
+  '💾',
+  '🎨',
+  '🧴',
+  '👜',
+  '📦',
+  '🕯️',
+  '✏️',
+  '📷',
+  '🎀',
+  '📔',
+  '💧',
+  '🗝️',
+  '🍜',
+  '🐝',
+  '🧸',
+  '🎯',
+  '🏆',
+  '💡',
+  '🔮',
+  '🌿',
+  '📱',
+  '🖥️',
 ];
 
 class EditSellerProductController extends GetxController {
-  final _repo       = SellerProductRepository();
-  final _uploadRepo = UploadRepository();
+  EditSellerProductController({
+    SellerProductRepository? repository,
+    UploadRepository? uploadRepository,
+    ProductRepository? productRepository,
+    SellerProduct? initialProduct,
+  }) : _repo = repository ?? SellerProductRepository(),
+       _uploadRepo = uploadRepository ?? UploadRepository(),
+       _productRepo = productRepository ?? ProductRepository(),
+       _initialProduct = initialProduct;
+
+  final SellerProductRepository _repo;
+  final UploadRepository _uploadRepo;
+  final ProductRepository _productRepo;
+  // Testing seam: `Get.arguments` has no public setter and the previous
+  // unchecked `as SellerProduct` cast throws immediately if this route is
+  // ever pushed without arguments (or with the wrong type) — accepting an
+  // optional override here both makes this controller unit-testable and
+  // removes that crash risk.
+  final SellerProduct? _initialProduct;
 
   late SellerProduct product;
 
@@ -67,25 +113,72 @@ class EditSellerProductController extends GetxController {
   final RxBool pdfStampingEnabled = false.obs;
   final RxString licenseType = 'personal'.obs;
   final RxString buyerDeliveryMessage = ''.obs;
+  // Watermarked/trimmed pre-purchase preview, derived server-side from the
+  // first uploaded file (see solvexo-api ProductsService.prepareDigitalPreview).
+  final RxBool previewEnabled = false.obs;
+  // Educational-only
+  late final TextEditingController customLevelCtrl;
+  final Rxn<String> educationLevel = Rxn<String>();
+  final RxString customLevel = ''.obs;
+  final RxList<String> customLevelSuggestions = <String>[].obs;
+  final RxBool isLoadingSuggestions = false.obs;
+  Timer? _suggestDebounce;
 
   // ── Computed ──────────────────────────────────────────────────────────────
 
   bool get isPhysical => product.type == 'Physical';
   bool get isDigital => product.type == 'Digital';
+  bool get isEducational => product.type == 'Educational';
+  bool get needsCustomLevel => isEducational && educationLevel.value == 'other';
 
   bool get canSave =>
       name.value.trim().isNotEmpty &&
       price.value.trim().isNotEmpty &&
-      (publishMode.value != ProductPublishMode.scheduled || scheduledAt.value != null);
+      (publishMode.value != ProductPublishMode.scheduled ||
+          scheduledAt.value != null) &&
+      (!isEducational || educationLevel.value != null) &&
+      (!needsCustomLevel || customLevel.value.trim().isNotEmpty);
+
+  void selectEducationLevel(String? level) {
+    educationLevel.value = level;
+    if (level != 'other') {
+      customLevel.value = '';
+      customLevelCtrl.clear();
+      customLevelSuggestions.clear();
+    }
+  }
+
+  void onCustomLevelChanged(String value) {
+    customLevel.value = value;
+    _suggestDebounce?.cancel();
+    if (value.trim().isEmpty) {
+      customLevelSuggestions.clear();
+      return;
+    }
+    _suggestDebounce = Timer(const Duration(milliseconds: 350), () async {
+      isLoadingSuggestions.value = true;
+      final results = await _productRepo.getCustomLevelSuggestions(
+        value.trim(),
+      );
+      isLoadingSuggestions.value = false;
+      customLevelSuggestions.assignAll(results);
+    });
+  }
+
+  void selectCustomLevelSuggestion(String value) {
+    customLevel.value = value;
+    customLevelCtrl.text = value;
+    customLevelSuggestions.clear();
+  }
 
   /// The product's publish mode as it was when the screen opened, derived
   /// from its list-level [ProductStatus] (active/lowStock/outOfStock all
   /// mean the product itself is live, just annotated with stock info).
   ProductPublishMode get _initialPublishMode => switch (product.status) {
-        ProductStatus.draft => ProductPublishMode.draft,
-        ProductStatus.scheduled => ProductPublishMode.scheduled,
-        _ => ProductPublishMode.now,
-      };
+    ProductStatus.draft => ProductPublishMode.draft,
+    ProductStatus.scheduled => ProductPublishMode.scheduled,
+    _ => ProductPublishMode.now,
+  };
 
   bool get hasChanges =>
       name.value != product.name ||
@@ -170,10 +263,23 @@ class EditSellerProductController extends GetxController {
       return;
     }
 
+    if (isEducational) {
+      if (educationLevel.value == null) {
+        ToastUtil.showToast('Please select an education level.');
+        isSaving.value = false;
+        return;
+      }
+      if (needsCustomLevel && customLevel.value.trim().isEmpty) {
+        ToastUtil.showToast('Please enter a custom level.');
+        isSaving.value = false;
+        return;
+      }
+    }
+
     final bool success;
     if (isPhysical) {
       success = await _savePhysical(parsedPrice);
-    } else if (isDigital) {
+    } else if (isDigital || isEducational) {
       success = await _saveDigital(parsedPrice);
     } else {
       isSaving.value = false;
@@ -191,8 +297,8 @@ class EditSellerProductController extends GetxController {
     final parsedCompare = double.tryParse(compareAtPriceCtrl.text.trim());
     final parsedStock =
         (!unlimitedStock.value && stockCtrl.text.trim().isNotEmpty)
-            ? int.tryParse(stockCtrl.text.trim())
-            : null;
+        ? int.tryParse(stockCtrl.text.trim())
+        : null;
     final tagList = tagsCtrl.text
         .split(',')
         .map((t) => t.trim())
@@ -209,6 +315,7 @@ class EditSellerProductController extends GetxController {
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
       compareAtPrice: parsedCompare,
       stock: parsedStock,
+      unlimitedStock: unlimitedStock.value,
       size: sizeCtrl.text.trim().isEmpty ? null : sizeCtrl.text.trim(),
       color: colorCtrl.text.trim().isEmpty ? null : colorCtrl.text.trim(),
       shippingWeight: shippingWeightCtrl.text.trim().isEmpty
@@ -237,8 +344,9 @@ class EditSellerProductController extends GetxController {
     }
 
     final expiryRaw = linkExpiryDaysCtrl.text.trim();
-    final int? parsedExpiry =
-        expiryRaw.isEmpty ? null : int.tryParse(expiryRaw);
+    final int? parsedExpiry = expiryRaw.isEmpty
+        ? null
+        : int.tryParse(expiryRaw);
 
     final msg = buyerDeliveryMsgCtrl.text.trim();
 
@@ -257,7 +365,10 @@ class EditSellerProductController extends GetxController {
       pdfStampingEnabled: pdfStampingEnabled.value,
       licenseType: licenseType.value,
       buyerDeliveryMessage: msg.isEmpty ? null : msg,
+      previewEnabled: previewEnabled.value,
       images: productImages.toList(),
+      educationLevel: isEducational ? educationLevel.value : null,
+      customLevel: needsCustomLevel ? customLevel.value.trim() : null,
     );
   }
 
@@ -274,7 +385,7 @@ class EditSellerProductController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    product = Get.arguments as SellerProduct;
+    product = _initialProduct ?? Get.arguments as SellerProduct;
 
     // Core
     nameCtrl = TextEditingController(text: product.name);
@@ -289,7 +400,9 @@ class EditSellerProductController extends GetxController {
     stockCtrl = TextEditingController(text: product.stock?.toString() ?? '');
     sizeCtrl = TextEditingController(text: product.size ?? '');
     colorCtrl = TextEditingController(text: product.color ?? '');
-    shippingWeightCtrl = TextEditingController(text: product.shippingWeight ?? '');
+    shippingWeightCtrl = TextEditingController(
+      text: product.shippingWeight ?? '',
+    );
     tagsCtrl = TextEditingController(text: product.tags.join(', '));
     // Digital
     final isUnlimitedDl = product.downloadLimit == 'unlimited';
@@ -302,6 +415,7 @@ class EditSellerProductController extends GetxController {
     buyerDeliveryMsgCtrl = TextEditingController(
       text: product.buyerDeliveryMessage ?? '',
     );
+    customLevelCtrl = TextEditingController(text: product.customLevel ?? '');
 
     // Reactive values
     name.value = product.name;
@@ -324,16 +438,20 @@ class EditSellerProductController extends GetxController {
     pdfStampingEnabled.value = product.pdfStampingEnabled;
     licenseType.value = product.licenseType;
     buyerDeliveryMessage.value = product.buyerDeliveryMessage ?? '';
+    previewEnabled.value = product.previewEnabled;
+    educationLevel.value = product.educationLevel;
+    customLevel.value = product.customLevel ?? '';
 
     // Pre-fill digital file entries from existing product data
     for (final f in product.digitalFiles) {
       final entry = DigitalFileEntry();
       // Accept both new 'publicId' and legacy 'url' field
-      entry.publicId.value = f['publicId'] as String? ?? f['url'] as String? ?? '';
+      entry.publicId.value =
+          f['publicId'] as String? ?? f['url'] as String? ?? '';
       entry.fileName.value = f['name'] as String? ?? '';
       entry.mimeType.value = f['mimeType'] as String? ?? '';
       entry.fileSize.value = f['size'] as int? ?? 0;
-      entry.nameCtrl.text  = f['name'] as String? ?? '';
+      entry.nameCtrl.text = f['name'] as String? ?? '';
       digitalFiles.add(entry);
     }
   }
@@ -352,6 +470,8 @@ class EditSellerProductController extends GetxController {
     downloadLimitCountCtrl.dispose();
     linkExpiryDaysCtrl.dispose();
     buyerDeliveryMsgCtrl.dispose();
+    customLevelCtrl.dispose();
+    _suggestDebounce?.cancel();
     for (final f in digitalFiles) {
       f.dispose();
     }

@@ -37,31 +37,6 @@ class AddressRepository {
     }
   }
 
-  // ─── Get default address ──────────────────────────────────────────────────
-  // GET /address/getDefaultAddress
-
-  Future<AddressModel?> fetchDefaultAddress() async {
-    try {
-      debugPrint('📍 GET ${ApiConstants.getDefaultAddress}');
-
-      final res = await _baseClient.get(
-        ApiConstants.getDefaultAddress,
-        requiresAuth: true,
-      );
-
-      debugPrint('📦 fetchDefaultA ddress: ${res.data}');
-
-      final data = res.data?['data'];
-      if (data is Map<String, dynamic>) {
-        return AddressModel.fromJson(data);
-      }
-      return null;
-    } catch (e) {
-      debugPrint('❌ fetchDefaultAddress: $e');
-      return null;
-    }
-  }
-
   // ─── Get single address ───────────────────────────────────────────────────
   // GET /address/get-address-by-id/:id
 

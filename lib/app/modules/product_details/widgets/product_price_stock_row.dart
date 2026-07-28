@@ -57,9 +57,13 @@ class ProductPriceStockRow extends StatelessWidget {
                 ),
                 SizedBox(width: BaseSpacing.xxs / 2),
                 CustomText(
-                  text: controller.inStock
-                      ? 'In stock (${controller.displayStock})'
-                      : 'Out of stock',
+                  text: !controller.inStock
+                      ? 'Out of stock'
+                      : (controller.product.value?.isDigital ?? false) ||
+                            (controller.selectedVariant.value?.isUnlimited ??
+                                false)
+                      ? 'In stock'
+                      : 'In stock (${controller.displayStock})',
                   color: controller.inStock ? AppColors.green2 : AppColors.red,
                   fontWeight: FontWeight.w600,
                   fontSize: 11,

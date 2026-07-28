@@ -35,10 +35,15 @@ class AnalyticsTabBar extends StatelessWidget {
               onTap: () => controller.changeTab(t.$1),
               child: AnimatedContainer(
                 duration: BaseMotion.normal,
-                padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md - 2, vertical: BaseSpacing.xxs),
+                padding: EdgeInsets.symmetric(
+                  horizontal: BaseSpacing.md - 2,
+                  vertical: BaseSpacing.xxs,
+                ),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.primaryColor : AppColors.lightGrey10,
+                  color: selected
+                      ? AppColors.primaryColor
+                      : AppColors.lightGrey10,
                   borderRadius: BorderRadius.circular(BaseRadius.pill),
                 ),
                 child: CustomText(

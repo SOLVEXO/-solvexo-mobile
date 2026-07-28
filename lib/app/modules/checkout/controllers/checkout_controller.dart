@@ -9,6 +9,7 @@ import 'package:book_store_app/app/modules/address/controllers/address_controlle
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/checkout/models/create_checkout_response.dart';
 import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
+import 'package:book_store_app/app/modules/payment/controllers/payment_controller.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -20,8 +21,26 @@ import 'package:get/get.dart';
 import '../models/checkout_item_model.dart';
 
 class CheckoutController extends GetxController {
-  final ShippingRepository _shippingRepository = ShippingRepository();
-  final CheckoutRepository _checkoutRepository = CheckoutRepository();
+  CheckoutController({
+    ShippingRepository? shippingRepository,
+    CheckoutRepository? checkoutRepository,
+    AddressController? addressController,
+    CreateCheckoutResponse? initialCheckoutResponse,
+  }) : _shippingRepository = shippingRepository ?? ShippingRepository(),
+       _checkoutRepository = checkoutRepository ?? CheckoutRepository(),
+       _initialCheckoutResponse = initialCheckoutResponse,
+       addressController =
+           addressController ??
+           (Get.isRegistered<AddressController>()
+               ? Get.find<AddressController>()
+               : Get.put(AddressController()));
+
+  final ShippingRepository _shippingRepository;
+  final CheckoutRepository _checkoutRepository;
+  // Testing seam: `Get.arguments` has no public setter, so a plain unit test
+  // can't otherwise populate `_checkoutId`/`orderItems` — every coupon/
+  // shipping/COD method early-returns while `_checkoutId` is empty.
+  final CreateCheckoutResponse? _initialCheckoutResponse;
 
   String _checkoutId = '';
 
@@ -52,17 +71,25 @@ class CheckoutController extends GetxController {
   final Rx<ShippingOption?> selectedShipping = Rx<ShippingOption?>(null);
   final RxBool isLoadingShipping = false.obs;
   final RxBool isLoading = true.obs;
-  final AddressController addressController = Get.put(AddressController());
+  final AddressController addressController;
 
   // Allowed payment methods from the create-checkout API response
   final RxList<String> _allowedPaymentMethods = <String>[].obs;
+
+  // Digital/physical split of the subtotal — only meaningful (non-zero) for
+  // a mixed cart, where `canSplitPay` is true. Refreshed after coupon
+  // apply/remove since coupon discounts are baked into `item.totalPrice`
+  // server-side.
+  final RxDouble digitalSubtotal = 0.0.obs;
+  final RxDouble physicalSubtotal = 0.0.obs;
 
   // ── Subscriber (membership) benefits — all server-computed ────────────────
   // Total member savings already baked into item prices (display-only).
   final RxDouble subscriberSavings = 0.0.obs;
 
   // Upsell hints for stores in this cart the buyer isn't subscribed to.
-  final RxList<SubscriptionSavingsHint> savingsHints = <SubscriptionSavingsHint>[].obs;
+  final RxList<SubscriptionSavingsHint> savingsHints =
+      <SubscriptionSavingsHint>[].obs;
 
   void openStoreFromHint(SubscriptionSavingsHint hint) {
     if (hint.storeSlug.isEmpty) return;
@@ -81,6 +108,17 @@ class CheckoutController extends GetxController {
       _allowedPaymentMethods.isEmpty ||
       _allowedPaymentMethods.contains('stripe');
 
+  /// True for a mixed (digital + physical) cart — the backend only ever
+  /// returns `['split']` in that case, never alongside `'stripe'`/
+  /// `'cash_on_delivery'`, so this and the other two `canPay*` getters are
+  /// mutually exclusive.
+  bool get canSplitPay => _allowedPaymentMethods.contains('split');
+
+  /// The amount collected in cash by the courier on delivery — the physical
+  /// portion of a split-pay order plus shipping (digital items are always
+  /// prepaid online, never COD).
+  double get codAmountDue => physicalSubtotal.value + shippingCost.value;
+
   /// True when every item is digital — drives hiding the address/shipping
   /// sections (backend already excludes shipping for digital-only checkouts).
   bool get isAllDigital =>
@@ -96,7 +134,8 @@ class CheckoutController extends GetxController {
   Future<void> _loadInitialData() async {
     isLoading.value = true;
 
-    final response = Get.arguments as CreateCheckoutResponse?;
+    final response =
+        _initialCheckoutResponse ?? Get.arguments as CreateCheckoutResponse?;
     if (response != null) {
       _checkoutId = response.checkout.id;
       orderItems.assignAll(
@@ -105,6 +144,8 @@ class CheckoutController extends GetxController {
       shippingCost.value = response.checkout.shippingFee;
       _allowedPaymentMethods.assignAll(response.allowedPaymentMethods);
       subscriberSavings.value = response.summary.subscriberSavingsUSD;
+      digitalSubtotal.value = response.summary.digitalSubtotal;
+      physicalSubtotal.value = response.summary.physicalSubtotal;
       savingsHints.assignAll(response.subscriptionSavingsHints);
     }
 
@@ -152,8 +193,20 @@ class CheckoutController extends GetxController {
 
   RxBool isPlacingOrder = false.obs;
 
+  /// Physical-goods checkouts need a delivery address before placing an
+  /// order — digital-only carts skip the address section entirely.
+  bool validateAddressSelected() {
+    if (isAllDigital || addressController.defaultAddress.value != null) {
+      return true;
+    }
+    ToastUtil.showToast('Please add a delivery address to continue');
+    return false;
+  }
+
   /// Shows a confirmation dialog then calls POST /api/payment/cod-payment.
   Future<void> placeCodOrder() async {
+    if (!validateAddressSelected()) return;
+
     final confirmed = await Get.dialog<bool>(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -233,12 +286,95 @@ class CheckoutController extends GetxController {
     }
   }
 
+  /// A mixed (digital + physical) cart's single "Place Order" action —
+  /// digital items are charged online right away, physical items become a
+  /// COD order automatically once that payment succeeds (the backend
+  /// resolves this from the checkout's item types; the actual online
+  /// payment is the exact same Stripe flow as [PaymentController.payWithStripe],
+  /// just charging the digital subtotal instead of the full total).
+  Future<void> placeSplitOrder(PaymentController paymentController) async {
+    if (!validateAddressSelected()) return;
+
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        title: const CustomText(
+          text: 'Confirm Your Order',
+          fontSize: AppFontSize.small,
+          fontWeight: FontWeight.w700,
+          color: AppColors.black2,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.receipt_long_outlined,
+                color: AppColors.primaryColor,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const CustomText(
+              text: 'Your cart has both digital and physical items',
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.w700,
+              color: AppColors.black2,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            CustomText(
+              text:
+                  "You'll pay \$${digitalSubtotal.value.toStringAsFixed(2)} now online for the digital items. "
+                  "\$${codAmountDue.toStringAsFixed(2)} will be collected in cash when your physical order is delivered.",
+              fontSize: AppFontSize.verySmall,
+              color: AppColors.grey,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: 'Cancel',
+                  isOutlined: true,
+                  onPressed: () => Get.back(result: false),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: AppButton(
+                  label: 'Place Order',
+                  onPressed: () => Get.back(result: true),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    await paymentController.payWithStripe(paymentMode: 'split');
+  }
+
   /// Shared by COD and Stripe checkout: re-sync the cart from the server
   /// (only the checked-out lines were removed server-side, so unselected
   /// lines must stay) and hand off to the success screen.
   void onPaymentSuccess() {
     Get.find<CartController>().fetchCart();
-    Get.offAllNamed(Routes.paymentSuccessView);
+    Get.offAllNamed(Routes.paymentSuccessView, arguments: canSplitPay ? codAmountDue : null);
   }
 
   Future<void> selectShippingOption(ShippingOption option) async {
@@ -305,11 +441,16 @@ class CheckoutController extends GetxController {
 
     isApplyingCoupon.value = true;
     try {
-      final response = await _checkoutRepository.applyCoupon(checkoutId: _checkoutId, code: code);
+      final response = await _checkoutRepository.applyCoupon(
+        checkoutId: _checkoutId,
+        code: code,
+      );
       if (response.success && response.result != null) {
         appliedCouponCode.value = response.result!.couponCode;
         couponDiscountUSD.value = response.result!.couponDiscountUSD;
         shippingCost.value = response.result!.shippingFee;
+        digitalSubtotal.value = response.result!.digitalSubtotal;
+        physicalSubtotal.value = response.result!.physicalSubtotal;
         voucherController.clear();
         Get.back();
         ToastUtil.showToast('Coupon "${response.result!.couponCode}" applied');
@@ -330,6 +471,8 @@ class CheckoutController extends GetxController {
         appliedCouponCode.value = '';
         couponDiscountUSD.value = 0.0;
         shippingCost.value = result.shippingFee;
+        digitalSubtotal.value = result.digitalSubtotal;
+        physicalSubtotal.value = result.physicalSubtotal;
       }
     } finally {
       isApplyingCoupon.value = false;
@@ -432,7 +575,9 @@ class CheckoutController extends GetxController {
                 borderRadius: BorderRadius.circular(15),
                 filled: true,
                 fillColor: AppColors.background,
-                hintText: isRewardPoint ? "Enter your reward code" : "Enter your coupon code",
+                hintText: isRewardPoint
+                    ? "Enter your reward code"
+                    : "Enter your coupon code",
               ),
               isRewardPoint
                   ? Row(
@@ -447,10 +592,12 @@ class CheckoutController extends GetxController {
                     )
                   : SizedBox(),
               SizedBox(height: isRewardPoint ? 15 : 30),
-              Obx(() => AppButton(
-                    label: isApplyingCoupon.value ? "Applying..." : "Apply",
-                    onPressed: isApplyingCoupon.value ? null : onPressed,
-                  )),
+              Obx(
+                () => AppButton(
+                  label: isApplyingCoupon.value ? "Applying..." : "Apply",
+                  onPressed: isApplyingCoupon.value ? null : onPressed,
+                ),
+              ),
             ],
           ),
         ),

@@ -15,14 +15,25 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AuthController extends BaseController {
-  final AuthRepository _authRepository = AuthRepository();
-  final UploadRepository _uploadRepository = UploadRepository();
-  final SocialAuthService _socialAuth = SocialAuthService();
+  AuthController({
+    AuthRepository? authRepository,
+    UploadRepository? uploadRepository,
+    SocialAuthService? socialAuthService,
+  }) : _authRepository = authRepository ?? AuthRepository(),
+       _uploadRepository = uploadRepository ?? UploadRepository(),
+       _socialAuth = socialAuthService ?? SocialAuthService();
+
+  final AuthRepository _authRepository;
+  final UploadRepository _uploadRepository;
+  final SocialAuthService _socialAuth;
   // Observables
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   @override
   final RxBool isLoading = false.obs;
   final RxBool isSocialLoading = false.obs;
+  // Which provider's button should show its own spinner — the other two
+  // stay disabled but plain, rather than all three animating identically.
+  final RxString activeSocialProvider = ''.obs;
   final RxBool isPasswordVisible = false.obs;
   final RxBool isConfirmPasswordVisible = false.obs;
   // Text Controllers for Login
@@ -35,7 +46,8 @@ class AuthController extends BaseController {
   final TextEditingController registerLastNameController =
       TextEditingController();
   final TextEditingController registerPhoneController = TextEditingController();
-  final TextEditingController registerAddressController = TextEditingController();
+  final TextEditingController registerAddressController =
+      TextEditingController();
   final TextEditingController registerPasswordController =
       TextEditingController();
   final TextEditingController registerConfirmPasswordController =
@@ -165,8 +177,10 @@ class AuthController extends BaseController {
   }
 
   Future<void> signInWithGoogle() async {
+    if (isSocialLoading.value) return;
     try {
       isSocialLoading.value = true;
+      activeSocialProvider.value = 'google';
 
       // 1. Get Google credentials
       final dto = await _socialAuth.signInWithGoogle();
@@ -190,12 +204,15 @@ class AuthController extends BaseController {
       _showError('Google sign in failed: ${e.toString()}');
     } finally {
       isSocialLoading.value = false;
+      activeSocialProvider.value = '';
     }
   }
 
   Future<void> signInWithFacebook() async {
+    if (isSocialLoading.value) return;
     try {
       isSocialLoading.value = true;
+      activeSocialProvider.value = 'facebook';
 
       final dto = await _socialAuth.signInWithFacebook();
       if (dto == null) return;
@@ -214,12 +231,15 @@ class AuthController extends BaseController {
       _showError('Facebook sign in failed: ${e.toString()}');
     } finally {
       isSocialLoading.value = false;
+      activeSocialProvider.value = '';
     }
   }
 
   Future<void> signInWithApple() async {
+    if (isSocialLoading.value) return;
     try {
       isSocialLoading.value = true;
+      activeSocialProvider.value = 'apple';
 
       final dto = await _socialAuth.signInWithApple();
       if (dto == null) return;
@@ -238,6 +258,7 @@ class AuthController extends BaseController {
       _showError('Apple sign in failed: ${e.toString()}');
     } finally {
       isSocialLoading.value = false;
+      activeSocialProvider.value = '';
     }
   }
 
@@ -363,7 +384,9 @@ class AuthController extends BaseController {
   Future<void> pickRegisterProfileImage() async {
     isPickingRegisterImage.value = true;
     try {
-      final file = await _uploadRepository.pickImage(source: ImageSource.gallery);
+      final file = await _uploadRepository.pickImage(
+        source: ImageSource.gallery,
+      );
       if (file != null) registerProfileImage.value = file;
     } finally {
       isPickingRegisterImage.value = false;
@@ -374,7 +397,9 @@ class AuthController extends BaseController {
   /// tokens exist) to upload any profile photo picked during signup and
   /// attach it to the now-verified user. Failures here must never block
   /// navigation — signup itself already succeeded.
-  Future<void> finishProfileSetupAfterVerification(AuthResponseModel auth) async {
+  Future<void> finishProfileSetupAfterVerification(
+    AuthResponseModel auth,
+  ) async {
     final file = registerProfileImage.value;
     if (file == null) return;
 

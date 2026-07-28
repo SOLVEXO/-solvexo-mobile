@@ -7,19 +7,35 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 
 class PaymentController extends GetxController {
-  final CheckoutController checkoutController = Get.find<CheckoutController>();
-  final CheckoutRepository _checkoutRepository = CheckoutRepository();
+  PaymentController({
+    CheckoutController? checkoutController,
+    CheckoutRepository? checkoutRepository,
+  }) : checkoutController =
+           checkoutController ?? Get.find<CheckoutController>(),
+       _checkoutRepository = checkoutRepository ?? CheckoutRepository();
+
+  final CheckoutController checkoutController;
+  final CheckoutRepository _checkoutRepository;
 
   final RxBool isProcessing = false.obs;
 
   /// Presents Stripe's own PaymentSheet (card entry + 3DS/SCA handling all
   /// built in) for the current checkout, then confirms the resulting order
   /// was actually created before navigating to the success screen.
-  Future<void> payWithStripe() async {
+  ///
+  /// [paymentMode] only matters for a mixed (digital + physical) checkout —
+  /// `'full'` (the default, used by the plain "Pay Online" button) charges
+  /// everything; `'split'` (used by [CheckoutController.placeSplitOrder])
+  /// charges only the digital subtotal and leaves the physical items COD.
+  Future<void> payWithStripe({String paymentMode = 'full'}) async {
     if (isProcessing.value) return;
 
+    if (!checkoutController.validateAddressSelected()) return;
+
     if (!StripeConfig.isConfigured) {
-      ToastUtil.showToast('Online payments are not available yet. Please use Cash on Delivery.');
+      ToastUtil.showToast(
+        'Online payments are not available yet. Please use Cash on Delivery.',
+      );
       return;
     }
 
@@ -31,7 +47,7 @@ class PaymentController extends GetxController {
 
     isProcessing.value = true;
     try {
-      final result = await _checkoutRepository.initiatePayment(checkoutId);
+      final result = await _checkoutRepository.initiatePayment(checkoutId, paymentMode: paymentMode);
       if (!result.success || result.intent == null) {
         ToastUtil.showToast(result.message ?? 'Failed to start payment');
         return;
@@ -60,7 +76,9 @@ class PaymentController extends GetxController {
       await _confirmOrderCreated(checkoutId);
     } catch (e) {
       debugPrint('❌ payWithStripe error: $e');
-      ToastUtil.showToast('Something went wrong while processing your payment.');
+      ToastUtil.showToast(
+        'Something went wrong while processing your payment.',
+      );
     } finally {
       isProcessing.value = false;
     }
@@ -78,7 +96,9 @@ class PaymentController extends GetxController {
         return;
       }
       if (status.isFailed) {
-        ToastUtil.showToast('Payment could not be completed. Please try again.');
+        ToastUtil.showToast(
+          'Payment could not be completed. Please try again.',
+        );
         return;
       }
       await Future.delayed(const Duration(seconds: 1));

@@ -86,9 +86,15 @@ class ProductDetailsBottomBar extends StatelessWidget {
           Expanded(
             child: Obx(
               () => PrimaryButton(
-                label: controller.isAddtoCartLoading.value ? "Adding..." : 'Add to cart',
+                label: controller.isAddtoCartLoading.value
+                    ? "Adding..."
+                    : controller.inStock
+                    ? 'Add to cart'
+                    : 'Out of stock',
                 isLoading: controller.isAddtoCartLoading.value,
-                onPressed: controller.isAddtoCartLoading.value ? null : () => controller.addToCart(),
+                onPressed: (controller.isAddtoCartLoading.value || !controller.inStock)
+                    ? null
+                    : () => controller.addToCart(),
               ),
             ),
           ),

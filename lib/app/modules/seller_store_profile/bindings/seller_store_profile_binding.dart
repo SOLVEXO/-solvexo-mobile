@@ -5,6 +5,7 @@ class SellerStoreProfileBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<SellerStoreProfileController>(
-        () => SellerStoreProfileController());
+      () => SellerStoreProfileController(),
+    );
   }
 }

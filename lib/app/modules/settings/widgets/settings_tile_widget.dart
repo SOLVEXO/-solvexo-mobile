@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/settings/controllers/settings_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -56,8 +57,8 @@ class SettingsTileWidget extends StatelessWidget {
               ),
             ],
             const SizedBox(width: 6),
-            Icon(
-              Icons.chevron_right_rounded,
+            SvgIcon(
+              assetName: AppIcons.chevronRight,
               size: 18,
               color: tile.isDanger ? AppColors.red : AppColors.lightGrey5,
             ),

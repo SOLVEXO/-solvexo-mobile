@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_addon_model.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_entitlements_model.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_invoice_model.dart';
@@ -10,6 +11,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,7 +23,8 @@ String _fmtDate(DateTime? d) => d == null ? '—' : DateFormat('MMM d, yyyy').fo
 
 class MyPlanCard extends StatelessWidget {
   final PlatformSubscriptionModel sub;
-  const MyPlanCard({super.key, required this.sub});
+  final SellerPlatformPlansController controller;
+  const MyPlanCard({super.key, required this.sub, required this.controller});
 
   Color get _statusColor => switch (sub.status) {
         'active' => AppColors.greenSuccess,
@@ -104,8 +107,91 @@ class MyPlanCard extends StatelessWidget {
               color: AppColors.white.withOpacity(0.85),
               fontSize: AppFontSize.tiny,
             ),
+          if (!sub.isFreePlan) ...[
+            SizedBox(height: BaseSpacing.sm + 2),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(BaseSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(BaseRadius.md),
+              ),
+              child: Obx(() {
+                final busy = controller.isUpdating.value;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    OutlineButton(
+                      label: 'Manage Billing',
+                      icon: const Icon(Icons.receipt_long_rounded, size: 18),
+                      compact: true,
+                      onPressed: busy ? null : controller.openBillingPortal,
+                    ),
+                    SizedBox(height: BaseSpacing.xs),
+                    if (sub.cancelAtPeriodEnd) ...[
+                      CustomText(
+                        text:
+                            'Your plan moves to the free tier on ${_fmtDate(sub.currentPeriodEnd)} — you keep full access until then.',
+                        color: AppColors.gray600,
+                        fontSize: AppFontSize.tiny,
+                      ),
+                      SizedBox(height: BaseSpacing.xs),
+                      PrimaryButton(
+                        label: 'Reactivate Plan',
+                        compact: true,
+                        isLoading: busy,
+                        onPressed: busy ? null : controller.reactivatePlan,
+                      ),
+                    ] else
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: DangerButton(
+                          label: 'Cancel Plan',
+                          expand: false,
+                          compact: true,
+                          onPressed: busy ? null : () => _showCancelDialog(context),
+                        ),
+                      ),
+                  ],
+                );
+              }),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  void _showCancelDialog(BuildContext context) {
+    final reasonCtrl = TextEditingController();
+    CustomConfirmDialog.show(
+      context,
+      title: 'Cancel Plan?',
+      confirmLabel: 'Cancel Plan',
+      confirmColor: AppColors.red,
+      contentBuilder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomText(
+            text:
+                'Your store moves to the free plan at the end of the current billing period — you keep full access until then.',
+            fontSize: AppFontSize.tiny,
+            color: AppColors.grey,
+          ),
+          SizedBox(height: BaseSpacing.xs),
+          CustomTextField(
+            controller: reasonCtrl,
+            hintText: 'Reason (optional)',
+            isborder: true,
+            maxLength: 500,
+          ),
+        ],
+      ),
+      onConfirm: () {
+        final reason = reasonCtrl.text.trim();
+        controller.cancelPlan(reason.isEmpty ? null : reason);
+      },
     );
   }
 }
@@ -395,18 +481,23 @@ class PlanCard extends StatelessWidget {
           ),
           SizedBox(height: BaseSpacing.xs),
           if (!isCurrent && !plan.isCustomPricing)
-            Obx(
-              () => GestureDetector(
-                onTap: controller.isUpdating.value ? null : () => _confirmChange(context),
+            Obx(() {
+              // Tapping goes straight to `selectPlan`, which dry-runs
+              // `preview-change-plan` and opens `PlanChangePreviewSheet` with
+              // the real amount-due/credit math — no need for a separate
+              // estimate dialog here first.
+              final busy = controller.isUpdating.value || controller.isPreviewing.value;
+              return GestureDetector(
+                onTap: busy ? null : () => controller.selectPlan(plan),
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs + 2),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: controller.isUpdating.value ? AppColors.lightGrey10 : AppColors.primaryColor,
+                    color: busy ? AppColors.lightGrey10 : AppColors.primaryColor,
                     borderRadius: BorderRadius.circular(BaseRadius.md),
                   ),
-                  child: controller.isUpdating.value
+                  child: busy
                       ? const SizedBox(
                           width: 18,
                           height: 18,
@@ -421,25 +512,10 @@ class PlanCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                 ),
-              ),
-            ),
+              );
+            }),
         ],
       ),
-    );
-  }
-
-  void _confirmChange(BuildContext context) {
-    final price = plan.priceFor(isYearly ? 'yearly' : 'monthly');
-    CustomConfirmDialog.show(
-      context,
-      title: 'Switch to ${plan.name}?',
-      message: plan.isFree
-          ? 'Your store will move to the free ${plan.name} plan.'
-          : 'You\'ll be billed \$${price.toStringAsFixed(0)}/${isYearly ? 'year' : 'month'}'
-              '${plan.trialDays > 0 ? ' after a ${plan.trialDays}-day free trial' : ''}. '
-              'Unused time on your current plan is credited automatically.',
-      confirmLabel: 'Switch Plan',
-      onConfirm: () => controller.selectPlan(plan),
     );
   }
 }

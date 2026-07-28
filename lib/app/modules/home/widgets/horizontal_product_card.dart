@@ -40,9 +40,34 @@ class HorizontalProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(BaseRadius.md),
                 boxShadow: BaseShadows.forLevel(BaseElevation.level1),
               ),
-              child: prod.images.isNotEmpty
-                  ? CommonImageView(url: prod.images.first, width: 50)
-                  : const Icon(Icons.image_outlined, color: AppColors.lightGrey7, size: 30),
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
+                children: [
+                  prod.images.isNotEmpty
+                      ? CommonImageView(url: prod.images.first, width: 50)
+                      : const Icon(Icons.image_outlined, color: AppColors.lightGrey7, size: 30),
+                  if (prod.isOnSale)
+                    Positioned(
+                      top: 4,
+                      left: 4,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxs + 2, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.red,
+                          borderRadius: BorderRadius.circular(BaseRadius.sm),
+                        ),
+                        child: CustomText(
+                          text: prod.activeCampaign!.badgeLabel,
+                          color: AppColors.white,
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w700,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
             SizedBox(width: BaseSpacing.xs + 2),
             Expanded(

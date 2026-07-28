@@ -67,7 +67,12 @@ class _TopBrand extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CommonImageView(imagePath: AppImages.logoImage),
+        Container(
+          height: 70,
+          width: 70,
+          decoration: BoxDecoration(),
+          child: CommonImageView(imagePath: AppImages.logoImage),
+        ),
         SizedBox(height: BaseSpacing.sm),
         CustomText(
           text: 'Solvexo',

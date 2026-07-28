@@ -20,78 +20,163 @@ class SellerNotificationsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBarTwo(title: 'Notification Permissions'),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppDimen.allPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _NotifSection(
-              header: 'ORDER NOTIFICATIONS',
-              tiles: [
-                _NotifItem(
-                  emoji: AppIcons.ordersIcon,
-                  title: 'New Orders',
-                  subtitle: 'Alert when a new order is placed',
-                  obs: c.newOrders,
+      body: Obx(
+        () => c.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(AppDimen.allPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Obx(
+                      () => c.isOsPermissionDenied
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: _PermissionBanner(
+                                onTap: c.openSystemSettings,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    _NotifSection(
+                      header: 'DELIVERY',
+                      tiles: [
+                        _NotifItem(
+                          emoji: AppIcons.notificationIcon,
+                          title: 'Push Notifications',
+                          subtitle: 'Alerts on this device',
+                          obs: c.pushEnabled,
+                          onChanged: () => c.toggle(c.pushEnabled, 'pushEnabled'),
+                        ),
+                        _NotifItem(
+                          emoji: AppIcons.emailIcon,
+                          title: 'Email Notifications',
+                          subtitle: 'Alerts sent to your email',
+                          obs: c.emailEnabled,
+                          onChanged: () => c.toggle(c.emailEnabled, 'emailEnabled'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _NotifSection(
+                      header: 'ORDERS',
+                      tiles: [
+                        _NotifItem(
+                          emoji: AppIcons.ordersIcon,
+                          title: 'Orders & Payments',
+                          subtitle: 'New orders, shipping, cancellations, payments, low stock',
+                          obs: c.orders,
+                          onChanged: () => c.toggle(c.orders, 'orders'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _NotifSection(
+                      header: 'STORE',
+                      tiles: [
+                        _NotifItem(
+                          emoji: AppIcons.messageIcon,
+                          title: 'Customer Messages',
+                          subtitle: 'New messages from buyers',
+                          obs: c.messages,
+                          onChanged: () => c.toggle(c.messages, 'messages'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _NotifSection(
+                      header: 'GROWTH',
+                      tiles: [
+                        _NotifItem(
+                          emoji: AppIcons.saleIcon,
+                          title: 'Followers & Promotions',
+                          subtitle: 'New followers and marketing tips',
+                          obs: c.promotions,
+                          onChanged: () => c.toggle(c.promotions, 'promotions'),
+                        ),
+                        _NotifItem(
+                          emoji: AppIcons.coinIcon,
+                          title: 'Loyalty & Rewards',
+                          subtitle: 'Loyalty program activity',
+                          obs: c.loyalty,
+                          onChanged: () => c.toggle(c.loyalty, 'loyalty'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _NotifSection(
+                      header: 'BILLING',
+                      tiles: [
+                        _NotifItem(
+                          emoji: AppIcons.cardIcon,
+                          title: 'Plan & Billing',
+                          subtitle: 'Platform plan renewal and payment reminders',
+                          obs: c.subscriptions,
+                          onChanged: () => c.toggle(c.subscriptions, 'subscriptions'),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                _NotifItem(
-                  emoji: AppIcons.truckIcon,
-                  title: 'Order Shipped',
-                  subtitle: 'When an order is marked shipped',
-                  obs: c.orderShipped,
+              ),
+      ),
+    );
+  }
+}
+
+// ─── Warns when the OS permission is actually off — the toggles above only
+// control a backend flag and have no bearing on whether push can reach this
+// device at all, so this is the one place that reflects reality. ───────────
+
+class _PermissionBanner extends StatelessWidget {
+  final VoidCallback onTap;
+  const _PermissionBanner({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.red.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+        border: Border.all(color: AppColors.red.withOpacity(0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.notifications_off_outlined, color: AppColors.red, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: 'Notifications are off for this app',
+                  fontSize: AppFontSize.extraSmall,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
                 ),
-                _NotifItem(
-                  emoji: AppIcons.cross,
-                  title: 'Order Cancelled',
-                  subtitle: 'When a buyer cancels an order',
-                  obs: c.orderCancelled,
+                const SizedBox(height: 2),
+                CustomText(
+                  text:
+                      'Push alerts won’t arrive until you allow notifications in your device settings.',
+                  fontSize: AppFontSize.tiny,
+                  color: AppColors.gray600,
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: onTap,
+                  child: CustomText(
+                    text: 'Open Settings',
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryColor,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            _NotifSection(
-              header: 'STORE ALERTS',
-              tiles: [
-                _NotifItem(
-                  emoji: AppIcons.messageIcon,
-                  title: 'Customer Messages',
-                  subtitle: 'New messages from buyers',
-                  obs: c.customerMessages,
-                ),
-                _NotifItem(
-                  emoji: AppIcons.alertIcon,
-                  title: 'Low Stock',
-                  subtitle: 'When product stock runs low',
-                  obs: c.lowStockAlerts,
-                ),
-                _NotifItem(
-                  emoji: AppIcons.fillStar,
-                  title: 'Product Reviews',
-                  subtitle: 'When a buyer leaves a review',
-                  obs: c.productReviews,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _NotifSection(
-              header: 'PLATFORM',
-              tiles: [
-                _NotifItem(
-                  emoji: AppIcons.anylaticsIcon,
-                  title: 'Tips & Insights',
-                  subtitle: 'Seller growth recommendations',
-                  obs: c.promotionalTips,
-                ),
-                _NotifItem(
-                  emoji: AppIcons.notificationIcon,
-                  title: 'Platform Updates',
-                  subtitle: 'New features and announcements',
-                  obs: c.platformUpdates,
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -154,11 +239,13 @@ class _NotifItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final RxBool obs;
+  final VoidCallback onChanged;
   const _NotifItem({
     required this.emoji,
     required this.title,
     required this.subtitle,
     required this.obs,
+    required this.onChanged,
   });
 
   @override
@@ -203,7 +290,7 @@ class _NotifItem extends StatelessWidget {
           Obx(
             () => Switch(
               value: obs.value,
-              onChanged: (_) => obs.toggle(),
+              onChanged: (_) => onChanged(),
               activeColor: AppColors.primaryColor,
             ),
           ),

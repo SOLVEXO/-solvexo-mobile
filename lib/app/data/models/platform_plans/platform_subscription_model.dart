@@ -16,6 +16,11 @@ class PlatformSubscriptionModel {
   final double totalPaidUSD;
   final double creditBalanceUSD;
   final PlatformPlanModel? plan;
+  // Set by POST .../cancel (schedules a downgrade-to-free at period end) and
+  // cleared by POST .../reactivate — drives whether MyPlanCard shows a
+  // "Cancel Plan" or "Reactivate" action.
+  final bool cancelAtPeriodEnd;
+  final String? cancelReason;
 
   const PlatformSubscriptionModel({
     required this.id,
@@ -30,6 +35,8 @@ class PlatformSubscriptionModel {
     required this.totalPaidUSD,
     required this.creditBalanceUSD,
     this.plan,
+    this.cancelAtPeriodEnd = false,
+    this.cancelReason,
   });
 
   bool get isTrialing => status == 'trialing';
@@ -52,6 +59,8 @@ class PlatformSubscriptionModel {
       totalPaidUSD: (json['totalPaidUSD'] as num?)?.toDouble() ?? 0,
       creditBalanceUSD: (json['creditBalanceUSD'] as num?)?.toDouble() ?? 0,
       plan: json['plan'] != null ? PlatformPlanModel.fromJson(json['plan'] as Map<String, dynamic>) : null,
+      cancelAtPeriodEnd: json['cancelAtPeriodEnd'] as bool? ?? false,
+      cancelReason: json['cancelReason'] as String?,
     );
   }
 }

@@ -2,8 +2,10 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/digital_file_upload_tile.dart';
+import 'package:book_store_app/app/modules/add_seller_product/widgets/education_level_picker_sheet.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/product_publish_mode_selector.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/subcategory_picker_sheet.dart';
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
@@ -205,9 +207,13 @@ class AddProductDetailsForm extends StatelessWidget {
             );
           }),
 
-          // ── Digital-product-only fields ─────────────────────────────
+          // ── Digital / Educational-product-only fields ───────────────
+          // Educational resources reuse the digital delivery mechanism
+          // (files, license, download limits) plus an education-level tag.
           Obx(() {
-            if (!controller.isDigital) return const SizedBox.shrink();
+            if (!controller.isDigital && !controller.isEducational) {
+              return const SizedBox.shrink();
+            }
             return _DigitalFields(controller: controller);
           }),
 
@@ -604,6 +610,109 @@ class _SubcategoryField extends StatelessWidget {
   }
 }
 
+// ── Education level field (educational products only) ────────────────────────
+
+class _EducationLevelField extends StatelessWidget {
+  final AddSellerProductController controller;
+  const _EducationLevelField({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return _FormSection(
+      label: 'Education Level',
+      required: true,
+      child: Obx(
+        () => GestureDetector(
+          onTap: () => EducationLevelPickerSheet.show(context, controller),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.textfldFillColor,
+              borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+              border: Border.all(color: AppColors.lightGrey, width: 0.3),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomText(
+                    text: controller.educationLevel.value == null
+                        ? 'Select a level'
+                        : educationLevelLabel(controller.educationLevel.value),
+                    fontSize: AppFontSize.verySmall,
+                    color: controller.educationLevel.value == null
+                        ? AppColors.grey
+                        : AppColors.black,
+                  ),
+                ),
+                const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.grey),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Custom level field + autocomplete (only when level == 'other') ───────────
+
+class _CustomLevelField extends StatelessWidget {
+  final AddSellerProductController controller;
+  const _CustomLevelField({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return _FormSection(
+      label: 'Custom Level',
+      required: true,
+      hint: 'e.g. "Grade 5", "O-Level", "Hifz"',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomTextField(
+            controller: controller.customLevelCtrl,
+            onChanged: controller.onCustomLevelChanged,
+            hintText: 'Enter a custom level',
+            isborder: true,
+            fillColor: AppColors.textfldFillColor,
+          ),
+          Obx(() {
+            if (controller.customLevelSuggestions.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: controller.customLevelSuggestions
+                    .map((s) => GestureDetector(
+                          onTap: () => controller.selectCustomLevelSuggestion(s),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryColor.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+                              border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
+                            ),
+                            child: CustomText(
+                              text: s,
+                              fontSize: AppFontSize.tiny,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
 class _ListedToggle extends StatelessWidget {
   final AddSellerProductController controller;
   const _ListedToggle({required this.controller});
@@ -667,6 +776,22 @@ class _DigitalFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Education Level (educational products only)
+        Obx(() {
+          if (!controller.isEducational) return const SizedBox.shrink();
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _EducationLevelField(controller: controller),
+              const SizedBox(height: 16),
+              if (controller.needsCustomLevel) ...[
+                _CustomLevelField(controller: controller),
+                const SizedBox(height: 16),
+              ],
+            ],
+          );
+        }),
+
         // Compare At Price
         _FormSection(
           label: 'Compare At Price',
@@ -879,6 +1004,48 @@ class _DigitalFields extends StatelessWidget {
                   Switch(
                     value: controller.pdfStampingEnabled.value,
                     onChanged: (_) => controller.pdfStampingEnabled.toggle(),
+                    activeColor: AppColors.primaryColor,
+                  ),
+                ],
+              )),
+        ),
+        const SizedBox(height: 16),
+
+        // Buyer preview toggle — lets buyers view a watermarked/trimmed
+        // sample (first pages/seconds) before purchasing, using the first
+        // uploaded file as the source. Never exposes the original file.
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+            border: Border.all(color: AppColors.lightGrey2),
+          ),
+          child: Obx(() => Row(
+                children: [
+                  const Icon(Icons.visibility_outlined, size: 20, color: AppColors.grey),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text: 'Let buyers preview before buying',
+                          fontSize: AppFontSize.verySmall,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black2,
+                        ),
+                        CustomText(
+                          text: 'Shows a watermarked sample of your first file',
+                          fontSize: AppFontSize.tiny,
+                          color: AppColors.grey,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch(
+                    value: controller.previewEnabled.value,
+                    onChanged: (_) => controller.previewEnabled.toggle(),
                     activeColor: AppColors.primaryColor,
                   ),
                 ],

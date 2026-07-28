@@ -58,6 +58,7 @@ class StoreModel {
   final String name;
   final String slug;
   final String logo;
+  final String coverImage;
   final String categoryId;
   final String description;
   final String sellerType;
@@ -84,6 +85,7 @@ class StoreModel {
     required this.name,
     required this.slug,
     required this.logo,
+    this.coverImage = '',
     required this.categoryId,
     required this.description,
     required this.sellerType,
@@ -124,6 +126,7 @@ class StoreModel {
         name: json['name'] as String? ?? '',
         slug: json['slug'] as String? ?? '',
         logo: json['logo'] as String? ?? '',
+        coverImage: json['coverImage'] as String? ?? '',
         categoryId: json['categoryId'] as String? ?? '',
         description: json['description'] as String? ?? '',
         sellerType: json['sellerType'] as String? ?? '',

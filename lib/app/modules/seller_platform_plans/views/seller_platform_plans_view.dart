@@ -37,7 +37,7 @@ class SellerPlatformPlansView extends GetView<SellerPlatformPlansController> {
               BaseSpacing.xxl * 2,
             ),
             children: [
-              if (sub != null) MyPlanCard(sub: sub),
+              if (sub != null) MyPlanCard(sub: sub, controller: controller),
               if (sub != null) SizedBox(height: BaseSpacing.sm),
               if (entitlements != null) UsageCard(data: entitlements),
               if (entitlements != null) SizedBox(height: BaseSpacing.sm),

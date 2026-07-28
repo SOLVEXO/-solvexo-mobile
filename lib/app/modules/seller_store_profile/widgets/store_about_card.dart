@@ -20,22 +20,25 @@ class StoreAboutCard extends StatelessWidget {
         decoration: _cardDeco(),
         child: Obx(() {
           final desc = c.store.value?.description ?? '';
-          return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const CustomText(
-              text: 'ABOUT THE STORE',
-              fontSize: AppFontSize.tiny,
-              fontWeight: FontWeight.w700,
-              color: AppColors.grey,
-              letterSpacing: 0.8,
-            ),
-            const SizedBox(height: 10),
-            CustomText(
-              text: desc.isEmpty ? 'No description added yet.' : desc,
-              fontSize: AppFontSize.verySmall,
-              color: desc.isEmpty ? AppColors.lightGrey5 : AppColors.black2,
-              height: 1.55,
-            ),
-          ]);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const CustomText(
+                text: 'ABOUT THE STORE',
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w700,
+                color: AppColors.grey,
+                letterSpacing: 0.8,
+              ),
+              const SizedBox(height: 10),
+              CustomText(
+                text: desc.isEmpty ? 'No description added yet.' : desc,
+                fontSize: AppFontSize.verySmall,
+                color: desc.isEmpty ? AppColors.lightGrey5 : AppColors.black2,
+                height: 1.55,
+              ),
+            ],
+          );
         }),
       ),
     );
@@ -45,5 +48,11 @@ class StoreAboutCard extends StatelessWidget {
 BoxDecoration _cardDeco() => BoxDecoration(
   color: AppColors.white,
   borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-  boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+  boxShadow: [
+    BoxShadow(
+      color: AppColors.black.withOpacity(0.04),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ],
 );

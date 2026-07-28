@@ -59,6 +59,11 @@ class CheckoutView extends StatelessWidget {
           onRefresh: controller.refresh,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
+            // `BaseViewScreen`'s Scaffold uses `extendBody: true`, so this
+            // scroll view's content area extends behind `customBottomBar`
+            // rather than being resized around it — without this, the last
+            // couple of summary rows render underneath the fixed bottom bar.
+            padding: EdgeInsets.only(bottom: _BottomBar.height + MediaQuery.of(context).padding.bottom),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -107,7 +112,10 @@ class CheckoutView extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.only(left: BaseSpacing.xxl - 2),
                     child: OutlineButton(
-                      onPressed: () => Get.toNamed(Routes.addressView),
+                      onPressed: () {
+                        controller.addressController.clearForm();
+                        Get.toNamed(Routes.addAddressView);
+                      },
                       label: "Add",
                       compact: true,
                     ),
@@ -407,6 +415,14 @@ class CheckoutView extends StatelessWidget {
               ),
             const Divider(),
             _summaryRow("Total", controller.total.toStringAsFixed(2), bold: true, color: AppColors.primaryColor),
+            // Mixed cart — "Split Payment" is one of two options below: it
+            // charges only the digital items online now and collects the
+            // physical items' cost in cash on delivery instead.
+            if (controller.canSplitPay) ...[
+              SizedBox(height: BaseSpacing.xxs),
+              _summaryRow("If Split Payment — Online now", controller.digitalSubtotal.value.toStringAsFixed(2)),
+              _summaryRow("If Split Payment — COD on delivery", controller.codAmountDue.toStringAsFixed(2)),
+            ],
             // Member savings are already baked into the item prices above —
             // this is a "you saved" note, not another deduction.
             if (controller.subscriberSavings.value > 0)
@@ -488,6 +504,12 @@ class _BottomBar extends StatelessWidget {
     required this.size,
   });
 
+  // Vertical padding (top + bottom) below plus the buttons' fixed height —
+  // kept in sync here so the scroll view above can reserve exactly this
+  // much space instead of guessing.
+  static const double height =
+      (BaseSpacing.sm + 2) + 52 + (BaseSpacing.xxl - 8);
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -521,6 +543,14 @@ class _BottomBar extends StatelessWidget {
                   icon: isPaying ? null : const Icon(Icons.lock_outline_rounded),
                   isLoading: isPaying,
                   onPressed: busy ? null : paymentController.payWithStripe,
+                ),
+              ),
+            if (controller.canSplitPay)
+              Expanded(
+                child: OutlineButton(
+                  label: "Split Payment",
+                  isLoading: isPaying,
+                  onPressed: busy ? null : () => controller.placeSplitOrder(paymentController),
                 ),
               ),
           ],

@@ -24,15 +24,30 @@ class OverviewTab extends StatelessWidget {
       return CustomRefreshWrapper(
         onRefresh: controller.loadOverview,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.md),
+          padding: EdgeInsets.fromLTRB(
+            BaseSpacing.md,
+            0,
+            BaseSpacing.md,
+            BaseSpacing.md,
+          ),
           children: [
             AnalyticsKpiGrid(data: controller.overview.value),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsRevenueBreakdownCard(data: controller.revenueBreakdown.value),
-            if (controller.revenueBreakdown.value.recurringSubscriptionRevenue > 0) SizedBox(height: BaseSpacing.sm),
-            AnalyticsRevenueChart(series: controller.revenueSeries, granularity: controller.chartGranularity.value),
+            AnalyticsRevenueBreakdownCard(
+              data: controller.revenueBreakdown.value,
+            ),
+            if (controller.revenueBreakdown.value.recurringSubscriptionRevenue >
+                0)
+              SizedBox(height: BaseSpacing.sm),
+            AnalyticsRevenueChart(
+              series: controller.revenueSeries,
+              granularity: controller.chartGranularity.value,
+            ),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsOrdersChart(series: controller.orderSeries, granularity: controller.chartGranularity.value),
+            AnalyticsOrdersChart(
+              series: controller.orderSeries,
+              granularity: controller.chartGranularity.value,
+            ),
             SizedBox(height: BaseSpacing.sm),
             AnalyticsTrafficDonut(sources: controller.trafficSources),
             SizedBox(height: BaseSpacing.sm),

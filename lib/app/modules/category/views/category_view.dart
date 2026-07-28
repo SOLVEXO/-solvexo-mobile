@@ -325,6 +325,16 @@ class _SubcategoryTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
+          if (category.productCount != null) ...[
+            const SizedBox(height: 2),
+            CustomText(
+              text:
+                  '${category.productCount} product${category.productCount == 1 ? '' : 's'}',
+              color: AppColors.gray600,
+              fontSize: AppFontSize.tiny,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
       ),
     );

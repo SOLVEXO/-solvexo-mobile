@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:book_store_app/app/notification/fcm_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -114,6 +115,12 @@ class SplashScreenController extends GetxController
       Get.offAllNamed(Routes.welcome);
       return;
     }
+
+    // Covers the returning-user case the login/verify call sites can't:
+    // a device that already has a valid session but never ran FCM init on
+    // this install (e.g. reinstalled, or logged in before this was wired
+    // up). Never blocks navigation below.
+    unawaited(FcmService().init());
 
     final role = await AppPreferences.getUserRole();
     switch (role) {

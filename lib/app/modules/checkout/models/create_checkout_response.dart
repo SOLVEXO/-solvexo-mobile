@@ -198,12 +198,20 @@ class CheckoutSummary {
   /// (line-item discounts). Display-only — never subtract it again.
   final double subscriberSavingsUSD;
 
+  /// Digital/physical split of `subtotal` — used to show "pay this much
+  /// online now" vs "this much COD on delivery" for a mixed cart (see
+  /// `allowedPaymentMethods` containing `'split'`).
+  final double digitalSubtotal;
+  final double physicalSubtotal;
+
   CheckoutSummary({
     required this.subtotal,
     required this.shippingFee,
     required this.taxAmount,
     required this.totalAmount,
     this.subscriberSavingsUSD = 0,
+    this.digitalSubtotal = 0,
+    this.physicalSubtotal = 0,
   });
 
   factory CheckoutSummary.fromJson(Map<String, dynamic> json) {
@@ -213,6 +221,8 @@ class CheckoutSummary {
       taxAmount: (json['taxAmount'] ?? 0).toDouble(),
       totalAmount: (json['totalAmount'] ?? 0).toDouble(),
       subscriberSavingsUSD: (json['subscriberSavingsUSD'] ?? 0).toDouble(),
+      digitalSubtotal: (json['digitalSubtotal'] ?? 0).toDouble(),
+      physicalSubtotal: (json['physicalSubtotal'] ?? 0).toDouble(),
     );
   }
 }

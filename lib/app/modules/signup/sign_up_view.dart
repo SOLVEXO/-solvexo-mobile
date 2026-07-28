@@ -119,7 +119,6 @@ class SignUpView extends StatelessWidget {
               () => CustomTextField(
                 hintText: 'Password',
                 isborder: true,
-                fillColor: AppColors.background,
                 filled: true,
                 prefixIcon: SvgIcon(
                   assetName: AppIcons.lockPassword,
@@ -145,7 +144,6 @@ class SignUpView extends StatelessWidget {
               () => CustomTextField(
                 hintText: 'Confirm password',
                 isborder: true,
-                fillColor: AppColors.background,
                 filled: true,
                 prefixIcon: SvgIcon(
                   assetName: AppIcons.lockPassword,

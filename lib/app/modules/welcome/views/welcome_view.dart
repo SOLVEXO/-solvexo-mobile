@@ -57,13 +57,19 @@ class _LogoSection extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
+          height: 100,
+          width: 100,
           padding: EdgeInsets.all(BaseSpacing.xxs + 1),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(BaseRadius.xxl),
             boxShadow: BaseShadows.forLevel(BaseElevation.level4),
           ),
-          child: CommonImageView(imagePath: AppImages.logoImage),
+          child: CommonImageView(
+            imagePath: AppImages.logoImage,
+            fit: BoxFit.cover,
+            radius: BorderRadius.circular(BaseRadius.xxl),
+          ),
         ),
         SizedBox(height: BaseSpacing.lg),
         CustomText(
@@ -101,7 +107,12 @@ class _BottomSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
-      padding: EdgeInsets.fromLTRB(AppDimen.allPadding, BaseSpacing.xl, AppDimen.allPadding, BaseSpacing.xxl),
+      padding: EdgeInsets.fromLTRB(
+        AppDimen.allPadding,
+        BaseSpacing.xl,
+        AppDimen.allPadding,
+        BaseSpacing.xxl,
+      ),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(BaseRadius.xxxl),
@@ -180,15 +191,24 @@ class _RoleCard extends StatelessWidget {
           // Enforce the 48px minimum touch target regardless of content height.
           constraints: const BoxConstraints(minHeight: 48),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md + 2, vertical: BaseSpacing.md),
+            padding: EdgeInsets.symmetric(
+              horizontal: BaseSpacing.md + 2,
+              vertical: BaseSpacing.md,
+            ),
             decoration: BoxDecoration(
               color: isPrimary ? AppColors.primaryColor : AppColors.background,
-              borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+              borderRadius: BorderRadius.circular(
+                AppDimen.serviceCountTileRadius,
+              ),
               border: Border.all(
-                color: isPrimary ? AppColors.primaryColor : AppColors.lightGrey2,
+                color: isPrimary
+                    ? AppColors.primaryColor
+                    : AppColors.lightGrey2,
                 width: isPrimary ? 0 : 1,
               ),
-              boxShadow: isPrimary ? BaseShadows.glow(AppColors.primaryColor) : BaseShadows.none,
+              boxShadow: isPrimary
+                  ? BaseShadows.glow(AppColors.primaryColor)
+                  : BaseShadows.none,
             ),
             child: Row(
               children: [
@@ -196,14 +216,18 @@ class _RoleCard extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: isPrimary ? AppColors.white.withOpacity(0.2) : AppColors.white,
+                    color: isPrimary
+                        ? AppColors.white.withOpacity(0.2)
+                        : AppColors.white,
                     borderRadius: BorderRadius.circular(BaseRadius.sm),
                   ),
                   alignment: Alignment.center,
                   child: SvgIcon(
                     assetName: emoji,
                     size: 30,
-                    color: isPrimary ? AppColors.white10 : AppColors.barrierColor,
+                    color: isPrimary
+                        ? AppColors.white10
+                        : AppColors.barrierColor,
                   ),
                 ),
                 SizedBox(width: BaseSpacing.md - 2),
@@ -220,7 +244,9 @@ class _RoleCard extends StatelessWidget {
                       SizedBox(height: BaseSpacing.xxs / 2),
                       CustomText(
                         text: subtitle,
-                        color: isPrimary ? AppColors.white.withOpacity(0.8) : AppColors.grey,
+                        color: isPrimary
+                            ? AppColors.white.withOpacity(0.8)
+                            : AppColors.grey,
                         fontSize: AppFontSize.tiny,
                         fontWeight: FontWeight.w400,
                       ),
@@ -230,7 +256,9 @@ class _RoleCard extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 16,
-                  color: isPrimary ? AppColors.white.withOpacity(0.8) : AppColors.lightGrey5,
+                  color: isPrimary
+                      ? AppColors.white.withOpacity(0.8)
+                      : AppColors.lightGrey5,
                 ),
               ],
             ),

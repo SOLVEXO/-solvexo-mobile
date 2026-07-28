@@ -198,4 +198,166 @@ class PlatformPlansRepository {
       return false;
     }
   }
+
+  /// Dry-run pricing preview for [selectPlan] — no charge/DB write. Lets the
+  /// UI show "amount due today" / credit math before the seller commits via
+  /// the real `changePlan` call.
+  Future<PlatformPlanPreviewResult?> previewChangePlan(
+    String storeId, {
+    required String newPlatformPlanId,
+    required String newBillingInterval,
+  }) async {
+    try {
+      final response = await _client.post(
+        ApiConstants.platformPreviewChangePlan(storeId),
+        data: {'newPlatformPlanId': newPlatformPlanId, 'newBillingInterval': newBillingInterval},
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) {
+        return PlatformPlanPreviewResult.fromJson(response.data['data'] as Map<String, dynamic>);
+      }
+      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to preview plan change.');
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint('❌ previewChangePlan error: $e');
+      ToastUtil.showToast('Failed to preview plan change.');
+      return null;
+    }
+  }
+
+  /// Schedules a downgrade-to-free at the end of the current billing period
+  /// — access is unaffected until then. [reason] is optional, max 500 chars.
+  Future<PlatformSubscriptionModel?> cancelSubscription(String storeId, {String? reason}) async {
+    try {
+      final response = await _client.post(
+        ApiConstants.platformCancelPlan(storeId),
+        data: {if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim()},
+        requiresAuth: true,
+        headers: _idempotencyHeader,
+      );
+      if (response.data['success'] == true) {
+        ToastUtil.showToast(response.data['message'] as String? ?? 'Cancellation scheduled.');
+        final data = response.data['data'] as Map<String, dynamic>? ?? const {};
+        final sub = data['subscription'];
+        return sub != null ? PlatformSubscriptionModel.fromJson(sub as Map<String, dynamic>) : null;
+      }
+      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to cancel subscription.');
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint('❌ cancelSubscription error: $e');
+      ToastUtil.showToast('Failed to cancel subscription.');
+      return null;
+    }
+  }
+
+  /// Undoes a pending cancellation scheduled by [cancelSubscription].
+  Future<PlatformSubscriptionModel?> reactivateSubscription(String storeId) async {
+    try {
+      final response = await _client.post(
+        ApiConstants.platformReactivatePlan(storeId),
+        requiresAuth: true,
+        headers: _idempotencyHeader,
+      );
+      if (response.data['success'] == true) {
+        ToastUtil.showToast(response.data['message'] as String? ?? 'Subscription reactivated.');
+        final data = response.data['data'] as Map<String, dynamic>? ?? const {};
+        final sub = data['subscription'];
+        return sub != null ? PlatformSubscriptionModel.fromJson(sub as Map<String, dynamic>) : null;
+      }
+      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to reactivate subscription.');
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint('❌ reactivateSubscription error: $e');
+      ToastUtil.showToast('Failed to reactivate subscription.');
+      return null;
+    }
+  }
+
+  /// Returns a Stripe-hosted billing-portal URL for this store (or, if the
+  /// manual-payment provider is active, just [returnUrl] echoed back).
+  Future<String?> openBillingPortal(String storeId, {required String returnUrl}) async {
+    try {
+      final response = await _client.post(
+        ApiConstants.platformBillingPortal(storeId),
+        data: {'returnUrl': returnUrl},
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>? ?? const {};
+        return data['url'] as String?;
+      }
+      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to open billing portal.');
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint('❌ openBillingPortal error: $e');
+      ToastUtil.showToast('Failed to open billing portal.');
+      return null;
+    }
+  }
+}
+
+/// `POST .../preview-change-plan` dry-run result — pricing math for a
+/// prospective plan/interval switch, shown in [PlanChangePreviewSheet] before
+/// the seller commits via the real `changePlan` call.
+class PlatformPlanPreviewResult {
+  final String direction; // 'upgrade' | 'downgrade' | 'billing_interval_change'
+  final String currentPlanName;
+  final double currentAmountUSD;
+  final String newPlanName;
+  final double newAmountUSD;
+  final String newBillingInterval;
+  final int remainingDaysInCurrentPeriod;
+  final double unusedCreditFromCurrentPlanUSD;
+  final double existingCreditBalanceUSD;
+  final double totalCreditAppliedUSD;
+  final double amountDueTodayUSD;
+  final double creditAppliedToBalanceUSD;
+  final bool effectiveImmediately;
+
+  const PlatformPlanPreviewResult({
+    required this.direction,
+    required this.currentPlanName,
+    required this.currentAmountUSD,
+    required this.newPlanName,
+    required this.newAmountUSD,
+    required this.newBillingInterval,
+    required this.remainingDaysInCurrentPeriod,
+    required this.unusedCreditFromCurrentPlanUSD,
+    required this.existingCreditBalanceUSD,
+    required this.totalCreditAppliedUSD,
+    required this.amountDueTodayUSD,
+    required this.creditAppliedToBalanceUSD,
+    required this.effectiveImmediately,
+  });
+
+  factory PlatformPlanPreviewResult.fromJson(Map<String, dynamic> json) {
+    double d(dynamic v) => (v as num?)?.toDouble() ?? 0;
+    return PlatformPlanPreviewResult(
+      direction: json['direction'] as String? ?? 'upgrade',
+      currentPlanName: json['currentPlanName'] as String? ?? '',
+      currentAmountUSD: d(json['currentAmountUSD']),
+      newPlanName: json['newPlanName'] as String? ?? '',
+      newAmountUSD: d(json['newAmountUSD']),
+      newBillingInterval: json['newBillingInterval'] as String? ?? 'monthly',
+      remainingDaysInCurrentPeriod: (json['remainingDaysInCurrentPeriod'] as num?)?.toInt() ?? 0,
+      unusedCreditFromCurrentPlanUSD: d(json['unusedCreditFromCurrentPlanUSD']),
+      existingCreditBalanceUSD: d(json['existingCreditBalanceUSD']),
+      totalCreditAppliedUSD: d(json['totalCreditAppliedUSD']),
+      amountDueTodayUSD: d(json['amountDueTodayUSD']),
+      creditAppliedToBalanceUSD: d(json['creditAppliedToBalanceUSD']),
+      effectiveImmediately: json['effectiveImmediately'] as bool? ?? true,
+    );
+  }
 }

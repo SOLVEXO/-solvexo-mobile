@@ -124,7 +124,7 @@ class _WishlistCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = item.product;
     final variant = item.selectedVariant ?? (item.variants.isNotEmpty ? item.variants.first : null);
-    final inStock = (variant?.stock ?? 0) > 0;
+    final inStock = product.isDigital || (variant?.isInStock ?? true);
 
     return GestureDetector(
       onTap: () => Get.toNamed(Routes.productDetailsView, arguments: {'productId': product.id}),

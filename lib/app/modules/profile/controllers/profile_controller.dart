@@ -52,6 +52,11 @@ class ProfileController extends GetxController {
           title: 'Change Password',
           onTap: () => Get.toNamed(Routes.CHANGE_PASSWORD),
         ),
+        SettingsTile(
+          icon: AppIcons.notificationIcon,
+          title: 'Notification Preferences',
+          onTap: () => Get.toNamed(Routes.notificationPreferences),
+        ),
       ],
     ),
     SettingsSection(
@@ -61,6 +66,11 @@ class ProfileController extends GetxController {
           icon: AppIcons.phoneIcon,
           title: 'Help Center',
           onTap: () => Get.toNamed(Routes.helpCenterView),
+        ),
+        SettingsTile(
+          icon: AppIcons.emailIcon,
+          title: 'Contact Us',
+          onTap: () => Get.toNamed(Routes.contactUsView),
         ),
         SettingsTile(
           icon: AppIcons.privacy,

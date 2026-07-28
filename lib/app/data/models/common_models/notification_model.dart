@@ -27,6 +27,10 @@ class NotificationModel {
   final String title;
   final String body;
   final NotificationType type;
+  // The backend's fine-grained type string (e.g. `order_shipped`), kept
+  // alongside the coarse [type] bucket so taps can route to the exact
+  // screen the notification is about.
+  final String? rawType;
   final bool isRead;
   final DateTime createdAt;
   final Map<String, dynamic>? data;
@@ -36,6 +40,7 @@ class NotificationModel {
     required this.title,
     required this.body,
     required this.type,
+    this.rawType,
     this.isRead = false,
     required this.createdAt,
     this.data,
@@ -47,6 +52,7 @@ class NotificationModel {
       title: json['title'] as String? ?? '',
       body: json['body'] as String? ?? '',
       type: _mapBackendType(json['type'] as String?),
+      rawType: json['type'] as String?,
       isRead: json['isRead'] as bool? ?? false,
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
       data: (json['data'] as Map?)?.cast<String, dynamic>(),
@@ -58,6 +64,7 @@ class NotificationModel {
         title: title,
         body: body,
         type: type,
+        rawType: rawType,
         isRead: isRead ?? this.isRead,
         createdAt: createdAt,
         data: data,
