@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:flutter/material.dart';
 
 // ─── Cart Response Model ───────────────────────────────────────────────────
@@ -88,10 +89,13 @@ class CartItem {
   final String productId;
   final String productVariantId;
   final String name;
+  final String? sellerName;
+  final bool sellerVerified;
   final double price; // unitPrice (get-cart) or price (add/update)
   final int quantity;
   final List<String> images;
   final String productType; // 'physical' or 'digital'
+  final List<VariantOption> options;
 
   // UI only
   bool isSelected;
@@ -100,10 +104,13 @@ class CartItem {
     required this.productId,
     required this.productVariantId,
     required this.name,
+    this.sellerName,
+    this.sellerVerified = false,
     required this.price,
     required this.quantity,
     required this.images,
     this.productType = 'physical',
+    this.options = const [],
     this.isSelected = true,
   });
 
@@ -126,6 +133,8 @@ class CartItem {
         productId: json['productId'] as String? ?? '',
         productVariantId: json['productVariantId'] as String? ?? '',
         name: json['name'] as String? ?? '',
+        sellerName: json['sellerName'] as String?,
+        sellerVerified: json['sellerVerified'] == true,
         price: (rawPrice as num).toDouble(),
         quantity: (json['quantity'] as num?)?.toInt() ?? 1,
         // images key: try every field the backend uses across all shapes
@@ -138,6 +147,9 @@ class CartItem {
           (json['productSnapshot'] as Map<String, dynamic>?)?['image'],
         ),
         productType: (json['productType'] as String? ?? 'physical').toLowerCase(),
+        options: (json['options'] as List? ?? [])
+            .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
+            .toList(),
         isSelected: true,
       );
     } catch (e) {
@@ -163,19 +175,25 @@ class CartItem {
     String? productId,
     String? productVariantId,
     String? name,
+    String? sellerName,
+    bool? sellerVerified,
     double? price,
     int? quantity,
     List<String>? images,
     String? productType,
+    List<VariantOption>? options,
     bool? isSelected,
   }) => CartItem(
     productId: productId ?? this.productId,
     productVariantId: productVariantId ?? this.productVariantId,
     name: name ?? this.name,
+    sellerName: sellerName ?? this.sellerName,
+    sellerVerified: sellerVerified ?? this.sellerVerified,
     price: price ?? this.price,
     quantity: quantity ?? this.quantity,
     images: images ?? this.images,
     productType: productType ?? this.productType,
+    options: options ?? this.options,
     isSelected: isSelected ?? this.isSelected,
   );
 

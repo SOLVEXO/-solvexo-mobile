@@ -114,6 +114,12 @@ class CheckoutController extends GetxController {
   /// mutually exclusive.
   bool get canSplitPay => _allowedPaymentMethods.contains('split');
 
+  /// The Pakistan "pay into the platform's own bank account, upload proof"
+  /// alternative — a Stripe-equivalent (works for any digital/physical mix),
+  /// not a COD substitute, so it's independent of the other three getters
+  /// and only appears when an admin has enabled it platform-wide.
+  bool get canPayManualBankTransfer => _allowedPaymentMethods.contains('manual_bank_transfer');
+
   /// The amount collected in cash by the courier on delivery — the physical
   /// portion of a split-pay order plus shipping (digital items are always
   /// prepaid online, never COD).
@@ -284,6 +290,17 @@ class CheckoutController extends GetxController {
     } finally {
       isPlacingOrder.value = false;
     }
+  }
+
+  /// Hands off to the full-screen bank-transfer flow (bank details + proof
+  /// upload) — unlike COD/split there's a whole form to fill in first, so
+  /// this navigates instead of showing an inline confirmation dialog.
+  void goToManualBankTransfer() {
+    if (!validateAddressSelected()) return;
+    Get.toNamed(
+      Routes.manualTransferView,
+      arguments: {'checkoutId': _checkoutId, 'totalAmountUSD': total},
+    );
   }
 
   /// A mixed (digital + physical) cart's single "Place Order" action —

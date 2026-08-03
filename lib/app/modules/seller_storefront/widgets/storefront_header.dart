@@ -5,6 +5,7 @@ import 'package:book_store_app/app/data/models/storefront/storefront_model.dart'
 import 'package:book_store_app/app/modules/seller_storefront/controllers/seller_storefront_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -34,7 +35,6 @@ class StorefrontHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Cover + back/share buttons + overlapping logo ───────────────────
         SizedBox(
           height: _coverHeight + _logoSize / 2,
           child: Stack(
@@ -79,6 +79,7 @@ class StorefrontHeader extends StatelessWidget {
             children: [
               CustomText(
                 text: store.name,
+                fontFamily: AppTextStyles.headingFontFamily,
                 fontWeight: FontWeight.w800,
                 fontSize: AppFontSize.medium,
                 maxLines: 1,
@@ -188,11 +189,14 @@ class _Cover extends StatelessWidget {
             store.coverImage != null && store.coverImage!.isNotEmpty
                 ? CommonImageView(url: store.coverImage!, fit: BoxFit.cover)
                 : Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [AppColors.primaryColor, AppColors.accentColor],
+                        colors: [
+                          AppColors.primaryColor.withOpacity(0.5),
+                          AppColors.accentColor.withOpacity(0.7),
+                        ],
                       ),
                     ),
                   ),

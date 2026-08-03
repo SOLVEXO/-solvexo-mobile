@@ -5,6 +5,7 @@ import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart
 import 'package:book_store_app/app/modules/myorders/widgets/order_actions.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/order_header.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -49,8 +50,8 @@ class MyOrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
-                      text: order.isPaid ? 'Paid' : 'Unpaid',
-                      color: order.isPaid ? const Color(0xFF22C55E) : AppColors.orange,
+                      text: order.paymentStatusDisplay,
+                      color: order.paymentStatusColor,
                       fontSize: AppFontSize.tiny,
                       fontWeight: FontWeight.w600,
                     ),
@@ -71,6 +72,7 @@ class MyOrderCard extends StatelessWidget {
                       color: AppColors.black,
                       fontSize: AppFontSize.extraSmall,
                       fontWeight: FontWeight.bold,
+                      fontFamily: AppTextStyles.monoFontFamily,
                     ),
                   ],
                 ),
@@ -114,29 +116,56 @@ class _StoreSection extends StatelessWidget {
         // Store status row
         Padding(
           padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.xs + 2, BaseSpacing.md, BaseSpacing.xxs + 2),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(color: _storeStatusColor, shape: BoxShape.circle),
-              ),
-              SizedBox(width: BaseSpacing.xxs + 2),
-              CustomText(
-                text: store.status[0].toUpperCase() + store.status.substring(1),
-                color: _storeStatusColor,
-                fontSize: AppFontSize.tiny,
-                fontWeight: FontWeight.w600,
-              ),
-              if (store.tracking != null) ...[
-                const Spacer(),
-                CustomText(
-                  text: '${store.tracking!.carrier} · ${store.tracking!.trackingNumber}',
-                  color: AppColors.gray600,
-                  fontSize: AppFontSize.tiny,
-                  fontWeight: FontWeight.w400,
+              if (store.sellerName?.isNotEmpty == true)
+                Padding(
+                  padding: EdgeInsets.only(bottom: BaseSpacing.xxs / 2),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: CustomText(
+                          text: 'Sold by ${store.sellerName!}',
+                          color: AppColors.black2,
+                          fontSize: AppFontSize.tiny,
+                          fontWeight: FontWeight.w600,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (store.sellerVerified) ...[
+                        const SizedBox(width: 3),
+                        const Icon(Icons.verified_rounded, color: AppColors.blue, size: 12),
+                      ],
+                    ],
+                  ),
                 ),
-              ],
+              Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(color: _storeStatusColor, shape: BoxShape.circle),
+                  ),
+                  SizedBox(width: BaseSpacing.xxs + 2),
+                  CustomText(
+                    text: store.status[0].toUpperCase() + store.status.substring(1),
+                    color: _storeStatusColor,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  if (store.tracking != null) ...[
+                    const Spacer(),
+                    CustomText(
+                      text: '${store.tracking!.carrier} · ${store.tracking!.trackingNumber}',
+                      color: AppColors.gray600,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ],
+                ],
+              ),
             ],
           ),
         ),
@@ -191,6 +220,7 @@ class _OrderItemRow extends StatelessWidget {
             color: AppColors.black,
             fontSize: 12.5,
             fontWeight: FontWeight.bold,
+            fontFamily: AppTextStyles.monoFontFamily,
           ),
         ],
       ),

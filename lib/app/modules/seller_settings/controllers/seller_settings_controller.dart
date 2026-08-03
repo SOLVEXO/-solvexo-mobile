@@ -55,7 +55,6 @@ class SellerSettingsController extends GetxController {
 
   // ── Store settings ──────────────────────────────────────────────────────────
   final RxString storeName = 'My Shop'.obs;
-  final RxString paymentMethods = 'Card, Cash, PayPal'.obs;
   final RxString shippingZones = '3 zones configured'.obs;
 
   // Only stores that opted into `in_person_pos` (via onboarding or Edit
@@ -86,12 +85,6 @@ class SellerSettingsController extends GetxController {
           emoji: AppIcons.billsIcon,
           title: 'Finance & Payouts',
           onTap: () => Get.toNamed(Routes.sellerFinance),
-        ),
-        SettingsTile(
-          emoji: AppIcons.duePayment,
-          title: 'Payment Methods',
-          trailing: paymentMethods.value,
-          onTap: () => Get.toNamed(Routes.sellerPaymentMethods),
         ),
         SettingsTile(
           emoji: AppIcons.truckIcon,
@@ -129,6 +122,16 @@ class SellerSettingsController extends GetxController {
           emoji: AppIcons.cardIcon,
           title: 'Subscription Plans',
           onTap: () => Get.toNamed(Routes.sellerSubscriptionPlans),
+        ),
+        SettingsTile(
+          emoji: AppIcons.dashboardIcon,
+          title: 'Storefront Banners',
+          onTap: () => Get.toNamed(Routes.sellerStoreBanners),
+        ),
+        SettingsTile(
+          emoji: AppIcons.anylaticsIcon,
+          title: 'Promotions',
+          onTap: () => Get.toNamed(Routes.sellerPromotions),
         ),
         SettingsTile(
           emoji: AppIcons.aiStudioIcon,

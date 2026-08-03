@@ -7,6 +7,7 @@ import 'package:book_store_app/app/modules/profile/controllers/profile_controlle
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +65,7 @@ class HomeGreetingHeader extends StatelessWidget {
                   CustomText(
                     text: name,
                     color: AppColors.black2,
+                    fontFamily: AppTextStyles.headingFontFamily,
                     fontSize: AppFontSize.regular,
                     fontWeight: FontWeight.bold,
                   ),

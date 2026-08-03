@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,6 +13,7 @@ class CustomAppBarTwo extends StatelessWidget implements PreferredSizeWidget {
   final Color color;
   final bool centerTitle;
   final bool showBackButton;
+  final bool showLeading;
   final Color? backgroundColor;
   final Color? iconColor;
   final double appbarHeight;
@@ -25,6 +27,7 @@ class CustomAppBarTwo extends StatelessWidget implements PreferredSizeWidget {
     this.color = AppColors.black,
     this.centerTitle = false,
     this.showBackButton = true,
+    this.showLeading = true,
     this.backgroundColor,
     this.iconColor,
     this.actions,
@@ -48,29 +51,33 @@ class CustomAppBarTwo extends StatelessWidget implements PreferredSizeWidget {
       scrolledUnderElevation: 0, // ← add this line
       elevation: 0,
       surfaceTintColor: AppColors.transparent,
-      leading: showBackButton
-          ? IconButton(
-              onPressed: onBack ?? () => Get.back(),
-              icon: Icon(
-                Icons.chevron_left,
-                size: isTablet ? 50 : 35,
-                color: color,
-              ),
-            )
-          : IconButton(
-              onPressed: onBack ?? () => Get.back(),
-              icon: SvgIcon(
-                assetName: assetName,
-                size: isTablet ? 50 : 35,
-                color: color,
-              ),
-            ),
+      automaticallyImplyLeading: showLeading,
+      leading: !showLeading
+          ? null
+          : showBackButton
+              ? IconButton(
+                  onPressed: onBack ?? () => Get.back(),
+                  icon: Icon(
+                    Icons.chevron_left,
+                    size: isTablet ? 50 : 35,
+                    color: color,
+                  ),
+                )
+              : IconButton(
+                  onPressed: onBack ?? () => Get.back(),
+                  icon: SvgIcon(
+                    assetName: assetName,
+                    size: isTablet ? 50 : 35,
+                    color: color,
+                  ),
+                ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomText(
             text: title ?? "",
             color: color,
+            fontFamily: AppTextStyles.headingFontFamily,
             fontSize: isTablet ? 24 : AppFontSize.medium,
             fontWeight: FontWeight.w600,
           ),

@@ -9,6 +9,7 @@ import 'package:book_store_app/app/modules/seller_messages/controllers/seller_me
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -47,6 +48,7 @@ class SellerAppBar extends StatelessWidget {
                   if (controller.storeName.value.isNotEmpty) ...[
                     CustomText(
                       text: controller.storeName.value,
+                      fontFamily: AppTextStyles.headingFontFamily,
                       fontSize: AppFontSize.small2,
                       color: AppColors.background,
                       fontWeight: FontWeight.w400,
@@ -55,6 +57,7 @@ class SellerAppBar extends StatelessWidget {
                   ],
                   CustomText(
                     text: title,
+                    fontFamily: AppTextStyles.headingFontFamily,
                     fontSize: AppFontSize.large,
                     color: AppColors.white,
                     fontWeight: FontWeight.bold,

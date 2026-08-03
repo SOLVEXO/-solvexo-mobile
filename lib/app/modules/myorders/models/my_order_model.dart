@@ -125,6 +125,32 @@ class OrderModel {
   bool get isCancelled => orderStatus == 'cancelled';
   bool get canCancel => orderStatus == 'pending';
 
+  /// True for a Pakistan manual-bank-transfer order awaiting an admin to
+  /// review the buyer's uploaded proof — see the `manual_transfer` module.
+  bool get isPendingVerification => paymentStatus == 'pending_verification';
+
+  String get paymentStatusDisplay {
+    switch (paymentStatus) {
+      case 'pending_verification': return 'Verifying Payment';
+      case 'paid':                 return 'Paid';
+      case 'failed':                return 'Payment Failed';
+      case 'refunded':              return 'Refunded';
+      case 'unpaid':
+      default:                      return 'Unpaid';
+    }
+  }
+
+  Color get paymentStatusColor {
+    switch (paymentStatus) {
+      case 'pending_verification': return const Color(0xFFF59E0B);
+      case 'paid':                 return const Color(0xFF22C55E);
+      case 'failed':                return const Color(0xFFEF4444);
+      case 'refunded':              return const Color(0xFF6B7280);
+      case 'unpaid':
+      default:                      return const Color(0xFFDE8147);
+    }
+  }
+
   /// Mirrors `orders.service.ts#returnRequest`'s eligibility rules: at least
   /// one delivered, physical, not-already-requested line item.
   bool get canRequestReturn => stores.any(

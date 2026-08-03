@@ -7,6 +7,7 @@ import 'package:book_store_app/app/modules/pos_orders/widgets/pos_transactions_e
 import 'package:book_store_app/app/modules/pos_orders/widgets/pos_transactions_shimmer.dart';
 import 'package:book_store_app/app/modules/pos/widgets/pos_app_bar.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +105,7 @@ class _FilterHeader extends StatelessWidget {
         children: [
           const CustomText(
             text: 'Transactions',
+            fontFamily: AppTextStyles.headingFontFamily,
             fontSize: AppFontSize.medium,
             fontWeight: FontWeight.bold,
             color: AppColors.black2,

@@ -3,6 +3,7 @@ import 'package:book_store_app/app/modules/seller_products/controllers/seller_pr
 import 'package:book_store_app/app/modules/seller_products/widgets/product_status_badge.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/product_type_badge.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -136,15 +137,22 @@ class _ProductInfo extends StatelessWidget {
         Row(
           children: [
             CustomText(
-              text: '\$${product.price.toStringAsFixed(2)}',
+              text: product.hasPriceRange
+                  ? '\$${product.minPrice!.toStringAsFixed(2)} - \$${product.maxPrice!.toStringAsFixed(2)}'
+                  : '\$${product.price.toStringAsFixed(2)}',
               fontSize: AppFontSize.small2,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryColor,
+              fontFamily: AppTextStyles.monoFontFamily,
             ),
             const SizedBox(width: 8),
             ProductTypeBadge(type: product.type),
             const SizedBox(width: 6),
             ProductStatusBadge(status: product.status),
+            if (product.variantCount > 1) ...[
+              const SizedBox(width: 6),
+              _VariantCountBadge(count: product.variantCount),
+            ],
           ],
         ),
         const SizedBox(height: 5),
@@ -158,6 +166,30 @@ class _ProductInfo extends StatelessWidget {
               : AppColors.lightGrey5,
         ),
       ],
+    );
+  }
+}
+
+// ── Variant count badge ───────────────────────────────────────────────────────
+class _VariantCountBadge extends StatelessWidget {
+  final int count;
+  const _VariantCountBadge({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.primaryColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: CustomText(
+        text: '$count variants',
+        fontSize: AppFontSize.tiny,
+        fontWeight: FontWeight.w600,
+        color: AppColors.primaryColor,
+        fontFamily: AppTextStyles.monoFontFamily,
+      ),
     );
   }
 }

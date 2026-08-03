@@ -42,9 +42,15 @@ class CartView extends BaseView<CartController> {
   @override
   Color? get backgroundColor => AppColors.white;
 
+  // `MainView` (the bottom-nav shell) is only ever reached via
+  // `Get.offAllNamed`, so when Cart is the active tab it sits at the root
+  // of the nav stack and `canPop` is false. When opened via a cart icon
+  // elsewhere (`Get.toNamed(Routes.cartView)`), it's pushed on top, so
+  // `canPop` is true — that's the signal for showing a back button.
   @override
   PreferredSizeWidget buildAppBar(BuildContext context) => CustomAppBarTwo(
         title: "Cart",
+        showLeading: Navigator.canPop(context),
         actions: [WishlistIconCount()],
       );
 

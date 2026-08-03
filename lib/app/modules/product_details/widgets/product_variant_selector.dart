@@ -9,7 +9,8 @@ import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-/// Color/size variant chips plus the selected variant's SKU + stock badge.
+/// One chip row per seller-defined attribute (e.g. Color, Size, Material)
+/// plus the selected variant's SKU + stock badge.
 class ProductVariantSelector extends StatelessWidget {
   final ProductDetailController controller;
   final ProductModel product;
@@ -26,30 +27,21 @@ class ProductVariantSelector extends StatelessWidget {
       final variants = controller.variants;
       if (variants.isEmpty) return const SizedBox.shrink();
 
+      final optionValues = product.availableOptionValues;
+      if (optionValues.isEmpty) return const SizedBox.shrink();
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (product.availableColors.isNotEmpty) ...[
-            const ProductSectionTitle('Color'),
+          for (final entry in optionValues.entries) ...[
+            ProductSectionTitle(entry.key),
             SizedBox(height: BaseSpacing.xs),
-            _VariantChipWrap(
+            _OptionChipWrap(
               controller: controller,
-              variants: variants.where((v) => v.color != null && v.color!.isNotEmpty),
-              labelOf: (v) => v.color!,
-              semanticsLabelOf: (v) => 'Color ${v.color}',
+              name: entry.key,
+              values: entry.value,
             ),
-          ],
-          if (product.availableSizes.isNotEmpty) ...[
             SizedBox(height: BaseSpacing.sm),
-            const ProductSectionTitle('Size'),
-            SizedBox(height: BaseSpacing.xs),
-            _VariantChipWrap(
-              controller: controller,
-              variants: variants.where((v) => v.size != null && v.size!.isNotEmpty),
-              labelOf: (v) => v.size!,
-              semanticsLabelOf: (v) => v.isInStock ? 'Size ${v.size}' : 'Size ${v.size}, out of stock',
-              disabledIf: (v) => !v.isInStock,
-            ),
           ],
           _SelectedVariantBadgeRow(controller: controller),
         ],
@@ -58,75 +50,74 @@ class ProductVariantSelector extends StatelessWidget {
   }
 }
 
-// ─── Color/Size chip wrap ───────────────────────────────────────────────────
+// ─── Attribute value chip wrap ──────────────────────────────────────────────
 
-class _VariantChipWrap extends StatelessWidget {
+class _OptionChipWrap extends StatelessWidget {
   final ProductDetailController controller;
-  final Iterable<ProductVariant> variants;
-  final String Function(ProductVariant) labelOf;
-  final String Function(ProductVariant) semanticsLabelOf;
-  final bool Function(ProductVariant) disabledIf;
+  final String name;
+  final List<String> values;
 
-  const _VariantChipWrap({
+  const _OptionChipWrap({
     required this.controller,
-    required this.variants,
-    required this.labelOf,
-    required this.semanticsLabelOf,
-    this.disabledIf = _neverDisabled,
+    required this.name,
+    required this.values,
   });
-
-  static bool _neverDisabled(ProductVariant v) => false;
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: BaseSpacing.xs,
-      runSpacing: BaseSpacing.xs,
-      children: variants.map((v) {
-        final isSelected = controller.selectedVariant.value?.id == v.id;
-        final disabled = disabledIf(v);
-        return Semantics(
-          button: true,
-          selected: isSelected,
-          enabled: !disabled,
-          label: semanticsLabelOf(v),
-          child: GestureDetector(
-            onTap: disabled ? null : () => controller.selectVariant(v),
-            child: AnimatedContainer(
-              duration: BaseMotion.normal,
-              constraints: const BoxConstraints(minHeight: 40),
-              padding: EdgeInsets.symmetric(
-                horizontal: BaseSpacing.xs + 2,
-                vertical: BaseSpacing.xxs + 1,
-              ),
-              decoration: BoxDecoration(
-                color: disabled
-                    ? AppColors.lightGrey.withOpacity(0.3)
-                    : isSelected
-                    ? AppColors.primaryColor
-                    : AppColors.background,
-                borderRadius: BorderRadius.circular(BaseRadius.sm),
-                border: Border.all(
-                  color: isSelected ? AppColors.primaryColor : AppColors.lightGrey,
-                  width: 1.5,
+    return Obx(() {
+      final selectedValue = controller.selectedOptions[name];
+      return Wrap(
+        spacing: BaseSpacing.xs,
+        runSpacing: BaseSpacing.xs,
+        children: values.map((value) {
+          final isSelected = selectedValue == value;
+          final available = controller.isOptionValueAvailable(name, value);
+          return Semantics(
+            button: true,
+            selected: isSelected,
+            enabled: available,
+            label: available ? '$name $value' : '$name $value, unavailable',
+            child: GestureDetector(
+              onTap: available
+                  ? () => controller.selectOption(name, value)
+                  : null,
+              child: AnimatedContainer(
+                duration: BaseMotion.normal,
+                constraints: const BoxConstraints(minHeight: 40),
+                padding: EdgeInsets.symmetric(
+                  horizontal: BaseSpacing.xs + 2,
+                  vertical: BaseSpacing.xxs + 1,
+                ),
+                decoration: BoxDecoration(
+                  color: !available
+                      ? AppColors.lightGrey.withOpacity(0.3)
+                      : isSelected
+                      ? AppColors.primaryColor
+                      : AppColors.background,
+                  borderRadius: BorderRadius.circular(BaseRadius.sm),
+                  border: Border.all(
+                    color: isSelected ? AppColors.primaryColor : AppColors.lightGrey,
+                    width: 1.5,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: CustomText(
+                  text: value,
+                  color: !available
+                      ? AppColors.gray600
+                      : isSelected
+                      ? AppColors.white
+                      : AppColors.textPrimary,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              alignment: Alignment.center,
-              child: CustomText(
-                text: labelOf(v),
-                color: disabled
-                    ? AppColors.gray600
-                    : isSelected
-                    ? AppColors.white
-                    : AppColors.textPrimary,
-                fontSize: AppFontSize.tiny,
-                fontWeight: FontWeight.w600,
-              ),
             ),
-          ),
-        );
-      }).toList(),
-    );
+          );
+        }).toList(),
+      );
+    });
   }
 }
 

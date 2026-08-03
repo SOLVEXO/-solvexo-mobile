@@ -13,8 +13,6 @@ import '../modules/edit_seller_product/bindings/edit_seller_product_binding.dart
 import '../modules/edit_seller_product/views/edit_seller_product_view.dart';
 import '../modules/seller_store_profile/bindings/seller_store_profile_binding.dart';
 import '../modules/seller_store_profile/views/seller_store_profile_view.dart';
-import '../modules/seller_payment_methods/bindings/seller_payment_methods_binding.dart';
-import '../modules/seller_payment_methods/views/seller_payment_methods_view.dart';
 import '../modules/seller_shipping/bindings/seller_shipping_binding.dart';
 import '../modules/seller_shipping/views/seller_shipping_view.dart';
 import '../modules/seller_notifications/bindings/seller_notifications_binding.dart';
@@ -92,6 +90,10 @@ import '../modules/seller_seo_products/bindings/seller_seo_products_binding.dart
 import '../modules/seller_seo_products/views/seller_seo_products_view.dart';
 import '../modules/seller_activity_log/bindings/seller_activity_log_binding.dart';
 import '../modules/seller_activity_log/views/seller_activity_log_view.dart';
+import '../modules/seller_store_banners/bindings/seller_store_banners_binding.dart';
+import '../modules/seller_store_banners/views/seller_store_banners_view.dart';
+import '../modules/seller_promotions/bindings/seller_promotions_binding.dart';
+import '../modules/seller_promotions/views/seller_promotions_view.dart';
 import '../modules/loyalty_rewards/bindings/loyalty_rewards_binding.dart';
 import '../modules/loyalty_rewards/views/loyalty_rewards_view.dart';
 import '../modules/my_memberships/bindings/my_memberships_binding.dart';
@@ -151,6 +153,10 @@ import '../modules/otp/binding/otp_binding.dart';
 import '../modules/otp/views/get_notified.dart';
 import '../modules/otp/views/otp_view.dart';
 import '../modules/payment/views/payment_success_view.dart';
+import '../modules/manual_transfer/bindings/manual_transfer_binding.dart';
+import '../modules/manual_transfer/bindings/manual_transfer_status_binding.dart';
+import '../modules/manual_transfer/views/manual_transfer_view.dart';
+import '../modules/manual_transfer/views/manual_transfer_status_view.dart';
 import '../modules/privacy_policy/bindings/privacy_policy_binding.dart';
 import '../modules/privacy_policy/views/privacy_policy_view.dart';
 import '../modules/product_details/binding/product_detail_binding.dart';
@@ -272,6 +278,16 @@ class AppPages {
       binding: CheckoutBinding(),
     ),
     GetPage(name: Routes.paymentSuccessView, page: () => PaymentSuccessView()),
+    GetPage(
+      name: Routes.manualTransferView,
+      page: () => ManualTransferView(),
+      binding: ManualTransferBinding(),
+    ),
+    GetPage(
+      name: Routes.manualTransferStatusView,
+      page: () => ManualTransferStatusView(),
+      binding: ManualTransferStatusBinding(),
+    ),
     GetPage(
       name: Routes.profileView,
       page: () => ProfileView(),
@@ -499,6 +515,16 @@ class AppPages {
       binding: SellerActivityLogBinding(),
     ),
     GetPage(
+      name: Routes.sellerStoreBanners,
+      page: () => SellerStoreBannersView(),
+      binding: SellerStoreBannersBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerPromotions,
+      page: () => const SellerPromotionsView(),
+      binding: SellerPromotionsBinding(),
+    ),
+    GetPage(
       name: Routes.loyaltyRewards,
       page: () => LoyaltyRewardsView(),
       binding: LoyaltyRewardsBinding(),
@@ -572,11 +598,6 @@ class AppPages {
       name: Routes.sellerStoreProfile,
       page: () => SellerStoreProfileView(),
       binding: SellerStoreProfileBinding(),
-    ),
-    GetPage(
-      name: Routes.sellerPaymentMethods,
-      page: () => SellerPaymentMethodsView(),
-      binding: SellerPaymentMethodsBinding(),
     ),
     GetPage(
       name: Routes.sellerShipping,

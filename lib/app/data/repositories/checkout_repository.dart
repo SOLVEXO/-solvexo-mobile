@@ -22,12 +22,16 @@ class CheckoutRepository {
   /// error toast.
   Future<({bool success, CreateCheckoutResponse? data, bool addressRequired, String? message})> createCheckout({
     List<Map<String, String>>? items,
+    String? attributedBannerId,
+    String? attributedStoreBannerId,
   }) async {
     try {
       final response = await _client.post(
         ApiConstants.createCheckout,
         data: {
           if (items != null && items.isNotEmpty) 'items': items,
+          if (attributedBannerId != null) 'attributedBannerId': attributedBannerId,
+          if (attributedStoreBannerId != null) 'attributedStoreBannerId': attributedStoreBannerId,
         },
         requiresAuth: true,
       );

@@ -1,4 +1,5 @@
 class PayoutScheduleModel {
+  final String currency; // USD | PKR
   final String frequency; // daily | weekly | biweekly | monthly | manual
   final int dayOfWeek; // 0=Sun..6=Sat
   final int dayOfMonth; // 1-28
@@ -8,6 +9,7 @@ class PayoutScheduleModel {
   final String? defaultPayoutMethodId;
 
   const PayoutScheduleModel({
+    this.currency = 'USD',
     required this.frequency,
     required this.dayOfWeek,
     required this.dayOfMonth,
@@ -22,6 +24,7 @@ class PayoutScheduleModel {
   );
 
   factory PayoutScheduleModel.fromJson(Map<String, dynamic> json) => PayoutScheduleModel(
+        currency: json['currency'] as String? ?? 'USD',
         frequency: json['frequency'] as String? ?? 'weekly',
         dayOfWeek: json['dayOfWeek'] as int? ?? 1,
         dayOfMonth: json['dayOfMonth'] as int? ?? 1,

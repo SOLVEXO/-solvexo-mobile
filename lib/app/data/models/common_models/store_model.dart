@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/data/models/store/store_announcement_bar_model.dart';
 import 'package:flutter/material.dart';
 
 // ── Register / Shift sub-models ───────────────────────────────────────────────
@@ -72,12 +73,27 @@ class StoreModel {
   final List<StoreShift> shifts;
   final String sellerName;
   final String sellerEmail;
+  /// Only present when GET /api/store/getStoreById is called by the owning
+  /// seller (see StoreService.getStoreById) — never returned to anonymous or
+  /// other-store callers.
+  final String? sellerPhone;
 
-  /// Per-store stats attached by GET /api/store/my-stores.
+  /// Per-store stats. `productCount`/`totalSalesUSD` come from either
+  /// GET /api/store/my-stores or (owner-only) GET /api/store/getStoreById;
+  /// `orderCount` is owner-only (getStoreById); `averageRating`/`reviewCount`
+  /// live directly on the Store document (`RatingService.recalcStoreRating`)
+  /// and are always present regardless of auth.
   final int productCount;
+  final int orderCount;
   final double totalSalesUSD;
+  final double averageRating;
+  final int reviewCount;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// Seller-managed storefront merchandising (`src/store/schemas/store.schema.ts`).
+  final List<String> pinnedProductIds;
+  final StoreAnnouncementBarModel announcementBar;
 
   const StoreModel({
     required this.id,
@@ -99,10 +115,16 @@ class StoreModel {
     required this.shifts,
     required this.sellerName,
     required this.sellerEmail,
+    this.sellerPhone,
     this.productCount = 0,
+    this.orderCount = 0,
     this.totalSalesUSD = 0,
+    this.averageRating = 0,
+    this.reviewCount = 0,
     required this.createdAt,
     required this.updatedAt,
+    this.pinnedProductIds = const [],
+    this.announcementBar = const StoreAnnouncementBarModel(),
   });
 
   bool get isActive => status == 'active' && !isDelete;
@@ -148,14 +170,22 @@ class StoreModel {
             [],
         sellerName: json['sellerName'] as String? ?? '',
         sellerEmail: json['sellerEmail'] as String? ?? '',
+        sellerPhone: json['sellerPhone'] as String?,
         productCount: json['productCount'] as int? ?? 0,
+        orderCount: json['orderCount'] as int? ?? 0,
         totalSalesUSD: (json['totalSalesUSD'] as num?)?.toDouble() ?? 0,
+        averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0,
+        reviewCount: json['reviewCount'] as int? ?? 0,
         createdAt: json['createdAt'] != null
             ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
             : DateTime.now(),
         updatedAt: json['updatedAt'] != null
             ? DateTime.tryParse(json['updatedAt'] as String) ?? DateTime.now()
             : DateTime.now(),
+        pinnedProductIds: (json['pinnedProductIds'] as List?)?.cast<String>() ?? const [],
+        announcementBar: json['announcementBar'] is Map<String, dynamic>
+            ? StoreAnnouncementBarModel.fromJson(json['announcementBar'] as Map<String, dynamic>)
+            : const StoreAnnouncementBarModel(),
       );
     } catch (e) {
       debugPrint('❌ StoreModel.fromJson error: $e  json: $json');

@@ -1,13 +1,27 @@
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:get/get.dart';
 
+// ─── Variant option (arbitrary seller-defined attribute, e.g. Color/Size) ──────
+class VariantOption {
+  final String name;
+  final String value;
+
+  const VariantOption({required this.name, required this.value});
+
+  factory VariantOption.fromJson(Map<String, dynamic> json) => VariantOption(
+    name: json['name'] as String? ?? '',
+    value: json['value'] as String? ?? '',
+  );
+
+  Map<String, dynamic> toJson() => {'name': name, 'value': value};
+}
+
 // ─── Variant Model ────────────────────────────────────────────────────────────
 class ProductVariant {
   final String id;
   final String productId;
   final String sku;
-  final String? size;
-  final String? color;
+  final List<VariantOption> options;
   final double price;
   final double? compareAtPrice;
   final int? stock; // null = unlimited
@@ -21,8 +35,7 @@ class ProductVariant {
     required this.id,
     required this.productId,
     required this.sku,
-    this.size,
-    this.color,
+    this.options = const [],
     required this.price,
     this.compareAtPrice,
     required this.stock,
@@ -32,6 +45,10 @@ class ProductVariant {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  String? optionValue(String name) => options
+      .firstWhereOrNull((o) => o.name.toLowerCase() == name.toLowerCase())
+      ?.value;
 
   // null  → unlimited; int → as-is; "∞"/"unlimited"/"Infinity" → null
   static int? _parseStock(dynamic raw) {
@@ -57,8 +74,9 @@ class ProductVariant {
       id: json['_id'] ?? json['id'] ?? '',
       productId: json['productId'] ?? '',
       sku: json['sku'] ?? '',
-      size: json['size'],
-      color: json['color'],
+      options: (json['options'] as List? ?? [])
+          .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
+          .toList(),
       price: (json['price'] ?? 0).toDouble(),
       compareAtPrice: json['compareAtPrice'] != null
           ? (json['compareAtPrice'] as num).toDouble()
@@ -81,8 +99,7 @@ class ProductVariant {
       '_id': id,
       'productId': productId,
       'sku': sku,
-      'size': size,
-      'color': color,
+      'options': options.map((o) => o.toJson()).toList(),
       'price': price,
       'compareAtPrice': compareAtPrice,
       'stock': stock,
@@ -163,8 +180,11 @@ class ProductModel {
   // digital.previewAvailable — server-derived, only meaningful when isDigital
   final bool previewAvailable;
 
-  // Seller / store — only populated by the product-detail endpoint.
+  // Seller / store. sellerName/sellerVerified are batch-attached on every
+  // listing endpoint (category, search, shaped-by-ids) as well as product
+  // detail; the store* fields remain product-detail only.
   final String? sellerName;
+  final bool sellerVerified;
   final String? storeId;
   final String? storeSlug;
   final String? storeName;
@@ -210,6 +230,7 @@ class ProductModel {
     required this.createdAt,
     required this.updatedAt,
     this.sellerName,
+    this.sellerVerified = false,
     this.storeId,
     this.storeSlug,
     this.storeName,
@@ -264,6 +285,7 @@ class ProductModel {
         json['updatedAt'] ?? DateTime.now().toIso8601String(),
       ),
       sellerName: json['sellerName'] as String?,
+      sellerVerified: json['sellerVerified'] == true,
       storeId: json['storeId'] as String?,
       storeSlug: json['storeSlug'] as String?,
       storeName: json['storeName'] as String?,
@@ -345,26 +367,24 @@ class ProductModel {
   /// True when product and all logic is active
   bool get isActive => status == 'active';
 
-  /// All unique colors across variants (null-safe)
-  List<String> get availableColors => variants
-      .where((v) => v.color != null && v.color!.isNotEmpty)
-      .map((v) => v.color!)
-      .toSet()
-      .toList();
+  /// Attribute name → distinct values across all variants, in first-seen order.
+  Map<String, List<String>> get availableOptionValues {
+    final map = <String, List<String>>{};
+    for (final v in variants) {
+      for (final o in v.options) {
+        map.putIfAbsent(o.name, () => []);
+        if (!map[o.name]!.contains(o.value)) map[o.name]!.add(o.value);
+      }
+    }
+    return map;
+  }
 
-  /// All unique sizes across variants (null-safe)
-  List<String> get availableSizes => variants
-      .where((v) => v.size != null && v.size!.isNotEmpty)
-      .map((v) => v.size!)
-      .toSet()
-      .toList();
-
-  /// Get a specific variant by color + size (for product detail screen)
-  ProductVariant? findVariant({String? color, String? size}) {
+  /// Get the variant whose full attribute set matches [selections] exactly.
+  ProductVariant? findVariant(Map<String, String> selections) {
     return variants.firstWhereOrNull(
       (v) =>
-          (color == null || v.color == color) &&
-          (size == null || v.size == size),
+          selections.length == v.options.length &&
+          selections.entries.every((e) => v.optionValue(e.key) == e.value),
     );
   }
 }

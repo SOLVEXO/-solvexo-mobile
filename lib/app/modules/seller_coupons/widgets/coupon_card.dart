@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/marketing/coupon_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -126,6 +127,7 @@ class _CodeChip extends StatelessWidget {
         fontSize: AppFontSize.tiny,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.5,
+        fontFamily: AppTextStyles.monoFontFamily,
       ),
     );
   }
@@ -144,7 +146,13 @@ class _StatusBadge extends StatelessWidget {
       margin: EdgeInsets.only(right: BaseSpacing.xxs),
       padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-      child: CustomText(text: label, color: color, fontSize: 10.5, fontWeight: FontWeight.w700),
+      child: CustomText(
+        text: label,
+        color: color,
+        fontSize: 10.5,
+        fontWeight: FontWeight.w700,
+        fontFamily: AppTextStyles.monoFontFamily,
+      ),
     );
   }
 }
@@ -163,7 +171,13 @@ class _InfoChip extends StatelessWidget {
       children: [
         Icon(icon, size: 13, color: color),
         SizedBox(width: BaseSpacing.xxs / 2),
-        CustomText(text: label, color: color, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w500),
+        CustomText(
+          text: label,
+          color: color,
+          fontSize: AppFontSize.tiny,
+          fontWeight: FontWeight.w500,
+          fontFamily: AppTextStyles.monoFontFamily,
+        ),
       ],
     );
   }

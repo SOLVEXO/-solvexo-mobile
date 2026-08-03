@@ -81,10 +81,12 @@ class CustomTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         decoration: InputDecoration(
-          prefixIcon: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: prefixIcon,
-          ),
+          prefixIcon: prefixIcon == null
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: prefixIcon,
+                ),
           prefixIconColor: AppColors.grey,
           labelText: label,
           labelStyle: TextStyle(
@@ -93,16 +95,20 @@ class CustomTextField extends StatelessWidget {
           ),
           hintText: "$hintText".tr,
           hintStyle: TextStyle(color: AppColors.grey),
-          suffixIcon: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: suffixIcon,
-          ),
+          suffixIcon: suffixIcon == null
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: suffixIcon,
+                ),
           suffixIconColor: AppColors.grey,
           filled: filled,
           fillColor: fillColor,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: isTablet ? 20 : 16,
+          contentPadding: EdgeInsets.only(
+            left: 12,
+            right: 18,
+            top: isTablet ? 20 : 16,
+            bottom: isTablet ? 20 : 16,
           ),
           enabledBorder: isborder
               ? OutlineInputBorder(

@@ -4,6 +4,7 @@ import 'package:book_store_app/app/modules/pos_home/controllers/pos_home_control
 import 'package:book_store_app/app/modules/pos_home/widgets/pos_cart_sheet.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -100,6 +101,7 @@ class PosCartBar extends StatelessWidget {
                       color: AppColors.white,
                       fontSize: AppFontSize.small,
                       fontWeight: FontWeight.bold,
+                      fontFamily: AppTextStyles.monoFontFamily,
                     ),
                   ],
                 ),

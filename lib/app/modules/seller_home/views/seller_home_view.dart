@@ -11,6 +11,7 @@ import 'package:book_store_app/app/modules/seller_home/widgets/seller_quick_acti
 import 'package:book_store_app/app/modules/seller_home/widgets/seller_status_card.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -107,7 +108,12 @@ class _SellerHomeContent extends StatelessWidget {
   Widget _sectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: CustomText(text: title, fontSize: 18, fontWeight: FontWeight.bold),
+      child: CustomText(
+        text: title,
+        fontFamily: AppTextStyles.headingFontFamily,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 
@@ -117,8 +123,9 @@ class _SellerHomeContent extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const CustomText(
+          CustomText(
             text: 'Recent Orders',
+            fontFamily: AppTextStyles.headingFontFamily,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),

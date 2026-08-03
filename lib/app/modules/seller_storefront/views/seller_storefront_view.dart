@@ -2,11 +2,15 @@ import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:book_store_app/app/modules/seller_storefront/controllers/seller_storefront_controller.dart';
+import 'package:book_store_app/app/modules/seller_storefront/widgets/product_horizontal_section.dart';
+import 'package:book_store_app/app/modules/seller_storefront/widgets/store_announcement_bar.dart';
+import 'package:book_store_app/app/modules/seller_storefront/widgets/store_banner_carousel.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_filter_bar.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_header.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_plans_teaser.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,11 +38,42 @@ class SellerStorefrontView extends StatelessWidget {
               SliverToBoxAdapter(
                 child: StorefrontHeader(store: store, c: c),
               ),
+              // Hidden entirely (renders nothing) when the bar isn't
+              // currently active/in-window, or once dismissed for this
+              // screen session.
+              SliverToBoxAdapter(
+                child: c.announcementBarDismissed.value
+                    ? const SizedBox.shrink()
+                    : StoreAnnouncementBar(
+                        announcementBar: store.announcementBar,
+                        onDismiss: c.dismissAnnouncementBar,
+                      ),
+              ),
               const SliverToBoxAdapter(child: SizedBox(height: 18)),
+              // Hidden entirely (renders nothing) when the store has no
+              // active hero banners.
+              SliverToBoxAdapter(
+                child: StoreBannerCarousel(banners: c.storeBanners),
+              ),
               // Hidden entirely (renders nothing) when the store has no
               // active membership plans.
               SliverToBoxAdapter(
                 child: StorefrontPlansTeaser(storeId: store.storeId, storeName: store.name),
+              ),
+              // ── Merchandising rows — handpicked pinned products read as
+              // "curated by the seller", so they lead; the rest follow in a
+              // discovery-oriented order. Each hides itself when empty.
+              SliverToBoxAdapter(
+                child: ProductHorizontalSection(title: 'Handpicked by the Seller', products: c.pinnedProducts),
+              ),
+              SliverToBoxAdapter(
+                child: ProductHorizontalSection(title: 'New Arrivals', products: c.newArrivals),
+              ),
+              SliverToBoxAdapter(
+                child: ProductHorizontalSection(title: 'Best Sellers', products: c.bestSellers),
+              ),
+              SliverToBoxAdapter(
+                child: ProductHorizontalSection(title: 'Trending Now', products: c.trending),
               ),
               SliverToBoxAdapter(child: StorefrontFilterBar(c: c)),
               const SliverToBoxAdapter(child: SizedBox(height: 18)),
@@ -96,6 +131,7 @@ class _SectionHeader extends StatelessWidget {
             const SizedBox(width: 8),
             CustomText(
               text: '${c.totalProducts.value} Products',
+              fontFamily: AppTextStyles.headingFontFamily,
               fontSize: AppFontSize.small2,
               fontWeight: FontWeight.w700,
               color: AppColors.black2,

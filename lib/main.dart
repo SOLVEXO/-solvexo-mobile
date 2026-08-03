@@ -45,8 +45,6 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          // Pinned to light for now — flip to ThemeMode.system once every
-          // screen has been verified against the dark palette.
           themeMode: ThemeMode.light,
           debugShowCheckedModeBanner: false,
           title: "Solvexo",

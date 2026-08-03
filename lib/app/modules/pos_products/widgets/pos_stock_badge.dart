@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
@@ -31,6 +32,7 @@ class PosStockBadge extends StatelessWidget {
             fontSize: AppFontSize.verySmall,
             fontWeight: FontWeight.bold,
             color: _inStock ? AppColors.darkGreen : AppColors.red,
+            fontFamily: AppTextStyles.monoFontFamily,
           ),
         ),
         const SizedBox(height: 4),

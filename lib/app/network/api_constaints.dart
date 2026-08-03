@@ -71,6 +71,10 @@ class ApiConstants {
     String? productType,
     String? educationLevel,
     String? normalizedCustomLevel,
+    double? minPrice,
+    double? maxPrice,
+    double? minRating,
+    String? sortBy,
   }) {
     String url = '$apiPrefix/products/products-by-category';
     List<String> queryParams = [];
@@ -88,6 +92,18 @@ class ApiConstants {
     }
     if (normalizedCustomLevel != null && normalizedCustomLevel.isNotEmpty) {
       queryParams.add('normalizedCustomLevel=$normalizedCustomLevel');
+    }
+    if (minPrice != null) {
+      queryParams.add('minPrice=$minPrice');
+    }
+    if (maxPrice != null) {
+      queryParams.add('maxPrice=$maxPrice');
+    }
+    if (minRating != null) {
+      queryParams.add('minRating=$minRating');
+    }
+    if (sortBy != null && sortBy.isNotEmpty) {
+      queryParams.add('sortBy=$sortBy');
     }
 
     return '$url?${queryParams.join('&')}';
@@ -176,6 +192,21 @@ class ApiConstants {
   static const String initiatePayment = "$apiPrefix/payment/initiate-payment";
   static const String paymentStatus = "$apiPrefix/payment/status";
   static const String getShippingZones = "$apiPrefix/checkout/getShippingZones";
+
+  // ============ Manual Bank Transfer Endpoints (Pakistan) ============
+  // The buyer's "pay into the platform's own bank account, upload proof"
+  // alternative to Stripe — same {success, message, data} envelope as the
+  // other `api/payment/*` routes above.
+  static const String manualTransferBankDetails =
+      "$apiPrefix/payment/manual-transfer/bank-details";
+  static const String manualTransferSubmit =
+      "$apiPrefix/payment/manual-transfer/submit";
+  static const String manualTransferMyProofs =
+      "$apiPrefix/payment/manual-transfer";
+  static String manualTransferProofById(String proofId) =>
+      "$apiPrefix/payment/manual-transfer/$proofId";
+  static String manualTransferReupload(String proofId) =>
+      "$apiPrefix/payment/manual-transfer/$proofId/reupload";
   // ============ Seller / Store Endpoints ============
   static const String createStore = "$apiPrefix/store/create-store";
   static const String updateStore = "$apiPrefix/store/update-store";
@@ -207,6 +238,12 @@ class ApiConstants {
   static const String addDigitalProduct =
       "$apiPrefix/products/add-digital-product";
   static const String editProduct = "$apiPrefix/products/edit-product";
+  static String getMyProduct(String productId) =>
+      "$apiPrefix/products/get-my-product/$productId";
+  static String productVariants(String productId) =>
+      "$apiPrefix/products/$productId/variants";
+  static String productVariant(String productId, String variantId) =>
+      "$apiPrefix/products/$productId/variants/$variantId";
   static String getStoreInventory(String storeId) =>
       "$apiPrefix/inventory/getStoreInventory/$storeId";
   static String lowStockSummary(String storeId) =>
@@ -628,6 +665,53 @@ class ApiConstants {
       '$apiPrefix/subscriptions/my/benefits/$storeId';
   static const String buyerMembershipCredits =
       '$apiPrefix/subscriptions/my/credits';
+
+  // ============ Promotions Endpoints — seller (paid ad placements) ============
+  static const String promotionsPreviewPrice = '$apiPrefix/promotions/preview-price';
+  static String promotionsList(String storeId) => '$apiPrefix/promotions/$storeId';
+  static String promotionsCreate(String storeId) => '$apiPrefix/promotions/$storeId';
+  static String promotionsAnalytics(String storeId) =>
+      '$apiPrefix/promotions/$storeId/analytics';
+  static String promotionsPay(String id) => '$apiPrefix/promotions/$id/pay';
+  static String promotionsConfirm(String id) => '$apiPrefix/promotions/$id/confirm';
+  static String promotionsCancel(String id) => '$apiPrefix/promotions/$id/cancel';
+  static String promotionsTimeline(String id) => '$apiPrefix/promotions/$id/timeline';
+
+  // ============ Promotions Endpoints — public tracking (anonymous-safe) =======
+  static const String promotionTrackImpression =
+      '$apiPrefix/promotions/track/impression';
+  static const String promotionTrackClick = '$apiPrefix/promotions/track/click';
+
+  // ============ Store Banner Endpoints — seller (free storefront hero) ========
+  static String storeBanners(String storeId) => '$apiPrefix/store-banner/$storeId';
+  static String storeBannerById(String storeId, String bannerId) =>
+      '$apiPrefix/store-banner/$storeId/$bannerId';
+  static String storeBannerPause(String storeId, String bannerId) =>
+      '$apiPrefix/store-banner/$storeId/$bannerId/pause';
+  static String storeBannerResume(String storeId, String bannerId) =>
+      '$apiPrefix/store-banner/$storeId/$bannerId/resume';
+  static String storeBannerTimeline(String storeId, String bannerId) =>
+      '$apiPrefix/store-banner/$storeId/$bannerId/timeline';
+
+  // ============ Store Banner Endpoints — public (buyer storefront) ============
+  static String publicStoreBanners(String storeId) =>
+      '$apiPrefix/public/store-banners/$storeId';
+
+  // ============ Store: Pinned Products + Announcement Bar — seller ============
+  static String storePinnedProducts(String storeId) =>
+      '$apiPrefix/store/$storeId/pinned-products';
+  static String storeAnnouncement(String storeId) =>
+      '$apiPrefix/store/$storeId/announcement';
+
+  // ============ Products: Storefront Promotion Sections — buyer (public) ======
+  static String productsPinned(String storeId) =>
+      '$apiPrefix/products/store/$storeId/pinned';
+  static String productsNewArrivals(String storeId, {int limit = 12}) =>
+      '$apiPrefix/products/store/$storeId/new-arrivals?limit=$limit';
+  static String productsBestSellers(String storeId, {int limit = 12}) =>
+      '$apiPrefix/products/store/$storeId/best-sellers?limit=$limit';
+  static String productsTrending(String storeId, {int limit = 12}) =>
+      '$apiPrefix/products/store/$storeId/trending?limit=$limit';
 
   // ============ Notifications Endpoints ============
   static const String notifications = '$apiPrefix/notifications';

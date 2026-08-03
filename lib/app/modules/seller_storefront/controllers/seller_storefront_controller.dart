@@ -1,5 +1,8 @@
 import 'package:book_store_app/app/data/models/storefront/storefront_model.dart';
+import 'package:book_store_app/app/data/models/store_banner/store_banner_model.dart';
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
+import 'package:book_store_app/app/data/repositories/promotions_repository.dart';
+import 'package:book_store_app/app/data/repositories/store_banner_repository.dart';
 import 'package:book_store_app/app/data/repositories/storefront_repository.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
@@ -12,6 +15,7 @@ import 'package:share_plus/share_plus.dart';
 class SellerStorefrontController extends GetxController {
   final _repo = StorefrontRepository();
   final _messagingRepo = MessagingRepository();
+  final _storeBannerRepo = StoreBannerRepository();
   final RxBool isStartingChat = false.obs;
 
   final ScrollController scrollController = ScrollController();
@@ -38,6 +42,26 @@ class SellerStorefrontController extends GetxController {
   int _page = 1;
   bool _hasMore = false;
   bool get hasMore => _hasMore;
+
+  // ── Store banners (seller's free hero carousel) ──────────────────────────
+  final RxList<StoreBannerModel> storeBanners = <StoreBannerModel>[].obs;
+
+  // ── Merchandising sections (pinned / new arrivals / best sellers / trending) ─
+  // Fetched in parallel alongside products once `storeId` is known. Every
+  // repository call silently returns [] on failure — no error toast, the
+  // corresponding section just renders nothing (no-fake-data rule).
+  final RxList<ProductModel> pinnedProducts = <ProductModel>[].obs;
+  final RxList<ProductModel> newArrivals = <ProductModel>[].obs;
+  final RxList<ProductModel> bestSellers = <ProductModel>[].obs;
+  final RxList<ProductModel> trending = <ProductModel>[].obs;
+
+  // ── Announcement bar ─────────────────────────────────────────────────────
+  // Local-only, not persisted — dismissing just hides it for the rest of
+  // this screen's lifetime (same pattern as HomeController.announcementDismissed).
+  final RxBool announcementBarDismissed = false.obs;
+
+  // ── Store banner impressions ─────────────────────────────────────────────
+  final Set<String> _impressedStoreBannerIds = {};
 
   static const sortLabels = {
     'newest': 'Newest',
@@ -94,8 +118,31 @@ class SellerStorefrontController extends GetxController {
         loadProducts(reset: true),
         _loadFilterTags(),
         _loadFollowStatus(),
+        _loadStoreBanners(),
+        _loadMerchandisingSections(),
       ]);
     }
+  }
+
+  Future<void> _loadStoreBanners() async {
+    final storeId = store.value?.storeId;
+    if (storeId == null || storeId.isEmpty) return;
+    storeBanners.assignAll(await _storeBannerRepo.getPublicBanners(storeId));
+  }
+
+  Future<void> _loadMerchandisingSections() async {
+    final storeId = store.value?.storeId;
+    if (storeId == null || storeId.isEmpty) return;
+    final results = await Future.wait([
+      _repo.getPinnedProducts(storeId),
+      _repo.getNewArrivals(storeId),
+      _repo.getBestSellers(storeId),
+      _repo.getTrending(storeId),
+    ]);
+    pinnedProducts.assignAll(results[0]);
+    newArrivals.assignAll(results[1]);
+    bestSellers.assignAll(results[2]);
+    trending.assignAll(results[3]);
   }
 
   Future<void> refreshData() => _loadStore();
@@ -195,6 +242,8 @@ class SellerStorefrontController extends GetxController {
       followersCount: s.followersCount + (wasFollowing ? -1 : 1),
       sellerType: s.sellerType,
       badges: s.badges,
+      pinnedProductIds: s.pinnedProductIds,
+      announcementBar: s.announcementBar,
     );
 
     final following = await _repo.toggleFollow(s.storeId);
@@ -240,6 +289,22 @@ class SellerStorefrontController extends GetxController {
       });
     }
   }
+
+  // ── Store banner impressions ─────────────────────────────────────────────
+
+  /// Fires the store-banner impression beacon at most once per banner id
+  /// per storefront view session — call from `StoreBannerCarousel` for
+  /// whichever page is currently visible.
+  void maybeTrackStoreBannerImpression(String bannerId) {
+    if (bannerId.isEmpty) return;
+    if (_impressedStoreBannerIds.add(bannerId)) {
+      PromotionsRepository().trackImpression(entityType: 'store_banner', entityId: bannerId);
+    }
+  }
+
+  // ── Announcement bar ─────────────────────────────────────────────────────
+
+  void dismissAnnouncementBar() => announcementBarDismissed.value = true;
 
   // ── Share ────────────────────────────────────────────────────────────────
 

@@ -2,6 +2,7 @@ class TaxReportModel {
   final String id;
   final String period; // q1 | q2 | q3 | q4 | annual
   final int year;
+  final String currency;
   final DateTime fromDate;
   final DateTime toDate;
   final double totalRevenue;
@@ -18,6 +19,7 @@ class TaxReportModel {
     required this.id,
     required this.period,
     required this.year,
+    this.currency = 'USD',
     required this.fromDate,
     required this.toDate,
     required this.totalRevenue,
@@ -35,6 +37,7 @@ class TaxReportModel {
         id: json['_id'] as String? ?? json['id'] as String? ?? '',
         period: json['period'] as String? ?? 'q1',
         year: json['year'] as int? ?? DateTime.now().year,
+        currency: json['currency'] as String? ?? 'USD',
         fromDate: json['fromDate'] != null ? DateTime.tryParse(json['fromDate'] as String) ?? DateTime.now() : DateTime.now(),
         toDate: json['toDate'] != null ? DateTime.tryParse(json['toDate'] as String) ?? DateTime.now() : DateTime.now(),
         totalRevenue: (json['totalRevenue'] as num?)?.toDouble() ?? 0,
@@ -47,6 +50,8 @@ class TaxReportModel {
         pdfUrl: json['pdfUrl'] as String?,
         generatedAt: json['generatedAt'] != null ? DateTime.tryParse(json['generatedAt'] as String) : null,
       );
+
+  String amountLabel(double v) => currency == 'PKR' ? 'PKR ${v.toStringAsFixed(2)}' : '\$${v.toStringAsFixed(2)}';
 
   String get periodLabel {
     switch (period) {

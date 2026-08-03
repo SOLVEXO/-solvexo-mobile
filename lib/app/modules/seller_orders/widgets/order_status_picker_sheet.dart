@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -391,6 +392,7 @@ class _TrackingSection extends StatelessWidget {
               const SizedBox(width: 6),
               const CustomText(
                 text: 'Tracking Details',
+                fontFamily: AppTextStyles.headingFontFamily,
                 fontSize: AppFontSize.verySmall,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF5856D6),

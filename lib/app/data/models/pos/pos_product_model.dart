@@ -1,6 +1,7 @@
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:get/get.dart';
 
-/// A single purchasable variant of a POS product (size/color combination).
+/// A single purchasable variant of a POS product (e.g. size/color combination).
 /// Mirrors the backend's embedded ProductVariant as returned by
 /// GET /api/pos/products/:storeId, /products/search and /products/barcode/:storeId/:barcode.
 class PosProductVariant {
@@ -10,8 +11,7 @@ class PosProductVariant {
   final double price;
   final double? compareAtPrice;
   final int stock;
-  final String? size;
-  final String? color;
+  final List<VariantOption> options;
   final bool isDefault;
   final List<String> images;
 
@@ -22,15 +22,14 @@ class PosProductVariant {
     required this.price,
     this.compareAtPrice,
     required this.stock,
-    this.size,
-    this.color,
+    this.options = const [],
     required this.isDefault,
     this.images = const [],
   });
 
   /// Human-readable label for a variant picker, e.g. "Large / Blue".
   String get label {
-    final parts = [size, color].whereType<String>().where((p) => p.isNotEmpty);
+    final parts = options.map((o) => o.value).where((p) => p.isNotEmpty);
     return parts.isNotEmpty ? parts.join(' / ') : sku;
   }
 
@@ -42,8 +41,9 @@ class PosProductVariant {
         price: (json['price'] as num?)?.toDouble() ?? 0,
         compareAtPrice: (json['compareAtPrice'] as num?)?.toDouble(),
         stock: json['stock'] as int? ?? 0,
-        size: json['size'] as String?,
-        color: json['color'] as String?,
+        options: (json['options'] as List? ?? [])
+            .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
+            .toList(),
         isDefault: json['isDefault'] as bool? ?? false,
         images: (json['images'] as List<dynamic>?)?.cast<String>() ?? const [],
       );

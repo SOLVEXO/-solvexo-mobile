@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/checkout/models/checkout_item_model.dart';
 
 class CreateCheckoutResponse {
@@ -115,13 +116,14 @@ class ApiCheckoutItem {
   final String productId;
   final String? variantId;
   final String? sellerId;
+  final String? sellerName;
+  final bool sellerVerified;
   final String? storeId;
   final String type; // 'physical' | 'digital'
   final String name;
   final String? image;
   final String? sku;
-  final String? size;
-  final String? color;
+  final List<VariantOption> options;
   final String? licenseType;
   final int quantity;
   final double price;
@@ -137,13 +139,14 @@ class ApiCheckoutItem {
     required this.productId,
     this.variantId,
     this.sellerId,
+    this.sellerName,
+    this.sellerVerified = false,
     this.storeId,
     required this.type,
     required this.name,
     this.image,
     this.sku,
-    this.size,
-    this.color,
+    this.options = const [],
     this.licenseType,
     required this.quantity,
     required this.price,
@@ -157,13 +160,16 @@ class ApiCheckoutItem {
       productId: json['productId'] as String,
       variantId: json['variantId'] as String?,
       sellerId: json['sellerId'] as String?,
+      sellerName: json['sellerName'] as String?,
+      sellerVerified: json['sellerVerified'] == true,
       storeId: json['storeId'] as String?,
       type: json['type'] as String? ?? 'physical',
       name: json['name'] as String,
       image: json['image'] as String?,
       sku: json['sku'] as String?,
-      size: json['size'] as String?,
-      color: json['color'] as String?,
+      options: (json['options'] as List? ?? [])
+          .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
+          .toList(),
       licenseType: json['licenseType'] as String?,
       quantity: json['quantity'] as int? ?? 1,
       price: (json['price'] ?? 0).toDouble(),
@@ -177,7 +183,9 @@ class ApiCheckoutItem {
   CheckoutItem toCheckoutItem() => CheckoutItem(
         id: productId,
         name: name,
-        color: color,
+        sellerName: sellerName,
+        sellerVerified: sellerVerified,
+        options: options,
         image: image ?? '',
         price: price,
         quantity: quantity,

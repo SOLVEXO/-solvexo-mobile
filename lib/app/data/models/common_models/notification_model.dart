@@ -16,6 +16,14 @@ NotificationType _mapBackendType(String? backendType) {
     case 'new_message':
       return NotificationType.message;
     case 'new_follower':
+    case 'promotion_request_submitted':
+    case 'promotion_approved':
+    case 'promotion_rejected':
+    case 'promotion_payment_succeeded':
+    case 'promotion_payment_failed':
+    case 'promotion_going_live':
+    case 'promotion_expiring_soon':
+    case 'promotion_expired':
       return NotificationType.promo;
     default:
       return NotificationType.system;

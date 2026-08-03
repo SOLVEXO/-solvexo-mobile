@@ -101,6 +101,32 @@ class StorefrontRepository {
     }
   }
 
+  // ─── GET /api/products/store/:storeId/{pinned,new-arrivals,best-sellers,trending} ──
+  // Storefront promotion sections (`ProductsController`, public/optional-auth).
+  // All 4 share the same `{success, data: {products}}` shape.
+
+  Future<List<ProductModel>> getPinnedProducts(String storeId) => _getProductSection(ApiConstants.productsPinned(storeId));
+  Future<List<ProductModel>> getNewArrivals(String storeId) => _getProductSection(ApiConstants.productsNewArrivals(storeId));
+  Future<List<ProductModel>> getBestSellers(String storeId) => _getProductSection(ApiConstants.productsBestSellers(storeId));
+  Future<List<ProductModel>> getTrending(String storeId) => _getProductSection(ApiConstants.productsTrending(storeId));
+
+  Future<List<ProductModel>> _getProductSection(String url) async {
+    try {
+      final response = await _client.get(url);
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        final products = data['products'] as List? ?? [];
+        return products.map((p) => ProductModel.fromJson(p as Map<String, dynamic>)).toList();
+      }
+      return const [];
+    } catch (e) {
+      // Every merchandising section is additive/optional — silently render
+      // nothing rather than surface an error toast on a buyer's storefront view.
+      debugPrint('❌ storefront product section error ($url): $e');
+      return const [];
+    }
+  }
+
   // ─── POST /api/store/:storeId/follow ───────────────────────────────────────
 
   /// Toggles follow state. Returns the new `following` value, or null on
@@ -109,7 +135,7 @@ class StorefrontRepository {
     try {
       final response = await _client.post(ApiConstants.followStore(storeId));
       if (response.data['success'] == true) {
-        return response.data['following'] as bool?;
+        return (response.data['data'] as Map<String, dynamic>?)?['following'] as bool?;
       }
       return null;
     } on DioException catch (e) {

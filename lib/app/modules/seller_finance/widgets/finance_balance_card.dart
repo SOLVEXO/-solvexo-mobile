@@ -4,6 +4,7 @@ import 'package:book_store_app/app/modules/seller_finance/controllers/seller_fin
 import 'package:book_store_app/app/modules/seller_finance/widgets/finance_request_payout_sheet.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,6 +15,16 @@ class FinanceBalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Obx(() => controller.availableCurrencies.length > 1 ? _CurrencySwitcher(controller: controller) : const SizedBox.shrink()),
+        Obx(() => controller.isFlaggedForReview ? _FlaggedBalanceBanner(reason: controller.flaggedReason) : const SizedBox.shrink()),
+        _balanceCard(),
+      ],
+    );
+  }
+
+  Widget _balanceCard() {
     return Obx(
       () => Container(
         margin: const EdgeInsets.symmetric(horizontal: 15),
@@ -100,11 +111,11 @@ class FinanceBalanceCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   CustomText(
-                    text:
-                        '\$${controller.availableBalance.toStringAsFixed(2)}',
+                    text: controller.amountLabel(controller.availableBalance),
                     fontSize: AppFontSize.large,
                     color: AppColors.white,
                     fontWeight: FontWeight.w800,
+                    fontFamily: AppTextStyles.monoFontFamily,
                   ),
                   const SizedBox(height: 18),
                   Row(
@@ -112,8 +123,7 @@ class FinanceBalanceCard extends StatelessWidget {
                       _MetaChip(
                         icon: AppIcons.cross,
                         label: 'Pending',
-                        value:
-                            '\$${controller.pendingBalance.toStringAsFixed(2)}',
+                        value: controller.amountLabel(controller.pendingBalance),
                       ),
                       const SizedBox(width: 10),
                       _MetaChip(
@@ -214,6 +224,94 @@ class _RequestPayoutButton extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Lets a seller who earns in more than one currency (e.g. USD via Stripe
+/// and PKR via manual bank transfer) switch which wallet the whole Finance
+/// screen — balance, stats, transactions, schedule — is currently showing.
+class _CurrencySwitcher extends StatelessWidget {
+  final SellerFinanceController controller;
+  const _CurrencySwitcher({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() => Padding(
+          padding: const EdgeInsets.fromLTRB(15, 0, 15, 10),
+          child: Row(
+            children: controller.availableCurrencies.map((currency) {
+              final selected = controller.selectedCurrency.value == currency;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: GestureDetector(
+                  onTap: () => controller.selectCurrency(currency),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected ? AppColors.primaryColor : AppColors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: selected ? AppColors.primaryColor : AppColors.lightGrey11),
+                    ),
+                    child: CustomText(
+                      text: currency,
+                      fontSize: AppFontSize.verySmall,
+                      fontWeight: FontWeight.w700,
+                      color: selected ? AppColors.white : AppColors.lightGrey5,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ));
+  }
+}
+
+/// Shown above the balance card when a refund/chargeback exceeded what the
+/// seller still had on hand (they'd already withdrawn it) — the negative
+/// balance is real debt against future earnings, not a bug, so this makes it
+/// visible instead of the seller only noticing an odd number in their history.
+class _FlaggedBalanceBanner extends StatelessWidget {
+  final String? reason;
+  const _FlaggedBalanceBanner({required this.reason});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(15, 0, 15, 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.error.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.error.withOpacity(0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CustomText(
+                  text: 'Account flagged for review',
+                  color: AppColors.error,
+                  fontSize: AppFontSize.verySmall,
+                  fontWeight: FontWeight.w700,
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  text: reason ?? 'A refund exceeded your available balance — this will be deducted from future earnings.',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

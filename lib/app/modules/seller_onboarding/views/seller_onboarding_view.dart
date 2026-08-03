@@ -9,6 +9,7 @@ import 'package:book_store_app/app/modules/seller_onboarding/widgets/step4_what_
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/step5_go_live.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +105,7 @@ class _TopHeader extends StatelessWidget {
           const SizedBox(width: 5),
           const CustomText(
             text: 'SOLVEXO',
+            fontFamily: AppTextStyles.headingFontFamily,
             fontSize: AppFontSize.medium,
             fontWeight: FontWeight.bold,
             color: AppColors.primaryColor,

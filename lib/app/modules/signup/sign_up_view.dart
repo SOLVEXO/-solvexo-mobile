@@ -132,7 +132,7 @@ class SignUpView extends StatelessWidget {
                       ? AppIcons.hidePassword
                       : AppIcons.showPassword,
                   color: AppColors.grey,
-                  onTap: () => authController.togglePasswordVisibility,
+                  onTap: authController.togglePasswordVisibility,
                 ),
               ),
             ),
@@ -157,7 +157,7 @@ class SignUpView extends StatelessWidget {
                       ? AppIcons.hidePassword
                       : AppIcons.showPassword,
                   color: AppColors.grey,
-                  onTap: () => authController.toggleConfirmPasswordVisibility,
+                  onTap: authController.toggleConfirmPasswordVisibility,
                 ),
               ),
             ),

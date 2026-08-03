@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -198,6 +199,7 @@ class ProductGridItem extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primaryColor,
+                        fontFamily: AppTextStyles.monoFontFamily,
                       ),
 
                       // if (product.hasDiscount) ...[

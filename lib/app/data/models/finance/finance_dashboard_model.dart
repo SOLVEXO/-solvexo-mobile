@@ -129,39 +129,46 @@ class FinanceFeeBreakdown {
       ];
 }
 
-class FinanceDashboardModel {
+/// One store can hold a separate balance/schedule per currency (e.g. a
+/// Pakistani seller earning both USD-Stripe and PKR-manual-transfer sales) —
+/// each currency the store has ever transacted in gets its own wallet here.
+class FinanceWallet {
+  final String currency;
   final double availableBalance;
   final double pendingBalance;
-  final String currency;
   final FinanceNextPayout nextPayout;
   final FinanceSummary summary;
   final FinanceDashboardScheduleSummary payoutSchedule;
-  final FinanceFeeBreakdown feeBreakdown;
+  // Set when a refund/chargeback reversal drove the balance negative —
+  // typically because funds were already withdrawn before the refund landed.
+  // See FinanceService.recordRefund on the backend.
+  final bool isFlaggedForReview;
+  final String? flaggedReason;
 
-  const FinanceDashboardModel({
+  const FinanceWallet({
+    required this.currency,
     required this.availableBalance,
     required this.pendingBalance,
-    required this.currency,
     required this.nextPayout,
     required this.summary,
     required this.payoutSchedule,
-    required this.feeBreakdown,
+    this.isFlaggedForReview = false,
+    this.flaggedReason,
   });
 
-  static const empty = FinanceDashboardModel(
+  static const empty = FinanceWallet(
+    currency: 'USD',
     availableBalance: 0,
     pendingBalance: 0,
-    currency: 'USD',
     nextPayout: FinanceNextPayout(),
     summary: FinanceSummary.empty,
     payoutSchedule: FinanceDashboardScheduleSummary.empty,
-    feeBreakdown: FinanceFeeBreakdown.empty,
   );
 
-  factory FinanceDashboardModel.fromJson(Map<String, dynamic> json) => FinanceDashboardModel(
+  factory FinanceWallet.fromJson(Map<String, dynamic> json) => FinanceWallet(
+        currency: json['currency'] as String? ?? 'USD',
         availableBalance: (json['availableBalance'] as num?)?.toDouble() ?? 0,
         pendingBalance: (json['pendingBalance'] as num?)?.toDouble() ?? 0,
-        currency: json['currency'] as String? ?? 'USD',
         nextPayout: json['nextPayout'] != null
             ? FinanceNextPayout.fromJson(json['nextPayout'] as Map<String, dynamic>)
             : const FinanceNextPayout(),
@@ -169,8 +176,33 @@ class FinanceDashboardModel {
         payoutSchedule: json['payoutSchedule'] != null
             ? FinanceDashboardScheduleSummary.fromJson(json['payoutSchedule'] as Map<String, dynamic>)
             : FinanceDashboardScheduleSummary.empty,
-        feeBreakdown: json['feeBreakdown'] != null
-            ? FinanceFeeBreakdown.fromJson(json['feeBreakdown'] as Map<String, dynamic>)
-            : FinanceFeeBreakdown.empty,
+        isFlaggedForReview: json['isFlaggedForReview'] as bool? ?? false,
+        flaggedReason: json['flaggedReason'] as String?,
       );
+
+  String amountLabel(double v) => currency == 'PKR' ? 'PKR ${v.toStringAsFixed(2)}' : '\$${v.toStringAsFixed(2)}';
+}
+
+class FinanceDashboardModel {
+  final List<FinanceWallet> wallets;
+  final FinanceFeeBreakdown feeBreakdown;
+
+  const FinanceDashboardModel({required this.wallets, required this.feeBreakdown});
+
+  static const empty = FinanceDashboardModel(wallets: [FinanceWallet.empty], feeBreakdown: FinanceFeeBreakdown.empty);
+
+  factory FinanceDashboardModel.fromJson(Map<String, dynamic> json) {
+    final wallets = (json['wallets'] as List?)?.cast<Map<String, dynamic>>().map(FinanceWallet.fromJson).toList() ?? const <FinanceWallet>[];
+    return FinanceDashboardModel(
+      wallets: wallets.isNotEmpty ? wallets : const [FinanceWallet.empty],
+      feeBreakdown: json['feeBreakdown'] != null
+          ? FinanceFeeBreakdown.fromJson(json['feeBreakdown'] as Map<String, dynamic>)
+          : FinanceFeeBreakdown.empty,
+    );
+  }
+
+  List<String> get currencies => wallets.map((w) => w.currency).toList();
+
+  FinanceWallet walletFor(String currency) =>
+      wallets.firstWhere((w) => w.currency == currency, orElse: () => wallets.isNotEmpty ? wallets.first : FinanceWallet.empty);
 }

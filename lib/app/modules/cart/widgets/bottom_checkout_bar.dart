@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_user_greeting.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
@@ -51,6 +52,7 @@ class BottomCheckoutBar extends StatelessWidget {
                         color: AppColors.black,
                         fontSize: AppFontSize.small,
                         fontWeight: FontWeight.bold,
+                        fontFamily: AppTextStyles.monoFontFamily,
                       ),
                     ],
                   ),

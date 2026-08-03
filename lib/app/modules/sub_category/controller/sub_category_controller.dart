@@ -1,8 +1,8 @@
+import 'package:book_store_app/app/components/product_filter_bottom_sheet.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
-import 'package:book_store_app/app/modules/sub_category/widgets/filter_bottom_sheet.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -38,12 +38,12 @@ class SubCategoryController extends GetxController {
   final RxBool hasMoreProducts = true.obs;
 
   // ─── Filters ──────────────────────────────────────────────────────────────
-  final RxDouble minPrice = 0.0.obs;
-  final RxDouble maxPrice = 1000.0.obs;
-  final RxDouble currentMinFilter = 0.0.obs;
-  final RxDouble currentMaxFilter = 1000.0.obs;
-  final RxString selectedBrand = ''.obs;
+  static const double priceBoundMin = 0.0;
+  static const double priceBoundMax = 1000.0;
+  final RxDouble currentMinFilter = priceBoundMin.obs;
+  final RxDouble currentMaxFilter = priceBoundMax.obs;
   final RxDouble selectedRating = 0.0.obs;
+  final RxString selectedSort = 'newest'.obs;
 
   // Education-level facets (Tier-1 + Tier-2 "other" drill-down). Facet counts
   // are global (not scoped to this category), but the filter section itself
@@ -58,20 +58,6 @@ class SubCategoryController extends GetxController {
   bool get hasEducationalProducts =>
       products.any((p) => p.isEducational) ||
       selectedEducationLevel.value != null;
-
-  final List<double> ratings = [1, 2, 3, 4, 5];
-
-  List<String> get brands {
-    final uniqueBrands = products
-        .where((p) => p.variants.isNotEmpty)
-        .expand((p) => p.variants)
-        .map((v) => v.sku.split('-').first)
-        .toSet()
-        .toList();
-    return uniqueBrands.isEmpty
-        ? ['Brand A', 'Brand B', 'Brand C']
-        : uniqueBrands;
-  }
 
   // ─── Currently selected sub-category ID ──────────────────────────────────
   String? get _activeSubCategoryId {
@@ -183,6 +169,10 @@ class SubCategoryController extends GetxController {
         limit: 20,
         educationLevel: selectedEducationLevel.value,
         normalizedCustomLevel: selectedNormalizedCustomLevel.value,
+        minPrice: currentMinFilter.value > priceBoundMin ? currentMinFilter.value : null,
+        maxPrice: currentMaxFilter.value < priceBoundMax ? currentMaxFilter.value : null,
+        minRating: selectedRating.value > 0 ? selectedRating.value : null,
+        sortBy: selectedSort.value == 'newest' ? null : selectedSort.value,
       );
 
       if (response != null) {
@@ -222,37 +212,42 @@ class SubCategoryController extends GetxController {
 
   // ─── 5. Filters ───────────────────────────────────────────────────────────
 
-  void applyFilters() {
-    currentMinFilter.value = minPrice.value;
-    currentMaxFilter.value = maxPrice.value;
+  void applyFilters(ProductFilterResult filters) {
+    currentMinFilter.value = filters.minPrice;
+    currentMaxFilter.value = filters.maxPrice;
+    selectedRating.value = filters.rating;
+    selectedSort.value = filters.sort;
+    selectedEducationLevel.value = filters.educationLevel;
+    selectedNormalizedCustomLevel.value = filters.normalizedCustomLevel;
     fetchProducts();
   }
 
   void resetFilters() {
-    selectedBrand.value = '';
+    currentMinFilter.value = priceBoundMin;
+    currentMaxFilter.value = priceBoundMax;
     selectedRating.value = 0;
-    minPrice.value = 0;
-    maxPrice.value = 1000;
-    currentMinFilter.value = 0;
-    currentMaxFilter.value = 1000;
+    selectedSort.value = 'newest';
     selectedEducationLevel.value = null;
     selectedNormalizedCustomLevel.value = null;
     fetchProducts();
   }
 
-  /// Staged selection (only takes effect once "Apply Filters" is tapped),
-  /// matching the brand/rating chips' behavior.
-  void selectEducationLevel(String? level) {
-    selectedEducationLevel.value = level;
-    if (level != 'other') selectedNormalizedCustomLevel.value = null;
-  }
-
-  void selectNormalizedCustomLevel(String? slug) {
-    selectedNormalizedCustomLevel.value = slug;
-  }
-
   void openFilterBottomSheet() {
-    Get.bottomSheet(FilterBottomSheetSubCategory());
+    Get.bottomSheet(
+      ProductFilterBottomSheet(
+        minBound: priceBoundMin,
+        maxBound: priceBoundMax,
+        initialMinPrice: currentMinFilter.value,
+        initialMaxPrice: currentMaxFilter.value,
+        initialRating: selectedRating.value,
+        initialSort: selectedSort.value,
+        educationFacets: hasEducationalProducts ? educationFacets.value : null,
+        initialEducationLevel: selectedEducationLevel.value,
+        initialNormalizedCustomLevel: selectedNormalizedCustomLevel.value,
+        onApply: applyFilters,
+        onReset: resetFilters,
+      ),
+    );
   }
 
   // ─── 6. Refresh ───────────────────────────────────────────────────────────

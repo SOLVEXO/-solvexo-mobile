@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +41,7 @@ class ProductDetailSummary extends StatelessWidget {
             color: AppColors.black,
             fontSize: AppFontSize.small2,
             fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+            fontFamily: AppTextStyles.monoFontFamily,
           ),
         ],
       ),

@@ -20,6 +20,8 @@ abstract class Routes {
   static const cartView = '/cart';
   static const checkoutView = '/checkout';
   static const paymentSuccessView = '/payment/payment_success_view';
+  static const manualTransferView = '/payment/manual-bank-transfer';
+  static const manualTransferStatusView = '/payment/manual-bank-transfer/status';
   static const profileView = '/profile';
   static const myOrdersView = '/profile/myorders';
   static const orderTrackingView = '/profile/myorders/order_tracking';
@@ -66,7 +68,6 @@ abstract class Routes {
   static const sellerReturns = '/seller/returns';
   // Seller settings sub-screens
   static const sellerStoreProfile = '/seller/settings/store-profile';
-  static const sellerPaymentMethods = '/seller/settings/payment-methods';
   static const sellerShipping = '/seller/settings/shipping';
   static const sellerNotifications = '/seller/settings/notifications';
   static const sellerPasswordSecurity = '/seller/settings/password-security';
@@ -87,6 +88,8 @@ abstract class Routes {
   static const sellerSeo = '/seller/seo';
   static const sellerSeoProducts = '/seller/seo/products';
   static const sellerActivityLog = '/seller/activity-log';
+  static const sellerStoreBanners = '/seller/store-banners';
+  static const sellerPromotions = '/seller/promotions';
 
   // Seller — AI Studio (6 seller-only AI tools + credits/history).
   // `sellerAiStudio` above (already linked from seller-home quick actions) is

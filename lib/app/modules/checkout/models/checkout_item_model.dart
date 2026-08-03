@@ -1,7 +1,11 @@
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
+
 class CheckoutItem {
   final String? id;
   final String name;
-  final String? color;
+  final String? sellerName;
+  final bool sellerVerified;
+  final List<VariantOption> options;
   final String image;
   final double price;
   final int quantity;
@@ -15,7 +19,9 @@ class CheckoutItem {
   CheckoutItem({
     this.id,
     required this.name,
-    this.color,
+    this.sellerName,
+    this.sellerVerified = false,
+    this.options = const [],
     required this.image,
     required this.price,
     required this.quantity,
@@ -29,7 +35,11 @@ class CheckoutItem {
     return CheckoutItem(
       id: json['id'],
       name: json['name'],
-      color: json['color'],
+      sellerName: json['sellerName'] as String?,
+      sellerVerified: json['sellerVerified'] == true,
+      options: (json['options'] as List? ?? [])
+          .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
+          .toList(),
       image: json['image'],
       price: double.parse(json['price'].toString()),
       quantity: json['quantity'],
@@ -41,7 +51,7 @@ class CheckoutItem {
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
-    "color": color,
+    "options": options.map((o) => o.toJson()).toList(),
     "image": image,
     "price": price,
     "quantity": quantity,

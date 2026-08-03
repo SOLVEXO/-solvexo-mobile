@@ -19,13 +19,14 @@ class SellerStoresView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: EdgeInsets.fromLTRB(
           AppDimen.allPadding,
-          0,
+          12,
           AppDimen.allPadding,
-          Get.bottomBarHeight / 3,
+          12 + bottomInset,
         ),
         child: AppButton(
           onPressed: controller.createNewStore,

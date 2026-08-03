@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_finance/controllers/seller_finance_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,13 +14,14 @@ class FinanceStatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final growth = controller.revenueChange;
+      final currency = controller.selectedCurrency.value;
       final stats = [
         _StatItem(
           icon: Icons.trending_up_rounded,
           iconBg: const Color(0xFFDCFCE7),
           iconColor: AppColors.darkGreen,
           label: 'This Month',
-          value: _compact(controller.monthRevenue),
+          value: _compact(controller.monthRevenue, currency),
           badge: '${growth >= 0 ? '+' : ''}${growth.toInt()}%',
           badgeColor: AppColors.darkGreen,
           badgeBg: const Color(0xFFDCFCE7),
@@ -29,7 +31,7 @@ class FinanceStatsRow extends StatelessWidget {
           iconBg: const Color(0xFFFEF3C7),
           iconColor: const Color(0xFFD97706),
           label: 'Platform Fees',
-          value: _compact(controller.platformFees),
+          value: _compact(controller.platformFees, currency),
           badge: 'This month',
           badgeColor: const Color(0xFFD97706),
           badgeBg: const Color(0xFFFEF3C7),
@@ -39,7 +41,7 @@ class FinanceStatsRow extends StatelessWidget {
           iconBg: const Color(0xFFDBEAFE),
           iconColor: const Color(0xFF2563EB),
           label: 'Total Paid Out',
-          value: _compact(controller.totalPaidOut),
+          value: _compact(controller.totalPaidOut, currency),
           badge: 'All time',
           badgeColor: const Color(0xFF2563EB),
           badgeBg: const Color(0xFFDBEAFE),
@@ -49,7 +51,7 @@ class FinanceStatsRow extends StatelessWidget {
           iconBg: const Color(0xFFFEE2E2),
           iconColor: const Color(0xFFDC2626),
           label: 'Pending Tax',
-          value: _compact(controller.pendingTax),
+          value: _compact(controller.pendingTax, currency),
           badge: 'Est.',
           badgeColor: const Color(0xFFDC2626),
           badgeBg: const Color(0xFFFEE2E2),
@@ -82,9 +84,10 @@ class FinanceStatsRow extends StatelessWidget {
     });
   }
 
-  String _compact(double v) {
-    if (v >= 1000) return '\$${(v / 1000).toStringAsFixed(1)}K';
-    return '\$${v.toStringAsFixed(0)}';
+  String _compact(double v, String currency) {
+    final prefix = currency == 'PKR' ? 'PKR ' : '\$';
+    if (v >= 1000) return '$prefix${(v / 1000).toStringAsFixed(1)}K';
+    return '$prefix${v.toStringAsFixed(0)}';
   }
 }
 
@@ -166,6 +169,7 @@ class _StatCard extends StatelessWidget {
             fontSize: AppFontSize.medium,
             fontWeight: FontWeight.w800,
             color: AppColors.black2,
+            fontFamily: AppTextStyles.monoFontFamily,
           ),
           const SizedBox(height: 3),
           CustomText(

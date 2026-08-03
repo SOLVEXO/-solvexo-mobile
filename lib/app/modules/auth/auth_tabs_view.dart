@@ -5,6 +5,7 @@ import 'package:book_store_app/app/modules/login/login_view.dart';
 import 'package:book_store_app/app/modules/signup/sign_up_view.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
@@ -77,6 +78,7 @@ class _TopBrand extends StatelessWidget {
         CustomText(
           text: 'Solvexo',
           color: AppColors.black2,
+          fontFamily: AppTextStyles.headingFontFamily,
           fontSize: AppFontSize.large,
           fontWeight: FontWeight.bold,
         ),

@@ -3,6 +3,7 @@ import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/data/models/finance/tax_report_model.dart';
 import 'package:book_store_app/app/modules/seller_finance/controllers/seller_finance_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class _FinanceGenerateTaxReportSheetState extends State<FinanceGenerateTaxReport
       Get.snackbar('Invalid year', 'Enter a valid year.', snackPosition: SnackPosition.BOTTOM);
       return;
     }
-    final ok = await widget.controller.generateTaxReport(year: year, period: _period);
+    final ok = await widget.controller.generateTaxReport(year: year, period: _period, currency: widget.controller.selectedCurrency.value);
     if (ok && mounted) Get.back();
   }
 
@@ -144,12 +145,12 @@ void showTaxReportDetailDialog(BuildContext context, TaxReportModel report) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ReportRow(label: 'Total Revenue', value: report.totalRevenue),
-          _ReportRow(label: 'Total Fees', value: report.totalFees),
-          _ReportRow(label: 'Total Refunds', value: report.totalRefunds),
-          _ReportRow(label: 'Total Paid Out', value: report.totalPayouts),
-          _ReportRow(label: 'Net Revenue', value: report.netRevenue),
-          _ReportRow(label: 'Estimated Tax', value: report.estimatedTax),
+          _ReportRow(label: 'Total Revenue', value: report.amountLabel(report.totalRevenue)),
+          _ReportRow(label: 'Total Fees', value: report.amountLabel(report.totalFees)),
+          _ReportRow(label: 'Total Refunds', value: report.amountLabel(report.totalRefunds)),
+          _ReportRow(label: 'Total Paid Out', value: report.amountLabel(report.totalPayouts)),
+          _ReportRow(label: 'Net Revenue', value: report.amountLabel(report.netRevenue)),
+          _ReportRow(label: 'Estimated Tax', value: report.amountLabel(report.estimatedTax)),
           const SizedBox(height: 4),
           CustomText(text: '${report.transactionCount} transactions', color: AppColors.lightGrey5, fontSize: AppFontSize.tiny),
         ],
@@ -166,7 +167,7 @@ void showTaxReportDetailDialog(BuildContext context, TaxReportModel report) {
 
 class _ReportRow extends StatelessWidget {
   final String label;
-  final double value;
+  final String value;
   const _ReportRow({required this.label, required this.value});
 
   @override
@@ -177,7 +178,7 @@ class _ReportRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CustomText(text: label, color: AppColors.lightGrey5, fontSize: AppFontSize.verySmall),
-          CustomText(text: '\$${value.toStringAsFixed(2)}', color: AppColors.black2, fontSize: AppFontSize.verySmall, fontWeight: FontWeight.w700),
+          CustomText(text: value, color: AppColors.black2, fontSize: AppFontSize.verySmall, fontWeight: FontWeight.w700, fontFamily: AppTextStyles.monoFontFamily),
         ],
       ),
     );

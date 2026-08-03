@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:book_store_app/app/components/app_image_picker.dart';
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
+import 'package:book_store_app/app/data/models/store/store_announcement_bar_model.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
@@ -55,11 +56,12 @@ class SellerStoreProfileController extends GetxController {
     return mainCategories.firstWhereOrNull((c) => c.id == id)?.name ?? '—';
   }
 
-  // Stats — placeholder values until a dedicated stats API is integrated
-  int get productCount => 0;
-  int get orderCount => 0;
-  double get rating => 0.0;
-  int get reviewCount => 0;
+  // Stats — from GET /api/store/getStoreById, owner-only fields populated
+  // server-side once this seller is authenticated (see StoreService.getStoreById).
+  int get productCount => store.value?.productCount ?? 0;
+  int get orderCount => store.value?.orderCount ?? 0;
+  double get rating => store.value?.averageRating ?? 0.0;
+  int get reviewCount => store.value?.reviewCount ?? 0;
 
   String get initials {
     final name = store.value?.name.trim() ?? '';
@@ -183,8 +185,14 @@ class SellerStoreProfileController extends GetxController {
                 shifts: store.value!.shifts,
                 sellerName: store.value!.sellerName,
                 sellerEmail: store.value!.sellerEmail,
+                sellerPhone: store.value!.sellerPhone,
+                orderCount: store.value!.orderCount,
+                averageRating: store.value!.averageRating,
+                reviewCount: store.value!.reviewCount,
                 createdAt: store.value!.createdAt,
                 updatedAt: store.value!.updatedAt,
+                pinnedProductIds: store.value!.pinnedProductIds,
+                announcementBar: store.value!.announcementBar,
               );
       },
     );
@@ -221,8 +229,14 @@ class SellerStoreProfileController extends GetxController {
                 shifts: store.value!.shifts,
                 sellerName: store.value!.sellerName,
                 sellerEmail: store.value!.sellerEmail,
+                sellerPhone: store.value!.sellerPhone,
+                orderCount: store.value!.orderCount,
+                averageRating: store.value!.averageRating,
+                reviewCount: store.value!.reviewCount,
                 createdAt: store.value!.createdAt,
                 updatedAt: store.value!.updatedAt,
+                pinnedProductIds: store.value!.pinnedProductIds,
+                announcementBar: store.value!.announcementBar,
               );
       },
     );
@@ -273,5 +287,101 @@ class SellerStoreProfileController extends GetxController {
     await AppPreferences.saveStoreName(updated.name);
     isEditing.value = false;
     ToastUtil.showToast('Store profile updated!');
+  }
+
+  // ── Pinned products ──────────────────────────────────────────────────────
+  // Merchandising add-ons — always-visible cards with their own inline Save,
+  // independent of the profile's global isEditing toggle.
+
+  final RxBool isSavingPinnedProducts = false.obs;
+
+  Future<bool> savePinnedProducts(List<String> productIds) async {
+    final current = store.value;
+    if (current == null || isSavingPinnedProducts.value) return false;
+    isSavingPinnedProducts.value = true;
+    final saved = await _repo.updatePinnedProducts(current.id, productIds);
+    isSavingPinnedProducts.value = false;
+    if (saved == null) return false;
+
+    store.value = StoreModel(
+      id: current.id,
+      sellerId: current.sellerId,
+      name: current.name,
+      slug: current.slug,
+      logo: current.logo,
+      coverImage: current.coverImage,
+      categoryId: current.categoryId,
+      description: current.description,
+      sellerType: current.sellerType,
+      productTypes: current.productTypes,
+      enabledTools: current.enabledTools,
+      plan: current.plan,
+      aiCredits: current.aiCredits,
+      status: current.status,
+      isDelete: current.isDelete,
+      registers: current.registers,
+      shifts: current.shifts,
+      sellerName: current.sellerName,
+      sellerEmail: current.sellerEmail,
+      sellerPhone: current.sellerPhone,
+      productCount: current.productCount,
+      orderCount: current.orderCount,
+      totalSalesUSD: current.totalSalesUSD,
+      averageRating: current.averageRating,
+      reviewCount: current.reviewCount,
+      createdAt: current.createdAt,
+      updatedAt: current.updatedAt,
+      pinnedProductIds: saved,
+      announcementBar: current.announcementBar,
+    );
+    ToastUtil.showToast('Pinned products updated!');
+    return true;
+  }
+
+  // ── Announcement bar ─────────────────────────────────────────────────────
+
+  final RxBool isSavingAnnouncementBar = false.obs;
+
+  Future<bool> saveAnnouncementBar(StoreAnnouncementBarModel bar) async {
+    final current = store.value;
+    if (current == null || isSavingAnnouncementBar.value) return false;
+    isSavingAnnouncementBar.value = true;
+    final saved = await _repo.updateAnnouncementBar(current.id, bar);
+    isSavingAnnouncementBar.value = false;
+    if (saved == null) return false;
+
+    store.value = StoreModel(
+      id: current.id,
+      sellerId: current.sellerId,
+      name: current.name,
+      slug: current.slug,
+      logo: current.logo,
+      coverImage: current.coverImage,
+      categoryId: current.categoryId,
+      description: current.description,
+      sellerType: current.sellerType,
+      productTypes: current.productTypes,
+      enabledTools: current.enabledTools,
+      plan: current.plan,
+      aiCredits: current.aiCredits,
+      status: current.status,
+      isDelete: current.isDelete,
+      registers: current.registers,
+      shifts: current.shifts,
+      sellerName: current.sellerName,
+      sellerEmail: current.sellerEmail,
+      sellerPhone: current.sellerPhone,
+      productCount: current.productCount,
+      orderCount: current.orderCount,
+      totalSalesUSD: current.totalSalesUSD,
+      averageRating: current.averageRating,
+      reviewCount: current.reviewCount,
+      createdAt: current.createdAt,
+      updatedAt: current.updatedAt,
+      pinnedProductIds: current.pinnedProductIds,
+      announcementBar: saved,
+    );
+    ToastUtil.showToast('Announcement bar updated!');
+    return true;
   }
 }

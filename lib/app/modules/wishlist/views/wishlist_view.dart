@@ -9,6 +9,7 @@ import 'package:book_store_app/app/modules/wishlist/model/wishlist_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/core/widgets/base_empty_view.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -155,13 +156,33 @@ class _WishlistCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: CustomText(
+                          text: 'by ${product.sellerName?.isNotEmpty == true ? product.sellerName! : 'Seller'}',
+                          fontSize: AppFontSize.verySmall,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.gray600,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (product.sellerVerified) ...[
+                        const SizedBox(width: 3),
+                        const Icon(Icons.verified_rounded, color: AppColors.blue, size: 12),
+                      ],
+                    ],
+                  ),
                   const SizedBox(height: 5),
-                  if (variant != null)
+                  if (variant != null && variant.options.isNotEmpty)
                     Row(
                       children: [
-                        if (variant.color != null && variant.color!.isNotEmpty) _Badge(label: variant.color!),
-                        if (variant.color != null && variant.size != null) const SizedBox(width: 6),
-                        if (variant.size != null && variant.size!.isNotEmpty) _Badge(label: variant.size!),
+                        for (final o in variant.options) ...[
+                          _Badge(label: o.value),
+                          if (o != variant.options.last) const SizedBox(width: 6),
+                        ],
                       ],
                     ),
                   const SizedBox(height: 8),
@@ -172,6 +193,7 @@ class _WishlistCard extends StatelessWidget {
                         fontSize: AppFontSize.small,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primaryColor,
+                        fontFamily: AppTextStyles.monoFontFamily,
                       ),
                       const Spacer(),
                       Container(
@@ -185,6 +207,7 @@ class _WishlistCard extends StatelessWidget {
                           fontSize: AppFontSize.small2,
                           fontWeight: FontWeight.w600,
                           color: inStock ? AppColors.darkGreen : AppColors.red,
+                          fontFamily: AppTextStyles.monoFontFamily,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -233,7 +256,12 @@ class _Badge extends StatelessWidget {
         color: AppColors.primaryColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: CustomText(text: label, fontSize: AppFontSize.verySmall, color: AppColors.primaryColor),
+      child: CustomText(
+        text: label,
+        fontSize: AppFontSize.verySmall,
+        color: AppColors.primaryColor,
+        fontFamily: AppTextStyles.monoFontFamily,
+      ),
     );
   }
 }

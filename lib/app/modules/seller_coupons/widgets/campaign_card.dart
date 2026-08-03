@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/marketing/campaign_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -74,7 +75,13 @@ class CampaignCard extends StatelessWidget {
                         children: [
                           const Icon(Icons.check_rounded, size: 12, color: AppColors.white),
                           const SizedBox(width: 3),
-                          CustomText(text: 'Joined', color: AppColors.white, fontSize: 10.5, fontWeight: FontWeight.w700),
+                          CustomText(
+                            text: 'Joined',
+                            color: AppColors.white,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: AppTextStyles.monoFontFamily,
+                          ),
                         ],
                       ),
                     ),
@@ -169,6 +176,7 @@ class _DiscountBadge extends StatelessWidget {
         fontSize: AppFontSize.tiny,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.3,
+        fontFamily: AppTextStyles.monoFontFamily,
       ),
     );
   }
@@ -188,7 +196,13 @@ class _InfoChip extends StatelessWidget {
       children: [
         Icon(icon, size: 13, color: color),
         SizedBox(width: BaseSpacing.xxs / 2),
-        CustomText(text: label, color: color, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w500),
+        CustomText(
+          text: label,
+          color: color,
+          fontSize: AppFontSize.tiny,
+          fontWeight: FontWeight.w500,
+          fontFamily: AppTextStyles.monoFontFamily,
+        ),
       ],
     );
   }

@@ -5,12 +5,14 @@
 /// positional/record shape.
 class PlatformStatsModel {
   final int sellersCount;
+  final int storesCount;
   final double gmv;
   final double avgRating;
   final int ratingCount;
 
   const PlatformStatsModel({
     required this.sellersCount,
+    required this.storesCount,
     required this.gmv,
     required this.avgRating,
     required this.ratingCount,
@@ -19,6 +21,7 @@ class PlatformStatsModel {
   factory PlatformStatsModel.fromJson(Map<String, dynamic> json) {
     return PlatformStatsModel(
       sellersCount: (json['sellersCount'] as num?)?.toInt() ?? 0,
+      storesCount: (json['storesCount'] as num?)?.toInt() ?? 0,
       gmv: (json['gmv'] as num?)?.toDouble() ?? 0,
       avgRating: (json['avgRating'] as num?)?.toDouble() ?? 0,
       ratingCount: (json['ratingCount'] as num?)?.toInt() ?? 0,

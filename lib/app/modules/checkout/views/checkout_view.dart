@@ -10,6 +10,7 @@ import 'package:book_store_app/app/modules/payment/controllers/payment_controlle
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -229,7 +230,31 @@ class CheckoutView extends StatelessWidget {
                   ),
                   child: ListTile(
                     leading: CommonImageView(url: item.image, width: 60),
-                    title: CustomText(text: item.name, color: AppColors.black, fontSize: AppFontSize.extraSmall),
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CustomText(text: item.name, color: AppColors.black, fontSize: AppFontSize.extraSmall),
+                        if (item.sellerName?.isNotEmpty == true)
+                          Row(
+                            children: [
+                              Flexible(
+                                child: CustomText(
+                                  text: 'by ${item.sellerName!}',
+                                  color: AppColors.gray600,
+                                  fontSize: AppFontSize.tiny,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (item.sellerVerified) ...[
+                                const SizedBox(width: 3),
+                                const Icon(Icons.verified_rounded, color: AppColors.blue, size: 11),
+                              ],
+                            ],
+                          ),
+                      ],
+                    ),
                     subtitle: Row(
                       spacing: BaseSpacing.xxs + 2,
                       children: [
@@ -252,12 +277,14 @@ class CheckoutView extends StatelessWidget {
                                 color: AppColors.gray600,
                                 fontSize: AppFontSize.tiny,
                                 textDecoration: TextDecoration.lineThrough,
+                                fontFamily: AppTextStyles.monoFontFamily,
                               ),
                               CustomText(
                                 text: "\$${(item.price * item.quantity).toStringAsFixed(2)}",
                                 color: AppColors.primaryColor,
                                 fontSize: AppFontSize.extraSmall,
                                 fontWeight: FontWeight.bold,
+                                fontFamily: AppTextStyles.monoFontFamily,
                               ),
                             ],
                           )
@@ -266,6 +293,7 @@ class CheckoutView extends StatelessWidget {
                             color: AppColors.black,
                             fontSize: AppFontSize.extraSmall,
                             fontWeight: FontWeight.bold,
+                            fontFamily: AppTextStyles.monoFontFamily,
                           ),
                   ),
                 ),
@@ -329,6 +357,7 @@ class CheckoutView extends StatelessWidget {
                           color: AppColors.primaryColor,
                           fontSize: AppFontSize.extraSmall,
                           fontWeight: FontWeight.bold,
+                          fontFamily: AppTextStyles.monoFontFamily,
                         ),
                       ],
                     ),
@@ -375,6 +404,7 @@ class CheckoutView extends StatelessWidget {
                                 color: AppColors.black2,
                                 fontSize: AppFontSize.verySmall,
                                 fontWeight: FontWeight.w700,
+                                fontFamily: AppTextStyles.monoFontFamily,
                               ),
                               CustomText(
                                 text: "Join ${hint.storeName}'s ${hint.planName} plan for member pricing",
@@ -439,6 +469,7 @@ class CheckoutView extends StatelessWidget {
                       color: AppColors.greenSuccess,
                       fontSize: AppFontSize.tiny,
                       fontWeight: FontWeight.w700,
+                      fontFamily: AppTextStyles.monoFontFamily,
                     ),
                   ],
                 ),
@@ -484,6 +515,7 @@ class CheckoutView extends StatelessWidget {
             color: color ?? AppColors.black,
             fontSize: AppFontSize.extraSmall,
             fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            fontFamily: AppTextStyles.monoFontFamily,
           ),
         ],
       ),
@@ -553,6 +585,14 @@ class _BottomBar extends StatelessWidget {
                   onPressed: busy ? null : () => controller.placeSplitOrder(paymentController),
                 ),
               ),
+            if (controller.canPayManualBankTransfer)
+              Expanded(
+                child: OutlineButton(
+                  label: "Bank Transfer",
+                  icon: const Icon(Icons.account_balance_outlined),
+                  onPressed: busy ? null : controller.goToManualBankTransfer,
+                ),
+              ),
           ],
         ),
       );
@@ -578,6 +618,7 @@ class _MemberPriceBadge extends StatelessWidget {
         color: AppColors.greenSuccess,
         fontSize: AppFontSize.tiny,
         fontWeight: FontWeight.w600,
+        fontFamily: AppTextStyles.monoFontFamily,
       ),
     );
   }
@@ -603,6 +644,7 @@ class _ProductTypeBadge extends StatelessWidget {
         color: isDigital ? AppColors.primaryColor : AppColors.darkGreen,
         fontSize: AppFontSize.tiny,
         fontWeight: FontWeight.w600,
+        fontFamily: AppTextStyles.monoFontFamily,
       ),
     );
   }

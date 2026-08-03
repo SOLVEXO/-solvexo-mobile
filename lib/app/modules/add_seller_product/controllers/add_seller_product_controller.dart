@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:book_store_app/app/data/models/common_models/variant_entry.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
@@ -171,8 +172,6 @@ class AddSellerProductController extends GetxController {
   final RxString productName = ''.obs;
   final RxString description = ''.obs;
   final RxString price = ''.obs;
-  final RxString stock = ''.obs;
-  final RxBool unlimitedStock = false.obs;
   final Rx<ProductPublishMode> publishMode = ProductPublishMode.now.obs;
   final Rxn<DateTime> scheduledAt = Rxn<DateTime>();
 
@@ -181,14 +180,14 @@ class AddSellerProductController extends GetxController {
   final RxString tags = ''.obs;
   final RxBool isListedOnSolvexo = false.obs;
 
-  // ── Physical-only reactive values ─────────────────────────────────────────
-  final RxString size = ''.obs;
-  final RxString color = ''.obs;
-  final RxString shippingWeight = ''.obs;
-
   // ── Product images (shared) ───────────────────────────────────────────────
   final RxList<String> productImages = <String>[].obs;
   final RxBool isUploadingImage = false.obs;
+
+  // ── Physical-only: variants (each carries its own price/stock/options) ────
+  final RxList<VariantEntry> variants = <VariantEntry>[
+    VariantEntry()..isDefault.value = true,
+  ].obs;
 
   // ── Digital-only reactive values ──────────────────────────────────────────
   final RxList<DigitalFileEntry> digitalFiles = <DigitalFileEntry>[].obs;
@@ -252,13 +251,8 @@ class AddSellerProductController extends GetxController {
   late final TextEditingController nameCtrl;
   late final TextEditingController descCtrl;
   late final TextEditingController priceCtrl;
-  late final TextEditingController stockCtrl;
   late final TextEditingController compareAtPriceCtrl;
   late final TextEditingController tagsCtrl;
-  // Physical
-  late final TextEditingController sizeCtrl;
-  late final TextEditingController colorCtrl;
-  late final TextEditingController shippingWeightCtrl;
   // Digital
   late final TextEditingController downloadLimitCountCtrl;
   late final TextEditingController linkExpiryDaysCtrl;
@@ -277,8 +271,6 @@ class AddSellerProductController extends GetxController {
   bool get isDigital => selectedType.value == ProductTypeOption.digital;
   bool get isEducational => selectedType.value == ProductTypeOption.educational;
 
-  bool get needsStock => isPhysical && !unlimitedStock.value;
-
   bool get isOnLastStep => step.value == AddProductStep.details;
 
   bool get canProceed {
@@ -287,8 +279,12 @@ class AddSellerProductController extends GetxController {
         return selectedType.value != null;
       case AddProductStep.details:
         final needsSchedule = publishMode.value == ProductPublishMode.scheduled;
+        final hasValidPrice = isPhysical
+            ? variants.isNotEmpty &&
+                variants.every((v) => double.tryParse(v.priceCtrl.text.trim()) != null)
+            : price.value.trim().isNotEmpty;
         return productName.value.trim().isNotEmpty &&
-            price.value.trim().isNotEmpty &&
+            hasValidPrice &&
             (!needsSchedule || scheduledAt.value != null) &&
             (!isEducational || educationLevel.value != null) &&
             (!needsCustomLevel || customLevel.value.trim().isNotEmpty);
@@ -383,7 +379,6 @@ class AddSellerProductController extends GetxController {
 
   void selectType(ProductTypeOption type) {
     selectedType.value = type;
-    if (type != ProductTypeOption.physical) unlimitedStock.value = true;
     if (type != ProductTypeOption.educational) selectEducationLevel(null);
   }
 
@@ -399,6 +394,42 @@ class AddSellerProductController extends GetxController {
 
   void removeImage(int index) {
     if (index < productImages.length) productImages.removeAt(index);
+  }
+
+  // ── Variant management (physical products) ─────────────────────────────────
+
+  void addVariant() => variants.add(VariantEntry());
+
+  void removeVariant(int index) {
+    if (variants.length <= 1) {
+      ToastUtil.showToast('A product needs at least one variant.');
+      return;
+    }
+    variants[index].dispose();
+    variants.removeAt(index);
+    if (!variants.any((v) => v.isDefault.value)) {
+      variants.first.isDefault.value = true;
+    }
+  }
+
+  void setDefaultVariant(int index) {
+    for (var i = 0; i < variants.length; i++) {
+      variants[i].isDefault.value = i == index;
+    }
+  }
+
+  Future<void> pickAndUploadVariantImage(int index) async {
+    final v = variants[index];
+    if (v.isUploadingImage.value || v.images.length >= 5) return;
+    v.isUploadingImage.value = true;
+    final url = await _uploadRepo.pickAndUpload(source: ImageSource.gallery);
+    v.isUploadingImage.value = false;
+    if (url != null) v.images.add(url);
+  }
+
+  void removeVariantImage(int variantIndex, int imageIndex) {
+    final v = variants[variantIndex];
+    if (imageIndex < v.images.length) v.images.removeAt(imageIndex);
   }
 
   // ── Digital file management ───────────────────────────────────────────────
@@ -573,14 +604,41 @@ class AddSellerProductController extends GetxController {
       return false;
     }
 
-    final parsedPrice = double.tryParse(priceCtrl.text.trim());
-    if (parsedPrice == null) {
-      ToastUtil.showToast('Please enter a valid price.');
+    if (variants.isEmpty) {
+      ToastUtil.showToast('Add at least one variant.');
       return false;
     }
 
-    final parsedCompare = double.tryParse(compareAtPriceCtrl.text.trim());
-    final parsedStock = needsStock ? int.tryParse(stockCtrl.text.trim()) : null;
+    final variantJsonList = <Map<String, dynamic>>[];
+    for (var i = 0; i < variants.length; i++) {
+      final json = variants[i].toJson();
+      if (json == null) {
+        ToastUtil.showToast('Variant ${i + 1}: please enter a valid price.');
+        return false;
+      }
+      variantJsonList.add(json);
+    }
+
+    // Client-side duplicate/consistency check — mirrors the backend's rules,
+    // fails fast before the network round-trip.
+    String optionsKey(List options) => (options
+            .map((o) => '${(o['name'] as String).trim().toLowerCase()}:${(o['value'] as String).trim().toLowerCase()}')
+            .toList()
+          ..sort())
+        .join(',');
+    String nameSetKey(List options) =>
+        ((options).map((o) => (o['name'] as String).trim().toLowerCase()).toList()..sort()).join('|');
+
+    final nameSets = variantJsonList.map((v) => nameSetKey(v['options'] as List)).toSet();
+    if (nameSets.length > 1) {
+      ToastUtil.showToast('All variants must use the same attributes.');
+      return false;
+    }
+    final keys = variantJsonList.map((v) => optionsKey(v['options'] as List)).toList();
+    if (keys.toSet().length != keys.length) {
+      ToastUtil.showToast('Each variant must have a unique combination of attributes.');
+      return false;
+    }
 
     // Parse comma-separated tags
     final tagList = tagsCtrl.text
@@ -592,18 +650,10 @@ class AddSellerProductController extends GetxController {
     return _repo.addPhysicalProduct(
       storeId: storeId,
       name: nameCtrl.text.trim(),
-      price: parsedPrice,
       status: publishMode.value.apiStatus,
+      variants: variantJsonList,
       scheduledAt: scheduledAt.value?.toIso8601String(),
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
-      compareAtPrice: parsedCompare,
-      stock: parsedStock,
-      unlimitedStock: unlimitedStock.value,
-      size: sizeCtrl.text.trim().isEmpty ? null : sizeCtrl.text.trim(),
-      color: colorCtrl.text.trim().isEmpty ? null : colorCtrl.text.trim(),
-      shippingWeight: shippingWeightCtrl.text.trim().isEmpty
-          ? null
-          : shippingWeightCtrl.text.trim(),
       tags: tagList,
       images: productImages.toList(),
       isListedOnSolvexo: isListedOnSolvexo.value,
@@ -620,13 +670,8 @@ class AddSellerProductController extends GetxController {
     nameCtrl = TextEditingController();
     descCtrl = TextEditingController();
     priceCtrl = TextEditingController();
-    stockCtrl = TextEditingController();
     compareAtPriceCtrl = TextEditingController();
     tagsCtrl = TextEditingController();
-    // Physical
-    sizeCtrl = TextEditingController();
-    colorCtrl = TextEditingController();
-    shippingWeightCtrl = TextEditingController();
     // Digital
     downloadLimitCountCtrl = TextEditingController();
     linkExpiryDaysCtrl = TextEditingController();
@@ -639,12 +684,8 @@ class AddSellerProductController extends GetxController {
     nameCtrl.dispose();
     descCtrl.dispose();
     priceCtrl.dispose();
-    stockCtrl.dispose();
     compareAtPriceCtrl.dispose();
     tagsCtrl.dispose();
-    sizeCtrl.dispose();
-    colorCtrl.dispose();
-    shippingWeightCtrl.dispose();
     downloadLimitCountCtrl.dispose();
     linkExpiryDaysCtrl.dispose();
     buyerDeliveryMsgCtrl.dispose();
@@ -652,6 +693,9 @@ class AddSellerProductController extends GetxController {
     _suggestDebounce?.cancel();
     for (final f in digitalFiles) {
       f.dispose();
+    }
+    for (final v in variants) {
+      v.dispose();
     }
     super.onClose();
   }

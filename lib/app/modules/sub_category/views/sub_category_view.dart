@@ -9,6 +9,7 @@ import 'package:book_store_app/app/modules/sub_category/widgets/floating_item_ro
 import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -145,6 +146,7 @@ class _SectionHeader extends StatelessWidget {
         CustomText(
           text: title,
           color: AppColors.textPrimary,
+          fontFamily: AppTextStyles.headingFontFamily,
           fontSize: AppFontSize.small,
           fontWeight: FontWeight.w700,
         ),

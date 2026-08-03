@@ -55,6 +55,7 @@ class FinanceTransactionModel {
   final double amount;
   final double balanceBefore;
   final double balanceAfter;
+  final String currency;
   final String description;
   final String? referenceId;
   final String? referenceType;
@@ -67,6 +68,7 @@ class FinanceTransactionModel {
     required this.amount,
     required this.balanceBefore,
     required this.balanceAfter,
+    this.currency = 'USD',
     required this.description,
     this.referenceId,
     this.referenceType,
@@ -76,10 +78,14 @@ class FinanceTransactionModel {
 
   bool get isCredit => amount >= 0;
 
+  String _amountLabel(double v) => currency == 'PKR' ? 'PKR ${v.toStringAsFixed(2)}' : '\$${v.toStringAsFixed(2)}';
+
   String get formattedAmount {
     final sign = isCredit ? '+' : '-';
-    return '$sign\$${amount.abs().toStringAsFixed(2)}';
+    return '$sign${_amountLabel(amount.abs())}';
   }
+
+  String get formattedBalanceAfter => _amountLabel(balanceAfter);
 
   factory FinanceTransactionModel.fromJson(Map<String, dynamic> json) => FinanceTransactionModel(
         id: json['_id'] as String? ?? json['id'] as String? ?? '',
@@ -87,6 +93,7 @@ class FinanceTransactionModel {
         amount: (json['amount'] as num?)?.toDouble() ?? 0,
         balanceBefore: (json['balanceBefore'] as num?)?.toDouble() ?? 0,
         balanceAfter: (json['balanceAfter'] as num?)?.toDouble() ?? 0,
+        currency: json['currency'] as String? ?? 'USD',
         description: json['description'] as String? ?? '',
         referenceId: json['referenceId'] as String?,
         referenceType: json['referenceType'] as String?,

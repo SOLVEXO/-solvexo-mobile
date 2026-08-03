@@ -37,6 +37,7 @@ class SellerFinanceRepository {
     String? status,
     String? from,
     String? to,
+    String? currency,
     int page = 1,
     int limit = 20,
   }) async {
@@ -49,6 +50,7 @@ class SellerFinanceRepository {
           if (status != null) 'status': status,
           if (from != null) 'from': from,
           if (to != null) 'to': to,
+          if (currency != null) 'currency': currency,
           'page': page,
           'limit': limit,
         },
@@ -72,7 +74,7 @@ class SellerFinanceRepository {
   }
 
   /// Returns the raw CSV text, or null on failure.
-  Future<String?> exportTransactionsCsv(String storeId, {String? type, String? status, String? from, String? to}) async {
+  Future<String?> exportTransactionsCsv(String storeId, {String? type, String? status, String? from, String? to, String? currency}) async {
     try {
       final response = await _client.get(
         ApiConstants.financeTransactionsExport(storeId),
@@ -81,6 +83,7 @@ class SellerFinanceRepository {
           if (status != null) 'status': status,
           if (from != null) 'from': from,
           if (to != null) 'to': to,
+          if (currency != null) 'currency': currency,
         },
         requiresAuth: true,
       );
@@ -129,6 +132,7 @@ class SellerFinanceRepository {
   Future<PayoutMethodModel?> addPayoutMethod(
     String storeId, {
     required String type,
+    String? currency,
     String? bankName,
     String? accountHolder,
     String? accountNumber,
@@ -141,6 +145,7 @@ class SellerFinanceRepository {
         ApiConstants.financePayoutMethods(storeId),
         data: {
           'type': type,
+          if (currency != null && currency.isNotEmpty) 'currency': currency,
           if (bankName != null && bankName.isNotEmpty) 'bankName': bankName,
           if (accountHolder != null && accountHolder.isNotEmpty) 'accountHolder': accountHolder,
           if (accountNumber != null && accountNumber.isNotEmpty) 'accountNumber': accountNumber,
@@ -164,6 +169,7 @@ class SellerFinanceRepository {
   Future<PayoutMethodModel?> updatePayoutMethod(
     String storeId,
     String methodId, {
+    String? currency,
     String? bankName,
     String? accountHolder,
     String? accountNumber,
@@ -174,6 +180,7 @@ class SellerFinanceRepository {
       final response = await _client.patch(
         ApiConstants.financePayoutMethodById(storeId, methodId),
         data: {
+          if (currency != null) 'currency': currency,
           if (bankName != null) 'bankName': bankName,
           if (accountHolder != null) 'accountHolder': accountHolder,
           if (accountNumber != null && accountNumber.isNotEmpty) 'accountNumber': accountNumber,
@@ -221,9 +228,13 @@ class SellerFinanceRepository {
     }
   }
 
-  Future<PayoutScheduleModel> getPayoutSchedule(String storeId) async {
+  Future<PayoutScheduleModel> getPayoutSchedule(String storeId, {String currency = 'USD'}) async {
     try {
-      final response = await _client.get(ApiConstants.financePayoutSchedule(storeId), requiresAuth: true);
+      final response = await _client.get(
+        ApiConstants.financePayoutSchedule(storeId),
+        queryParameters: {'currency': currency},
+        requiresAuth: true,
+      );
       return PayoutScheduleModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -236,6 +247,7 @@ class SellerFinanceRepository {
 
   Future<PayoutScheduleModel?> updatePayoutSchedule(
     String storeId, {
+    String? currency,
     String? frequency,
     int? dayOfWeek,
     int? dayOfMonth,
@@ -247,6 +259,7 @@ class SellerFinanceRepository {
       final response = await _client.patch(
         ApiConstants.financePayoutSchedule(storeId),
         data: {
+          if (currency != null) 'currency': currency,
           if (frequency != null) 'frequency': frequency,
           if (dayOfWeek != null) 'dayOfWeek': dayOfWeek,
           if (dayOfMonth != null) 'dayOfMonth': dayOfMonth,
@@ -280,11 +293,11 @@ class SellerFinanceRepository {
     }
   }
 
-  Future<TaxReportModel?> generateTaxReport(String storeId, {required int year, required String period}) async {
+  Future<TaxReportModel?> generateTaxReport(String storeId, {required int year, required String period, String? currency}) async {
     try {
       final response = await _client.post(
         ApiConstants.financeTaxReportsGenerate(storeId),
-        queryParameters: {'year': year, 'period': period},
+        queryParameters: {'year': year, 'period': period, if (currency != null) 'currency': currency},
         requiresAuth: true,
       );
       return TaxReportModel.fromJson(response.data as Map<String, dynamic>);

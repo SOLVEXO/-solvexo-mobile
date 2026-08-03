@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
@@ -30,6 +31,14 @@ class MyOrdersView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
+      // Root of the nav stack (root `MainView` is only reached via
+      // `Get.offAllNamed`) when Orders is the active bottom-nav tab, so
+      // `canPop` is false there and true when pushed via
+      // `Get.toNamed(Routes.myOrdersView)` from Profile/Notifications.
+      appBar: CustomAppBarTwo(
+        title: "My Orders",
+        showLeading: Navigator.canPop(context),
+      ),
       body: SafeArea(
         child: Column(
           children: [

@@ -1,6 +1,8 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -53,7 +55,9 @@ class PlatformStatsStrip extends StatelessWidget {
               _Divider(),
               Expanded(
                 child: _StatTile(
-                  value: '${stats.avgRating.toStringAsFixed(1)}★',
+                  isIcon: true,
+                  assetName: AppIcons.fillStar,
+                  value: stats.avgRating.toStringAsFixed(1),
                   label: stats.ratingCount > 0
                       ? '${_formatCount(stats.ratingCount)} reviews'
                       : 'Avg rating',
@@ -90,19 +94,35 @@ class _Divider extends StatelessWidget {
 class _StatTile extends StatelessWidget {
   final String value;
   final String label;
+  final String assetName;
+  final bool isIcon;
 
-  const _StatTile({required this.value, required this.label});
+  const _StatTile({
+    required this.value,
+    required this.label,
+    this.isIcon = false,
+    this.assetName = AppIcons.cross,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        CustomText(
-          text: value,
-          color: AppColors.black2,
-          fontSize: AppFontSize.small2,
-          fontWeight: FontWeight.w800,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 5,
+          children: [
+            CustomText(
+              text: value,
+              color: AppColors.black2,
+              fontSize: AppFontSize.small2,
+              fontWeight: FontWeight.w800,
+            ),
+            isIcon
+                ? SvgIcon(assetName: assetName, size: 15)
+                : SizedBox.shrink(),
+          ],
         ),
         SizedBox(height: BaseSpacing.xxs / 2),
         CustomText(

@@ -117,30 +117,23 @@ class HomeView extends BaseView<HomeController> {
 
                 // ── Greeting ──────────────────────────────────────────
                 const HomeGreetingHeader(),
-
+                // ── Active marketing campaigns ─────────────────────────
+                CampaignsSection(),
                 SizedBox(height: BaseSpacing.xs),
 
                 // ── Platform trust stats ──────────────────────────────
                 PlatformStatsStrip(),
 
                 SizedBox(height: BaseSpacing.lg),
+                // ── Promotional banner ───────────────────────────────
+                isLoading ? BannerShimmer() : BannerCarousel(),
 
                 // ── Search + filter ───────────────────────────────────
-                const HomeSearchFilterRow(),
-
                 SizedBox(height: BaseSpacing.lg),
 
                 // ── Browse by Category ───────────────────────────────
                 const HomeSectionHeader(title: 'Browse by Category'),
                 CategoriesGrid(),
-
-                SizedBox(height: BaseSpacing.lg),
-
-                // ── Promotional banner ───────────────────────────────
-                isLoading ? BannerShimmer() : BannerCarousel(),
-
-                // ── Active marketing campaigns ─────────────────────────
-                CampaignsSection(),
 
                 // SizedBox(height: BaseSpacing.sm),
 
@@ -155,7 +148,7 @@ class HomeView extends BaseView<HomeController> {
                 TopStoresRow(),
 
                 SizedBox(height: BaseSpacing.sm),
-
+                const HomeSearchFilterRow(),
                 // ── Trending Now ─────────────────────────────────────
                 HomeSectionHeader(
                   title: 'Trending near you',

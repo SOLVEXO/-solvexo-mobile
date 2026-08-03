@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:book_store_app/app/data/models/common_models/variant_entry.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart'
     show DigitalFileEntry, ProductPublishMode;
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
+import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -74,11 +76,6 @@ class EditSellerProductController extends GetxController {
   late final TextEditingController descCtrl;
   late final TextEditingController priceCtrl;
   late final TextEditingController compareAtPriceCtrl;
-  // Physical-only
-  late final TextEditingController stockCtrl;
-  late final TextEditingController sizeCtrl;
-  late final TextEditingController colorCtrl;
-  late final TextEditingController shippingWeightCtrl;
   late final TextEditingController tagsCtrl;
   // Digital-only
   late final TextEditingController downloadLimitCountCtrl;
@@ -98,13 +95,11 @@ class EditSellerProductController extends GetxController {
   // Product images (shared)
   final RxList<String> productImages = <String>[].obs;
   final RxBool isUploadingImage = false.obs;
-  // Physical-only
-  final RxString stock = ''.obs;
-  final RxString size = ''.obs;
-  final RxString color = ''.obs;
-  final RxString shippingWeight = ''.obs;
   final RxString tags = ''.obs;
-  final RxBool unlimitedStock = false.obs;
+  // Physical-only: variants (each carries its own price/stock/attributes/images)
+  final RxList<VariantEntry> variants = <VariantEntry>[].obs;
+  final RxBool isLoadingVariants = false.obs;
+  final List<String> _pendingVariantDeletions = [];
   // Digital-only
   final RxList<DigitalFileEntry> digitalFiles = <DigitalFileEntry>[].obs;
   final RxBool unlimitedDownload = true.obs;
@@ -131,13 +126,18 @@ class EditSellerProductController extends GetxController {
   bool get isEducational => product.type == 'Educational';
   bool get needsCustomLevel => isEducational && educationLevel.value == 'other';
 
-  bool get canSave =>
-      name.value.trim().isNotEmpty &&
-      price.value.trim().isNotEmpty &&
-      (publishMode.value != ProductPublishMode.scheduled ||
-          scheduledAt.value != null) &&
-      (!isEducational || educationLevel.value != null) &&
-      (!needsCustomLevel || customLevel.value.trim().isNotEmpty);
+  bool get canSave {
+    final hasValidPrice = isPhysical
+        ? variants.isNotEmpty &&
+            variants.every((v) => double.tryParse(v.priceCtrl.text.trim()) != null)
+        : price.value.trim().isNotEmpty;
+    return name.value.trim().isNotEmpty &&
+        hasValidPrice &&
+        (publishMode.value != ProductPublishMode.scheduled ||
+            scheduledAt.value != null) &&
+        (!isEducational || educationLevel.value != null) &&
+        (!needsCustomLevel || customLevel.value.trim().isNotEmpty);
+  }
 
   void selectEducationLevel(String? level) {
     educationLevel.value = level;
@@ -201,6 +201,90 @@ class EditSellerProductController extends GetxController {
     if (index < productImages.length) productImages.removeAt(index);
   }
 
+  // ── Variant management (physical products) ─────────────────────────────────
+
+  Future<void> _loadVariants() async {
+    isLoadingVariants.value = true;
+    final result = await _repo.getMyProduct(product.id);
+    isLoadingVariants.value = false;
+
+    for (final v in result.variants) {
+      final entry = VariantEntry(price: (v['price'] as num?)?.toString() ?? '');
+      entry.compareAtPriceCtrl.text = v['compareAtPrice']?.toString() ?? '';
+      entry.stockCtrl.text = v['stock']?.toString() ?? '';
+      entry.unlimitedStock.value = v['unlimitedStock'] as bool? ?? false;
+      entry.shippingWeightCtrl.text = v['shippingWeight'] as String? ?? '';
+      entry.images.assignAll((v['images'] as List?)?.cast<String>() ?? const []);
+      entry.isDefault.value = v['isDefault'] as bool? ?? false;
+      for (final o in (v['options'] as List? ?? [])) {
+        final opt = o as Map<String, dynamic>;
+        entry.options.add(VariantOptionEntry(
+          name: opt['name'] as String? ?? '',
+          value: opt['value'] as String? ?? '',
+        ));
+      }
+      entry.remoteId = v['_id'] as String?;
+      variants.add(entry);
+    }
+
+    if (variants.isEmpty) variants.add(VariantEntry()..isDefault.value = true);
+  }
+
+  void addVariant() => variants.add(VariantEntry());
+
+  void removeVariant(int index) {
+    if (variants.length <= 1) {
+      ToastUtil.showToast('A product needs at least one variant.');
+      return;
+    }
+    final entry = variants[index];
+    if (entry.remoteId == null) {
+      entry.dispose();
+      variants.removeAt(index);
+      if (!variants.any((v) => v.isDefault.value)) {
+        variants.first.isDefault.value = true;
+      }
+      return;
+    }
+
+    showCustomDialog(
+      title: 'Remove this variant?',
+      content: 'This will delete the variant when you save changes.',
+      rightButtonName: 'Remove',
+      leftButtonName: 'Cancel',
+      onLeftButtonTap: Get.back,
+      onRightButtonTap: () {
+        Get.back();
+        _pendingVariantDeletions.add(entry.remoteId!);
+        entry.dispose();
+        variants.removeAt(index);
+        if (!variants.any((v) => v.isDefault.value)) {
+          variants.first.isDefault.value = true;
+        }
+      },
+    );
+  }
+
+  void setDefaultVariant(int index) {
+    for (var i = 0; i < variants.length; i++) {
+      variants[i].isDefault.value = i == index;
+    }
+  }
+
+  Future<void> pickAndUploadVariantImage(int index) async {
+    final v = variants[index];
+    if (v.isUploadingImage.value || v.images.length >= 5) return;
+    v.isUploadingImage.value = true;
+    final url = await _uploadRepo.pickAndUpload(source: ImageSource.gallery);
+    v.isUploadingImage.value = false;
+    if (url != null) v.images.add(url);
+  }
+
+  void removeVariantImage(int variantIndex, int imageIndex) {
+    final v = variants[variantIndex];
+    if (imageIndex < v.images.length) v.images.removeAt(imageIndex);
+  }
+
   // ── Digital file management ───────────────────────────────────────────────
 
   void addDigitalFile() => digitalFiles.add(DigitalFileEntry());
@@ -256,36 +340,37 @@ class EditSellerProductController extends GetxController {
     if (!canSave || isSaving.value) return;
     isSaving.value = true;
 
-    final parsedPrice = double.tryParse(priceCtrl.text.trim());
-    if (parsedPrice == null) {
-      ToastUtil.showToast('Please enter a valid price.');
-      isSaving.value = false;
-      return;
-    }
-
-    if (isEducational) {
-      if (educationLevel.value == null) {
-        ToastUtil.showToast('Please select an education level.');
+    if (!isPhysical) {
+      final parsedPrice = double.tryParse(priceCtrl.text.trim());
+      if (parsedPrice == null) {
+        ToastUtil.showToast('Please enter a valid price.');
         isSaving.value = false;
         return;
       }
-      if (needsCustomLevel && customLevel.value.trim().isEmpty) {
-        ToastUtil.showToast('Please enter a custom level.');
-        isSaving.value = false;
-        return;
-      }
-    }
 
-    final bool success;
-    if (isPhysical) {
-      success = await _savePhysical(parsedPrice);
-    } else if (isDigital || isEducational) {
-      success = await _saveDigital(parsedPrice);
-    } else {
+      if (isEducational) {
+        if (educationLevel.value == null) {
+          ToastUtil.showToast('Please select an education level.');
+          isSaving.value = false;
+          return;
+        }
+        if (needsCustomLevel && customLevel.value.trim().isEmpty) {
+          ToastUtil.showToast('Please enter a custom level.');
+          isSaving.value = false;
+          return;
+        }
+      }
+
+      final success = await _saveDigital(parsedPrice);
       isSaving.value = false;
+      if (success) {
+        Get.back();
+        ToastUtil.showToast('Product updated successfully!');
+      }
       return;
     }
 
+    final success = await _savePhysical();
     isSaving.value = false;
     if (success) {
       Get.back();
@@ -293,37 +378,73 @@ class EditSellerProductController extends GetxController {
     }
   }
 
-  Future<bool> _savePhysical(double parsedPrice) async {
-    final parsedCompare = double.tryParse(compareAtPriceCtrl.text.trim());
-    final parsedStock =
-        (!unlimitedStock.value && stockCtrl.text.trim().isNotEmpty)
-        ? int.tryParse(stockCtrl.text.trim())
-        : null;
+  Future<bool> _savePhysical() async {
+    // Client-side duplicate/consistency check — mirrors the backend's rules.
+    String optionsKey(List options) => (options
+            .map((o) => '${(o['name'] as String).trim().toLowerCase()}:${(o['value'] as String).trim().toLowerCase()}')
+            .toList()
+          ..sort())
+        .join(',');
+    String nameSetKey(List options) =>
+        ((options).map((o) => (o['name'] as String).trim().toLowerCase()).toList()..sort()).join('|');
+
+    final variantJsonList = <Map<String, dynamic>>[];
+    for (var i = 0; i < variants.length; i++) {
+      final json = variants[i].toJson();
+      if (json == null) {
+        ToastUtil.showToast('Variant ${i + 1}: please enter a valid price.');
+        return false;
+      }
+      variantJsonList.add(json);
+    }
+    final nameSets = variantJsonList.map((v) => nameSetKey(v['options'] as List)).toSet();
+    if (nameSets.length > 1) {
+      ToastUtil.showToast('All variants must use the same attributes.');
+      return false;
+    }
+    final keys = variantJsonList.map((v) => optionsKey(v['options'] as List)).toList();
+    if (keys.toSet().length != keys.length) {
+      ToastUtil.showToast('Each variant must have a unique combination of attributes.');
+      return false;
+    }
+
     final tagList = tagsCtrl.text
         .split(',')
         .map((t) => t.trim())
         .where((t) => t.isNotEmpty)
         .toList();
 
-    return _repo.editPhysicalProduct(
+    final productOk = await _repo.editProductFields(
       productId: product.id,
-      variantId: product.variantId,
       name: nameCtrl.text.trim(),
-      price: parsedPrice,
       status: publishMode.value.apiStatus,
       scheduledAt: scheduledAt.value?.toIso8601String(),
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
-      compareAtPrice: parsedCompare,
-      stock: parsedStock,
-      unlimitedStock: unlimitedStock.value,
-      size: sizeCtrl.text.trim().isEmpty ? null : sizeCtrl.text.trim(),
-      color: colorCtrl.text.trim().isEmpty ? null : colorCtrl.text.trim(),
-      shippingWeight: shippingWeightCtrl.text.trim().isEmpty
-          ? null
-          : shippingWeightCtrl.text.trim(),
       tags: tagList,
       images: productImages.toList(),
     );
+    if (!productOk) return false;
+
+    for (final id in _pendingVariantDeletions) {
+      final ok = await _repo.deleteVariant(productId: product.id, variantId: id);
+      if (!ok) return false;
+    }
+    _pendingVariantDeletions.clear();
+
+    for (var i = 0; i < variants.length; i++) {
+      final entry = variants[i];
+      final json = variantJsonList[i];
+      final ok = entry.remoteId == null
+          ? await _repo.addVariant(productId: product.id, variant: json)
+          : await _repo.updateVariant(
+              productId: product.id,
+              variantId: entry.remoteId!,
+              variant: json,
+            );
+      if (!ok) return false;
+    }
+
+    return true;
   }
 
   Future<bool> _saveDigital(double parsedPrice) async {
@@ -396,13 +517,6 @@ class EditSellerProductController extends GetxController {
           ? product.compareAtPrice!.toStringAsFixed(2)
           : '',
     );
-    // Physical
-    stockCtrl = TextEditingController(text: product.stock?.toString() ?? '');
-    sizeCtrl = TextEditingController(text: product.size ?? '');
-    colorCtrl = TextEditingController(text: product.color ?? '');
-    shippingWeightCtrl = TextEditingController(
-      text: product.shippingWeight ?? '',
-    );
     tagsCtrl = TextEditingController(text: product.tags.join(', '));
     // Digital
     final isUnlimitedDl = product.downloadLimit == 'unlimited';
@@ -422,13 +536,8 @@ class EditSellerProductController extends GetxController {
     price.value = product.price.toStringAsFixed(2);
     description.value = product.description ?? '';
     compareAtPrice.value = product.compareAtPrice?.toStringAsFixed(2) ?? '';
-    stock.value = product.stock?.toString() ?? '';
-    size.value = product.size ?? '';
-    color.value = product.color ?? '';
-    shippingWeight.value = product.shippingWeight ?? '';
     tags.value = product.tags.join(', ');
     selectedEmoji.value = product.emoji;
-    unlimitedStock.value = product.isUnlimitedStock;
     publishMode.value = _initialPublishMode;
     scheduledAt.value = product.scheduledAt;
     productImages.assignAll(product.images);
@@ -454,6 +563,8 @@ class EditSellerProductController extends GetxController {
       entry.nameCtrl.text = f['name'] as String? ?? '';
       digitalFiles.add(entry);
     }
+
+    if (isPhysical) unawaited(_loadVariants());
   }
 
   @override
@@ -462,10 +573,6 @@ class EditSellerProductController extends GetxController {
     descCtrl.dispose();
     priceCtrl.dispose();
     compareAtPriceCtrl.dispose();
-    stockCtrl.dispose();
-    sizeCtrl.dispose();
-    colorCtrl.dispose();
-    shippingWeightCtrl.dispose();
     tagsCtrl.dispose();
     downloadLimitCountCtrl.dispose();
     linkExpiryDaysCtrl.dispose();
@@ -474,6 +581,9 @@ class EditSellerProductController extends GetxController {
     _suggestDebounce?.cancel();
     for (final f in digitalFiles) {
       f.dispose();
+    }
+    for (final v in variants) {
+      v.dispose();
     }
     super.onClose();
   }

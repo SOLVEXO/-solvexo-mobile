@@ -26,6 +26,8 @@ class ProductDetailController extends GetxController {
   final RxList<ProductVariant> variants = <ProductVariant>[].obs;
   final Rx<ProductVariant?> selectedVariant = Rx<ProductVariant?>(null);
   final Rx<ProductVariant?> defaultVariant = Rx<ProductVariant?>(null);
+  // Attribute name → currently selected value (e.g. {'Color': 'Red'}).
+  final RxMap<String, String> selectedOptions = <String, String>{}.obs;
 
   final RxBool isLoading = false.obs;
   final RxBool isAddtoCartLoading = false.obs;
@@ -107,6 +109,9 @@ class ProductDetailController extends GetxController {
             (response.variants.isNotEmpty ? response.variants.first : null);
         selectedVariant.value = def;
         defaultVariant.value = def;
+        selectedOptions.assignAll({
+          for (final o in def?.options ?? <VariantOption>[]) o.name: o.value,
+        });
 
         // Reset quantity + gallery position for the newly loaded product
         productQty.value = 1;
@@ -208,6 +213,27 @@ class ProductDetailController extends GetxController {
     productQty.value = 1;
     _resetImageGallery();
     fetchVariantById(variant.id); // refresh from API
+  }
+
+  /// Tapping an attribute chip (e.g. Color=Red) — updates the current
+  /// selection map and resolves the matching variant, if one exists.
+  void selectOption(String name, String value) {
+    selectedOptions[name] = value;
+    final match = product.value?.findVariant(Map.of(selectedOptions));
+    if (match != null) {
+      selectVariant(match);
+    }
+  }
+
+  /// Whether picking [value] for attribute [name] (on top of the other
+  /// currently selected attributes) resolves to a real variant — used to
+  /// gray out combinations the seller never created.
+  bool isOptionValueAvailable(String name, String value) {
+    final trial = Map<String, String>.of(selectedOptions)..[name] = value;
+    return product.value?.variants.any(
+          (v) => trial.entries.every((e) => v.optionValue(e.key) == e.value),
+        ) ??
+        false;
   }
 
   void _resetImageGallery() {

@@ -6,6 +6,7 @@ import 'package:book_store_app/app/modules/welcome/controllers/welcome_controlle
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -75,6 +76,7 @@ class _LogoSection extends StatelessWidget {
         CustomText(
           text: 'Solvexo',
           color: AppColors.white,
+          fontFamily: AppTextStyles.headingFontFamily,
           fontSize: AppFontSize.veryLarge3,
           fontWeight: FontWeight.w800,
         ),
@@ -124,6 +126,7 @@ class _BottomSection extends StatelessWidget {
           CustomText(
             text: 'How would you like to use Solvexo?',
             color: AppColors.black,
+            fontFamily: AppTextStyles.headingFontFamily,
             fontSize: AppFontSize.small2,
             fontWeight: FontWeight.w600,
           ),

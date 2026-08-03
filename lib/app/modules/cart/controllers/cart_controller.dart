@@ -8,6 +8,7 @@ import 'package:book_store_app/app/modules/address/controllers/address_controlle
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/app/services/promotion_attribution_service.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -287,7 +288,15 @@ class CartController extends BaseController {
 
     isCheckingOut.value = true;
     try {
-      final result = await _checkoutRepository.createCheckout(items: selected);
+      // If the buyer arrived via a platform/store banner tap within the last
+      // 30 minutes, attribute this checkout to it for promotion conversion
+      // tracking (see PromotionAttributionService doc comment).
+      final attribution = PromotionAttributionService.instance.consumeIfFresh();
+      final result = await _checkoutRepository.createCheckout(
+        items: selected,
+        attributedBannerId: attribution.bannerId,
+        attributedStoreBannerId: attribution.storeBannerId,
+      );
       if (result.success && result.data != null) {
         Get.toNamed(Routes.checkoutView, arguments: result.data);
       } else if (result.addressRequired) {

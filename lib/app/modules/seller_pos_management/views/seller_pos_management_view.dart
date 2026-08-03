@@ -12,6 +12,7 @@ import 'package:book_store_app/app/modules/seller_pos_management/controllers/sel
 import 'package:book_store_app/app/modules/seller_pos_management/widgets/seller_pos_management_shimmer.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -315,6 +316,7 @@ class _SectionHeader extends StatelessWidget {
       children: [
         CustomText(
           text: title,
+          fontFamily: AppTextStyles.headingFontFamily,
           fontSize: AppFontSize.small2,
           fontWeight: FontWeight.bold,
           color: AppColors.black2,
@@ -1479,6 +1481,7 @@ class _SessionsSection extends StatelessWidget {
           children: [
             const CustomText(
               text: 'Recent Sessions',
+              fontFamily: AppTextStyles.headingFontFamily,
               fontSize: AppFontSize.small2,
               fontWeight: FontWeight.bold,
               color: AppColors.black2,

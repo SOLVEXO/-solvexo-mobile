@@ -8,6 +8,7 @@ import 'package:book_store_app/app/modules/home/controllers/home_controller.dart
 import 'package:book_store_app/app/modules/home/widgets/notched_image_box.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -212,6 +213,7 @@ class ProductCard extends StatelessWidget {
                               fontSize: AppFontSize.tiny,
                               fontWeight: FontWeight.w500,
                               textDecoration: TextDecoration.lineThrough,
+                              fontFamily: AppTextStyles.monoFontFamily,
                             ),
                             SizedBox(width: BaseSpacing.xxs),
                             CustomText(
@@ -219,6 +221,7 @@ class ProductCard extends StatelessWidget {
                               color: AppColors.primaryColor,
                               fontSize: AppFontSize.verySmall,
                               fontWeight: FontWeight.w800,
+                              fontFamily: AppTextStyles.monoFontFamily,
                             ),
                           ],
                         )
@@ -229,6 +232,7 @@ class ProductCard extends StatelessWidget {
                           color: AppColors.primaryColor,
                           fontSize: AppFontSize.verySmall,
                           fontWeight: FontWeight.w800,
+                          fontFamily: AppTextStyles.monoFontFamily,
                         ),
                 ],
               ),
@@ -249,17 +253,30 @@ class _SellerRatingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rating = product.averageRating.toStringAsFixed(1);
+    final sellerName = product.sellerName?.isNotEmpty == true
+        ? product.sellerName!
+        : 'Seller';
     return Row(
       children: [
         Flexible(
           child: CustomText(
-            text: 'by Seller · ',
+            text: 'by $sellerName',
             color: AppColors.gray600,
             fontSize: 10.5,
             fontWeight: FontWeight.w400,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+        ),
+        if (product.sellerVerified) ...[
+          SizedBox(width: BaseSpacing.xxs / 2),
+          const Icon(Icons.verified_rounded, color: AppColors.blue, size: 12),
+        ],
+        CustomText(
+          text: ' · ',
+          color: AppColors.gray600,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w400,
         ),
         SvgIcon(
           assetName: AppIcons.fillStar,

@@ -1,10 +1,12 @@
 import 'package:book_store_app/core/base/base_controller.dart';
+import 'package:book_store_app/app/components/product_filter_bottom_sheet.dart';
 import 'package:book_store_app/app/data/repositories/announcements_repository.dart';
 import 'package:book_store_app/app/data/repositories/banners_repository.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/marketing_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
+import 'package:book_store_app/app/data/repositories/promotions_repository.dart';
 import 'package:book_store_app/app/data/repositories/stores_repository.dart';
 import 'package:book_store_app/app/data/models/announcement_model.dart';
 import 'package:book_store_app/app/data/models/marketing/public_campaign_model.dart';
@@ -65,6 +67,10 @@ class HomeController extends BaseController {
   final RxList<BannerModel> banners = <BannerModel>[].obs;
   final RxInt bannerIndex = 0.obs;
   final RxBool isLoadingBanners = false.obs;
+  // Impression beacons are per-banner-id, once per session — a page that
+  // scrolls back and forth (or a rebuild replaying index 0) must never
+  // double-fire.
+  final Set<String> _impressedBannerIds = {};
   @override
   final RxBool isLoading = true.obs;
   final RxBool isFetchingProducts = false.obs;
@@ -109,8 +115,11 @@ class HomeController extends BaseController {
   final RxString searchQuery = ''.obs;
   final RxString selectedSort = 'newest'.obs;
   final TextEditingController searchTextCtrl = TextEditingController();
-  final Rx<double?> minPrice = Rx<double?>(null);
-  final Rx<double?> maxPrice = Rx<double?>(null);
+  static const double priceBoundMin = 0.0;
+  static const double priceBoundMax = 1000.0;
+  final RxDouble currentMinFilter = priceBoundMin.obs;
+  final RxDouble currentMaxFilter = priceBoundMax.obs;
+  final RxDouble selectedRating = 0.0.obs;
 
   // ─── Static address (placeholder) ────────────────────────────────────────
   AddressModel get address => AddressModel(
@@ -158,6 +167,16 @@ class HomeController extends BaseController {
       banners.clear();
     } finally {
       isLoadingBanners.value = false;
+    }
+  }
+
+  /// Fires the platform-banner impression beacon at most once per banner id
+  /// per session — call from the carousel for whichever page is currently
+  /// visible (index 0 on load, then again on every `onPageChanged`).
+  void maybeTrackBannerImpression(String bannerId) {
+    if (bannerId.isEmpty) return;
+    if (_impressedBannerIds.add(bannerId)) {
+      PromotionsRepository().trackImpression(entityType: 'banner', entityId: bannerId);
     }
   }
 
@@ -281,6 +300,10 @@ class HomeController extends BaseController {
         categoryId: categoryId,
         page: currentPage.value,
         limit: 10,
+        minPrice: currentMinFilter.value > priceBoundMin ? currentMinFilter.value : null,
+        maxPrice: currentMaxFilter.value < priceBoundMax ? currentMaxFilter.value : null,
+        minRating: selectedRating.value > 0 ? selectedRating.value : null,
+        sortBy: selectedSort.value == 'newest' ? null : selectedSort.value,
       );
 
       if (response != null) {
@@ -324,51 +347,25 @@ class HomeController extends BaseController {
     return null;
   }
 
-  // ─── 6. Local filtering (search + sort) ──────────────────────────────────
+  // ─── 6. Local filtering (search only) ─────────────────────────────────────
   // Applied after every fetch so the displayed list is always up to date.
-  // Heavy filtering (price, category) is handled server-side by the API.
+  // Price/rating/sort are handled server-side (see fetchProducts) — this
+  // only narrows the already-fetched, already-sorted page by search text.
 
   void _applyLocalFilters() {
-    var result = products.toList();
-
-    // Search filter — matches product name or description
     final query = searchQuery.value.trim().toLowerCase();
-    if (query.isNotEmpty) {
-      result = result
-          .where(
-            (p) =>
-                p.name.toLowerCase().contains(query) ||
-                p.description.toLowerCase().contains(query),
-          )
-          .toList();
+    if (query.isEmpty) {
+      filteredProducts.assignAll(products);
+      return;
     }
 
-    // Price filter — uses computed product.price (min variant price)
-    if (minPrice.value != null) {
-      result = result.where((p) => p.price >= minPrice.value!).toList();
-    }
-    if (maxPrice.value != null) {
-      result = result.where((p) => p.price <= maxPrice.value!).toList();
-    }
-
-    // Sort
-    switch (selectedSort.value) {
-      case 'price_asc':
-        result.sort((a, b) => a.price.compareTo(b.price));
-        break;
-      case 'price_desc':
-        result.sort((a, b) => b.price.compareTo(a.price));
-        break;
-      case 'rating':
-        result.sort((a, b) => b.averageRating.compareTo(a.averageRating));
-        break;
-      case 'newest':
-      default:
-        result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        break;
-    }
-
-    filteredProducts.assignAll(result);
+    filteredProducts.assignAll(
+      products.where(
+        (p) =>
+            p.name.toLowerCase().contains(query) ||
+            p.description.toLowerCase().contains(query),
+      ),
+    );
     debugPrint('🔍 Filtered to ${filteredProducts.length} products');
   }
 
@@ -455,26 +452,21 @@ class HomeController extends BaseController {
     fetchProducts();
   }
 
-  /// Sort
-  void changeSortOrder(String sort) {
-    selectedSort.value = sort;
-    _applyLocalFilters(); // sort is local — no need to re-fetch
+  /// Applies price/rating/sort from the shared filter sheet and re-fetches
+  /// page 1 from the server (see `fetchProducts`, which forwards them).
+  void applyFilters(ProductFilterResult filters) {
+    currentMinFilter.value = filters.minPrice;
+    currentMaxFilter.value = filters.maxPrice;
+    selectedRating.value = filters.rating;
+    selectedSort.value = filters.sort;
+    fetchProducts();
   }
 
-  /// Price filter
-  void applyPriceFilter(double? min, double? max) {
-    minPrice.value = min;
-    maxPrice.value = max;
-    _applyLocalFilters();
-  }
-
-  /// Clear all filters and reset to "All Products"
-  void clearFilters() {
-    searchQuery.value = '';
+  void resetFilters() {
+    currentMinFilter.value = priceBoundMin;
+    currentMaxFilter.value = priceBoundMax;
+    selectedRating.value = 0;
     selectedSort.value = 'newest';
-    minPrice.value = null;
-    maxPrice.value = null;
-    tabIndex.value = 0;
     fetchProducts();
   }
 

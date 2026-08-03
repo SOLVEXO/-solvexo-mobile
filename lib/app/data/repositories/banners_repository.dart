@@ -6,11 +6,17 @@ import 'package:flutter/material.dart';
 class BannersRepository {
   final BaseClient _baseClient = BaseClient();
 
-  Future<List<BannerModel>> fetchBanners() async {
+  /// [placement] is optional — when omitted, behavior is 100% unchanged
+  /// (unscoped, used by the live homepage carousel). Pass it to scope the
+  /// request to a specific placement slot once a caller needs that.
+  Future<List<BannerModel>> fetchBanners({String? placement}) async {
     try {
       debugPrint('🔄 Fetching banners...');
 
-      final res = await _baseClient.get(ApiConstants.banners);
+      final res = await _baseClient.get(
+        ApiConstants.banners,
+        queryParameters: placement != null ? {'placement': placement} : null,
+      );
 
       // ✅ Backend returns: { success, count, remaining, data: [...] }
       final list = res.data['data'] as List? ?? [];

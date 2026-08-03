@@ -18,6 +18,7 @@ class StoreContactCard extends StatelessWidget {
         decoration: _cardDeco(),
         child: Obx(() {
           final email = c.store.value?.sellerEmail ?? '';
+          final phone = c.store.value?.sellerPhone ?? '';
           return Column(
             children: [
               StoreInfoRow(
@@ -26,10 +27,10 @@ class StoreContactCard extends StatelessWidget {
                 value: email.isEmpty ? '—' : email,
               ),
               const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
-              const StoreInfoRow(
+              StoreInfoRow(
                 icon: AppIcons.phoneIcon,
                 label: 'Phone',
-                value: '—',
+                value: phone.isEmpty ? '—' : phone,
               ),
             ],
           );

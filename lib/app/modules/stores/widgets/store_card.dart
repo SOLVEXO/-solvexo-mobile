@@ -5,6 +5,7 @@ import 'package:book_store_app/app/data/models/storefront/store_list_item_model.
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -50,6 +51,7 @@ class StoreCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     color: AppColors.textPrimary,
+                    fontFamily: AppTextStyles.headingFontFamily,
                     fontSize: AppFontSize.small2,
                     fontWeight: FontWeight.w600,
                   ),

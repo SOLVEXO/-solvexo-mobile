@@ -2,13 +2,15 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/digital_file_upload_tile.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/product_publish_mode_selector.dart';
+import 'package:book_store_app/app/modules/add_seller_product/widgets/shared_form_widgets.dart';
+import 'package:book_store_app/app/modules/add_seller_product/widgets/variant_card.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/edit_seller_product/controllers/edit_seller_product_controller.dart';
 import 'package:book_store_app/app/modules/edit_seller_product/widgets/education_level_picker_sheet.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -57,36 +59,50 @@ class EditProductForm extends StatelessWidget {
             maxLines: 4,
           ),
           const SizedBox(height: 16),
-          const _FieldLabel(label: 'Product Images'),
-          const SizedBox(height: 2),
-          const _FieldHint(hint: 'Up to 5 images'),
-          const SizedBox(height: 6),
-          _ProductImagesSection(controller: controller),
+          ImagesSection(
+            label: 'Product Images',
+            hint: 'Up to 5 images — shared gallery for the product',
+            images: controller.productImages,
+            isUploading: controller.isUploadingImage,
+            onAdd: controller.pickAndUploadImage,
+            onRemove: controller.removeImage,
+          ),
           const SizedBox(height: 16),
-          _FieldLabel(label: 'Price', required: true),
-          const SizedBox(height: 6),
-          CustomTextField(
-            controller: controller.priceCtrl,
-            onChanged: (v) => controller.price.value = v,
-            hintText: '0.00',
-            isborder: true,
-            fillColor: AppColors.textfldFillColor,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            prefixIcon: const Padding(
-              padding: EdgeInsets.only(left: 14, right: 6),
-              child: CustomText(
-                text: '\$',
-                fontSize: AppFontSize.small2,
-                fontWeight: FontWeight.w600,
-                color: AppColors.grey,
+          if (!controller.isPhysical) ...[
+            FormFieldSection(
+              label: 'Price',
+              required: true,
+              child: CustomTextField(
+                controller: controller.priceCtrl,
+                onChanged: (v) => controller.price.value = v,
+                hintText: '0.00',
+                isborder: true,
+                fillColor: AppColors.textfldFillColor,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(left: 14, right: 6),
+                  child: CustomText(
+                    text: '\$',
+                    fontSize: AppFontSize.small2,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.grey,
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
           if (controller.isPhysical) ...[
+            _VariantsSection(controller: controller),
             const SizedBox(height: 16),
-            _StockSection(controller: controller),
-            const SizedBox(height: 16),
-            _PhysicalExtraFields(controller: controller),
+            const _FieldLabel(label: 'Tags', optional: true),
+            const SizedBox(height: 6),
+            CustomTextField(
+              controller: controller.tagsCtrl,
+              onChanged: (v) => controller.tags.value = v,
+              hintText: 'clothing, cotton, summer',
+              isborder: true,
+              fillColor: AppColors.textfldFillColor,
+            ),
           ],
           if (controller.isDigital || controller.isEducational) ...[
             const SizedBox(height: 16),
@@ -105,204 +121,65 @@ class EditProductForm extends StatelessWidget {
   }
 }
 
-// ── Stock section (Physical only) ─────────────────────────────────────────────
+// ── Variants section (Physical only) ──────────────────────────────────────────
 
-class _StockSection extends StatelessWidget {
+class _VariantsSection extends StatelessWidget {
   final EditSellerProductController controller;
-  const _StockSection({required this.controller});
+  const _VariantsSection({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const _FieldLabel(label: 'Stock Count'),
-          const SizedBox(height: 6),
-          controller.unlimitedStock.value
-              ? _UnlimitedPlaceholder()
-              : CustomTextField(
-                  controller: controller.stockCtrl,
-                  onChanged: (v) => controller.stock.value = v,
-                  hintText: '0',
-                  isborder: true,
-                  fillColor: AppColors.textfldFillColor,
-                  keyboardType: TextInputType.number,
-                ),
-          const SizedBox(height: 10),
-          _UnlimitedToggle(controller: controller),
-        ],
-      ),
-    );
-  }
-}
-
-class _UnlimitedPlaceholder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      decoration: BoxDecoration(
-        color: AppColors.greenContainerInnerColor,
-        borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-        border: Border.all(color: AppColors.darkGreen.withOpacity(0.25)),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.all_inclusive_rounded, size: 18, color: AppColors.darkGreen),
-          SizedBox(width: 8),
-          CustomText(
-            text: 'Unlimited stock',
-            fontSize: AppFontSize.verySmall,
-            fontWeight: FontWeight.w600,
-            color: AppColors.darkGreen,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _UnlimitedToggle extends StatelessWidget {
-  final EditSellerProductController controller;
-  const _UnlimitedToggle({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(
-      () => GestureDetector(
-        onTap: () => controller.unlimitedStock.toggle(),
-        child: Row(
+    return FormFieldSection(
+      label: 'Variants',
+      required: true,
+      hint: 'Add one card per option combination (e.g. color/size)',
+      child: Obx(() {
+        if (controller.isLoadingVariants.value) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        }
+        return Column(
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: controller.unlimitedStock.value
-                    ? AppColors.primaryColor
-                    : AppColors.white,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: controller.unlimitedStock.value
-                      ? AppColors.primaryColor
-                      : AppColors.lightGrey2,
+            ...List.generate(controller.variants.length, (i) => VariantCard(
+                  key: ValueKey(controller.variants[i].remoteId ?? 'new_$i'),
+                  index: i,
+                  entry: controller.variants[i],
+                  canRemove: controller.variants.length > 1,
+                  onRemove: () => controller.removeVariant(i),
+                  onSetDefault: () => controller.setDefaultVariant(i),
+                  onAddImage: () => controller.pickAndUploadVariantImage(i),
+                  onRemoveImage: (imgIdx) => controller.removeVariantImage(i, imgIdx),
+                )),
+            GestureDetector(
+              onTap: controller.addVariant,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primaryColor.withOpacity(0.4)),
+                  borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+                  color: AppColors.primaryColor.withOpacity(0.04),
                 ),
-              ),
-              alignment: Alignment.center,
-              child: controller.unlimitedStock.value
-                  ? const Icon(Icons.check_rounded, size: 13, color: AppColors.white)
-                  : null,
-            ),
-            const SizedBox(width: 10),
-            const CustomText(
-              text: 'Unlimited stock',
-              fontSize: AppFontSize.verySmall,
-              color: AppColors.black2,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Physical extra fields (compareAtPrice, size, color, weight, tags) ────────
-
-class _PhysicalExtraFields extends StatelessWidget {
-  final EditSellerProductController controller;
-  const _PhysicalExtraFields({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Compare At Price
-        const _FieldLabel(label: 'Compare At Price', optional: true),
-        const SizedBox(height: 6),
-        CustomTextField(
-          controller: controller.compareAtPriceCtrl,
-          onChanged: (v) => controller.compareAtPrice.value = v,
-          hintText: '0.00',
-          isborder: true,
-          fillColor: AppColors.textfldFillColor,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          prefixIcon: const Padding(
-            padding: EdgeInsets.only(left: 14, right: 6),
-            child: CustomText(
-              text: '\$',
-              fontSize: AppFontSize.small2,
-              fontWeight: FontWeight.w600,
-              color: AppColors.grey,
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Size & Color row
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _FieldLabel(label: 'Size', optional: true),
-                  const SizedBox(height: 6),
-                  CustomTextField(
-                    controller: controller.sizeCtrl,
-                    onChanged: (v) => controller.size.value = v,
-                    hintText: 'e.g. L',
-                    isborder: true,
-                    fillColor: AppColors.textfldFillColor,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _FieldLabel(label: 'Color', optional: true),
-                  const SizedBox(height: 6),
-                  CustomTextField(
-                    controller: controller.colorCtrl,
-                    onChanged: (v) => controller.color.value = v,
-                    hintText: 'e.g. Red',
-                    isborder: true,
-                    fillColor: AppColors.textfldFillColor,
-                  ),
-                ],
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_rounded, size: 18, color: AppColors.primaryColor),
+                    SizedBox(width: 6),
+                    CustomText(
+                      text: 'Add Variant',
+                      fontSize: AppFontSize.verySmall,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryColor,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 16),
-
-        // Shipping Weight
-        const _FieldLabel(label: 'Shipping Weight', optional: true),
-        const SizedBox(height: 6),
-        CustomTextField(
-          controller: controller.shippingWeightCtrl,
-          onChanged: (v) => controller.shippingWeight.value = v,
-          hintText: 'e.g. 0.3kg',
-          isborder: true,
-          fillColor: AppColors.textfldFillColor,
-        ),
-        const SizedBox(height: 16),
-
-        // Tags
-        const _FieldLabel(label: 'Tags', optional: true),
-        const SizedBox(height: 6),
-        CustomTextField(
-          controller: controller.tagsCtrl,
-          onChanged: (v) => controller.tags.value = v,
-          hintText: 'clothing, cotton, summer',
-          isborder: true,
-          fillColor: AppColors.textfldFillColor,
-        ),
-      ],
+        );
+      }),
     );
   }
 }
@@ -626,6 +503,7 @@ class _LicenseChip extends StatelessWidget {
             fontSize: AppFontSize.verySmall,
             fontWeight: FontWeight.w600,
             color: selected ? AppColors.white : AppColors.grey,
+            fontFamily: AppTextStyles.monoFontFamily,
           ),
         ),
       ),
@@ -721,142 +599,6 @@ class _CustomLevelField extends StatelessWidget {
           );
         }),
       ],
-    );
-  }
-}
-
-// ── Product images section ────────────────────────────────────────────────────
-
-class _ProductImagesSection extends StatelessWidget {
-  final EditSellerProductController controller;
-  const _ProductImagesSection({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final images = controller.productImages;
-      final isUploading = controller.isUploadingImage.value;
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            ...List.generate(images.length, (i) => Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: _ImageThumbnail(
-                    url: images[i],
-                    onRemove: () => controller.removeImage(i),
-                  ),
-                )),
-            if (isUploading)
-              const _LoadingThumbnail()
-            else if (images.length < 5)
-              _AddImageButton(onTap: controller.pickAndUploadImage),
-          ],
-        ),
-      );
-    });
-  }
-}
-
-class _ImageThumbnail extends StatelessWidget {
-  final String url;
-  final VoidCallback onRemove;
-  const _ImageThumbnail({required this.url, required this.onRemove});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-          child: CachedNetworkImage(
-            imageUrl: url,
-            width: 80,
-            height: 80,
-            fit: BoxFit.cover,
-            placeholder: (_, __) => Container(
-              width: 80,
-              height: 80,
-              color: AppColors.textfldFillColor,
-              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-            ),
-            errorWidget: (_, __, ___) => Container(
-              width: 80,
-              height: 80,
-              color: AppColors.textfldFillColor,
-              child: const Icon(Icons.broken_image_rounded, color: AppColors.grey, size: 28),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 4,
-          right: 4,
-          child: GestureDetector(
-            onTap: onRemove,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: const BoxDecoration(
-                color: AppColors.red,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.close_rounded, size: 12, color: AppColors.white),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _LoadingThumbnail extends StatelessWidget {
-  const _LoadingThumbnail();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        color: AppColors.textfldFillColor,
-        borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-        border: Border.all(color: AppColors.lightGrey2),
-      ),
-      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-    );
-  }
-}
-
-class _AddImageButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _AddImageButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.04),
-          borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-          border: Border.all(color: AppColors.primaryColor.withOpacity(0.4)),
-        ),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_photo_alternate_rounded, size: 26, color: AppColors.primaryColor),
-            SizedBox(height: 4),
-            CustomText(
-              text: 'Add',
-              fontSize: AppFontSize.tiny,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryColor,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

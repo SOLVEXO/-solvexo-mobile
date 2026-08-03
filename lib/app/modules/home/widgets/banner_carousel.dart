@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:book_store_app/app/components/custom_catagory_header.dart';
+import 'package:book_store_app/app/data/repositories/promotions_repository.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
+import 'package:book_store_app/app/modules/home/models/banner_model.dart';
+import 'package:book_store_app/app/services/promotion_attribution_service.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -51,7 +54,13 @@ class _BannerCarouselState extends State<BannerCarousel> {
     super.dispose();
   }
 
-  Future<void> _openBannerLink(String? urlOnTap) async {
+  Future<void> _openBannerLink(BannerModel item) async {
+    // Capture attribution + fire the click beacon regardless of whether the
+    // banner actually has a link — a tap is a tap for tracking purposes.
+    PromotionAttributionService.instance.capture('banner', item.id);
+    PromotionsRepository().trackClick(entityType: 'banner', entityId: item.id);
+
+    final urlOnTap = item.urlOnTap;
     if (urlOnTap == null || urlOnTap.trim().isEmpty) return;
     final uri = Uri.tryParse(urlOnTap.trim());
     if (uri == null) return;
@@ -68,20 +77,31 @@ class _BannerCarouselState extends State<BannerCarousel> {
         child: SizedBox(height: Get.height / 5, width: double.infinity),
       );
     }
+
+    // Fire the impression beacon for whichever page is currently visible.
+    // `maybeTrackBannerImpression` dedupes per banner id per session, so
+    // calling it here on every build (including the initially-visible
+    // index 0, before any `onPageChanged` fires) is safe.
+    final visibleIndex = c.bannerIndex.value.clamp(0, c.banners.length - 1);
+    c.maybeTrackBannerImpression(c.banners[visibleIndex].id);
+
     return Column(
       children: [
         SizedBox(
           height: Get.height / 5,
           child: PageView.builder(
             controller: controllerPage,
-            onPageChanged: (i) => c.bannerIndex.value = i,
+            onPageChanged: (i) {
+              c.bannerIndex.value = i;
+              c.maybeTrackBannerImpression(c.banners[i].id);
+            },
             itemCount: c.banners.length,
             itemBuilder: (_, i) {
               final item = c.banners[i];
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md),
                 child: GestureDetector(
-                  onTap: () => _openBannerLink(item.urlOnTap),
+                  onTap: () => _openBannerLink(item),
                   child: CustomCatagoryHeader(productImage: item.image),
                 ),
               );

@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,7 @@ class ProductTypeBadge extends StatelessWidget {
         fontSize: AppFontSize.tiny,
         fontWeight: FontWeight.w600,
         color: isDigital ? AppColors.blue : AppColors.orange,
+        fontFamily: AppTextStyles.monoFontFamily,
       ),
     );
   }

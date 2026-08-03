@@ -346,16 +346,10 @@ class SellerProductRepository {
   Future<bool> addPhysicalProduct({
     required String storeId,
     required String name,
-    required double price,
     required String status, // "active" | "draft" | "scheduled"
+    required List<Map<String, dynamic>> variants,
     String? scheduledAt,
     String? description,
-    double? compareAtPrice,
-    int? stock, // null = unlimited (no stock tracking)
-    bool unlimitedStock = false,
-    String? size,
-    String? color,
-    String? shippingWeight,
     List<String> tags = const [],
     List<String> images = const [],
     bool isListedOnSolvexo = false,
@@ -365,20 +359,13 @@ class SellerProductRepository {
       final body = <String, dynamic>{
         'storeId': storeId,
         'name': name,
-        'price': price,
         'status': status,
+        'variants': variants,
         if (scheduledAt != null) 'scheduledAt': scheduledAt,
         'isListedOnSolvexo': isListedOnSolvexo,
         'images': images,
         if (description != null && description.isNotEmpty)
           'description': description,
-        if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
-        if (stock != null) 'stock': stock,
-        'unlimitedStock': unlimitedStock,
-        if (size != null && size.isNotEmpty) 'size': size,
-        if (color != null && color.isNotEmpty) 'color': color,
-        if (shippingWeight != null && shippingWeight.isNotEmpty)
-          'shippingWeight': shippingWeight,
         if (tags.isNotEmpty) 'tags': tags,
         'subCategoryId': subCategoryId,
       };
@@ -409,6 +396,182 @@ class SellerProductRepository {
       return false;
     } catch (e) {
       debugPrint('❌ addPhysicalProduct error: $e');
+      ToastUtil.showToast('Something went wrong. Please try again.');
+      return false;
+    }
+  }
+
+  // ─── POST /api/products/edit-product (product-level fields only) ─────────
+
+  Future<bool> editProductFields({
+    required String productId,
+    required String name,
+    required String status,
+    String? scheduledAt,
+    String? description,
+    List<String> tags = const [],
+    List<String> images = const [],
+    String? subCategoryId,
+  }) async {
+    try {
+      final body = <String, dynamic>{
+        'productId': productId,
+        'name': name,
+        'status': status,
+        if (scheduledAt != null) 'scheduledAt': scheduledAt,
+        if (description != null && description.isNotEmpty)
+          'description': description,
+        if (images.isNotEmpty) 'images': images,
+        if (tags.isNotEmpty) 'tags': tags,
+        if (subCategoryId != null) 'subCategoryId': subCategoryId,
+      };
+
+      debugPrint('📤 editProductFields → ${ApiConstants.editProduct}');
+      debugPrint('   body: $body');
+
+      final response = await _client.post(
+        ApiConstants.editProduct,
+        data: body,
+        requiresAuth: true,
+      );
+
+      if (response.data['success'] == true) {
+        final product = response.data['data']['product'];
+        debugPrint('✅ Product updated: ${product['name']} (${product['_id']})');
+        return true;
+      }
+
+      ToastUtil.showToast(
+        response.data['message'] as String? ?? 'Failed to update product.',
+      );
+      return false;
+    } on DioException catch (e) {
+      debugPrint('❌ editProductFields DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return false;
+    } catch (e) {
+      debugPrint('❌ editProductFields error: $e');
+      ToastUtil.showToast('Something went wrong. Please try again.');
+      return false;
+    }
+  }
+
+  // ─── GET /api/products/get-my-product/:productId ──────────────────────────
+  // Returns the full { product, variants, defaultVariant } shape — used by
+  // the Edit Product screen to load every existing variant, not just the
+  // single flattened one the inventory list returns.
+
+  Future<({Map<String, dynamic>? product, List<Map<String, dynamic>> variants})>
+      getMyProduct(String productId) async {
+    try {
+      final response = await _client.get(
+        ApiConstants.getMyProduct(productId),
+        requiresAuth: true,
+      );
+
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        return (
+          product: data['product'] as Map<String, dynamic>?,
+          variants: (data['variants'] as List? ?? [])
+              .cast<Map<String, dynamic>>(),
+        );
+      }
+      return (product: null, variants: <Map<String, dynamic>>[]);
+    } on DioException catch (e) {
+      debugPrint('❌ getMyProduct DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return (product: null, variants: <Map<String, dynamic>>[]);
+    } catch (e) {
+      debugPrint('❌ getMyProduct error: $e');
+      return (product: null, variants: <Map<String, dynamic>>[]);
+    }
+  }
+
+  // ─── POST /api/products/:productId/variants ───────────────────────────────
+
+  Future<bool> addVariant({
+    required String productId,
+    required Map<String, dynamic> variant,
+  }) async {
+    try {
+      final response = await _client.post(
+        ApiConstants.productVariants(productId),
+        data: variant,
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) return true;
+      ToastUtil.showToast(
+        response.data['message'] as String? ?? 'Failed to add variant.',
+      );
+      return false;
+    } on DioException catch (e) {
+      debugPrint('❌ addVariant DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return false;
+    } catch (e) {
+      debugPrint('❌ addVariant error: $e');
+      ToastUtil.showToast('Something went wrong. Please try again.');
+      return false;
+    }
+  }
+
+  // ─── PATCH /api/products/:productId/variants/:variantId ───────────────────
+
+  Future<bool> updateVariant({
+    required String productId,
+    required String variantId,
+    required Map<String, dynamic> variant,
+  }) async {
+    try {
+      final response = await _client.patch(
+        ApiConstants.productVariant(productId, variantId),
+        data: variant,
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) return true;
+      ToastUtil.showToast(
+        response.data['message'] as String? ?? 'Failed to update variant.',
+      );
+      return false;
+    } on DioException catch (e) {
+      debugPrint('❌ updateVariant DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return false;
+    } catch (e) {
+      debugPrint('❌ updateVariant error: $e');
+      ToastUtil.showToast('Something went wrong. Please try again.');
+      return false;
+    }
+  }
+
+  // ─── DELETE /api/products/:productId/variants/:variantId ──────────────────
+
+  Future<bool> deleteVariant({
+    required String productId,
+    required String variantId,
+  }) async {
+    try {
+      final response = await _client.delete(
+        ApiConstants.productVariant(productId, variantId),
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) return true;
+      ToastUtil.showToast(
+        response.data['message'] as String? ?? 'Failed to delete variant.',
+      );
+      return false;
+    } on DioException catch (e) {
+      debugPrint('❌ deleteVariant DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return false;
+    } catch (e) {
+      debugPrint('❌ deleteVariant error: $e');
       ToastUtil.showToast('Something went wrong. Please try again.');
       return false;
     }

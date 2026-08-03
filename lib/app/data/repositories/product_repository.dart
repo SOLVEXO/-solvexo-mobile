@@ -17,6 +17,10 @@ class ProductRepository {
     String? productType,
     String? educationLevel,
     String? normalizedCustomLevel,
+    double? minPrice,
+    double? maxPrice,
+    double? minRating,
+    String? sortBy,
   }) async {
     try {
       final url = ApiConstants.getProductsByCategory(
@@ -26,6 +30,10 @@ class ProductRepository {
         productType: productType,
         educationLevel: educationLevel,
         normalizedCustomLevel: normalizedCustomLevel,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        minRating: minRating,
+        sortBy: sortBy,
       );
       final response = await _baseClient.get(url);
       if (response.data['success'] == true) {

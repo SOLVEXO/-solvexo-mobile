@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/stores/controllers/stores_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -53,6 +54,7 @@ class StoreSortChips extends StatelessWidget {
                   color: selected ? AppColors.white : AppColors.textPrimary,
                   fontSize: AppFontSize.tiny,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  fontFamily: AppTextStyles.monoFontFamily,
                 ),
               ),
             );

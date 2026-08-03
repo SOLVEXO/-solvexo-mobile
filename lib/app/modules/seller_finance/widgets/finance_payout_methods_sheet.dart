@@ -131,6 +131,9 @@ class _MethodTile extends StatelessWidget {
 
   IconData get _icon {
     switch (method.type) {
+      case 'jazzcash':
+      case 'easypaisa':
+        return Icons.phone_android_rounded;
       case 'paypal':
         return Icons.account_balance_wallet_rounded;
       case 'stripe':
@@ -141,8 +144,23 @@ class _MethodTile extends StatelessWidget {
     }
   }
 
+  /// pending_verification (amber) / inactive (grey) — active methods show
+  /// no status pill at all, matching the existing "only mention it when it's
+  /// not the happy path" convention.
+  ({Color color, String label})? get _statusBadge {
+    switch (method.status) {
+      case 'pending_verification':
+        return (color: const Color(0xFFD97706), label: 'Pending Verification');
+      case 'inactive':
+        return (color: AppColors.lightGrey5, label: 'Inactive');
+      default:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final statusBadge = _statusBadge;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       decoration: BoxDecoration(
@@ -150,66 +168,97 @@ class _MethodTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.lightGrey11),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.08), borderRadius: BorderRadius.circular(10)),
-            child: Icon(_icon, size: 17, color: AppColors.primaryColor),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          Row(
+            children: [
+              Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.08), borderRadius: BorderRadius.circular(10)),
+                child: Icon(_icon, size: 17, color: AppColors.primaryColor),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Flexible(
-                      child: CustomText(
-                        text: method.displayLabel,
-                        fontSize: AppFontSize.verySmall,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black2,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: CustomText(
+                            text: '${method.displayLabel} · ${method.currency}',
+                            fontSize: AppFontSize.verySmall,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.black2,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (method.isDefault) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(color: AppColors.darkGreen.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+                            child: const CustomText(text: 'Default', fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.darkGreen),
+                          ),
+                        ],
+                      ],
                     ),
-                    if (method.isDefault) ...[
-                      const SizedBox(width: 6),
+                    if (statusBadge != null) ...[
+                      const SizedBox(height: 3),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.darkGreen.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
-                        child: const CustomText(text: 'Default', fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.darkGreen),
+                        decoration: BoxDecoration(color: statusBadge.color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+                        child: CustomText(text: statusBadge.label, fontSize: 10, fontWeight: FontWeight.w700, color: statusBadge.color),
                       ),
                     ],
                   ],
                 ),
-                if (!method.isActive)
-                  CustomText(text: method.status, fontSize: AppFontSize.tiny, color: AppColors.lightGrey5),
-              ],
-            ),
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded, size: 18, color: AppColors.lightGrey5),
-            onSelected: (v) {
-              switch (v) {
-                case 'default':
-                  onSetDefault();
-                  break;
-                case 'edit':
-                  onEdit();
-                  break;
-                case 'delete':
-                  onDelete();
-                  break;
-              }
-            },
-            itemBuilder: (_) => [
-              if (!method.isDefault) const PopupMenuItem(value: 'default', child: Text('Set as default')),
-              const PopupMenuItem(value: 'edit', child: Text('Edit')),
-              const PopupMenuItem(value: 'delete', child: Text('Remove')),
+              ),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert_rounded, size: 18, color: AppColors.lightGrey5),
+                onSelected: (v) {
+                  switch (v) {
+                    case 'default':
+                      onSetDefault();
+                      break;
+                    case 'edit':
+                      onEdit();
+                      break;
+                    case 'delete':
+                      onDelete();
+                      break;
+                  }
+                },
+                itemBuilder: (_) => [
+                  if (!method.isDefault) const PopupMenuItem(value: 'default', child: Text('Set as default')),
+                  const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                  const PopupMenuItem(value: 'delete', child: Text('Remove')),
+                ],
+              ),
             ],
           ),
+          if (method.accountTitleMismatchFlagged) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8)),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, size: 13, color: Color(0xFFD97706)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: CustomText(
+                      text: method.accountTitleMismatchNote ?? 'Account title may not match your registered name — flagged for admin review.',
+                      fontSize: AppFontSize.tiny,
+                      color: const Color(0xFF92400E),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -236,6 +285,7 @@ class FinancePayoutMethodFormSheet extends StatefulWidget {
 
 class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSheet> {
   late String _type;
+  late String _currency;
   late final TextEditingController _bankNameCtrl;
   late final TextEditingController _accountHolderCtrl;
   late final TextEditingController _accountNumberCtrl;
@@ -244,12 +294,26 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
   bool _setAsDefault = false;
 
   bool get _isEdit => widget.existing != null;
+  bool get _isMobileWallet => _type == 'jazzcash' || _type == 'easypaisa';
+
+  /// jazzcash/easypaisa default to PKR, everything else to USD — the seller
+  /// can still override via the currency chips below.
+  static String _defaultCurrencyFor(String type) =>
+      (type == 'jazzcash' || type == 'easypaisa') ? 'PKR' : 'USD';
+
+  void _selectType(String type) {
+    setState(() {
+      _type = type;
+      _currency = _defaultCurrencyFor(type);
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     final e = widget.existing;
     _type = e?.type ?? 'bank_transfer';
+    _currency = e?.currency ?? _defaultCurrencyFor(_type);
     _bankNameCtrl = TextEditingController(text: e?.bankName ?? '');
     _accountHolderCtrl = TextEditingController(text: e?.accountHolder ?? '');
     _accountNumberCtrl = TextEditingController();
@@ -269,24 +333,30 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
   }
 
   Future<void> _submit() async {
+    // Bank details apply to bank_transfer only; jazzcash/easypaisa/paypal/stripe
+    // all store their single identifying value in externalAccountId (a mobile
+    // number for wallets, an email/account-id for PayPal/Stripe).
+    final isBank = _type == 'bank_transfer';
     bool ok;
     if (_isEdit) {
       ok = await widget.controller.updatePayoutMethod(
         widget.existing!.id,
-        bankName: _type == 'bank_transfer' ? _bankNameCtrl.text.trim() : null,
-        accountHolder: _type == 'bank_transfer' ? _accountHolderCtrl.text.trim() : null,
-        accountNumber: _type == 'bank_transfer' ? _accountNumberCtrl.text.trim() : null,
-        routingNumber: _type == 'bank_transfer' ? _routingNumberCtrl.text.trim() : null,
-        externalAccountId: _type != 'bank_transfer' ? _externalAccountCtrl.text.trim() : null,
+        currency: _currency,
+        bankName: isBank ? _bankNameCtrl.text.trim() : null,
+        accountHolder: isBank ? _accountHolderCtrl.text.trim() : null,
+        accountNumber: isBank ? _accountNumberCtrl.text.trim() : null,
+        routingNumber: isBank ? _routingNumberCtrl.text.trim() : null,
+        externalAccountId: !isBank ? _externalAccountCtrl.text.trim() : null,
       );
     } else {
       ok = await widget.controller.addPayoutMethod(
         type: _type,
-        bankName: _type == 'bank_transfer' ? _bankNameCtrl.text.trim() : null,
-        accountHolder: _type == 'bank_transfer' ? _accountHolderCtrl.text.trim() : null,
-        accountNumber: _type == 'bank_transfer' ? _accountNumberCtrl.text.trim() : null,
-        routingNumber: _type == 'bank_transfer' ? _routingNumberCtrl.text.trim() : null,
-        externalAccountId: _type != 'bank_transfer' ? _externalAccountCtrl.text.trim() : null,
+        currency: _currency,
+        bankName: isBank ? _bankNameCtrl.text.trim() : null,
+        accountHolder: isBank ? _accountHolderCtrl.text.trim() : null,
+        accountNumber: isBank ? _accountNumberCtrl.text.trim() : null,
+        routingNumber: isBank ? _routingNumberCtrl.text.trim() : null,
+        externalAccountId: !isBank ? _externalAccountCtrl.text.trim() : null,
         setAsDefault: _setAsDefault,
       );
     }
@@ -321,13 +391,25 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
                   ),
                   const SizedBox(height: BaseSpacing.md),
                   if (!_isEdit) ...[
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
-                        _TypeChip(label: 'Bank', value: 'bank_transfer', selected: _type == 'bank_transfer', onTap: () => setState(() => _type = 'bank_transfer')),
-                        const SizedBox(width: 8),
-                        _TypeChip(label: 'PayPal', value: 'paypal', selected: _type == 'paypal', onTap: () => setState(() => _type = 'paypal')),
-                        const SizedBox(width: 8),
-                        _TypeChip(label: 'Stripe', value: 'stripe', selected: _type == 'stripe', onTap: () => setState(() => _type = 'stripe')),
+                        _TypeChip(label: 'Bank', selected: _type == 'bank_transfer', onTap: () => _selectType('bank_transfer')),
+                        _TypeChip(label: 'JazzCash', selected: _type == 'jazzcash', onTap: () => _selectType('jazzcash')),
+                        _TypeChip(label: 'EasyPaisa', selected: _type == 'easypaisa', onTap: () => _selectType('easypaisa')),
+                        _TypeChip(label: 'PayPal', selected: _type == 'paypal', onTap: () => _selectType('paypal')),
+                        _TypeChip(label: 'Stripe', selected: _type == 'stripe', onTap: () => _selectType('stripe')),
+                      ],
+                    ),
+                    const SizedBox(height: BaseSpacing.sm),
+                    CustomText(text: 'Currency', fontSize: AppFontSize.tiny, color: AppColors.lightGrey5, fontWeight: FontWeight.w600),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        _TypeChip(label: 'USD', selected: _currency == 'USD', onTap: () => setState(() => _currency = 'USD')),
+                        _TypeChip(label: 'PKR', selected: _currency == 'PKR', onTap: () => setState(() => _currency = 'PKR')),
                       ],
                     ),
                     const SizedBox(height: BaseSpacing.sm),
@@ -346,7 +428,15 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
                     ),
                     const SizedBox(height: BaseSpacing.sm),
                     CustomTextField(label: 'Routing Number', controller: _routingNumberCtrl, isborder: true, keyboardType: TextInputType.number),
-                  ] else
+                  ] else if (_isMobileWallet)
+                    CustomTextField(
+                      label: '${_type == 'jazzcash' ? 'JazzCash' : 'EasyPaisa'} Mobile Number',
+                      hintText: '03XXXXXXXXX',
+                      controller: _externalAccountCtrl,
+                      isborder: true,
+                      keyboardType: TextInputType.phone,
+                    )
+                  else
                     CustomTextField(
                       label: _type == 'paypal' ? 'PayPal Email' : 'Stripe Account ID',
                       hintText: _type == 'paypal' ? 'seller@paypal.com' : 'acct_xxxxxxxx',
@@ -391,32 +481,33 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
   }
 }
 
+/// A single selectable chip — used both for payout-method type and currency.
+/// Deliberately NOT `Expanded` (unlike the old 3-chip `Row` this replaced) so
+/// it can sit inside a `Wrap` and flow onto a second line on narrow screens
+/// now that there are 5 method types instead of 3.
 class _TypeChip extends StatelessWidget {
   final String label;
-  final String value;
   final bool selected;
   final VoidCallback onTap;
-  const _TypeChip({required this.label, required this.value, required this.selected, required this.onTap});
+  const _TypeChip({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primaryColor : AppColors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: selected ? AppColors.primaryColor : AppColors.lightGrey11),
-          ),
-          child: CustomText(
-            text: label,
-            fontSize: AppFontSize.verySmall,
-            fontWeight: FontWeight.w600,
-            color: selected ? AppColors.white : AppColors.lightGrey5,
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primaryColor : AppColors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: selected ? AppColors.primaryColor : AppColors.lightGrey11),
+        ),
+        child: CustomText(
+          text: label,
+          fontSize: AppFontSize.verySmall,
+          fontWeight: FontWeight.w600,
+          color: selected ? AppColors.white : AppColors.lightGrey5,
         ),
       ),
     );

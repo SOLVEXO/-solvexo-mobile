@@ -4,12 +4,15 @@ import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/controllers/seller_store_profile_controller.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_about_card.dart';
+import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_announcement_bar_card.dart';
+import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_banners_entry_card.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_contact_card.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_edit_cover_section.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_edit_form_card.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_edit_logo_section.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_edit_save_bar.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_meta_card.dart';
+import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_pinned_products_card.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_profile_hero.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_profile_shimmer.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_stats_strip.dart';
@@ -137,6 +140,12 @@ class _ProfileBody extends StatelessWidget {
                     StoreContactCard(c: c),
                     const SizedBox(height: 16),
                     StoreMetaCard(c: c),
+                    const SizedBox(height: 16),
+                    StorePinnedProductsCard(c: c),
+                    const SizedBox(height: 16),
+                    StoreAnnouncementBarCard(c: c),
+                    const SizedBox(height: 16),
+                    const StoreBannersEntryCard(),
                     const SizedBox(height: 24),
                   ],
                 ),

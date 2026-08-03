@@ -8,6 +8,7 @@ import 'package:book_store_app/app/data/models/platform_plans/platform_plan_mode
 import 'package:book_store_app/app/data/models/platform_plans/platform_subscription_model.dart';
 import 'package:book_store_app/app/modules/seller_platform_plans/controllers/seller_platform_plans_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -76,6 +77,7 @@ class MyPlanCard extends StatelessWidget {
                   color: AppColors.white,
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,
+                  fontFamily: AppTextStyles.monoFontFamily,
                 ),
               ),
             ],
@@ -93,6 +95,7 @@ class MyPlanCard extends StatelessWidget {
                   '\$${sub.amountUSD.toStringAsFixed(0)}/${sub.billingInterval == 'yearly' ? 'yr' : 'mo'}${sub.nextBillingDate != null ? ' · renews ${_fmtDate(sub.nextBillingDate)}' : ''}',
               color: AppColors.white.withOpacity(0.9),
               fontSize: AppFontSize.verySmall,
+              fontFamily: AppTextStyles.monoFontFamily,
             ),
           if (sub.isTrialing && sub.trialEndsAt != null)
             CustomText(
@@ -106,6 +109,7 @@ class MyPlanCard extends StatelessWidget {
               text: 'Credit balance: \$${sub.creditBalanceUSD.toStringAsFixed(2)}',
               color: AppColors.white.withOpacity(0.85),
               fontSize: AppFontSize.tiny,
+              fontFamily: AppTextStyles.monoFontFamily,
             ),
           if (!sub.isFreePlan) ...[
             SizedBox(height: BaseSpacing.sm + 2),
@@ -445,6 +449,7 @@ class PlanCard extends StatelessWidget {
             color: AppColors.primaryColor,
             fontSize: AppFontSize.small2,
             fontWeight: FontWeight.bold,
+            fontFamily: AppTextStyles.monoFontFamily,
           ),
           if (plan.trialDays > 0 && !isCurrent)
             CustomText(
@@ -530,7 +535,13 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 3),
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-      child: CustomText(text: text, color: color, fontSize: 10.5, fontWeight: FontWeight.w700),
+      child: CustomText(
+        text: text,
+        color: color,
+        fontSize: 10.5,
+        fontWeight: FontWeight.w700,
+        fontFamily: AppTextStyles.monoFontFamily,
+      ),
     );
   }
 }
@@ -667,6 +678,7 @@ class AddonsCard extends StatelessWidget {
                         color: AppColors.primaryColor,
                         fontSize: AppFontSize.verySmall,
                         fontWeight: FontWeight.w700,
+                        fontFamily: AppTextStyles.monoFontFamily,
                       ),
                     ],
                   ),
@@ -711,6 +723,7 @@ class _AddonRow extends StatelessWidget {
                   fontSize: AppFontSize.tiny,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  fontFamily: AppTextStyles.monoFontFamily,
                 ),
               ],
             ),
@@ -843,6 +856,7 @@ class _InvoiceRow extends StatelessWidget {
                 color: AppColors.black2,
                 fontSize: AppFontSize.tiny,
                 fontWeight: FontWeight.w700,
+                fontFamily: AppTextStyles.monoFontFamily,
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xs, vertical: 2),
@@ -855,6 +869,7 @@ class _InvoiceRow extends StatelessWidget {
                   color: _statusColor,
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,
+                  fontFamily: AppTextStyles.monoFontFamily,
                 ),
               ),
             ],

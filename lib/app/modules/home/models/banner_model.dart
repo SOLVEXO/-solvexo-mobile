@@ -6,6 +6,11 @@ class BannerModel {
   final bool isActive;
   final int order;
   final DateTime? createdAt;
+  // Multi-placement support added alongside the legacy scalar `placement` on
+  // the backend (`src/banner/schemas/banner.schema.ts`) — additive, unused by
+  // the carousel today but kept so future placement-aware screens don't need
+  // another round-trip through this model.
+  final List<String> placements;
 
   BannerModel({
     required this.id,
@@ -15,6 +20,7 @@ class BannerModel {
     required this.isActive,
     required this.order,
     this.createdAt,
+    this.placements = const [],
   });
 
   // ✅ Matches the real NestJS response: { _id, bannerImage, publicId,
@@ -31,6 +37,7 @@ class BannerModel {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
+      placements: (json['placements'] as List?)?.cast<String>() ?? const [],
     );
   }
 

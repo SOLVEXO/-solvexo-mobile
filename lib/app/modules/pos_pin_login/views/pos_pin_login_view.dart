@@ -5,6 +5,7 @@ import 'package:book_store_app/app/modules/pos_pin_login/controllers/pos_pin_log
 import 'package:book_store_app/app/modules/pos_pin_login/widgets/pos_pin_login_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -76,6 +77,7 @@ class _Header extends StatelessWidget {
         const SizedBox(height: 14),
         const CustomText(
           text: 'Employee Login',
+          fontFamily: AppTextStyles.headingFontFamily,
           fontSize: AppFontSize.large,
           fontWeight: FontWeight.bold,
           color: kPinText,

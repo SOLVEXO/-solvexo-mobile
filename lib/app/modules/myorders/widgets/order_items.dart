@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -49,6 +50,24 @@ class OrderItems extends StatelessWidget {
                               fontSize: AppFontSize.extraSmall,
                               fontWeight: FontWeight.w700,
                             ),
+                            if (orderDetail.sellerName?.isNotEmpty == true)
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: CustomText(
+                                      text: 'by ${orderDetail.sellerName!}',
+                                      color: AppColors.gray600,
+                                      fontSize: AppFontSize.tiny,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (orderDetail.sellerVerified) ...[
+                                    const SizedBox(width: 3),
+                                    const Icon(Icons.verified_rounded, color: AppColors.blue, size: 11),
+                                  ],
+                                ],
+                              ),
                             CustomText(text: "Qty: ${orderDetail.quantity}", color: AppColors.gray600, fontSize: AppFontSize.extraSmall),
                           ],
                         ),
@@ -58,6 +77,7 @@ class OrderItems extends StatelessWidget {
                         color: AppColors.black,
                         fontSize: AppFontSize.extraSmall,
                         fontWeight: FontWeight.bold,
+                        fontFamily: AppTextStyles.monoFontFamily,
                       ),
                     ],
                   ),

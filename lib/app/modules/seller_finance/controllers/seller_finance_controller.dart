@@ -22,26 +22,45 @@ class SellerFinanceController extends GetxController {
   // Dashboard
   final Rx<FinanceDashboardModel> dashboard = Rx<FinanceDashboardModel>(FinanceDashboardModel.empty);
 
-  double get availableBalance => dashboard.value.availableBalance;
-  double get pendingBalance => dashboard.value.pendingBalance;
+  // A store can hold a separate wallet per currency (e.g. USD from Stripe
+  // sales + PKR from manual bank-transfer sales) — this picks which one the
+  // whole finance screen is currently showing.
+  final RxString selectedCurrency = 'USD'.obs;
+
+  List<String> get availableCurrencies => dashboard.value.currencies;
+  FinanceWallet get _wallet => dashboard.value.walletFor(selectedCurrency.value);
+
+  void selectCurrency(String currency) {
+    if (selectedCurrency.value == currency) return;
+    selectedCurrency.value = currency;
+    loadTransactions(reset: true);
+    loadPayoutSchedule();
+  }
+
+  String amountLabel(double v) => _wallet.amountLabel(v);
+
+  double get availableBalance => _wallet.availableBalance;
+  double get pendingBalance => _wallet.pendingBalance;
+  bool get isFlaggedForReview => _wallet.isFlaggedForReview;
+  String? get flaggedReason => _wallet.flaggedReason;
 
   String get nextPayoutDate {
-    final date = dashboard.value.nextPayout.scheduledAt ?? dashboard.value.payoutSchedule.nextPayoutAt;
+    final date = _wallet.nextPayout.scheduledAt ?? _wallet.payoutSchedule.nextPayoutAt;
     return date != null ? DateFormat('MMM d').format(date) : '—';
   }
 
   String get paymentMethod {
-    final method = dashboard.value.nextPayout.method;
+    final method = _wallet.nextPayout.method;
     if (method != null) return method.label;
-    final defaults = payoutMethods.where((m) => m.isDefault);
+    final defaults = payoutMethods.where((m) => m.currency == selectedCurrency.value && m.isDefault);
     return defaults.isEmpty ? 'Not set up' : defaults.first.displayLabel;
   }
 
-  double get monthRevenue => dashboard.value.summary.thisMonthRevenue;
-  double get revenueChange => dashboard.value.summary.revenueGrowthPercent;
-  double get platformFees => dashboard.value.summary.platformFees;
-  double get totalPaidOut => dashboard.value.summary.totalPaidOut;
-  double get pendingTax => dashboard.value.summary.pendingTax;
+  double get monthRevenue => _wallet.summary.thisMonthRevenue;
+  double get revenueChange => _wallet.summary.revenueGrowthPercent;
+  double get platformFees => _wallet.summary.platformFees;
+  double get totalPaidOut => _wallet.summary.totalPaidOut;
+  double get pendingTax => _wallet.summary.pendingTax;
 
   List<MapEntry<String, String>> get feeItems => dashboard.value.feeBreakdown.asEntries;
 
@@ -76,8 +95,8 @@ class SellerFinanceController extends GetxController {
   final RxBool isSavingSchedule = false.obs;
 
   String get payoutFrequency => payoutSchedule.value.frequencyLabel;
-  String get payoutCurrency => dashboard.value.currency;
-  String get payoutMinimum => '\$${payoutSchedule.value.minimumAmount.toStringAsFixed(2)}';
+  String get payoutCurrency => selectedCurrency.value;
+  String get payoutMinimum => amountLabel(payoutSchedule.value.minimumAmount);
 
   // Tax reports
   final RxList<TaxReportModel> taxReports = <TaxReportModel>[].obs;
@@ -114,6 +133,10 @@ class SellerFinanceController extends GetxController {
 
   Future<void> _loadDashboard() async {
     dashboard.value = await _repo.getDashboard(storeId);
+    final currencies = dashboard.value.currencies;
+    if (!currencies.contains(selectedCurrency.value)) {
+      selectedCurrency.value = currencies.isNotEmpty ? currencies.first : 'USD';
+    }
   }
 
   @override
@@ -135,6 +158,7 @@ class SellerFinanceController extends GetxController {
     final result = await _repo.getTransactions(
       storeId,
       type: _filterToType[activeFilter.value],
+      currency: selectedCurrency.value,
       page: reset ? 1 : _txPage,
     );
     if (reset) {
@@ -151,7 +175,12 @@ class SellerFinanceController extends GetxController {
     if (isLoadingMoreTransactions.value || !hasMoreTransactions) return;
     isLoadingMoreTransactions.value = true;
     _txPage += 1;
-    final result = await _repo.getTransactions(storeId, type: _filterToType[activeFilter.value], page: _txPage);
+    final result = await _repo.getTransactions(
+      storeId,
+      type: _filterToType[activeFilter.value],
+      currency: selectedCurrency.value,
+      page: _txPage,
+    );
     transactions.addAll(result.transactions);
     _txPage = result.page;
     _txPages = result.pages;
@@ -162,7 +191,7 @@ class SellerFinanceController extends GetxController {
     if (isExportingTransactions.value) return;
     isExportingTransactions.value = true;
     try {
-      final csv = await _repo.exportTransactionsCsv(storeId, type: _filterToType[activeFilter.value]);
+      final csv = await _repo.exportTransactionsCsv(storeId, type: _filterToType[activeFilter.value], currency: selectedCurrency.value);
       if (csv == null) return;
       final file = XFile.fromData(
         Uint8List.fromList(csv.codeUnits),
@@ -183,7 +212,9 @@ class SellerFinanceController extends GetxController {
     try {
       final payout = await _repo.requestPayout(storeId, amount: amount, payoutMethodId: payoutMethodId, notes: notes);
       if (payout == null) return false;
-      ToastUtil.showToast('Payout of \$${amount.toStringAsFixed(2)} requested.');
+      final method = payoutMethods.where((m) => m.id == payoutMethodId).firstOrNull;
+      final wallet = dashboard.value.walletFor(method?.currency ?? selectedCurrency.value);
+      ToastUtil.showToast('Payout of ${wallet.amountLabel(amount)} requested.');
       await Future.wait([_loadDashboard(), loadTransactions(reset: true)]);
       return true;
     } finally {
@@ -201,6 +232,7 @@ class SellerFinanceController extends GetxController {
 
   Future<bool> addPayoutMethod({
     required String type,
+    String? currency,
     String? bankName,
     String? accountHolder,
     String? accountNumber,
@@ -213,6 +245,7 @@ class SellerFinanceController extends GetxController {
       final method = await _repo.addPayoutMethod(
         storeId,
         type: type,
+        currency: currency,
         bankName: bankName,
         accountHolder: accountHolder,
         accountNumber: accountNumber,
@@ -222,7 +255,11 @@ class SellerFinanceController extends GetxController {
       );
       if (method == null) return false;
       await Future.wait([loadPayoutMethods(), _loadDashboard()]);
-      ToastUtil.showToast('Payout method added.');
+      ToastUtil.showToast(
+        method.isPendingVerification
+            ? 'Payout method added — awaiting verification before it can be used.'
+            : 'Payout method added.',
+      );
       return true;
     } finally {
       isSavingPayoutMethod.value = false;
@@ -231,6 +268,7 @@ class SellerFinanceController extends GetxController {
 
   Future<bool> updatePayoutMethod(
     String methodId, {
+    String? currency,
     String? bankName,
     String? accountHolder,
     String? accountNumber,
@@ -242,6 +280,7 @@ class SellerFinanceController extends GetxController {
       final method = await _repo.updatePayoutMethod(
         storeId,
         methodId,
+        currency: currency,
         bankName: bankName,
         accountHolder: accountHolder,
         accountNumber: accountNumber,
@@ -250,7 +289,11 @@ class SellerFinanceController extends GetxController {
       );
       if (method == null) return false;
       await loadPayoutMethods();
-      ToastUtil.showToast('Payout method updated.');
+      ToastUtil.showToast(
+        method.isPendingVerification
+            ? 'Payout method updated — changes require re-verification.'
+            : 'Payout method updated.',
+      );
       return true;
     } finally {
       isSavingPayoutMethod.value = false;
@@ -278,7 +321,7 @@ class SellerFinanceController extends GetxController {
   // ── Payout schedule ──────────────────────────────────────────────────────
 
   Future<void> loadPayoutSchedule() async {
-    payoutSchedule.value = await _repo.getPayoutSchedule(storeId);
+    payoutSchedule.value = await _repo.getPayoutSchedule(storeId, currency: selectedCurrency.value);
   }
 
   Future<bool> updatePayoutSchedule({
@@ -293,6 +336,7 @@ class SellerFinanceController extends GetxController {
     try {
       final updated = await _repo.updatePayoutSchedule(
         storeId,
+        currency: selectedCurrency.value,
         frequency: frequency,
         dayOfWeek: dayOfWeek,
         dayOfMonth: dayOfMonth,
@@ -318,10 +362,10 @@ class SellerFinanceController extends GetxController {
     isLoadingTaxReports.value = false;
   }
 
-  Future<bool> generateTaxReport({required int year, required String period}) async {
+  Future<bool> generateTaxReport({required int year, required String period, String? currency}) async {
     isGeneratingTaxReport.value = true;
     try {
-      final report = await _repo.generateTaxReport(storeId, year: year, period: period);
+      final report = await _repo.generateTaxReport(storeId, year: year, period: period, currency: currency ?? selectedCurrency.value);
       if (report == null) return false;
       await loadTaxReports();
       ToastUtil.showToast('${report.periodLabel} report generated.');

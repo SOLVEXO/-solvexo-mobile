@@ -57,7 +57,11 @@ class _FinanceScheduleSheetState extends State<FinanceScheduleSheet> {
     final minimum = double.tryParse(_minimumCtrl.text.trim());
     final dayOfMonth = int.tryParse(_dayOfMonthCtrl.text.trim());
     if (minimum == null || minimum < 1) {
-      Get.snackbar('Invalid amount', 'Minimum payout amount must be at least \$1.00', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        'Invalid amount',
+        'Minimum payout amount must be at least 1.00 ${widget.controller.selectedCurrency.value}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
     final ok = await widget.controller.updatePayoutSchedule(
@@ -153,7 +157,12 @@ class _FinanceScheduleSheetState extends State<FinanceScheduleSheet> {
                     CustomTextField(label: 'Day of Month (1-28)', controller: _dayOfMonthCtrl, isborder: true, keyboardType: TextInputType.number),
                   ],
                   const SizedBox(height: BaseSpacing.sm),
-                  CustomTextField(label: 'Minimum Payout Amount (USD)', controller: _minimumCtrl, isborder: true, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
+                  CustomTextField(
+                    label: 'Minimum Payout Amount (${widget.controller.selectedCurrency.value})',
+                    controller: _minimumCtrl,
+                    isborder: true,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  ),
                   const SizedBox(height: BaseSpacing.sm),
                   Row(
                     children: [

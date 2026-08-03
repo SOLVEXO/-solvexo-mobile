@@ -11,6 +11,12 @@ class OrderItem {
   final String status;
   final String returnStatus;
 
+  // Denormalized from the parent OrderStore at parse time (see
+  // OrderStore.fromJson) — the backend attaches seller info per-store, not
+  // per-item, but flat item listings (e.g. OrderItems widget) need it too.
+  final String? sellerName;
+  final bool sellerVerified;
+
   const OrderItem({
     required this.itemId,
     required this.productId,
@@ -23,6 +29,8 @@ class OrderItem {
     required this.totalPrice,
     required this.status,
     this.returnStatus = 'none',
+    this.sellerName,
+    this.sellerVerified = false,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
@@ -40,6 +48,23 @@ class OrderItem {
       returnStatus: json['returnStatus'] as String? ?? 'none',
     );
   }
+
+  OrderItem withSeller({String? sellerName, bool sellerVerified = false}) =>
+      OrderItem(
+        itemId: itemId,
+        productId: productId,
+        name: name,
+        image: image,
+        sku: sku,
+        type: type,
+        quantity: quantity,
+        price: price,
+        totalPrice: totalPrice,
+        status: status,
+        returnStatus: returnStatus,
+        sellerName: sellerName,
+        sellerVerified: sellerVerified,
+      );
 }
 
 class OrderTracking {
@@ -64,6 +89,8 @@ class OrderTracking {
 
 class OrderStore {
   final String storeId;
+  final String? sellerName;
+  final bool sellerVerified;
   final String fulfillmentType;
   final String status;
   final double subtotal;
@@ -75,6 +102,8 @@ class OrderStore {
 
   const OrderStore({
     required this.storeId,
+    this.sellerName,
+    this.sellerVerified = false,
     required this.fulfillmentType,
     required this.status,
     required this.subtotal,
@@ -86,14 +115,19 @@ class OrderStore {
   });
 
   factory OrderStore.fromJson(Map<String, dynamic> json) {
+    final sellerName = json['sellerName'] as String?;
+    final sellerVerified = json['sellerVerified'] == true;
     return OrderStore(
       storeId: json['storeId'] as String? ?? '',
+      sellerName: sellerName,
+      sellerVerified: sellerVerified,
       fulfillmentType: json['fulfillmentType'] as String? ?? 'physical',
       status: json['status'] as String? ?? 'pending',
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
       itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
       items: (json['items'] as List? ?? [])
-          .map((e) => OrderItem.fromJson(e as Map<String, dynamic>))
+          .map((e) => OrderItem.fromJson(e as Map<String, dynamic>)
+              .withSeller(sellerName: sellerName, sellerVerified: sellerVerified))
           .toList(),
       tracking: json['tracking'] != null
           ? OrderTracking.fromJson(json['tracking'] as Map<String, dynamic>)

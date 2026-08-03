@@ -1,3 +1,5 @@
+import 'package:book_store_app/app/data/models/store/store_announcement_bar_model.dart';
+
 /// A seller's public storefront profile — GET /api/store/public/:slug.
 class StorefrontModel {
   final String storeId;
@@ -12,6 +14,8 @@ class StorefrontModel {
   final int reviewCount;
   final String? sellerType;
   final List<String> badges;
+  final List<String> pinnedProductIds;
+  final StoreAnnouncementBarModel announcementBar;
 
   const StorefrontModel({
     required this.storeId,
@@ -26,6 +30,8 @@ class StorefrontModel {
     this.reviewCount = 0,
     this.sellerType,
     this.badges = const [],
+    this.pinnedProductIds = const [],
+    this.announcementBar = const StoreAnnouncementBarModel(),
   });
 
   String get initials => name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'S';
@@ -43,5 +49,9 @@ class StorefrontModel {
         reviewCount: json['reviewCount'] as int? ?? 0,
         sellerType: json['sellerType'] as String?,
         badges: (json['badges'] as List?)?.cast<String>() ?? const [],
+        pinnedProductIds: (json['pinnedProductIds'] as List?)?.cast<String>() ?? const [],
+        announcementBar: json['announcementBar'] is Map<String, dynamic>
+            ? StoreAnnouncementBarModel.fromJson(json['announcementBar'] as Map<String, dynamic>)
+            : const StoreAnnouncementBarModel(),
       );
 }

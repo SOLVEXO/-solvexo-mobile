@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 /// A small circular counter overlaid on the top-right corner of [child] —
@@ -46,6 +47,7 @@ class UnreadCountBadge extends StatelessWidget {
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 height: 1,
+                fontFamily: AppTextStyles.monoFontFamily,
               ),
             ),
           ),

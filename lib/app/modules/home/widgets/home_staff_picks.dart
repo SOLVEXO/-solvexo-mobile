@@ -6,6 +6,7 @@ import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -129,6 +130,7 @@ class _StaffPickItem extends StatelessWidget {
                         color: AppColors.black,
                         fontSize: AppFontSize.tiny,
                         fontWeight: FontWeight.w800,
+                        fontFamily: AppTextStyles.monoFontFamily,
                       ),
                       PressableScale(
                         onTap: () => productController.openProductDetails(product),

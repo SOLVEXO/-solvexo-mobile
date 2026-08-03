@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_returns/controllers/seller_returns_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -82,6 +83,7 @@ class _FilterChip extends StatelessWidget {
           fontSize: AppFontSize.verySmall,
           fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
           color: isActive ? AppColors.white : AppColors.black2,
+          fontFamily: AppTextStyles.monoFontFamily,
         ),
       ),
     );

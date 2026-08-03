@@ -11,7 +11,6 @@ import 'package:book_store_app/app/modules/category/models/category_model.dart'
 import 'package:book_store_app/app/modules/category/models/product_model.dart'
     as BackendModel;
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
-import 'package:book_store_app/app/modules/sub_category/widgets/filter_bottom_sheet.dart';
 import 'package:book_store_app/app/modules/product_details/controller/product_detail_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
@@ -31,50 +30,6 @@ class ProductController extends GetxController {
   RxInt currentPage = 1.obs;
   RxInt totalPages = 1.obs;
   RxBool hasMoreProducts = true.obs;
-
-  // ─── Filters ──────────────────────────────────────────────────────────────
-  RxDouble minPrice = 0.0.obs;
-  RxDouble maxPrice = 1000.0.obs;
-  RxDouble currentMinFilter = 0.0.obs;
-  RxDouble currentMaxFilter = 1000.0.obs;
-  RxString selectedBrand = ''.obs;
-  RxDouble selectedRating = 0.0.obs;
-
-  List<double> ratings = [1, 2, 3, 4, 5];
-
-  // List<String> get brands {
-  //   final uniqueBrands = products
-  //       .where((p) => p.brand != null && p.brand!.isNotEmpty)
-  //       .map((p) => p.brand!)
-  //       .toSet()
-  //       .toList();
-  //   return uniqueBrands.isEmpty
-  //       ? ['Ikea', 'HomeZ', 'UrbanHouse', 'KitchenPro']
-  //       : uniqueBrands;
-  // }
-
-  void resetFilters() {
-    selectedBrand.value = '';
-    selectedRating.value = 0;
-    currentMinFilter.value = minPrice.value;
-    currentMaxFilter.value = maxPrice.value;
-    fetchProducts();
-  }
-
-  void applyFilters() {
-    currentMinFilter.value = minPrice.value;
-    currentMaxFilter.value = maxPrice.value;
-    fetchProducts();
-  }
-
-  Future bottomsheet(context) {
-    return Get.bottomSheet(
-      CustomBottomSheet(
-        title: 'Filter',
-        widget: FilterBottomSheetSubCategory(),
-      ),
-    );
-  }
 
   // ─── Categories ───────────────────────────────────────────────────────────
   final RxList<BackendModel.CategoryModel> categories =

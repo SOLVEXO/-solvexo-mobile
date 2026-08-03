@@ -271,34 +271,45 @@ class _InfoRow extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 11),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomText(
-                text: label,
-                fontSize: AppFontSize.verySmall,
-                color: AppColors.lightGrey5,
+              Expanded(
+                flex: 2,
+                child: CustomText(
+                  text: label,
+                  fontSize: AppFontSize.verySmall,
+                  color: AppColors.lightGrey5,
+                ),
               ),
-              valueBg != null
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: valueBg,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: CustomText(
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 3,
+                child: valueBg != null
+                    ? Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: valueBg,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: CustomText(
+                            text: value,
+                            fontSize: AppFontSize.tiny,
+                            fontWeight: FontWeight.w600,
+                            color: valueColor ?? AppColors.black2,
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                      )
+                    : CustomText(
                         text: value,
-                        fontSize: AppFontSize.tiny,
+                        fontSize: AppFontSize.verySmall,
                         fontWeight: FontWeight.w600,
                         color: valueColor ?? AppColors.black2,
+                        textAlign: TextAlign.end,
                       ),
-                    )
-                  : CustomText(
-                      text: value,
-                      fontSize: AppFontSize.verySmall,
-                      fontWeight: FontWeight.w600,
-                      color: valueColor ?? AppColors.black2,
-                    ),
+              ),
             ],
           ),
         ),

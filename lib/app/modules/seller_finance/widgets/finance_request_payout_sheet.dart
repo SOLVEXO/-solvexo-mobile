@@ -37,8 +37,15 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
     _notesCtrl = TextEditingController();
     final methods = widget.controller.payoutMethods;
     final active = methods.where((m) => m.isActive).toList();
-    final defaults = active.where((m) => m.isDefault);
-    _selectedMethodId = defaults.isNotEmpty ? defaults.first.id : (active.isNotEmpty ? active.first.id : null);
+    // Prefer a default method in the currently-selected wallet's currency so
+    // the balance/amount shown on open matches the screen the seller came
+    // from; fall back to any default, then any active method.
+    final currency = widget.controller.selectedCurrency.value;
+    final currencyDefaults = active.where((m) => m.currency == currency && m.isDefault);
+    final anyDefaults = active.where((m) => m.isDefault);
+    _selectedMethodId = currencyDefaults.isNotEmpty
+        ? currencyDefaults.first.id
+        : (anyDefaults.isNotEmpty ? anyDefaults.first.id : (active.isNotEmpty ? active.first.id : null));
   }
 
   @override
@@ -80,6 +87,15 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
               child: Obx(() {
                 final methods = widget.controller.payoutMethods;
                 final activeMethods = methods.where((m) => m.isActive).toList();
+                PayoutMethodModel? selectedMethod;
+                for (final m in activeMethods) {
+                  if (m.id == _selectedMethodId) {
+                    selectedMethod = m;
+                    break;
+                  }
+                }
+                final currency = selectedMethod?.currency ?? widget.controller.selectedCurrency.value;
+                final wallet = widget.controller.dashboard.value.walletFor(currency);
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,7 +110,7 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
                     CustomText(text: 'Request Payout', color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
                     const SizedBox(height: 4),
                     CustomText(
-                      text: 'Available balance: \$${widget.controller.availableBalance.toStringAsFixed(2)}',
+                      text: 'Available balance: ${wallet.amountLabel(wallet.availableBalance)}',
                       color: AppColors.lightGrey5,
                       fontSize: AppFontSize.tiny,
                     ),
@@ -111,7 +127,7 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
                           )),
                       const SizedBox(height: BaseSpacing.sm),
                       CustomTextField(
-                        label: 'Amount (USD)',
+                        label: 'Amount ($currency)',
                         hintText: '0.00',
                         controller: _amountCtrl,
                         isborder: true,
@@ -174,7 +190,7 @@ class _MethodRadioTile extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: CustomText(
-                text: method.displayLabel,
+                text: '${method.displayLabel} · ${method.currency}',
                 fontSize: AppFontSize.verySmall,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black2,

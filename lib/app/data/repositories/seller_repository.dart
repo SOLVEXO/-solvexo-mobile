@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
+import 'package:book_store_app/app/data/models/store/store_announcement_bar_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -108,6 +109,53 @@ class SellerRepository {
     } catch (e) {
       debugPrint('❌ updateStore error: $e');
       ToastUtil.showToast('Something went wrong. Please try again.');
+      return null;
+    }
+  }
+
+  // ─── PATCH /api/store/:storeId/pinned-products ─────────────────────────────
+
+  Future<List<String>?> updatePinnedProducts(String storeId, List<String> productIds) async {
+    try {
+      final response = await _client.patch(
+        ApiConstants.storePinnedProducts(storeId),
+        data: {'productIds': productIds},
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        return (data['pinnedProductIds'] as List?)?.cast<String>() ?? const [];
+      }
+      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to update pinned products.');
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint('❌ updatePinnedProducts error: $e');
+      return null;
+    }
+  }
+
+  // ─── PATCH /api/store/:storeId/announcement ────────────────────────────────
+
+  Future<StoreAnnouncementBarModel?> updateAnnouncementBar(String storeId, StoreAnnouncementBarModel bar) async {
+    try {
+      final response = await _client.patch(
+        ApiConstants.storeAnnouncement(storeId),
+        data: bar.toJson(),
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) {
+        return StoreAnnouncementBarModel.fromJson(response.data['data'] as Map<String, dynamic>);
+      }
+      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to update announcement bar.');
+      return null;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return null;
+    } catch (e) {
+      debugPrint('❌ updateAnnouncementBar error: $e');
       return null;
     }
   }

@@ -7,6 +7,7 @@ import 'package:book_store_app/app/modules/splash_screen/controllers/splash_scre
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -107,6 +108,7 @@ class SplashView extends StatelessWidget {
                             text: 'Solvexo',
                             textAlign: TextAlign.center,
                             color: AppColors.white,
+                            fontFamily: AppTextStyles.headingFontFamily,
                             fontSize: AppFontSize.large,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 1.5,

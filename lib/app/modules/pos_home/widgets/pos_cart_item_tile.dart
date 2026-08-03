@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/pos_home/controllers/pos_home_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -76,6 +77,7 @@ class PosCartItemTile extends StatelessWidget {
                 text: '× \$${item.unitPrice.toStringAsFixed(2)}',
                 fontSize: AppFontSize.tiny,
                 color: AppColors.iosGrey,
+                fontFamily: AppTextStyles.monoFontFamily,
               ),
             ]),
           ]),
@@ -102,6 +104,7 @@ class PosCartItemTile extends StatelessWidget {
             fontSize: AppFontSize.small2,
             fontWeight: FontWeight.bold,
             color: AppColors.primaryColor,
+            fontFamily: AppTextStyles.monoFontFamily,
           ),
         ]),
       ]),

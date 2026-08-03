@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
+import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,9 +27,11 @@ class SellerProduct {
   final String? description;
   final double? compareAtPrice;
   // Physical-only
-  final String? size;
-  final String? color;
+  final List<VariantOption> options;
   final String? shippingWeight;
+  final int variantCount;
+  final double? minPrice;
+  final double? maxPrice;
   final List<String> tags;
   // Digital-only
   final List<Map<String, dynamic>> digitalFiles;
@@ -58,9 +61,11 @@ class SellerProduct {
     this.variantId,
     this.description,
     this.compareAtPrice,
-    this.size,
-    this.color,
+    this.options = const [],
     this.shippingWeight,
+    this.variantCount = 1,
+    this.minPrice,
+    this.maxPrice,
     this.tags = const [],
     this.digitalFiles = const [],
     this.downloadLimit = 'unlimited',
@@ -76,6 +81,8 @@ class SellerProduct {
 
   bool get isUnlimitedStock => stock == null;
   String get stockLabel => isUnlimitedStock ? '∞' : '$stock';
+  bool get hasPriceRange =>
+      variantCount > 1 && minPrice != null && maxPrice != null && minPrice != maxPrice;
 
   factory SellerProduct.fromApiJson(Map<String, dynamic> json) {
     // Stock: "∞ Unlimited" string → null, numeric → int
@@ -128,9 +135,13 @@ class SellerProduct {
           ? DateTime.tryParse(rawScheduledAt)
           : null,
       description: json['description'] as String?,
-      size: json['size'] as String?,
-      color: json['color'] as String?,
+      options: (json['options'] as List? ?? [])
+          .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
+          .toList(),
       shippingWeight: json['shippingWeight'] as String?,
+      variantCount: json['variantCount'] as int? ?? 1,
+      minPrice: (json['minPrice'] as num?)?.toDouble(),
+      maxPrice: (json['maxPrice'] as num?)?.toDouble(),
       tags: (json['tags'] as List?)?.cast<String>() ?? const [],
       digitalFiles:
           (digitalJson?['files'] as List?)?.cast<Map<String, dynamic>>() ??

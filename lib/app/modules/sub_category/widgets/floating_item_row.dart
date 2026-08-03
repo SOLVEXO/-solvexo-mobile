@@ -34,11 +34,9 @@ class CustomFloatingButton extends StatelessWidget {
     );
   }
 
-  // NOTE: "Sort" opens the same filter bottom sheet as "Filters" — there is
-  // no separate sort controller method (`SubCategoryController` only has
-  // `openFilterBottomSheet()`). Left as-is rather than inventing sort
-  // behavior (by price/rating/newest?) that wasn't specified; flagging for
-  // a product decision on what "Sort" should actually do.
+  // "Sort" and "Filters" intentionally open the same sheet — it now has a
+  // real "Sort By" section (`ProductFilterBottomSheet`) alongside price/
+  // rating/education filters, so both pills lead to one unified sheet.
   Widget customRow(String icon, String text, context) {
     return GestureDetector(
       onTap: () => controller.openFilterBottomSheet(),

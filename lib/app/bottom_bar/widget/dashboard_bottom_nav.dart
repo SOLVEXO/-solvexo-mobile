@@ -29,7 +29,7 @@ class DashboardBottomNav extends StatelessWidget {
               BoxShadow(
                 color: AppColors.black.withOpacity(showShadow ? 0.1 : 0),
                 blurRadius: 10,
-                offset: Offset(0, -2),
+                offset: Offset(2, -10),
               ),
             ],
           ),
