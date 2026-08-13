@@ -1,7 +1,7 @@
+import 'package:book_store_app/app/components/app_search_field.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/messaging/controllers/conversations_controller.dart';
 import 'package:book_store_app/app/modules/messaging/widgets/conversation_tile.dart';
@@ -75,14 +75,23 @@ class _SearchBar extends StatelessWidget {
         BaseSpacing.md,
         BaseSpacing.sm,
       ),
-      child: CustomTextField(
-        onChanged: c.onSearch,
-        hintText: 'Search messages',
-        isborder: true,
-        prefixIcon: SvgIcon(
-          assetName: AppIcons.searchIcon,
-          size: 18,
-          color: AppColors.iosGrey,
+      child: Obx(
+        () => AppSearchField(
+          controller: c.searchController,
+          onChanged: c.onSearch,
+          staticHint: 'Search messages',
+          suffixIcon: c.searchQuery.value.isNotEmpty
+              ? GestureDetector(
+                  onTap: () {
+                    c.searchController.clear();
+                    c.onSearch('');
+                  },
+                  child: SvgIcon(
+                    assetName: AppIcons.cross,
+                    color: AppColors.textPrimary,
+                  ),
+                )
+              : null,
         ),
       ),
     );

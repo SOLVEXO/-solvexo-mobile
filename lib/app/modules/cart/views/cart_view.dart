@@ -49,50 +49,85 @@ class CartView extends BaseView<CartController> {
   // `canPop` is true — that's the signal for showing a back button.
   @override
   PreferredSizeWidget buildAppBar(BuildContext context) => CustomAppBarTwo(
-        title: "Cart",
-        showLeading: Navigator.canPop(context),
-        actions: [WishlistIconCount()],
-      );
+    title: "Cart",
+    showLeading: Navigator.canPop(context),
+    actions: [WishlistIconCount()],
+  );
+
+  Future<void> _onLoggedIn() async {
+    await _profileController.refreshProfile();
+    await controller.refreshCart();
+  }
 
   @override
   Widget buildBody(BuildContext context) {
     final profileController = _profileController;
 
     return Obx(() {
-      if (profileController.user.isNull) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
-          child: Column(
-            children: [
-              SizedBox(height: Get.height / 12),
-              LoginSignupCard(),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomText(
-                    text: "Featured Items you may like",
-                    color: AppColors.black,
-                    fontSize: AppFontSize.small,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  RecommendedProductList(),
-                ],
-              ),
-            ],
-          ),
-        );
-      }
       if (controller.isLoading.value) {
         return ShimmerEffect(itemCount: 3);
       }
       if (controller.cartItems.isEmpty) {
+        // Guests with an empty local cart get the same nudge + recommendations
+        // as before; a guest with items in their cart falls through below to
+        // see the actual cart (guest-allowed) with just a slim login nudge —
+        // checkout itself is the protected action, not viewing the cart.
+        if (profileController.user.isNull) {
+          // Scaffold's body slot already gives this Column bounded height —
+          // no extra ConstrainedBox/SingleChildScrollView wrapper needed
+          // (that combination produces "RenderFlex... unbounded height
+          // constraints" once an Expanded child is involved).
+          return Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
+                      child: LoginSignupCard(onLoggedIn: _onLoggedIn),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  BaseSpacing.xl,
+                  0,
+                  BaseSpacing.xl,
+                  BaseSpacing.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText(
+                      text: "Featured Items you may like",
+                      color: AppColors.black,
+                      fontSize: AppFontSize.small,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    RecommendedProductList(),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }
         return const EmptyCartText();
       }
       return CustomRefreshWrapper(
         onRefresh: controller.refreshCart,
         child: Column(
           children: [
+            if (profileController.user.isNull)
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  BaseSpacing.md,
+                  BaseSpacing.sm,
+                  BaseSpacing.md,
+                  0,
+                ),
+                child: LoginSignupCard(onLoggedIn: _onLoggedIn),
+              ),
             _selectAllRow(),
             const Divider(height: 1, thickness: 0.5),
             Expanded(
@@ -101,7 +136,9 @@ class CartView extends BaseView<CartController> {
                 interactive: true,
                 thickness: 4,
                 child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: ClampingScrollPhysics(),
+                  ),
                   itemCount: controller.cartItems.length,
                   itemBuilder: (context, index) {
                     final cartItem = controller.cartItems[index];
@@ -155,8 +192,17 @@ class CartView extends BaseView<CartController> {
           fontWeight: FontWeight.w500,
         ),
         const Spacer(),
-        GhostButton(label: "Move to Wishlist", onPressed: () => controller.showWishListConformation()),
-        CustomText(text: '|', color: AppColors.lightGrey, fontSize: AppFontSize.tiny),
+        GhostButton(
+          label: "Move to Wishlist",
+          onPressed: () => controller.showWishListConformation(
+            onRightButtonTap: () => controller.moveSelectedToWishlist(),
+          ),
+        ),
+        CustomText(
+          text: '|',
+          color: AppColors.lightGrey,
+          fontSize: AppFontSize.tiny,
+        ),
         GhostButton(
           label: "Delete",
           onPressed: () {

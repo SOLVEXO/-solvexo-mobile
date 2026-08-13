@@ -9,6 +9,7 @@ import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orde
 import 'package:book_store_app/app/network/notifications_socket_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:get/get.dart';
 
 class NotificationsController extends GetxController {
@@ -40,6 +41,12 @@ class NotificationsController extends GetxController {
   }
 
   Future<void> fetchNotifications() async {
+    // Notifications are a login-only feature — a guest tapping the bell
+    // icon gets a clear reason the inbox is empty, not a raw 401.
+    if (!await AppPreferences.isLoggedIn()) {
+      ToastUtil.showToast('Login to view your notifications');
+      return;
+    }
     isLoading.value = true;
     final result = await _repository.list();
     _all.assignAll(result.items);
@@ -103,7 +110,17 @@ class NotificationsController extends GetxController {
         }
         break;
       case 'new_follower':
+      case 'store_approved':
         Get.toNamed(Routes.sellerStoreProfile);
+        break;
+      case 'store_rejected':
+      case 'verification_under_review':
+        final storeId = data['storeId']?.toString();
+        if (storeId != null && storeId.isNotEmpty) {
+          Get.toNamed(Routes.storeVerification, arguments: storeId);
+        } else {
+          Get.toNamed(Routes.sellerStoreProfile);
+        }
         break;
       case 'low_stock':
         Get.toNamed(Routes.sellerProducts);

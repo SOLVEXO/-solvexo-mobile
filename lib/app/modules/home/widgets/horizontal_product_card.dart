@@ -1,9 +1,8 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
+import 'package:book_store_app/app/data/services/currency_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
-import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
@@ -16,8 +15,13 @@ class HorizontalProductCard extends StatelessWidget {
   final ProductModel prod;
   final Function()? onTap;
   HorizontalProductCard({super.key, this.onTap, required this.prod});
-  final controller = Get.find<SearchBarController>();
-  final categoryController = Get.find<ProductController>();
+
+  CurrencyController get currencyController {
+    if (!Get.isRegistered<CurrencyController>()) {
+      Get.put(CurrencyController(), permanent: true);
+    }
+    return Get.find<CurrencyController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,11 +121,13 @@ class HorizontalProductCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  CustomText(
-                    text: "\$ ${prod.price}",
-                    color: AppColors.black,
-                    fontSize: AppFontSize.extraSmall,
-                    fontWeight: FontWeight.w600,
+                  Obx(
+                    () => CustomText(
+                      text: currencyController.format(prod.price, prod.currency),
+                      color: AppColors.black,
+                      fontSize: AppFontSize.extraSmall,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),

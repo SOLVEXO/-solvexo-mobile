@@ -1,3 +1,5 @@
+import 'package:book_store_app/utils/currency_formatter.dart';
+
 class CampaignModel {
   final String id;
   final String name;
@@ -15,6 +17,10 @@ class CampaignModel {
   /// join/leave are rejected server-side, see [isPlatformSponsored]).
   final String sponsorType;
 
+  /// Only meaningful when discountType == 'fixed' — campaigns are always
+  /// platform-wide, so this is always 'USD' (backend defaults it to 'USD').
+  final String currency;
+
   const CampaignModel({
     required this.id,
     required this.name,
@@ -28,6 +34,7 @@ class CampaignModel {
     this.participatingStoreIds = const [],
     this.isJoined = false,
     this.sponsorType = 'seller',
+    this.currency = 'USD',
   });
 
   bool get hasDiscount => discountType != null && discountValue != null;
@@ -38,7 +45,7 @@ class CampaignModel {
     final value = discountValue ?? 0;
     return isPercentage
         ? '${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 1)}% OFF'
-        : '\$${value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 2)} OFF';
+        : '${CurrencyFormatter.amount(value, currency, decimals: value.truncateToDouble() == value ? 0 : 2)} OFF';
   }
 
   bool get isEnded => endDate != null && endDate!.isBefore(DateTime.now());
@@ -57,6 +64,7 @@ class CampaignModel {
       participatingStoreIds: (json['participatingStoreIds'] as List?)?.cast<String>() ?? const [],
       isJoined: json['isJoined'] as bool? ?? false,
       sponsorType: json['sponsorType'] as String? ?? 'seller',
+      currency: json['currency'] as String? ?? 'USD',
     );
   }
 
@@ -74,6 +82,7 @@ class CampaignModel {
       participatingStoreIds: participatingStoreIds,
       isJoined: isJoined ?? this.isJoined,
       sponsorType: sponsorType,
+      currency: currency,
     );
   }
 }

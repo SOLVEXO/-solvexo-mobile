@@ -4,6 +4,7 @@ import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
+import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
@@ -11,6 +12,7 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/app/services/promotion_attribution_service.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -61,6 +63,12 @@ class CartController extends BaseController {
   // ─── 1. Fetch cart ────────────────────────────────────────────────────────
 
   Future<void> fetchCart() async {
+    // Cart is a login-only endpoint backend-side — guests read/write a
+    // local cart instead of hitting it (and 401ing) on every load.
+    if (!await isUserLogin()) {
+      await _loadLocalCart();
+      return;
+    }
     try {
       debugPrint("Fetching cart....");
       isLoading.value = true;
@@ -82,6 +90,43 @@ class CartController extends BaseController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // ─── Guest (local-only) cart ──────────────────────────────────────────────
+
+  Future<void> _loadLocalCart() async {
+    final raw = await AppPreferences.getGuestCartItems();
+    cartItems.assignAll(raw.map(CartItem.fromLocalJson));
+    selectAll.value = true;
+    calculateTotal();
+  }
+
+  Future<void> _persistLocalCart() async {
+    await AppPreferences.saveGuestCartItems(
+      cartItems.map((i) => i.toLocalJson()).toList(),
+    );
+  }
+
+  /// Adds a fully-formed `CartItem` (built by the caller from already-loaded
+  /// product/variant data — no network round-trip needed) to the local guest
+  /// cart, summing quantity on conflict just like the backend's `addToCart`.
+  Future<void> addLocalItem(CartItem newItem) async {
+    final index = cartItems.indexWhere(
+      (i) =>
+          i.productId == newItem.productId &&
+          i.productVariantId == newItem.productVariantId,
+    );
+    if (index != -1) {
+      cartItems[index] = cartItems[index].copyWith(
+        quantity: cartItems[index].quantity + newItem.quantity,
+      );
+    } else {
+      cartItems.add(newItem);
+    }
+    cartItems.refresh();
+    selectAll.value = true;
+    calculateTotal();
+    await _persistLocalCart();
   }
 
   // ─── 2. Add to cart ───────────────────────────────────────────────────────
@@ -113,6 +158,21 @@ class CartController extends BaseController {
     String productVariantId,
     String action,
   ) async {
+    if (!await isUserLogin()) {
+      final index = cartItems.indexWhere(
+        (i) => i.productId == productId && i.productVariantId == productVariantId,
+      );
+      if (index == -1) return;
+      final current = cartItems[index];
+      final newQty = action == 'increase'
+          ? current.quantity + 1
+          : (current.quantity - 1).clamp(1, current.quantity);
+      cartItems[index] = current.copyWith(quantity: newQty);
+      cartItems.refresh();
+      calculateTotal();
+      await _persistLocalCart();
+      return;
+    }
     try {
       isLoading.value = true;
 
@@ -163,6 +223,16 @@ class CartController extends BaseController {
   }
 
   Future<void> removeFromCart(String productId, String productVariantId) async {
+    if (!await isUserLogin()) {
+      cartItems.removeWhere(
+        (i) => i.productId == productId && i.productVariantId == productVariantId,
+      );
+      updateSelectAll();
+      calculateTotal();
+      await _persistLocalCart();
+      ToastUtil.showToast('Item removed');
+      return;
+    }
     try {
       isLoading.value = true;
 
@@ -188,6 +258,12 @@ class CartController extends BaseController {
   // ─── 5. Clear cart ────────────────────────────────────────────────────────
 
   Future<void> clearCart() async {
+    if (!await isUserLogin()) {
+      cartItems.clear();
+      calculateTotal();
+      await AppPreferences.clearGuestCart();
+      return;
+    }
     try {
       isLoading.value = true;
 
@@ -237,6 +313,15 @@ class CartController extends BaseController {
 
   // ─── 7. Total calculation ─────────────────────────────────────────────────
 
+  /// Only labeled with a currency symbol when every selected item shares
+  /// one — a mixed-currency selection renders the plain number instead.
+  String? get selectedCurrency {
+    final selected = cartItems.where((e) => e.isSelected).toList();
+    if (selected.isEmpty) return null;
+    final first = selected.first.currency;
+    return selected.every((i) => i.currency == first) ? first : null;
+  }
+
   void calculateTotal() {
     final selected = cartItems.where((e) => e.isSelected);
 
@@ -269,6 +354,14 @@ class CartController extends BaseController {
 
   Future<void> proceedToCheckout() async {
     if (isCheckingOut.value) return;
+
+    // Checkout is login-only. If this was a guest, a successful login here
+    // also merges the local cart into the account cart and refreshes
+    // `cartItems` (see AuthController/OtpController) before this resumes.
+    final allowed = await AuthGateService.instance.requireAuth(
+      message: 'Login to place your order.',
+    );
+    if (!allowed) return;
 
     // Only the ticked cart lines go to checkout — without this the backend
     // defaults to checking out the ENTIRE cart.
@@ -398,8 +491,12 @@ class CartController extends BaseController {
 
   // ─── 10. UI helpers ───────────────────────────────────────────────────────
   final WishlistController wishlistController;
-  void moveToWishlist(CartItem item) {
-    wishlistController.addToWishlist(
+  Future<void> moveToWishlist(CartItem item) async {
+    final allowed = await AuthGateService.instance.requireAuth(
+      message: 'Login to save items to your wishlist.',
+    );
+    if (!allowed) return;
+    await wishlistController.addToWishlist(
       productId: item.productId,
       productVariantId: item.productVariantId,
     );
@@ -408,6 +505,14 @@ class CartController extends BaseController {
       title: 'Wishlist',
       message: '${item.name} moved to wishlist',
     );
+  }
+
+  /// Bulk "Move to Wishlist" for every currently-selected cart item.
+  Future<void> moveSelectedToWishlist() async {
+    final selectedItems = cartItems.where((item) => item.isSelected).toList();
+    for (final item in selectedItems) {
+      await moveToWishlist(item);
+    }
   }
 
   void showDeleteConfirmation({

@@ -1,5 +1,7 @@
+import 'package:book_store_app/app/components/app_search_field.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/app/modules/pos_products/controllers/pos_products_controller.dart';
 import 'package:book_store_app/app/modules/pos_products/widgets/pos_product_tile.dart';
 import 'package:book_store_app/app/modules/pos_products/widgets/pos_products_empty.dart';
@@ -61,12 +63,24 @@ class _SearchBar extends StatelessWidget {
         horizontal: AppDimen.allPadding,
         vertical: 10,
       ),
-      child: CustomTextField(
-        controller: controller.searchController,
-        onChanged: controller.onSearchChanged,
-        hintText: 'Search products or SKU...',
-        isborder: true,
-        fillColor: AppColors.textfldFillColor,
+      child: Obx(
+        () => AppSearchField(
+          controller: controller.searchController,
+          onChanged: controller.onSearchChanged,
+          staticHint: 'Search products or SKU...',
+          suffixIcon: controller.searchText.value.isNotEmpty
+              ? GestureDetector(
+                  onTap: () {
+                    controller.searchController.clear();
+                    controller.onSearchChanged('');
+                  },
+                  child: const SvgIcon(
+                    assetName: AppIcons.cross,
+                    color: AppColors.textPrimary,
+                  ),
+                )
+              : null,
+        ),
       ),
     );
   }

@@ -1,7 +1,7 @@
+import 'package:book_store_app/app/components/app_search_field.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/data/models/activity_log/activity_log_model.dart';
 import 'package:book_store_app/app/modules/seller_activity_log/controllers/seller_activity_log_controller.dart';
@@ -312,15 +312,23 @@ class _SearchField extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: CustomTextField(
-                controller: c.searchController,
-                onChanged: c.onSearchChanged,
-                hintText: 'Search activity...',
-                borderBorderradius: AppDimen.borderRadius,
-                borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-                prefixIcon: SvgIcon(
-                  assetName: AppIcons.searchIcon,
-                  color: AppColors.gray600,
+              child: Obx(
+                () => AppSearchField(
+                  controller: c.searchController,
+                  onChanged: c.onSearchChanged,
+                  staticHint: 'Search activity...',
+                  suffixIcon: c.searchQuery.value.isNotEmpty
+                      ? GestureDetector(
+                          onTap: () {
+                            c.searchController.clear();
+                            c.onSearchChanged('');
+                          },
+                          child: SvgIcon(
+                            assetName: AppIcons.cross,
+                            color: AppColors.textPrimary,
+                          ),
+                        )
+                      : null,
                 ),
               ),
             ),

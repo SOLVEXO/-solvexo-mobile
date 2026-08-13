@@ -195,6 +195,8 @@ const kWhatYouSell = [
   ),
 ];
 
+const kStoreCurrencies = ['PKR', 'USD'];
+
 const kCountries = [
   'United States',
   'United Kingdom',
@@ -286,6 +288,8 @@ class SellerOnboardingController extends GetxController {
       ''.obs; // real category _id sent to the backend
   final RxString storeDescription = ''.obs;
   final Rx<File?> logoFile = Rx<File?>(null);
+  // Currency for pricing/payouts — required, immutable after store creation.
+  final RxString storeCurrency = ''.obs;
 
   // Admin-curated main categories a seller picks from — sellers cannot
   // create these themselves, only choose one.
@@ -310,7 +314,7 @@ class SellerOnboardingController extends GetxController {
   bool get canProceed {
     switch (step.value) {
       case OnboardingStep.storeInfo:
-        return storeName.value.trim().isNotEmpty;
+        return storeName.value.trim().isNotEmpty && storeCurrency.value.isNotEmpty;
       case OnboardingStep.sellerType:
         return sellerType.value != null;
       case OnboardingStep.whatYouSell:
@@ -429,6 +433,18 @@ class SellerOnboardingController extends GetxController {
     );
   }
 
+  void pickCurrency() {
+    Get.bottomSheet(
+      _PickerSheet(
+        title: 'Store Currency',
+        items: kStoreCurrencies,
+        selected: storeCurrency.value,
+        onSelect: (code) => storeCurrency.value = code,
+      ),
+      backgroundColor: Colors.transparent,
+    );
+  }
+
   Future<void> complete() async {
     if (isSaving.value) return;
     isSaving.value = true;
@@ -451,6 +467,7 @@ class SellerOnboardingController extends GetxController {
       description: storeDescription.value.trim(),
       categoryId: storeCategoryId.value.trim(),
       logoUrl: logoUrl,
+      baseCurrency: storeCurrency.value,
     );
 
     isSaving.value = false;
@@ -459,7 +476,15 @@ class SellerOnboardingController extends GetxController {
       createdStore.value = store;
       await AppPreferences.saveStoreId(store.id);
       await AppPreferences.saveStoreName(store.name);
+      // The store is created 'pending' and stays invisible/unable to sell
+      // until an admin approves it (see StoreService.createStore) — which
+      // itself requires the business/KYC verification submitted here first
+      // (ProductsService blocks product creation while status != 'active').
+      // Land on the dashboard underneath so Back from verification goes
+      // somewhere sane, then push straight into it rather than leaving the
+      // seller to stumble onto this requirement on their own.
       Get.offAllNamed(Routes.sellerHome);
+      Get.toNamed(Routes.storeVerification, arguments: store.id);
     }
     // On failure, _sellerRepo already shows a toast — stay on screen.
   }

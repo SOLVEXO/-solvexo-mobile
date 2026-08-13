@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/modules/seller/utils/seller_store_gate.dart';
 import 'package:book_store_app/app/modules/seller/widgets/seller_app_bar.dart';
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/product_card.dart';
@@ -26,7 +27,7 @@ class SellerProductsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Get.toNamed(Routes.addSellerProduct),
+        onPressed: openAddProductOrRequireVerification,
         backgroundColor: AppColors.primaryColor,
         elevation: 3,
         icon: const Icon(Icons.add_rounded, color: AppColors.white),
@@ -61,10 +62,13 @@ class SellerProductsView extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (_, i) => ProductCard(
                     product: products[i],
-                    onEdit: () => Get.toNamed(
-                      Routes.editSellerProduct,
-                      arguments: products[i],
-                    ),
+                    onEdit: () async {
+                      final result = await Get.toNamed(
+                        Routes.editSellerProduct,
+                        arguments: products[i],
+                      );
+                      if (result == true) controller.refreshData();
+                    },
                   ),
                 );
               }),

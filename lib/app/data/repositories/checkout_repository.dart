@@ -24,6 +24,7 @@ class CheckoutRepository {
     List<Map<String, String>>? items,
     String? attributedBannerId,
     String? attributedStoreBannerId,
+    String? currencyPreference,
   }) async {
     try {
       final response = await _client.post(
@@ -32,6 +33,7 @@ class CheckoutRepository {
           if (items != null && items.isNotEmpty) 'items': items,
           if (attributedBannerId != null) 'attributedBannerId': attributedBannerId,
           if (attributedStoreBannerId != null) 'attributedStoreBannerId': attributedStoreBannerId,
+          if (currencyPreference != null) 'currencyPreference': currencyPreference,
         },
         requiresAuth: true,
       );
@@ -150,8 +152,10 @@ class CheckoutRepository {
   }
 
   /// POST /api/payment/cod-payment
-  /// Places a Cash on Delivery order for physical products.
-  Future<bool> placeCodOrder(String checkoutId) async {
+  /// Places a Cash on Delivery order for physical products. [orderIds] lets
+  /// the success screen deep-link into the order(s) just created — a
+  /// multi-seller checkout produces one order per store.
+  Future<({bool success, List<String> orderIds})> placeCodOrder(String checkoutId) async {
     try {
       final response = await _client.post(
         ApiConstants.codPayment,
@@ -159,19 +163,30 @@ class CheckoutRepository {
         requiresAuth: true,
       );
 
-      if (response.data['success'] == true) return true;
+      if (response.data['success'] == true) {
+        return (success: true, orderIds: _extractOrderIds(response.data['data']));
+      }
 
       ToastUtil.showToast(
         response.data['message'] as String? ?? 'Failed to place order',
       );
-      return false;
+      return (success: false, orderIds: <String>[]);
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
-      return false;
+      return (success: false, orderIds: <String>[]);
     } catch (e) {
       ToastUtil.showToast('Failed to place order');
-      return false;
+      return (success: false, orderIds: <String>[]);
     }
+  }
+
+  List<String> _extractOrderIds(dynamic data) {
+    final orders = data is Map ? data['orders'] as List? : null;
+    if (orders == null) return [];
+    return orders
+        .map((o) => (o as Map)['orderId']?.toString())
+        .whereType<String>()
+        .toList();
   }
 
   /// POST /api/payment/initiate-payment
@@ -224,7 +239,10 @@ class CheckoutRepository {
 
       if (response.data['success'] == true) {
         final data = response.data['data'] as Map<String, dynamic>;
-        return PaymentStatusResult(status: data['status'] as String? ?? 'pending');
+        return PaymentStatusResult(
+          status: data['status'] as String? ?? 'pending',
+          orderIds: _extractOrderIds(data),
+        );
       }
       return const PaymentStatusResult(status: 'pending');
     } catch (e) {
@@ -321,8 +339,9 @@ class PaymentIntentResult {
 /// 'pending' | 'completed' | 'failed'
 class PaymentStatusResult {
   final String status;
+  final List<String> orderIds;
 
-  const PaymentStatusResult({required this.status});
+  const PaymentStatusResult({required this.status, this.orderIds = const []});
 
   bool get isCompleted => status == 'completed';
   bool get isFailed => status == 'failed';

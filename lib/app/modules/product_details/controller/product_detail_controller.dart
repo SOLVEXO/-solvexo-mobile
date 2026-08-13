@@ -8,7 +8,9 @@ import 'package:book_store_app/app/data/repositories/rating_repository.dart';
 import 'package:book_store_app/app/data/repositories/search_repository.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
+import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/config/resources/app_sounds.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -289,6 +291,34 @@ class ProductDetailController extends GetxController {
       ToastUtil.showToast('Please select a variant first');
       return;
     }
+
+    final cartController = Get.find<CartController>();
+
+    if (!await AppPreferences.isLoggedIn()) {
+      await cartController.addLocalItem(
+        CartItem(
+          productId: p.id,
+          productVariantId: variant.id,
+          name: p.name,
+          sellerName: p.sellerName,
+          sellerVerified: p.sellerVerified,
+          price: variant.price,
+          quantity: productQty.value,
+          images: variant.images.isNotEmpty ? variant.images : p.images,
+          productType: p.type,
+          options: variant.options,
+          currency: variant.currency,
+        ),
+      );
+      CustomAppSnackbar.show(
+        soundPath: AppSounds.successSound,
+        title: 'Added to Cart',
+        message: '${p.name} (x${productQty.value})',
+      );
+      ToastUtil.showToast('${p.name} added to cart');
+      return;
+    }
+
     try {
       isAddtoCartLoading.value = true;
       final cart = await _cartRepository.addToCart(
@@ -296,7 +326,6 @@ class ProductDetailController extends GetxController {
         productVariantId: variant.id,
         quantity: productQty.value,
       );
-      final cartController = Get.find<CartController>();
       cartController.addToCartBackend(cart: cart);
 
       CustomAppSnackbar.show(
@@ -329,6 +358,10 @@ class ProductDetailController extends GetxController {
 
   bool get hasDiscount =>
       displayCompareAtPrice != null && displayCompareAtPrice! > displayPrice;
+
+  /// Currency for [displayPrice]/[displayCompareAtPrice] — server-stamped
+  /// on the variant from the owning store's baseCurrency.
+  String? get displayCurrency => selectedVariant.value?.currency;
 
   /// Stock from selected variant, fallback to product total stock
   int get displayStock =>

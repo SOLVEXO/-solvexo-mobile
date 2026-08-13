@@ -11,11 +11,15 @@ import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_view_screen.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+// Seller-only landing screen. Reached exclusively via the "Sell on Solvexo"
+// entry point (Account tab, or a Home banner) — never shown at first launch.
+// Buyers never see a role picker; guest browsing is the default.
 class WelcomeView extends StatelessWidget {
   const WelcomeView({super.key});
 
@@ -37,11 +41,43 @@ class WelcomeView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 const _LogoSection(),
-                _BottomSection(onSelectRole: controller.selectRole),
+                _BottomSection(onGetStarted: controller.startSelling),
               ],
             ),
           ),
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(BaseSpacing.md),
+              child: _CloseButton(onTap: () => Get.back()),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _CloseButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _CloseButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Close',
+      child: PressableScale(
+        onTap: onTap,
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppColors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+          ),
+          alignment: Alignment.center,
+          child: SvgIcon(assetName: AppIcons.cross, color: AppColors.white),
+        ),
       ),
     );
   }
@@ -74,21 +110,21 @@ class _LogoSection extends StatelessWidget {
         ),
         SizedBox(height: BaseSpacing.lg),
         CustomText(
-          text: 'Solvexo',
+          text: 'Sell on Solvexo',
           color: AppColors.white,
           fontFamily: AppTextStyles.headingFontFamily,
-          fontSize: AppFontSize.veryLarge3,
+          fontSize: AppFontSize.large,
           fontWeight: FontWeight.w800,
         ),
         SizedBox(height: BaseSpacing.xxs),
         CustomText(
-          text: 'Commerce. Solved.',
+          text: 'Turn your products into a storefront',
           color: AppColors.white.withOpacity(0.8),
           fontSize: AppFontSize.extraSmall,
         ),
         SizedBox(height: BaseSpacing.xxs - 2),
         CustomText(
-          text: 'Buy, sell, and grow — all in one place.',
+          text: 'Reach thousands of buyers already shopping on Solvexo.',
           textAlign: TextAlign.center,
           color: AppColors.white.withOpacity(0.65),
           fontSize: AppFontSize.tiny,
@@ -98,12 +134,12 @@ class _LogoSection extends StatelessWidget {
   }
 }
 
-// ── Role selection buttons ─────────────────────────────────────────────────────
+// ── Seller pitch + CTA ─────────────────────────────────────────────────────────
 
 class _BottomSection extends StatelessWidget {
-  final Future<void> Function(String role) onSelectRole;
+  final Future<void> Function() onGetStarted;
 
-  const _BottomSection({required this.onSelectRole});
+  const _BottomSection({required this.onGetStarted});
 
   @override
   Widget build(BuildContext context) {
@@ -124,34 +160,26 @@ class _BottomSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomText(
-            text: 'How would you like to use Solvexo?',
+            text: 'Why sell on Solvexo?',
             color: AppColors.black,
             fontFamily: AppTextStyles.headingFontFamily,
             fontSize: AppFontSize.small2,
             fontWeight: FontWeight.w600,
           ),
-          SizedBox(height: BaseSpacing.xxs),
-          CustomText(
-            text: 'You can switch anytime from your profile settings.',
-            color: AppColors.grey,
-            fontSize: AppFontSize.tiny,
-          ),
           SizedBox(height: BaseSpacing.xl),
-          _RoleCard(
-            emoji: AppIcons.cartIcon,
-            title: 'I\'m a Buyer',
-            subtitle: 'Browse, discover and purchase products',
-            isPrimary: false,
-            onTap: () => onSelectRole('user'),
+          const _SellerPerk(
+            icon: AppIcons.cashIcon,
+            title: 'Create a store in minutes',
+            subtitle: 'Set up your storefront and list products fast',
           ),
           SizedBox(height: BaseSpacing.sm),
-          _RoleCard(
-            emoji: AppIcons.cashIcon,
-            title: 'I\'m a Seller',
-            subtitle: 'Create a store and start selling today',
-            isPrimary: true,
-            onTap: () => onSelectRole('seller'),
+          const _SellerPerk(
+            icon: AppIcons.cartIcon,
+            title: 'Manage everything in one place',
+            subtitle: 'Orders, inventory, and analytics on one dashboard',
           ),
+          SizedBox(height: BaseSpacing.xl),
+          PrimaryButton(label: 'Get Started', onPressed: onGetStarted),
           SizedBox(height: BaseSpacing.md),
           Center(
             child: CustomText(
@@ -168,106 +196,57 @@ class _BottomSection extends StatelessWidget {
   }
 }
 
-class _RoleCard extends StatelessWidget {
-  final String emoji;
+class _SellerPerk extends StatelessWidget {
+  final String icon;
   final String title;
   final String subtitle;
-  final bool isPrimary;
-  final VoidCallback onTap;
 
-  const _RoleCard({
-    required this.emoji,
+  const _SellerPerk({
+    required this.icon,
     required this.title,
     required this.subtitle,
-    required this.isPrimary,
-    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: '$title — $subtitle',
-      child: PressableScale(
-        onTap: onTap,
-        child: ConstrainedBox(
-          // Enforce the 48px minimum touch target regardless of content height.
-          constraints: const BoxConstraints(minHeight: 48),
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: BaseSpacing.md + 2,
-              vertical: BaseSpacing.md,
-            ),
-            decoration: BoxDecoration(
-              color: isPrimary ? AppColors.primaryColor : AppColors.background,
-              borderRadius: BorderRadius.circular(
-                AppDimen.serviceCountTileRadius,
-              ),
-              border: Border.all(
-                color: isPrimary
-                    ? AppColors.primaryColor
-                    : AppColors.lightGrey2,
-                width: isPrimary ? 0 : 1,
-              ),
-              boxShadow: isPrimary
-                  ? BaseShadows.glow(AppColors.primaryColor)
-                  : BaseShadows.none,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: isPrimary
-                        ? AppColors.white.withOpacity(0.2)
-                        : AppColors.white,
-                    borderRadius: BorderRadius.circular(BaseRadius.sm),
-                  ),
-                  alignment: Alignment.center,
-                  child: SvgIcon(
-                    assetName: emoji,
-                    size: 30,
-                    color: isPrimary
-                        ? AppColors.white10
-                        : AppColors.barrierColor,
-                  ),
-                ),
-                SizedBox(width: BaseSpacing.md - 2),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomText(
-                        text: title,
-                        color: isPrimary ? AppColors.white : AppColors.black,
-                        fontSize: AppFontSize.verySmall,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      SizedBox(height: BaseSpacing.xxs / 2),
-                      CustomText(
-                        text: subtitle,
-                        color: isPrimary
-                            ? AppColors.white.withOpacity(0.8)
-                            : AppColors.grey,
-                        fontSize: AppFontSize.tiny,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: isPrimary
-                      ? AppColors.white.withOpacity(0.8)
-                      : AppColors.lightGrey5,
-                ),
-              ],
-            ),
+    return Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(BaseRadius.sm),
+          ),
+          alignment: Alignment.center,
+          child: SvgIcon(
+            assetName: icon,
+            size: 24,
+            color: AppColors.primaryColor,
           ),
         ),
-      ),
+        SizedBox(width: BaseSpacing.md - 2),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomText(
+                text: title,
+                color: AppColors.black,
+                fontSize: AppFontSize.verySmall,
+                fontWeight: FontWeight.bold,
+              ),
+              SizedBox(height: BaseSpacing.xxs / 2),
+              CustomText(
+                text: subtitle,
+                color: AppColors.grey,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w400,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

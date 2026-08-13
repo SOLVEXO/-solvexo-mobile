@@ -9,6 +9,7 @@ import 'package:book_store_app/app/modules/seller/widgets/seller_app_bar.dart';
 import 'package:book_store_app/app/modules/seller_home/widgets/seller_home_shimmer.dart';
 import 'package:book_store_app/app/modules/seller_home/widgets/seller_quick_actions.dart';
 import 'package:book_store_app/app/modules/seller_home/widgets/seller_status_card.dart';
+import 'package:book_store_app/app/modules/seller_home/widgets/seller_verification_banner.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -73,6 +74,7 @@ class _SellerHomeContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SellerStatusCard(),
+        const SellerVerificationBanner(),
         const Divider(height: 1, color: AppColors.lightGrey2),
         Container(
           width: double.infinity,

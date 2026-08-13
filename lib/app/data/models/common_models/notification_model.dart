@@ -24,6 +24,9 @@ NotificationType _mapBackendType(String? backendType) {
     case 'promotion_going_live':
     case 'promotion_expiring_soon':
     case 'promotion_expired':
+    case 'store_approved':
+    case 'store_rejected':
+    case 'verification_under_review':
       return NotificationType.promo;
     default:
       return NotificationType.system;

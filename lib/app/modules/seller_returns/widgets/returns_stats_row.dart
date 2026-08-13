@@ -22,30 +22,29 @@ class ReturnsStatsRow extends StatelessWidget {
         12,
       ),
       child: Obx(() {
-        final stats = controller.stats.value;
         return Row(
           children: [
             Expanded(
               child: _StatTile(
-                label: 'Open Requests',
-                value: '${stats.openRequests}',
+                label: 'Pending',
+                value: '${controller.pendingCount}',
                 color: AppColors.amberDark,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _StatTile(
-                label: 'Return Rate',
-                value: stats.returnRate,
-                color: AppColors.primaryColor,
+                label: 'Approved',
+                value: '${controller.approvedCount}',
+                color: AppColors.darkGreen,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _StatTile(
-                label: 'Refunded (30d)',
-                value: '\$${stats.totalRefunded.toStringAsFixed(2)}',
-                color: AppColors.darkGreen,
+                label: 'Rejected',
+                value: '${controller.rejectedCount}',
+                color: AppColors.red,
               ),
             ),
           ],

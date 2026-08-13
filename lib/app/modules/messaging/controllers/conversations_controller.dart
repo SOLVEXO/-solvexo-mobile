@@ -4,6 +4,9 @@ import 'package:book_store_app/app/data/models/messaging/conversation_model.dart
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
 import 'package:book_store_app/app/network/messaging_socket_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/toast_util.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// Buyer's message inbox — lists every store conversation they've started.
@@ -19,6 +22,7 @@ class ConversationsController extends GetxController {
   final RxList<ConversationModel> conversations = <ConversationModel>[].obs;
   final RxBool isLoading = true.obs;
   final RxString searchQuery = ''.obs;
+  final TextEditingController searchController = TextEditingController();
   final RxBool unreadOnly = false.obs;
 
   Timer? _pollTimer;
@@ -67,10 +71,19 @@ class ConversationsController extends GetxController {
   void onClose() {
     _pollTimer?.cancel();
     _updateSub?.cancel();
+    searchController.dispose();
     super.onClose();
   }
 
   Future<void> loadConversations({bool silent = false}) async {
+    // Messaging is a login-only feature — a guest opening the inbox gets a
+    // clear reason it's empty, not a raw 401. Only the initial (non-silent)
+    // load toasts; the background poll/socket refresh must stay quiet.
+    if (!await AppPreferences.isLoggedIn()) {
+      if (!silent) ToastUtil.showToast('Login to view your messages');
+      isLoading.value = false;
+      return;
+    }
     if (!silent) isLoading.value = true;
     final result = await _repo.getConversations(page: 1, limit: 50);
     // Pinned conversations float to the top, same convention as the seller inbox.

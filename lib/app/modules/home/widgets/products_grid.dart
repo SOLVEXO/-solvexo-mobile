@@ -23,8 +23,7 @@ class ProductsGrid extends StatelessWidget {
         if (totalWidth >= 900) cols = 4;
 
         final double gridWidth = totalWidth - _gridHPad * 2;
-        final double cellWidth =
-            (gridWidth - _crossGap * (cols - 1)) / cols;
+        final double cellWidth = (gridWidth - _crossGap * (cols - 1)) / cols;
 
         // Card height = 1.55× width → image occupies exactly 50% via Expanded
         final double cellHeight = cellWidth * 1.55;

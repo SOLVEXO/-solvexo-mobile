@@ -15,6 +15,11 @@ class AddressModel {
   /// ISO-3166 alpha-2 country code (e.g. 'US', 'PK') — optional; powers
   /// revenue-by-country analytics backend-side.
   final String? country;
+
+  /// Coordinates captured when this address was picked from the map.
+  /// Null for manually-typed addresses.
+  final double? latitude;
+  final double? longitude;
   final bool isDefault;
   final String? status;
   final DateTime? createdAt;
@@ -32,6 +37,8 @@ class AddressModel {
     required this.state,
     required this.zipCode,
     this.country,
+    this.latitude,
+    this.longitude,
     this.isDefault = false,
     this.status,
     this.createdAt,
@@ -56,6 +63,8 @@ class AddressModel {
       state: (json['state'] as String?) ?? '',
       zipCode: (json['zipCode'] as String?) ?? '',
       country: json['country'] as String?,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       isDefault: (json['isDefault'] as bool?) ?? false,
       status: json['status'] as String?,
       createdAt: json['createdAt'] != null
@@ -80,6 +89,8 @@ class AddressModel {
     'state': state,
     'zipCode': zipCode,
     if (country != null && country!.isNotEmpty) 'country': country,
+    if (latitude != null) 'latitude': latitude,
+    if (longitude != null) 'longitude': longitude,
     'isDefault': isDefault,
   };
 
@@ -99,6 +110,8 @@ class AddressModel {
       'state': state,
       'zipCode': zipCode,
       if (country != null && country!.isNotEmpty) 'country': country,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
       'isDefault': isDefault,
     };
   }
@@ -130,6 +143,8 @@ class AddressModel {
     String? state,
     String? zipCode,
     String? country,
+    double? latitude,
+    double? longitude,
     bool? isDefault,
     String? status,
   }) => AddressModel(
@@ -144,6 +159,8 @@ class AddressModel {
     state: state ?? this.state,
     zipCode: zipCode ?? this.zipCode,
     country: country ?? this.country,
+    latitude: latitude ?? this.latitude,
+    longitude: longitude ?? this.longitude,
     isDefault: isDefault ?? this.isDefault,
     status: status ?? this.status,
   );

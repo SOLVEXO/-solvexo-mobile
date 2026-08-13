@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 
 // ─── Cart Response Model ───────────────────────────────────────────────────
@@ -63,7 +64,17 @@ class CartResponseModel {
   };
 
   double get subtotal => totalPrice;
-  String get formattedTotal => '\$${totalPrice.toStringAsFixed(2)}';
+
+  /// Only labeled with a currency symbol when every item shares one — a
+  /// mixed-currency cart (rare: items from stores with different
+  /// baseCurrency) renders the plain number instead of guessing.
+  String? get _commonCurrency {
+    if (items.isEmpty) return null;
+    final first = items.first.currency;
+    return items.every((i) => i.currency == first) ? first : null;
+  }
+
+  String get formattedTotal => CurrencyFormatter.amount(totalPrice, _commonCurrency);
   bool get isEmpty => items.isEmpty;
   int get itemCount => items.length;
 
@@ -96,6 +107,9 @@ class CartItem {
   final List<String> images;
   final String productType; // 'physical' or 'digital'
   final List<VariantOption> options;
+  // Display-only snapshot of the owning store's currency at add-to-cart
+  // time — checkout re-derives the authoritative currency server-side.
+  final String? currency;
 
   // UI only
   bool isSelected;
@@ -111,6 +125,7 @@ class CartItem {
     required this.images,
     this.productType = 'physical',
     this.options = const [],
+    this.currency,
     this.isSelected = true,
   });
 
@@ -150,6 +165,7 @@ class CartItem {
         options: (json['options'] as List? ?? [])
             .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
             .toList(),
+        currency: json['currency'] as String?,
         isSelected: true,
       );
     } catch (e) {
@@ -171,6 +187,41 @@ class CartItem {
     'quantity': quantity,
   };
 
+  // ─── Local (guest) cart persistence ───────────────────────────────────────
+  // Unlike `fromBackendJson`, key names here are unambiguous and stable —
+  // this is the app's own storage format, not a backend response shape.
+
+  Map<String, dynamic> toLocalJson() => {
+    'productId': productId,
+    'productVariantId': productVariantId,
+    'name': name,
+    'sellerName': sellerName,
+    'sellerVerified': sellerVerified,
+    'price': price,
+    'quantity': quantity,
+    'images': images,
+    'productType': productType,
+    'options': options.map((o) => o.toJson()).toList(),
+    'currency': currency,
+  };
+
+  factory CartItem.fromLocalJson(Map<String, dynamic> json) => CartItem(
+    productId: json['productId'] as String? ?? '',
+    productVariantId: json['productVariantId'] as String? ?? '',
+    name: json['name'] as String? ?? '',
+    sellerName: json['sellerName'] as String?,
+    sellerVerified: json['sellerVerified'] == true,
+    price: (json['price'] as num?)?.toDouble() ?? 0.0,
+    quantity: (json['quantity'] as num?)?.toInt() ?? 1,
+    images: List<String>.from(json['images'] as List? ?? []),
+    productType: json['productType'] as String? ?? 'physical',
+    options: (json['options'] as List? ?? [])
+        .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
+        .toList(),
+    currency: json['currency'] as String?,
+    isSelected: true,
+  );
+
   CartItem copyWith({
     String? productId,
     String? productVariantId,
@@ -182,6 +233,7 @@ class CartItem {
     List<String>? images,
     String? productType,
     List<VariantOption>? options,
+    String? currency,
     bool? isSelected,
   }) => CartItem(
     productId: productId ?? this.productId,
@@ -194,6 +246,7 @@ class CartItem {
     images: images ?? this.images,
     productType: productType ?? this.productType,
     options: options ?? this.options,
+    currency: currency ?? this.currency,
     isSelected: isSelected ?? this.isSelected,
   );
 

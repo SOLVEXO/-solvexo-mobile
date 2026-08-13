@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
+import 'package:book_store_app/app/data/repositories/cart_repository.dart';
+import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
+import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -13,9 +16,11 @@ import 'package:book_store_app/utils/toast_util.dart';
 class OtpController extends BaseController {
   OtpController({
     AuthRepository? authRepository,
+    CartRepository? cartRepository,
     String? otpType,
     String? email,
   }) : _authRepository = authRepository ?? AuthRepository(),
+       _cartRepository = cartRepository ?? CartRepository(),
        otpType = otpType ?? _readArg('type'),
        email = email ?? _readArg('email');
 
@@ -26,6 +31,7 @@ class OtpController extends BaseController {
   }
 
   final AuthRepository _authRepository;
+  final CartRepository _cartRepository;
 
   AuthController get _authController {
     if (!Get.isRegistered<AuthController>()) Get.put(AuthController());
@@ -133,7 +139,19 @@ class OtpController extends BaseController {
       // exist. Never blocks navigation below if it fails.
       await _authController.finishProfileSetupAfterVerification(auth);
 
-      if (intentRole == 'seller') {
+      // Buyer signup only — a seller account has no guest cart to merge.
+      if (intentRole != 'seller') {
+        await _cartRepository.mergeGuestCartIntoAccount();
+        if (Get.isRegistered<CartController>()) {
+          await Get.find<CartController>().refreshCart();
+        }
+      }
+
+      if (AuthGateService.instance.isAwaitingResume) {
+        // This signup was opened to resume a protected guest action — pop
+        // back to where the guard fired instead of navigating away.
+        AuthGateService.instance.resolveSuccess();
+      } else if (intentRole == 'seller') {
         Get.offAllNamed(Routes.sellerOnboarding);
       } else {
         Get.offAllNamed(Routes.mainHome);

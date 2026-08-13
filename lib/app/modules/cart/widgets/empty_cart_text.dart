@@ -18,36 +18,46 @@ class EmptyCartText extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return Container(
       color: AppColors.background,
-      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl, vertical: BaseSpacing.xl),
-      child: Column(
-        spacing: BaseSpacing.xl,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgIcon(assetName: AppIcons.emptyCart, size: 100, color: AppColors.gray600.withOpacity(0.3)),
-          CustomText(
-            text: "Your Shopping cart is empty",
-            color: AppColors.gray600.withOpacity(0.3),
-            fontSize: AppFontSize.small,
-            fontWeight: FontWeight.w700,
-          ),
-          PrimaryButton(
-            label: "Start Shopping",
-            onPressed: () => Get.toNamed(Routes.categoryView),
-          ),
-          SizedBox(height: size.height / 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomText(
-                text: "Featured Items you may like",
-                color: AppColors.black,
-                fontSize: AppFontSize.small,
-                fontWeight: FontWeight.w600,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl, vertical: BaseSpacing.xl),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: BaseSpacing.xl,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgIcon(assetName: AppIcons.emptyCart, size: 100, color: AppColors.gray600.withOpacity(0.3)),
+                  CustomText(
+                    text: "Your Shopping cart is empty",
+                    color: AppColors.gray600.withOpacity(0.3),
+                    fontSize: AppFontSize.small,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  PrimaryButton(
+                    label: "Start Shopping",
+                    onPressed: () => Get.toNamed(Routes.categoryView),
+                  ),
+                  SizedBox(height: size.height / 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        text: "Featured Items you may like",
+                        color: AppColors.black,
+                        fontSize: AppFontSize.small,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      RecommendedProductList(),
+                    ],
+                  ),
+                ],
               ),
-              RecommendedProductList(),
-            ],
-          ),
-        ],
+            ),
+          );
+        },
       ),
     );
   }

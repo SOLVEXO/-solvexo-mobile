@@ -11,6 +11,7 @@ class UserModel {
   final String? googleId;
   final String? facebookId;
   final String? appleId;
+  final String? currencyPreference; // 'PKR' | 'USD' | null (not yet chosen)
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -27,6 +28,7 @@ class UserModel {
     this.googleId,
     this.facebookId,
     this.appleId,
+    this.currencyPreference,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -45,6 +47,7 @@ class UserModel {
       googleId: json['googleId'] as String?,
       facebookId: json['facebookId'] as String?,
       appleId: json['appleId'] as String?,
+      currencyPreference: json['currencyPreference'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : DateTime.now(),
@@ -68,6 +71,7 @@ class UserModel {
       'googleId': googleId,
       'facebookId': facebookId,
       'appleId': appleId,
+      'currencyPreference': currencyPreference,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -86,6 +90,7 @@ class UserModel {
     String? googleId,
     String? facebookId,
     String? appleId,
+    String? currencyPreference,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -102,6 +107,7 @@ class UserModel {
       googleId: googleId ?? this.googleId,
       facebookId: facebookId ?? this.facebookId,
       appleId: appleId ?? this.appleId,
+      currencyPreference: currencyPreference ?? this.currencyPreference,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

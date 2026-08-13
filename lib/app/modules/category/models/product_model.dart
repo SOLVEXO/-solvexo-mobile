@@ -28,6 +28,9 @@ class ProductVariant {
   final bool unlimitedStock; // server-side flag; takes priority over `stock`
   final List<String> images;
   final String status;
+  // Server-stamped from the owning Store's baseCurrency at creation time —
+  // never client-supplied. Nullable only for pre-backfill legacy rows.
+  final String? currency;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -42,6 +45,7 @@ class ProductVariant {
     this.unlimitedStock = false,
     required this.images,
     required this.status,
+    this.currency,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -85,6 +89,7 @@ class ProductVariant {
       unlimitedStock: json['unlimitedStock'] == true,
       images: List<String>.from(json['images'] ?? []),
       status: json['status'] ?? 'active',
+      currency: json['currency'] as String?,
       createdAt: DateTime.parse(
         json['createdAt'] ?? DateTime.now().toIso8601String(),
       ),
@@ -337,6 +342,10 @@ class ProductModel {
 
   /// True when the cheapest variant has a real discount to show
   bool get hasDiscount => _cheapestVariant?.hasDiscount ?? false;
+
+  /// Currency of the cheapest variant (server-stamped from the store's
+  /// baseCurrency) — null only for pre-backfill legacy rows with no variants.
+  String? get currency => _cheapestVariant?.currency;
 
   /// Most expensive variant price
   double get maxPrice {

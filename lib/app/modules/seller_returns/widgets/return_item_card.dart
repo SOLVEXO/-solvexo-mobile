@@ -1,20 +1,33 @@
-import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/data/models/refund_request_model.dart';
 import 'package:book_store_app/app/modules/seller_returns/controllers/seller_returns_controller.dart';
 import 'package:book_store_app/app/modules/seller_returns/widgets/reject_reason_sheet.dart';
 import 'package:book_store_app/app/modules/seller_returns/widgets/return_status_badge.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
+/// The `refund-request/seller/:storeId` list returns raw request documents —
+/// no populated buyer name/product name/image the old `orders/returns`
+/// endpoint used to shape — so this card surfaces only the fields the new
+/// contract actually provides (order id, item count, reason, amounts, notes).
 class ReturnItemCard extends StatelessWidget {
-  final SellerReturnItem item;
+  final RefundRequestModel item;
   final SellerReturnsController controller;
 
   const ReturnItemCard({super.key, required this.item, required this.controller});
+
+  String get _shortOrderId =>
+      '#${item.orderId.length > 8 ? item.orderId.substring(item.orderId.length - 8) : item.orderId}';
+
+  String get _itemCountLabel => '${item.itemIds.length} item${item.itemIds.length == 1 ? '' : 's'}';
+
+  String _formatDate(DateTime dt) => DateFormat('MMM d, y · h:mm a').format(dt.toLocal());
 
   @override
   Widget build(BuildContext context) {
@@ -38,52 +51,20 @@ class ReturnItemCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               CustomText(
-                text: item.orderNumber,
+                text: _shortOrderId,
                 fontSize: AppFontSize.tiny,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primaryColor,
               ),
-              ReturnStatusBadge(status: item.returnStatus),
+              ReturnStatusBadge(status: item.status),
             ],
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              if (item.productImage != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CommonImageView(url: item.productImage, width: 44, height: 44),
-                ),
-              if (item.productImage != null) const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomText(
-                      text: item.productName,
-                      fontSize: AppFontSize.small2,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.black,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    CustomText(
-                      text: item.customerName,
-                      fontSize: AppFontSize.verySmall,
-                      color: AppColors.grey,
-                    ),
-                  ],
-                ),
-              ),
-              CustomText(
-                text: '\$${item.amount.toStringAsFixed(2)}',
-                fontSize: AppFontSize.small,
-                fontWeight: FontWeight.bold,
-                color: AppColors.black,
-                fontFamily: AppTextStyles.monoFontFamily,
-              ),
-            ],
+          CustomText(
+            text: _itemCountLabel,
+            fontSize: AppFontSize.small2,
+            fontWeight: FontWeight.bold,
+            color: AppColors.black,
           ),
           const SizedBox(height: 10),
           Container(
@@ -93,26 +74,35 @@ class ReturnItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppDimen.borderRadius),
             ),
             child: CustomText(
-              text: item.returnStatus == ReturnStatus.rejected &&
-                      item.returnRejectReason != null
-                  ? 'Reason: ${item.returnReason}\nRejected: ${item.returnRejectReason}'
-                  : 'Reason: ${item.returnReason}',
+              text: item.isRejected && item.resolutionNotes != null && item.resolutionNotes!.isNotEmpty
+                  ? 'Reason: ${item.reason}\nRejected: ${item.resolutionNotes}'
+                  : 'Reason: ${item.reason}',
               fontSize: AppFontSize.verySmall,
               color: AppColors.gray600,
             ),
           ),
+          if (item.isApproved && item.buyerRefundAmount != null) ...[
+            const SizedBox(height: 8),
+            CustomText(
+              text: 'Refunded: ${CurrencyFormatter.amount(item.buyerRefundAmount!, item.buyerRefundCurrency)}',
+              fontSize: AppFontSize.verySmall,
+              fontWeight: FontWeight.w600,
+              color: AppColors.darkGreen,
+              fontFamily: AppTextStyles.monoFontFamily,
+            ),
+          ],
           const SizedBox(height: 6),
           CustomText(
-            text: item.returnRequestedAt,
+            text: _formatDate(item.createdAt),
             fontSize: AppFontSize.tiny,
             color: AppColors.lightGrey5,
           ),
-          if (item.returnStatus == ReturnStatus.requested) ...[
+          if (item.isPending) ...[
             const SizedBox(height: 12),
             const Divider(height: 1, color: AppColors.lightGrey2),
             const SizedBox(height: 12),
             Obx(() {
-              final isBusy = controller.isProcessing(item.itemId);
+              final isBusy = controller.isProcessing(item.id);
               return Row(
                 children: [
                   Expanded(

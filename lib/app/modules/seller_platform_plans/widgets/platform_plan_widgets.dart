@@ -230,15 +230,10 @@ class UsageCard extends StatelessWidget {
           SizedBox(height: BaseSpacing.sm),
           _UsageBar(label: 'Staff accounts', usage: data.staffAccounts),
           SizedBox(height: BaseSpacing.sm),
+          _UsageBar(label: 'POS locations', usage: data.posLocations),
+          SizedBox(height: BaseSpacing.sm),
           Row(
             children: [
-              Expanded(
-                child: _MiniStat(
-                  label: 'POS locations',
-                  value: data.maxPosLocations == -1 ? 'Unlimited' : 'Up to ${data.maxPosLocations}',
-                ),
-              ),
-              SizedBox(width: BaseSpacing.sm),
               Expanded(
                 child: _MiniStat(
                   label: 'AI credits',

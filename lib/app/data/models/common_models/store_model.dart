@@ -67,7 +67,26 @@ class StoreModel {
   final List<String> enabledTools;
   final String plan;
   final int aiCredits;
+  /// Marketplace LISTING lifecycle only (`pending|active|rejected|suspended`)
+  /// — deliberately independent of [verificationStatus] below (see
+  /// `store.schema.ts`). Admin approve/reject happens to move both together
+  /// today, but they're separate fields.
   final String status;
+  /// Set by AdminMarketplaceService.rejectLead — null unless `status == 'rejected'`.
+  final String? rejectionReason;
+  final String? baseCurrency;
+  /// Where the seller says they operate — drives KYC requirement calculation
+  /// server-side. Defaults to Solvexo's home market ('PK').
+  final String country;
+  /// KYC business type ('individual'|'company'|'partnership') — top-level on
+  /// Store, separate from [sellerType] (a marketplace concept like 'creator').
+  final String? businessType;
+  /// Server-derived from [businessType] ('basic'|'business'|'enhanced') —
+  /// never client-supplied.
+  final String? verificationLevel;
+  /// The KYC review's own state (`not_started|pending|under_review|verified|
+  /// rejected`) — independent of [status]. See `store_verification` module.
+  final String verificationStatus;
   final bool isDelete;
   final List<StoreRegister> registers;
   final List<StoreShift> shifts;
@@ -110,6 +129,12 @@ class StoreModel {
     required this.plan,
     required this.aiCredits,
     required this.status,
+    this.rejectionReason,
+    this.baseCurrency,
+    this.country = 'PK',
+    this.businessType,
+    this.verificationLevel,
+    this.verificationStatus = 'not_started',
     required this.isDelete,
     required this.registers,
     required this.shifts,
@@ -157,6 +182,12 @@ class StoreModel {
         plan: json['plan'] as String? ?? '',
         aiCredits: json['aiCredits'] as int? ?? 0,
         status: json['status'] as String? ?? '',
+        rejectionReason: json['rejectionReason'] as String?,
+        baseCurrency: json['baseCurrency'] as String?,
+        country: json['country'] as String? ?? 'PK',
+        businessType: json['businessType'] as String?,
+        verificationLevel: json['verificationLevel'] as String?,
+        verificationStatus: json['verificationStatus'] as String? ?? 'not_started',
         isDelete: json['isDelete'] as bool? ?? false,
         registers:
             (json['registers'] as List<dynamic>?)

@@ -9,12 +9,14 @@ class StoreInfoRow extends StatelessWidget {
   final String icon;
   final String label;
   final String value;
+  final Color? valueColor;
 
   const StoreInfoRow({
     super.key,
     required this.icon,
     required this.label,
     required this.value,
+    this.valueColor,
   });
 
   @override
@@ -55,7 +57,7 @@ class StoreInfoRow extends StatelessWidget {
                   text: value,
                   fontSize: AppFontSize.verySmall,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.black,
+                  color: valueColor ?? AppColors.black,
                 ),
               ],
             ),

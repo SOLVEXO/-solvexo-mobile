@@ -51,6 +51,7 @@ class AppIcons {
   static const String emailIcon = '${_baseIconsPath}email.svg';
   static const String phoneIcon = '${_baseIconsPath}phone.svg';
   static const String addressIcon = '${_baseIconsPath}address.svg';
+  static const String addToCartIcon = '${_baseIconsPath}add-cart.svg';
   static const String logoutIcon = '${_baseIconsPath}Logout.svg';
   static const String languageIcon = '${_baseIconsPath}global.svg';
   static const String changePassword = '${_baseIconsPath}lock.svg';

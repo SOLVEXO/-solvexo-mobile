@@ -17,45 +17,61 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileController extends GetxController {
+  /// Guests get a stripped-down section list — anything that reads/writes
+  /// account data is hidden rather than shown broken (no fake data).
+  bool get isLoggedIn => user.value != null;
+
   // ── Sections for merged profile/settings UI ──────────────────────────────
   List<SettingsSection> get sections => [
+    if (isLoggedIn)
+      SettingsSection(
+        header: 'MY ORDERS',
+        tiles: [
+          SettingsTile(
+            icon: AppIcons.billsIcon,
+            title: 'My Orders',
+            onTap: () => Get.toNamed(Routes.myOrdersView),
+          ),
+          SettingsTile(
+            icon: AppIcons.cardIcon,
+            title: 'My Memberships',
+            onTap: () => Get.toNamed(Routes.myMemberships),
+          ),
+        ],
+      ),
+    if (isLoggedIn)
+      SettingsSection(
+        header: 'ACCOUNT',
+        tiles: [
+          SettingsTile(
+            icon: AppIcons.editIcon,
+            title: 'Edit Profile',
+            onTap: () => Get.toNamed(Routes.editProfileView),
+          ),
+          SettingsTile(
+            icon: AppIcons.locationIcon,
+            title: 'My Addresses',
+            onTap: () => Get.toNamed(Routes.addressView),
+          ),
+          SettingsTile(
+            icon: AppIcons.changePassword,
+            title: 'Change Password',
+            onTap: () => Get.toNamed(Routes.CHANGE_PASSWORD),
+          ),
+          SettingsTile(
+            icon: AppIcons.notificationIcon,
+            title: 'Notification Preferences',
+            onTap: () => Get.toNamed(Routes.notificationPreferences),
+          ),
+        ],
+      ),
     SettingsSection(
-      header: 'MY ORDERS',
+      header: 'SELLING',
       tiles: [
         SettingsTile(
-          icon: AppIcons.billsIcon,
-          title: 'My Orders',
-          onTap: () => Get.toNamed(Routes.myOrdersView),
-        ),
-        SettingsTile(
-          icon: AppIcons.cardIcon,
-          title: 'My Memberships',
-          onTap: () => Get.toNamed(Routes.myMemberships),
-        ),
-      ],
-    ),
-    SettingsSection(
-      header: 'ACCOUNT',
-      tiles: [
-        SettingsTile(
-          icon: AppIcons.editIcon,
-          title: 'Edit Profile',
-          onTap: () => Get.toNamed(Routes.editProfileView),
-        ),
-        SettingsTile(
-          icon: AppIcons.locationIcon,
-          title: 'My Addresses',
-          onTap: () => Get.toNamed(Routes.addressView),
-        ),
-        SettingsTile(
-          icon: AppIcons.changePassword,
-          title: 'Change Password',
-          onTap: () => Get.toNamed(Routes.CHANGE_PASSWORD),
-        ),
-        SettingsTile(
-          icon: AppIcons.notificationIcon,
-          title: 'Notification Preferences',
-          onTap: () => Get.toNamed(Routes.notificationPreferences),
+          icon: AppIcons.cashIcon,
+          title: 'Sell on Solvexo',
+          onTap: goToSellerLanding,
         ),
       ],
     ),
@@ -84,24 +100,38 @@ class ProfileController extends GetxController {
         ),
       ],
     ),
-    SettingsSection(
-      header: 'DANGER ZONE',
-      tiles: [
-        SettingsTile(
-          icon: AppIcons.logoutIcon,
-          title: 'Logout',
-          isDanger: true,
-          onTap: logout,
-        ),
-        // SettingsTile(
-        //   icon: AppIcons.deleteIcon,
-        //   title: 'Delete Account',
-        //   isDanger: true,
-        //   onTap: deleteAccount,
-        // ),
-      ],
-    ),
+    if (isLoggedIn)
+      SettingsSection(
+        header: 'DANGER ZONE',
+        tiles: [
+          SettingsTile(
+            icon: AppIcons.logoutIcon,
+            title: 'Logout',
+            isDanger: true,
+            onTap: logout,
+          ),
+          // SettingsTile(
+          //   icon: AppIcons.deleteIcon,
+          //   title: 'Delete Account',
+          //   isDanger: true,
+          //   onTap: deleteAccount,
+          // ),
+        ],
+      ),
   ];
+
+  /// Entry point into the seller-only landing screen (Welcome, repurposed).
+  /// Available to both guests and logged-in buyers — a buyer account and a
+  /// seller account are separate identities backend-side.
+  void goToSellerLanding() => Get.toNamed(Routes.welcome);
+
+  /// Guest CTA — explicitly tags the intent as buyer so a stale 'seller'
+  /// intent left over from a previous "Sell on Solvexo" visit never leaks
+  /// into a plain buyer login/signup.
+  Future<void> goToLogin() async {
+    await AppPreferences.saveIntentRole('user');
+    Get.toNamed(Routes.authTabView);
+  }
 
   String get initials {
     final n = user.value?.name ?? '';
@@ -134,6 +164,7 @@ class ProfileController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+  final RxString currencyPreference = ''.obs; // 'PKR' | 'USD'
 
   // Password change controllers
   final TextEditingController currentPasswordController =
@@ -182,12 +213,8 @@ class ProfileController extends GetxController {
 
       if (token == null || token.isEmpty) {
         debugPrint('No token found, user not logged in');
+        user.value = null;
         isLoading.value = false;
-
-        // Delay navigation to avoid widget errors
-        Future.delayed(Duration(milliseconds: 200), () {
-          ToastUtil.showToast('Please login to view profile');
-        });
         return;
       }
 
@@ -223,7 +250,12 @@ class ProfileController extends GetxController {
       emailController.text = user.value!.email;
       phoneController.text = user.value!.phone ?? '';
       addressController.text = user.value!.address ?? '';
+      currencyPreference.value = user.value!.currencyPreference ?? '';
     }
+  }
+
+  void pickCurrencyPreference(String currency) {
+    currencyPreference.value = currency;
   }
 
   /// Toggle edit mode
@@ -380,6 +412,7 @@ class ProfileController extends GetxController {
             ? null
             : addressController.text.trim(),
         profileImage: imageUrl ?? user.value?.profileImage,
+        currencyPreference: currencyPreference.value.isEmpty ? null : currencyPreference.value,
       );
 
       if (updatedUser != null) {

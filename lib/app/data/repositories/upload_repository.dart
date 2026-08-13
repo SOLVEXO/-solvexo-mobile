@@ -92,7 +92,7 @@ class UploadRepository {
   // Uploads a digital product file privately (no public URL).
   // Returns the full data map: { publicId, fileName, fileSize, mimeType, … }
 
-  Future<Map<String, dynamic>?> uploadPrivateFile(File file) async {
+  Future<Map<String, dynamic>?> uploadPrivateFile(File file, {String? purpose}) async {
     final bytes = await file.length();
     if (bytes > 20 * 1024 * 1024) {
       ToastUtil.showToast('File is too large. Please upload a file under 20 MB');
@@ -110,6 +110,7 @@ class UploadRepository {
           filename: filename,
           contentType: DioMediaType.parse(mime),
         ),
+        if (purpose != null) 'purpose': purpose,
       });
 
       final response = await _client.post(

@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/data/models/common_models/store_status_style.dart';
 import 'package:book_store_app/app/modules/seller_stores/controllers/seller_stores_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -87,7 +88,7 @@ class StoreCard extends StatelessWidget {
                   label: 'Sales',
                 ),
                 const Spacer(),
-                _StatusBadge(isActive: store.isActive),
+                _StatusBadge(status: store.status),
               ],
             ),
           ),
@@ -216,28 +217,26 @@ class _StatItem extends StatelessWidget {
 // ── Status badge ──────────────────────────────────────────────────────────────
 
 class _StatusBadge extends StatelessWidget {
-  final bool isActive;
-  const _StatusBadge({required this.isActive});
+  final String status;
+  const _StatusBadge({required this.status});
 
   @override
   Widget build(BuildContext context) {
+    final style = storeStatusStyle(status);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 7,
           height: 7,
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.greenSuccess : AppColors.lightGrey,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: style.color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 5),
         CustomText(
-          text: isActive ? 'Active' : 'Inactive',
+          text: style.shortLabel,
           fontSize: AppFontSize.tiny,
           fontWeight: FontWeight.w600,
-          color: isActive ? AppColors.greenSuccess : AppColors.grey,
+          color: style.color,
         ),
       ],
     );

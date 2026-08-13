@@ -14,14 +14,14 @@ class ReturnsFilterBar extends StatelessWidget {
 
   static const _filters = [
     ReturnFilter.all,
-    ReturnFilter.requested,
+    ReturnFilter.pending,
     ReturnFilter.approved,
     ReturnFilter.rejected,
   ];
 
   static const _labels = {
     ReturnFilter.all: 'All',
-    ReturnFilter.requested: 'Requested',
+    ReturnFilter.pending: 'Pending',
     ReturnFilter.approved: 'Approved',
     ReturnFilter.rejected: 'Rejected',
   };

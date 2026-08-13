@@ -278,8 +278,12 @@ class AuthRepository {
       // Ignore API errors (401 is OK here)
       debugPrint('Logout API error (ignored): $e');
     } finally {
-      // ALWAYS clear local data
+      // ALWAYS clear local data — but the first-launch onboarding carousel
+      // is a device-level flag, not session state, so it must survive a
+      // logout (`clearPreference()` wipes every SharedPreferences key).
+      final hasSeenOnboarding = await AppPreferences.getHasSeenOnboarding();
       await AppPreferences.clearPreference();
+      await AppPreferences.setHasSeenOnboarding(hasSeenOnboarding);
       // Tear down the realtime messaging socket so the next login doesn't
       // reuse this user's authenticated connection.
       if (Get.isRegistered<MessagingSocketService>()) {
@@ -386,6 +390,7 @@ class AuthRepository {
     String? phone,
     String? profileImage,
     String? address,
+    String? currencyPreference,
   }) async {
     try {
       final Map<String, dynamic> data = {};
@@ -395,6 +400,7 @@ class AuthRepository {
       if (phone != null) data['phone'] = phone;
       if (profileImage != null) data['profileImage'] = profileImage;
       if (address != null) data['address'] = address;
+      if (currencyPreference != null) data['currencyPreference'] = currencyPreference;
 
       final response = await _baseClient.put(
         ApiConstants.updateUserProfile,

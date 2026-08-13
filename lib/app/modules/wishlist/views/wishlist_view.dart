@@ -4,6 +4,7 @@ import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/shimmer/trip_shimmer.dart';
+import 'package:book_store_app/app/data/services/currency_controller.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
 import 'package:book_store_app/app/modules/wishlist/model/wishlist_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -121,6 +122,13 @@ class _WishlistCard extends StatelessWidget {
 
   const _WishlistCard({required this.item, required this.controller});
 
+  CurrencyController get _currencyController {
+    if (!Get.isRegistered<CurrencyController>()) {
+      Get.put(CurrencyController(), permanent: true);
+    }
+    return Get.find<CurrencyController>();
+  }
+
   @override
   Widget build(BuildContext context) {
     final product = item.product;
@@ -177,23 +185,22 @@ class _WishlistCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   if (variant != null && variant.options.isNotEmpty)
-                    Row(
-                      children: [
-                        for (final o in variant.options) ...[
-                          _Badge(label: o.value),
-                          if (o != variant.options.last) const SizedBox(width: 6),
-                        ],
-                      ],
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [for (final o in variant.options) _Badge(label: o.value)],
                     ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      CustomText(
-                        text: '\$${item.price.toStringAsFixed(2)}',
-                        fontSize: AppFontSize.small,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primaryColor,
-                        fontFamily: AppTextStyles.monoFontFamily,
+                      Obx(
+                        () => CustomText(
+                          text: _currencyController.format(item.price, item.currency),
+                          fontSize: AppFontSize.small,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryColor,
+                          fontFamily: AppTextStyles.monoFontFamily,
+                        ),
                       ),
                       const Spacer(),
                       Container(

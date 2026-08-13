@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/home/widgets/currency_selector.dart';
 import 'package:book_store_app/app/modules/home/widgets/icon_badge.dart';
 import 'package:book_store_app/app/modules/messaging/controllers/messaging_badge_controller.dart';
 import 'package:book_store_app/app/modules/notifications/controllers/notifications_badge_controller.dart';
@@ -97,6 +98,8 @@ class HomeGreetingHeader extends StatelessWidget {
             }),
           ),
           SizedBox(width: BaseSpacing.sm),
+          const CurrencySelector(),
+          SizedBox(width: BaseSpacing.xs),
           GestureDetector(
             onTap: () => Get.toNamed(Routes.messagesView),
             child: Obx(

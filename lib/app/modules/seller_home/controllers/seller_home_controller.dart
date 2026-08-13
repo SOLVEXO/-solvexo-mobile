@@ -63,6 +63,18 @@ class SellerHomeController extends GetxController {
   // `in_person_pos` (e.g. a digital-only store) via `enabledTools`.
   final RxBool posEnabled = true.obs;
 
+  // Store marketplace LISTING status (`pending|active|rejected|suspended` —
+  // see Store.status in the backend) — a seller can't create products until
+  // this is 'active' (ProductsService.createProduct/createDigitalProduct).
+  // `storeVerificationStatus` (`not_started|pending|under_review|verified|
+  // rejected`) is the KYC review's own, separate state — SellerVerificationBanner
+  // reads both, since e.g. after a resubmission `storeStatus` can still read
+  // 'rejected' while `storeVerificationStatus` has already moved to 'pending'.
+  final RxString storeId = ''.obs;
+  final RxString storeStatus = ''.obs;
+  final RxString storeVerificationStatus = ''.obs;
+  final RxString storeRejectionReason = ''.obs;
+
   final RxList<ConversationModel> recentConversations =
       <ConversationModel>[].obs;
 
@@ -106,6 +118,10 @@ class SellerHomeController extends GetxController {
       final store = await _sellerRepo.getStoreById(storeId);
       if (store != null) {
         posEnabled.value = store.enabledTools.contains('pos_register');
+        this.storeId.value = store.id;
+        storeStatus.value = store.status;
+        storeVerificationStatus.value = store.verificationStatus;
+        storeRejectionReason.value = store.rejectionReason ?? '';
       }
     } catch (e) {
       debugPrint('❌ _loadStoreCapabilities error: $e');

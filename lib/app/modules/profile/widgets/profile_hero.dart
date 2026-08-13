@@ -21,7 +21,7 @@ class ProfileHero extends StatelessWidget {
         width: double.infinity,
         padding: EdgeInsets.fromLTRB(BaseSpacing.xl, topPad + BaseSpacing.xl, BaseSpacing.xl, BaseSpacing.xxl + BaseSpacing.xxl),
         decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
-        child: Column(children: [
+        child: user == null ? _GuestHero(onLoginTap: controller.goToLogin) : Column(children: [
           // Avatar
           Container(
             width: 84,
@@ -33,9 +33,9 @@ class ProfileHero extends StatelessWidget {
               boxShadow: BaseShadows.forLevel(BaseElevation.level4),
             ),
             alignment: Alignment.center,
-            child: user?.profileImage != null
+            child: user.profileImage != null
                 ? ClipOval(
-                    child: CommonImageView(url: user!.profileImage, width: 84, height: 84, fit: BoxFit.cover),
+                    child: CommonImageView(url: user.profileImage, width: 84, height: 84, fit: BoxFit.cover),
                   )
                 : CustomText(
                     text: controller.initials,
@@ -48,13 +48,13 @@ class ProfileHero extends StatelessWidget {
           // Name + verified
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             CustomText(
-              text: user?.name ?? 'User',
+              text: user.name,
               color: AppColors.white,
               fontSize: AppFontSize.small2,
               fontWeight: FontWeight.bold,
               textAlign: TextAlign.center,
             ),
-            if (user?.isEmailVerified == true) ...[
+            if (user.isEmailVerified == true) ...[
               SizedBox(width: BaseSpacing.xxs + 2),
               const Icon(Icons.verified_rounded, color: AppColors.blue, size: 18),
             ],
@@ -62,7 +62,7 @@ class ProfileHero extends StatelessWidget {
           SizedBox(height: BaseSpacing.xxs),
           // Email
           CustomText(
-            text: user?.email ?? '',
+            text: user.email,
             color: AppColors.white.withOpacity(0.75),
             fontSize: AppFontSize.tiny,
           ),
@@ -84,5 +84,60 @@ class ProfileHero extends StatelessWidget {
         ]),
       );
     });
+  }
+}
+
+class _GuestHero extends StatelessWidget {
+  final VoidCallback onLoginTap;
+  const _GuestHero({required this.onLoginTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      Container(
+        width: 84,
+        height: 84,
+        decoration: BoxDecoration(
+          color: AppColors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.white, width: 3),
+          boxShadow: BaseShadows.forLevel(BaseElevation.level4),
+        ),
+        alignment: Alignment.center,
+        child: const Icon(Icons.person_outline_rounded, color: AppColors.white, size: 40),
+      ),
+      SizedBox(height: BaseSpacing.sm + 2),
+      CustomText(
+        text: 'Welcome, Guest',
+        color: AppColors.white,
+        fontSize: AppFontSize.small2,
+        fontWeight: FontWeight.bold,
+      ),
+      SizedBox(height: BaseSpacing.xxs),
+      CustomText(
+        text: 'Login to track orders, save your wishlist and more',
+        color: AppColors.white.withOpacity(0.75),
+        fontSize: AppFontSize.tiny,
+        textAlign: TextAlign.center,
+      ),
+      SizedBox(height: BaseSpacing.md),
+      Material(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(BaseRadius.pill),
+        child: InkWell(
+          onTap: onLoginTap,
+          borderRadius: BorderRadius.circular(BaseRadius.pill),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg, vertical: BaseSpacing.sm),
+            child: CustomText(
+              text: 'Login / Sign Up',
+              color: AppColors.primaryColor,
+              fontSize: AppFontSize.verySmall,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    ]);
   }
 }

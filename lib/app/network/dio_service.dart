@@ -51,10 +51,11 @@ class DioService {
           // returned to the caller normally, not treated as a session drop.
           final requiresAuth = e.requestOptions.extra['requiresAuth'] ?? false;
           if (e.response?.statusCode == 401 && requiresAuth) {
-            // Session expired or token invalid — clear local data and kick to welcome
+            // Session expired or token invalid — clear local data and drop
+            // back to guest-mode Home, not a login wall.
             await AppPreferences.clearPreference();
-            if (Get.currentRoute != Routes.welcome) {
-              Get.offAllNamed(Routes.welcome);
+            if (Get.currentRoute != Routes.mainHome) {
+              Get.offAllNamed(Routes.mainHome);
             }
           }
 

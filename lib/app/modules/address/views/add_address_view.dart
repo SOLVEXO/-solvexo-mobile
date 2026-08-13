@@ -1,7 +1,10 @@
 import 'package:book_store_app/app/base_view/base_view_screen.dart';
+import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
+import 'package:book_store_app/app/modules/map_picker/models/picked_address_model.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
@@ -28,6 +31,14 @@ class AddAddressView extends StatelessWidget {
             field("Label Address", controller.selectedLabel, onTap: () => controller.labelSheet(size)),
             customLableWithField(controller.nameCtrl, "Input Recipient Name", "Recipient's Name", true),
             customLableWithField(controller.phoneCtrl, "(+92) phone number", "Phone Number", true),
+            Padding(
+              padding: EdgeInsets.only(bottom: BaseSpacing.md),
+              child: OutlineButton(
+                label: 'Pick location on map',
+                icon: const Icon(Icons.map_outlined),
+                onPressed: () => _pickFromMap(),
+              ),
+            ),
             customLableWithField(controller.addressCtrl1, "Street address or P.O.Box", "Address", true),
             customLableWithField(controller.stateCtrl, "Select state", "State", true),
             customLableWithField(controller.cityCtrl, "Input city", "City", true),
@@ -55,6 +66,18 @@ class AddAddressView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _pickFromMap() async {
+    final result = await Get.toNamed(Routes.mapPickerView);
+    if (result is PickedAddress) {
+      controller.applyPickedAddress(result);
+      if (!result.hasUsableDetail) {
+        CustomAppSnackbar.warning(
+          'Location pinned, but please double-check city/state — they could not be detected automatically.',
+        );
+      }
+    }
   }
 
   Widget customLableWithField(

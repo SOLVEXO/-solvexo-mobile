@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/data/models/storefront/storefront_model.dart';
 import 'package:book_store_app/app/data/models/store_banner/store_banner_model.dart';
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
+import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/app/data/repositories/promotions_repository.dart';
 import 'package:book_store_app/app/data/repositories/store_banner_repository.dart';
 import 'package:book_store_app/app/data/repositories/storefront_repository.dart';
@@ -270,12 +271,10 @@ class SellerStorefrontController extends GetxController {
     final s = store.value;
     if (s == null || isStartingChat.value) return;
 
-    final profile = _resolveProfileController();
-    if (profile.user.value == null) {
-      ToastUtil.showToast('Please log in to message this store.');
-      Get.toNamed(Routes.authTabView);
-      return;
-    }
+    final allowed = await AuthGateService.instance.requireAuth(
+      message: 'Login to message ${s.name}.',
+    );
+    if (!allowed) return;
 
     isStartingChat.value = true;
     final conversation = await _messagingRepo.startConversation(s.storeId);

@@ -112,7 +112,10 @@ class SplashScreenController extends GetxController
     final token = await AppPreferences.getAccessTokenAsync();
 
     if (token == null || token.isEmpty) {
-      Get.offAllNamed(Routes.welcome);
+      // No session — first launch on this device shows the onboarding
+      // carousel once, then it's guest-mode Home from here on. Never a login wall.
+      final hasSeenOnboarding = await AppPreferences.getHasSeenOnboarding();
+      Get.offAllNamed(hasSeenOnboarding ? Routes.mainHome : Routes.onboarding);
       return;
     }
 

@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/data/models/common_models/store_status_style.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/controllers/seller_store_profile_controller.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_info_row.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -37,7 +38,8 @@ class StoreMetaCard extends StatelessWidget {
               StoreInfoRow(
                 icon: AppIcons.cartIcon,
                 label: 'Store Status',
-                value: s?.isActive == true ? 'Active & Verified' : 'Inactive',
+                value: storeStatusStyle(s?.status ?? '').label,
+                valueColor: storeStatusStyle(s?.status ?? '').color,
               ),
             ],
           );

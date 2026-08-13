@@ -1,8 +1,8 @@
+import 'package:book_store_app/app/components/app_search_field.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/map_picker/controllers/mappicker_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -18,8 +18,14 @@ class MapPickerScreen extends StatelessWidget {
 
   final controller = Get.put(MapPickerController());
 
+  static const double _pinSize = 46;
+  static const double _searchBarHeight = 50;
+
   @override
   Widget build(BuildContext context) {
+    final topInset = MediaQuery.of(context).padding.top + AppDimen.bottomPadding;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -27,7 +33,7 @@ class MapPickerScreen extends StatelessWidget {
             () => GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: controller.currentPosition.value,
-                zoom: 20,
+                zoom: 16,
               ),
               onMapCreated: controller.onMapCreated,
               onCameraMove: controller.onCameraMove,
@@ -38,117 +44,179 @@ class MapPickerScreen extends StatelessWidget {
             ),
           ),
 
-          // Center marker
-          Center(
-            child: Icon(Icons.location_pin, color: AppColors.red, size: 50),
-          ),
-
-          // Search bar
-          Positioned(
-            top: 80,
-            left: 20,
-            right: 20,
-            child: Row(
-              spacing: AppDimen.bottomPadding,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.lightGrey, width: 0.3),
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-                  ),
-                  child: CustomIconButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    assetName: AppIcons.chevronLeft,
-                    size: 35,
-                  ),
+          // Center marker — shifted up by half its height so the pin's tip
+          // (not its visual centroid) points at the map's actual center,
+          // i.e. the coordinate that gets reverse-geocoded.
+          IgnorePointer(
+            child: Center(
+              child: Transform.translate(
+                offset: const Offset(0, -_pinSize / 2),
+                child: Icon(
+                  Icons.location_pin,
+                  color: AppColors.red,
+                  size: _pinSize,
                 ),
-                Expanded(
-                  child: CustomTextField(
-                    isborder: true,
-                    borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-                    hintText: 'Search location...',
-                    prefixIcon: SvgIcon(
-                      assetName: AppIcons.searchIcon,
-                      color: AppColors.gray600,
-                      size: 20,
-                    ),
-                    controller: controller.searchController,
-                    onChanged: (value) {
-                      if (value.isNotEmpty) {
-                        controller.searchLocation(value);
-                      } else {
-                        controller.searchResults.clear();
-                      }
-                    },
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
 
-          // Search results
+          // Back button + search bar
           Positioned(
-            top: 140,
+            top: topInset,
             left: 20,
             right: 20,
-            child: Obx(
-              () => controller.searchResults.isNotEmpty
-                  ? Card(
+            child: SizedBox(
+              height: _searchBarHeight,
+              child: Row(
+                spacing: AppDimen.bottomPadding,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.lightGrey, width: 0.3),
                       color: AppColors.white,
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimen.borderRadius,
+                      borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+                    ),
+                    child: CustomIconButton(
+                      onPressed: () => Get.back(),
+                      assetName: AppIcons.chevronLeft,
+                      size: 35,
+                    ),
+                  ),
+                  Expanded(
+                    child: AppSearchField(
+                      controller: controller.searchController,
+                      staticHint: 'Search location...',
+                      onChanged: controller.searchLocation,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Search results / searching indicator
+          Positioned(
+            top: topInset + _searchBarHeight + 12,
+            left: 20,
+            right: 20,
+            child: Obx(() {
+              if (controller.isSearching.value) {
+                return _panel(
+                  child: const Padding(
+                    padding: EdgeInsets.all(15),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 12),
+                        CustomText(text: 'Searching...'),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              if (controller.searchResults.isEmpty) return const SizedBox();
+              return _panel(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 280),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: controller.searchResults.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final location = controller.searchResults[index];
+                      return ListTile(
+                        leading: SvgIcon(
+                          size: 26,
+                          assetName: AppIcons.locationIcon,
+                          color: AppColors.red,
+                        ),
+                        title: CustomText(
+                          text: location['name'] ?? '',
+                          fontWeight: FontWeight.w500,
+                        ),
+                        subtitle: CustomText(
+                          text: location['address'] ?? '',
+                          fontSize: 12,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () => controller.selectSearchResult(location),
+                      );
+                    },
+                  ),
+                ),
+              );
+            }),
+          ),
+
+          // My-location button — hidden while the search panel covers this
+          // part of the map so it can't sit underneath an unreachable tap
+          // target.
+          Positioned(
+            top: topInset + _searchBarHeight + 20,
+            right: 20,
+            child: Obx(() {
+              final hidden =
+                  controller.isSearching.value ||
+                  controller.searchResults.isNotEmpty;
+              if (hidden) return const SizedBox();
+              return FloatingActionButton(
+                heroTag: 'map_picker_my_location',
+                backgroundColor: AppColors.white,
+                onPressed: controller.getCurrentLocation,
+                child: Icon(
+                  Icons.my_location,
+                  color: AppColors.primaryColor,
+                  size: 26,
+                ),
+              );
+            }),
+          ),
+
+          // Permanently-denied permission banner
+          Positioned(
+            top: topInset + _searchBarHeight + 20,
+            left: 20,
+            right: 90,
+            child: Obx(
+              () => controller.isPermissionPermanentlyDenied.value
+                  ? _panel(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: CustomText(
+                                text:
+                                    'Location permission is off. Enable it to use your current location.',
+                                fontSize: AppFontSize.tiny,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: controller.openLocationSettings,
+                              child: const CustomText(text: 'Settings'),
+                            ),
+                          ],
                         ),
                       ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: controller.searchResults.length,
-                        itemBuilder: (context, index) {
-                          final location = controller.searchResults[index];
-                          return ListTile(
-                            leading: SvgIcon(
-                              size: 30,
-                              assetName: AppIcons.locationIcon,
-                              color: AppColors.red,
-                            ),
-                            title: CustomText(
-                              text: location['name'] ?? '',
-                              fontWeight: FontWeight.w500,
-                            ),
-                            subtitle: CustomText(
-                              text: location['address'] ?? '',
-                              fontSize: 12,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            onTap: () {
-                              controller.selectSearchResult(location);
-                            },
-                          );
-                        },
-                      ),
                     )
-                  : SizedBox(),
+                  : const SizedBox(),
             ),
           ),
 
           // Address display card
           Positioned(
-            bottom: 90,
+            bottom: bottomInset + 90,
             left: 20,
             right: 20,
             child: Obx(
-              () => Card(
-                color: AppColors.white,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+              () => _panel(
                 child: Padding(
                   padding: EdgeInsets.all(15),
                   child: controller.isLoading.value
@@ -165,7 +233,7 @@ class MapPickerScreen extends StatelessWidget {
                         )
                       : CustomText(
                           text: controller.selectedAddress.value.isEmpty
-                              ? 'Move map to select location'
+                              ? 'Move the map to select a location'
                               : controller.selectedAddress.value,
                           fontSize: AppFontSize.small,
                         ),
@@ -174,39 +242,40 @@ class MapPickerScreen extends StatelessWidget {
             ),
           ),
 
-          // My location button
-          Positioned(
-            top: 140,
-            right: 20,
-            child: FloatingActionButton(
-              backgroundColor: AppColors.white,
-              onPressed: controller.getCurrentLocation,
-              child: Icon(
-                Icons.my_location,
-                color: AppColors.primaryColor,
-                size: 30,
-              ),
-            ),
-          ),
-
           // Confirm button
           Positioned(
-            bottom: 30,
+            bottom: bottomInset + 30,
             left: 20,
             right: 20,
-            child: AppButton(
-              label: 'Confirm Location',
-              onPressed: () {
-                if (controller.selectedAddress.value.isNotEmpty) {
-                  Get.back(result: controller.selectedAddress.value);
-                } else {
-                  CustomAppSnackbar.error('Please select a location');
-                }
-              },
+            child: Obx(
+              () => AppButton(
+                label: 'Confirm Location',
+                onPressed: controller.isLoading.value
+                    ? null
+                    : () {
+                        if (controller.confirmedAddress != null) {
+                          Get.back(result: controller.confirmedAddress);
+                        } else {
+                          CustomAppSnackbar.error('Please select a location');
+                        }
+                      },
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _panel({required Widget child}) {
+    return Card(
+      color: AppColors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+      ),
+      margin: EdgeInsets.zero,
+      child: child,
     );
   }
 }

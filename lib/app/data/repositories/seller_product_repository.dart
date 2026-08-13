@@ -576,4 +576,29 @@ class SellerProductRepository {
       return false;
     }
   }
+
+  // ─── DELETE /api/products/delete-product/:productId ───────────────────────
+
+  Future<bool> deleteProduct(String productId) async {
+    try {
+      final response = await _client.delete(
+        ApiConstants.deleteProduct(productId),
+        requiresAuth: true,
+      );
+      if (response.data['success'] == true) return true;
+      ToastUtil.showToast(
+        response.data['message'] as String? ?? 'Failed to delete product.',
+      );
+      return false;
+    } on DioException catch (e) {
+      debugPrint('❌ deleteProduct DioException: ${e.response?.statusCode}');
+      debugPrint('   Response: ${e.response?.data}');
+      DioExceptionHandler.handleDioException(e);
+      return false;
+    } catch (e) {
+      debugPrint('❌ deleteProduct error: $e');
+      ToastUtil.showToast('Something went wrong. Please try again.');
+      return false;
+    }
+  }
 }

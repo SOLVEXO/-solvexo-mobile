@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/repositories/address_repository.dart';
+import 'package:book_store_app/app/modules/map_picker/models/picked_address_model.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,14 @@ class AddressController extends GetxController {
   final zipCtrl = TextEditingController();
   final countryCtrl = TextEditingController();
 
+  /// Coordinates from the map picker, if the location fields were filled
+  /// that way rather than typed manually. Cleared whenever the location
+  /// fields are edited by hand afterwards, so a stale pin never gets
+  /// attached to a manually-corrected address.
+  double? _pickedLatitude;
+  double? _pickedLongitude;
+  bool _isApplyingPickedAddress = false;
+
   AddressModel? _editingAddress;
   bool get isEditMode => _editingAddress != null;
 
@@ -40,10 +49,42 @@ class AddressController extends GetxController {
   void onInit() {
     super.onInit();
     fetchAddresses();
+    addressCtrl1.addListener(_clearPickedCoordsIfManualEdit);
+    cityCtrl.addListener(_clearPickedCoordsIfManualEdit);
+    stateCtrl.addListener(_clearPickedCoordsIfManualEdit);
+    zipCtrl.addListener(_clearPickedCoordsIfManualEdit);
+    countryCtrl.addListener(_clearPickedCoordsIfManualEdit);
+  }
+
+  void _clearPickedCoordsIfManualEdit() {
+    if (_isApplyingPickedAddress) return;
+    _pickedLatitude = null;
+    _pickedLongitude = null;
+  }
+
+  /// Fills the location fields from a map-picker result, leaving
+  /// recipient/phone/label untouched since those aren't location data.
+  void applyPickedAddress(PickedAddress picked) {
+    _isApplyingPickedAddress = true;
+    addressCtrl1.text = picked.addressLine1;
+    addressCtrl2.text = picked.addressLine2 ?? '';
+    cityCtrl.text = picked.city;
+    stateCtrl.text = picked.state;
+    zipCtrl.text = picked.zipCode;
+    countryCtrl.text = picked.countryCode ?? '';
+    _isApplyingPickedAddress = false;
+
+    _pickedLatitude = picked.latitude;
+    _pickedLongitude = picked.longitude;
   }
 
   @override
   void onClose() {
+    addressCtrl1.removeListener(_clearPickedCoordsIfManualEdit);
+    cityCtrl.removeListener(_clearPickedCoordsIfManualEdit);
+    stateCtrl.removeListener(_clearPickedCoordsIfManualEdit);
+    zipCtrl.removeListener(_clearPickedCoordsIfManualEdit);
+    countryCtrl.removeListener(_clearPickedCoordsIfManualEdit);
     nameCtrl.dispose();
     phoneCtrl.dispose();
     addressCtrl1.dispose();
@@ -108,6 +149,8 @@ class AddressController extends GetxController {
         country: countryCtrl.text.trim().isEmpty
             ? null
             : countryCtrl.text.trim().toUpperCase(),
+        latitude: _pickedLatitude,
+        longitude: _pickedLongitude,
         isDefault: makeDefault.value,
       );
 
@@ -154,6 +197,7 @@ class AddressController extends GetxController {
 
   void _populateForm(AddressModel address) {
     _editingAddress = address;
+    _isApplyingPickedAddress = true;
     selectedLabel.value = address.label;
     nameCtrl.text = address.recipientName;
     phoneCtrl.text = address.phoneNumber;
@@ -164,6 +208,9 @@ class AddressController extends GetxController {
     zipCtrl.text = address.zipCode;
     countryCtrl.text = address.country ?? '';
     makeDefault.value = address.isDefault;
+    _isApplyingPickedAddress = false;
+    _pickedLatitude = address.latitude;
+    _pickedLongitude = address.longitude;
   }
 
   // ─── 4. Delete ────────────────────────────────────────────────────────────
@@ -220,6 +267,8 @@ class AddressController extends GetxController {
     countryCtrl.clear();
     selectedLabel.value = 'Home';
     makeDefault.value = false;
+    _pickedLatitude = null;
+    _pickedLongitude = null;
   }
 
   bool _validateForm() {

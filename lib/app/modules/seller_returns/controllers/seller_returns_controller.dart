@@ -1,185 +1,67 @@
-import 'package:book_store_app/app/data/repositories/seller_orders_repository.dart';
+import 'package:book_store_app/app/data/models/refund_request_model.dart';
+import 'package:book_store_app/app/data/repositories/refund_request_repository.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
-enum ReturnFilter { all, requested, approved, rejected }
-
-extension ReturnFilterApi on ReturnFilter {
-  String? get apiValue => this == ReturnFilter.all ? null : name;
-}
-
-enum ReturnStatus { requested, approved, rejected }
-
-// ── Stats model ───────────────────────────────────────────────────────────────
-
-class SellerReturnStats {
-  final int openRequests;
-  final String returnRate;
-  final double totalRefunded;
-
-  const SellerReturnStats({
-    required this.openRequests,
-    required this.returnRate,
-    required this.totalRefunded,
-  });
-
-  factory SellerReturnStats.fromJson(Map<String, dynamic> json) {
-    return SellerReturnStats(
-      openRequests: json['openRequests'] as int? ?? 0,
-      returnRate: json['returnRate'] as String? ?? '0%',
-      totalRefunded: (json['totalRefunded'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
-
-  static const empty =
-      SellerReturnStats(openRequests: 0, returnRate: '0%', totalRefunded: 0);
-}
-
-// ── Return item model ─────────────────────────────────────────────────────────
-
-class SellerReturnItem {
-  final String orderId;
-  final String orderNumber;
-  final String itemId;
-  final String storeId;
-  final String customerName;
-  final String? customerEmail;
-  final String productName;
-  final String? productImage;
-  final String returnReason;
-  final double amount;
-  final double refundedAmount;
-  final ReturnStatus returnStatus;
-  final String? returnRejectReason;
-  final String returnRequestedAt;
-
-  const SellerReturnItem({
-    required this.orderId,
-    required this.orderNumber,
-    required this.itemId,
-    required this.storeId,
-    required this.customerName,
-    this.customerEmail,
-    required this.productName,
-    this.productImage,
-    required this.returnReason,
-    required this.amount,
-    required this.refundedAmount,
-    required this.returnStatus,
-    this.returnRejectReason,
-    required this.returnRequestedAt,
-  });
-
-  SellerReturnItem copyWith({
-    ReturnStatus? returnStatus,
-    String? returnRejectReason,
-    double? refundedAmount,
-  }) => SellerReturnItem(
-        orderId: orderId,
-        orderNumber: orderNumber,
-        itemId: itemId,
-        storeId: storeId,
-        customerName: customerName,
-        customerEmail: customerEmail,
-        productName: productName,
-        productImage: productImage,
-        returnReason: returnReason,
-        amount: amount,
-        refundedAmount: refundedAmount ?? this.refundedAmount,
-        returnStatus: returnStatus ?? this.returnStatus,
-        returnRejectReason: returnRejectReason ?? this.returnRejectReason,
-        returnRequestedAt: returnRequestedAt,
-      );
-
-  factory SellerReturnItem.fromJson(Map<String, dynamic> json) {
-    final customer = (json['customer'] as Map<String, dynamic>?) ?? {};
-    return SellerReturnItem(
-      orderId: json['orderId'] as String? ?? '',
-      orderNumber: json['orderNumber'] as String? ?? '',
-      itemId: json['itemId'] as String? ?? '',
-      storeId: json['storeId'] as String? ?? '',
-      customerName: customer['name'] as String? ?? 'Unknown',
-      customerEmail: customer['email'] as String?,
-      productName: json['productName'] as String? ?? '',
-      productImage: json['productImage'] as String?,
-      returnReason: json['returnReason'] as String? ?? '',
-      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      refundedAmount: (json['refundedAmount'] as num?)?.toDouble() ?? 0.0,
-      returnStatus: _parseStatus(json['returnStatus'] as String?),
-      returnRejectReason: json['returnRejectReason'] as String?,
-      returnRequestedAt: _formatDate(json['returnRequestedAt'] as String?),
-    );
-  }
-
-  static ReturnStatus _parseStatus(String? s) {
-    switch (s) {
-      case 'approved':
-        return ReturnStatus.approved;
-      case 'rejected':
-        return ReturnStatus.rejected;
-      default:
-        return ReturnStatus.requested;
-    }
-  }
-
-  static String _formatDate(String? iso) {
-    if (iso == null || iso.isEmpty) return '';
-    try {
-      final dt = DateTime.parse(iso).toLocal();
-      return DateFormat('MMM d, y · h:mm a').format(dt);
-    } catch (_) {
-      return iso;
-    }
-  }
-}
+/// Client-side display filter over the seller's full loaded list — the
+/// `refund-request/seller/:storeId` endpoint has no `status` query param, so
+/// filtering happens locally rather than by re-querying the backend.
+enum ReturnFilter { all, pending, approved, rejected }
 
 // ── Controller ────────────────────────────────────────────────────────────────
 
 class SellerReturnsController extends GetxController {
-  final _repo = SellerOrdersRepository();
+  final _repo = RefundRequestRepository();
+
+  static const _limit = 20;
 
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
   final Rx<ReturnFilter> selectedFilter = ReturnFilter.all.obs;
-  final Rx<SellerReturnStats> stats = SellerReturnStats.empty.obs;
-  final RxList<SellerReturnItem> returns = <SellerReturnItem>[].obs;
-  final RxSet<String> _processingItemIds = <String>{}.obs;
+  final RxList<RefundRequestModel> requests = <RefundRequestModel>[].obs;
+  final RxSet<String> _processingIds = <String>{}.obs;
 
   String? _storeId;
   int _page = 1;
-  bool _hasMore = false;
+  int _total = 0;
 
-  bool get hasMore => _hasMore;
+  bool get hasMore => requests.length < _total;
 
-  bool isProcessing(String itemId) => _processingItemIds.contains(itemId);
+  bool isProcessing(String id) => _processingIds.contains(id);
+
+  /// The currently loaded requests, narrowed to [selectedFilter].
+  List<RefundRequestModel> get filteredRequests {
+    final filter = selectedFilter.value;
+    if (filter == ReturnFilter.all) return requests;
+    return requests.where((r) => r.status == filter.name).toList();
+  }
+
+  int get pendingCount => requests.where((r) => r.isPending).length;
+  int get approvedCount => requests.where((r) => r.isApproved).length;
+  int get rejectedCount => requests.where((r) => r.isRejected).length;
 
   void setFilter(ReturnFilter filter) {
     if (selectedFilter.value == filter) return;
     selectedFilter.value = filter;
-    refreshData();
   }
 
   Future<void> refreshData() async {
-    _page = 1;
-    _hasMore = false;
-    isLoading.value = true;
-    await _load(isRefresh: true);
+    await _load(page: 1);
   }
 
   Future<void> loadMore() async {
-    if (!_hasMore || isLoadingMore.value) return;
+    if (!hasMore || isLoadingMore.value) return;
     await _load(page: _page + 1);
   }
 
-  Future<void> _load({int page = 1, bool isRefresh = false}) async {
-    if (page == 1 && !isRefresh) {
+  Future<void> _load({int page = 1}) async {
+    if (page == 1) {
       isLoading.value = true;
-    } else if (page > 1) {
+    } else {
       isLoadingMore.value = true;
     }
 
@@ -191,25 +73,14 @@ class SellerReturnsController extends GetxController {
         return;
       }
 
-      final result = await _repo.fetchSellerReturns(
-        storeId: storeId,
-        status: selectedFilter.value.apiValue,
-        page: page,
-      );
-
-      final parsed =
-          result.returns.map((json) => SellerReturnItem.fromJson(json)).toList();
+      final result = await _repo.listForSeller(storeId, page: page, limit: _limit);
 
       if (page == 1) {
-        returns.assignAll(parsed);
-        if (result.stats.isNotEmpty) {
-          stats.value = SellerReturnStats.fromJson(result.stats);
-        }
+        requests.assignAll(result.items);
       } else {
-        returns.addAll(parsed);
+        requests.addAll(result.items);
       }
-
-      _hasMore = result.hasMore;
+      _total = result.total;
       _page = page;
     } catch (e) {
       debugPrint('❌ SellerReturnsController._load error: $e');
@@ -219,43 +90,34 @@ class SellerReturnsController extends GetxController {
     }
   }
 
-  Future<void> approve(SellerReturnItem item) => _act(item, action: 'approve');
+  Future<void> approve(RefundRequestModel request) => _act(request, action: 'approve');
 
-  Future<void> reject(SellerReturnItem item, String reason) =>
-      _act(item, action: 'reject', rejectReason: reason);
+  Future<void> reject(RefundRequestModel request, String notes) =>
+      _act(request, action: 'reject', notes: notes);
 
   Future<void> _act(
-    SellerReturnItem item, {
+    RefundRequestModel request, {
     required String action,
-    String? rejectReason,
+    String? notes,
   }) async {
-    if (_processingItemIds.contains(item.itemId)) return;
-    _processingItemIds.add(item.itemId);
+    if (_processingIds.contains(request.id)) return;
+    _processingIds.add(request.id);
     try {
-      final success = await _repo.returnAction(
-        orderId: item.orderId,
-        storeId: item.storeId,
-        itemIds: [item.itemId],
-        action: action,
-        rejectReason: rejectReason,
-      );
+      final success = action == 'approve'
+          ? await _repo.approve(request.id)
+          : await _repo.reject(request.id, notes!);
 
       if (success) {
-        final idx = returns.indexWhere((r) => r.itemId == item.itemId);
-        if (idx != -1) {
-          returns[idx] = returns[idx].copyWith(
-            returnStatus:
-                action == 'approve' ? ReturnStatus.approved : ReturnStatus.rejected,
-            returnRejectReason: rejectReason,
-            refundedAmount: action == 'approve' ? item.amount : null,
-          );
-        }
         ToastUtil.showToast(
-          action == 'approve' ? 'Return approved' : 'Return rejected',
+          action == 'approve' ? 'Refund request approved' : 'Refund request rejected',
         );
+        // Re-fetch rather than patch locally: approve/reject don't return the
+        // updated refund/debit amounts, only success — the list endpoint is
+        // the single source of truth for those.
+        await refreshData();
       }
     } finally {
-      _processingItemIds.remove(item.itemId);
+      _processingIds.remove(request.id);
     }
   }
 

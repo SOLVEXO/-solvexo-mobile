@@ -2,9 +2,11 @@ import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/components/wishlist_heart_button.dart';
+import 'package:book_store_app/app/data/services/currency_controller.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/home/controllers/home_controller.dart';
+import 'package:book_store_app/app/modules/home/widgets/icon_badge.dart';
 import 'package:book_store_app/app/modules/home/widgets/notched_image_box.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -12,6 +14,7 @@ import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,6 +29,13 @@ class ProductCard extends StatelessWidget {
   ProductController get productController {
     if (!Get.isRegistered<ProductController>()) Get.put(ProductController());
     return Get.find<ProductController>();
+  }
+
+  CurrencyController get currencyController {
+    if (!Get.isRegistered<CurrencyController>()) {
+      Get.put(CurrencyController(), permanent: true);
+    }
+    return Get.find<CurrencyController>();
   }
 
   // Half the add-to-cart button sits below the image box, overlapping into
@@ -81,7 +91,8 @@ class ProductCard extends StatelessWidget {
                     // Sale + education-level badges — top left, stacked,
                     // mirrors the heart's top-right placement inside the notch.
                     if (product.isOnSale ||
-                        (product.isEducational && product.educationLevel != null))
+                        (product.isEducational &&
+                            product.educationLevel != null))
                       Positioned(
                         top: BaseSpacing.xxs,
                         left: BaseSpacing.xxs,
@@ -98,7 +109,9 @@ class ProductCard extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: AppColors.red,
-                                  borderRadius: BorderRadius.circular(BaseRadius.sm),
+                                  borderRadius: BorderRadius.circular(
+                                    BaseRadius.sm,
+                                  ),
                                 ),
                                 child: CustomText(
                                   text: product.activeCampaign!.badgeLabel,
@@ -113,7 +126,8 @@ class ProductCard extends StatelessWidget {
                                 product.isEducational &&
                                 product.educationLevel != null)
                               SizedBox(height: BaseSpacing.xxs / 2),
-                            if (product.isEducational && product.educationLevel != null)
+                            if (product.isEducational &&
+                                product.educationLevel != null)
                               Container(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: BaseSpacing.xs,
@@ -121,10 +135,14 @@ class ProductCard extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryColor,
-                                  borderRadius: BorderRadius.circular(BaseRadius.sm),
+                                  borderRadius: BorderRadius.circular(
+                                    BaseRadius.sm,
+                                  ),
                                 ),
                                 child: CustomText(
-                                  text: educationLevelLabel(product.educationLevel),
+                                  text: educationLevelLabel(
+                                    product.educationLevel,
+                                  ),
                                   color: AppColors.white,
                                   fontSize: 9.5,
                                   fontWeight: FontWeight.w700,
@@ -159,18 +177,20 @@ class ProductCard extends StatelessWidget {
                           width: _cartButtonSize,
                           height: _cartButtonSize,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryColor,
-                            shape: BoxShape.circle,
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(
+                              AppDimen.borderRadius,
+                            ),
+                            border: Border.all(
+                              color: AppColors.primaryColor,
+                              width: 0.1,
+                            ),
                             boxShadow: BaseShadows.forLevel(
                               BaseElevation.level1,
                             ),
                           ),
                           alignment: Alignment.center,
-                          child: SvgIcon(
-                            assetName: AppIcons.shoppingBag,
-                            size: 14,
-                            color: AppColors.white,
-                          ),
+                          child: IconBadge(icon: AppIcons.addToCartIcon),
                         ),
                       ),
                     ),
@@ -201,39 +221,49 @@ class ProductCard extends StatelessWidget {
                   SizedBox(height: BaseSpacing.xxs),
                   _SellerRatingRow(product: product),
                   SizedBox(height: BaseSpacing.xxs),
-                  product.hasDiscount
-                      ? Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            CustomText(
-                              text:
-                                  '\$${product.compareAtPrice!.toStringAsFixed(0)}',
-                              color: AppColors.gray600,
-                              fontSize: AppFontSize.tiny,
-                              fontWeight: FontWeight.w500,
-                              textDecoration: TextDecoration.lineThrough,
-                              fontFamily: AppTextStyles.monoFontFamily,
-                            ),
-                            SizedBox(width: BaseSpacing.xxs),
-                            CustomText(
-                              text: '\$${product.price.toStringAsFixed(0)}',
-                              color: AppColors.primaryColor,
-                              fontSize: AppFontSize.verySmall,
-                              fontWeight: FontWeight.w800,
-                              fontFamily: AppTextStyles.monoFontFamily,
-                            ),
-                          ],
-                        )
-                      : CustomText(
-                          text: product.hasPriceRange
-                              ? '\$${product.price.toStringAsFixed(0)} – \$${product.maxPrice.toStringAsFixed(0)}'
-                              : '\$${product.price.toStringAsFixed(0)}',
-                          color: AppColors.primaryColor,
-                          fontSize: AppFontSize.verySmall,
-                          fontWeight: FontWeight.w800,
-                          fontFamily: AppTextStyles.monoFontFamily,
-                        ),
+                  Obx(
+                    () => product.hasDiscount
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              CustomText(
+                                text: currencyController.format(
+                                  product.compareAtPrice!,
+                                  product.currency,
+                                ),
+                                color: AppColors.gray600,
+                                fontSize: AppFontSize.tiny,
+                                fontWeight: FontWeight.w500,
+                                textDecoration: TextDecoration.lineThrough,
+                                fontFamily: AppTextStyles.monoFontFamily,
+                              ),
+                              SizedBox(width: BaseSpacing.xxs),
+                              CustomText(
+                                text: currencyController.format(
+                                  product.price,
+                                  product.currency,
+                                ),
+                                color: AppColors.primaryColor,
+                                fontSize: AppFontSize.verySmall,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: AppTextStyles.monoFontFamily,
+                              ),
+                            ],
+                          )
+                        : CustomText(
+                            text: product.hasPriceRange
+                                ? '${currencyController.format(product.price, product.currency)} – ${currencyController.format(product.maxPrice, product.currency)}'
+                                : currencyController.format(
+                                    product.price,
+                                    product.currency,
+                                  ),
+                            color: AppColors.primaryColor,
+                            fontSize: AppFontSize.verySmall,
+                            fontWeight: FontWeight.w800,
+                            fontFamily: AppTextStyles.monoFontFamily,
+                          ),
+                  ),
                 ],
               ),
             ),

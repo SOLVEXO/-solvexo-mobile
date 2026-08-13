@@ -13,6 +13,9 @@ class AnalyticsOverviewModel {
   final int cancelledOrders;
   final int newCustomersCount;
   final int returningCustomersCount;
+  // null when the seller's stores span more than one baseCurrency — can't
+  // be labeled with a single symbol.
+  final String? currency;
 
   const AnalyticsOverviewModel({
     required this.grossRevenue,
@@ -29,6 +32,7 @@ class AnalyticsOverviewModel {
     required this.cancelledOrders,
     required this.newCustomersCount,
     required this.returningCustomersCount,
+    this.currency,
   });
 
   static const empty = AnalyticsOverviewModel(
@@ -62,6 +66,7 @@ class AnalyticsOverviewModel {
       cancelledOrders: json['cancelledOrders'] as int? ?? 0,
       newCustomersCount: json['newCustomersCount'] as int? ?? 0,
       returningCustomersCount: json['returningCustomersCount'] as int? ?? 0,
+      currency: json['currency'] as String?,
     );
   }
 }

@@ -96,7 +96,11 @@ class CheckoutSession {
       id: json['_id'] as String,
       userId: json['userId'] as String,
       addressId: json['addressId'] as String?,
-      currency: json['currency'] as String? ?? 'USD',
+      // Matches the backend's own resolveCheckoutCurrency fallback (PKR,
+      // since Solvexo is Pakistan-origin) — should never actually be hit
+      // since the backend always sets Checkout.currency, but keeps this
+      // consistent rather than silently assuming USD.
+      currency: json['currency'] as String? ?? 'PKR',
       items: (json['items'] as List? ?? [])
           .map((e) => ApiCheckoutItem.fromJson(e as Map<String, dynamic>))
           .toList(),

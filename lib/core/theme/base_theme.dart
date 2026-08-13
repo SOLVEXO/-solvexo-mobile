@@ -38,6 +38,7 @@ class BaseTheme {
       textTheme: BaseTypography.textTheme(brightness),
       dividerColor: isDark ? BaseColors.dividerDark : BaseColors.dividerLight,
       splashFactory: InkSparkle.splashFactory,
+      iconTheme: IconThemeData(color: onSurface, size: 22),
       appBarTheme: AppBarTheme(
         backgroundColor: surface,
         foregroundColor: onSurface,

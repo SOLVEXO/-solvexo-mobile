@@ -52,6 +52,7 @@ abstract class Routes {
 
   // Entry
   static const welcome = '/welcome';
+  static const onboarding = '/onboarding';
 
   // Seller setup
   static const sellerOnboarding = '/seller/onboarding';
@@ -68,6 +69,7 @@ abstract class Routes {
   static const sellerReturns = '/seller/returns';
   // Seller settings sub-screens
   static const sellerStoreProfile = '/seller/settings/store-profile';
+  static const storeVerification = '/seller/store-verification';
   static const sellerShipping = '/seller/settings/shipping';
   static const sellerNotifications = '/seller/settings/notifications';
   static const sellerPasswordSecurity = '/seller/settings/password-security';

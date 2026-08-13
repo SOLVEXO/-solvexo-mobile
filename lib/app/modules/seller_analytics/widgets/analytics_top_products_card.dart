@@ -4,11 +4,13 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsTopProductsCard extends StatelessWidget {
   final List<TopProductAnalyticsModel> products;
-  const AnalyticsTopProductsCard({super.key, required this.products});
+  final String? currency;
+  const AnalyticsTopProductsCard({super.key, required this.products, this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,7 @@ class AnalyticsTopProductsCard extends StatelessWidget {
               ),
             )
           else
-            ...products.asMap().entries.map((e) => _ProductRow(rank: e.key + 1, product: e.value)),
+            ...products.asMap().entries.map((e) => _ProductRow(rank: e.key + 1, product: e.value, currency: currency)),
         ],
       ),
     );
@@ -51,7 +53,8 @@ class AnalyticsTopProductsCard extends StatelessWidget {
 class _ProductRow extends StatelessWidget {
   final int rank;
   final TopProductAnalyticsModel product;
-  const _ProductRow({required this.rank, required this.product});
+  final String? currency;
+  const _ProductRow({required this.rank, required this.product, this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +97,7 @@ class _ProductRow extends StatelessWidget {
             ),
           ),
           CustomText(
-            text: '\$${product.revenue.toStringAsFixed(0)}',
+            text: CurrencyFormatter.amount(product.revenue, currency, decimals: 0),
             color: AppColors.black2,
             fontSize: AppFontSize.tiny,
             fontWeight: FontWeight.w800,

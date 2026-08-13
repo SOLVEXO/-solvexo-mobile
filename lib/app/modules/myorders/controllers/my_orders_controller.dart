@@ -22,6 +22,8 @@ class MyOrdersController extends BaseController {
     : _orderRepository = orderRepository ?? OrderRepository();
 
   RxInt selectedTab = 0.obs;
+  final RxString searchQuery = ''.obs;
+  final TextEditingController searchController = TextEditingController();
   final Rx<OrderDeliveryStatus> currentStatus = OrderDeliveryStatus.deliver.obs;
   int get currentStep =>
       OrderDeliveryStatus.values.indexOf(currentStatus.value);
@@ -112,6 +114,12 @@ class MyOrdersController extends BaseController {
 
   /// Fetch orders from API
   Future<void> fetchOrders() async {
+    // Updates the inherited `loginUser` flag the view keys off of — guests
+    // never hit the (login-only) endpoint in the first place.
+    if (!await isUserLogin()) {
+      orders.clear();
+      return;
+    }
     try {
       isLoading.value = true;
       debugPrint('🔄 Fetching orders...');
@@ -204,29 +212,27 @@ class MyOrdersController extends BaseController {
     currentStatus.value = status;
   }
 
-  /// Filter orders by tab
-  List<OrderModel> get filteredOrders {
-    switch (selectedTab.value) {
+  bool _matchesTab(OrderModel e, int tab) {
+    switch (tab) {
       case 1:
-        return orders.where((e) => e.orderStatus == 'pending').toList();
+        return e.orderStatus == 'pending';
       case 2:
-        return orders.where((e) => e.orderStatus == 'processing').toList();
+        return e.orderStatus == 'processing';
       case 3:
-        return orders
-            .where(
-              (e) =>
-                  e.orderStatus == 'shipped' ||
-                  e.orderStatus == 'partially_shipped',
-            )
-            .toList();
+        return e.orderStatus == 'shipped' || e.orderStatus == 'partially_shipped';
       case 4:
-        return orders.where((e) => e.orderStatus == 'completed').toList();
+        return e.orderStatus == 'completed';
       case 5:
-        return orders.where((e) => e.orderStatus == 'cancelled').toList();
+        return e.orderStatus == 'cancelled';
       default:
-        return orders;
+        return true;
     }
   }
+
+  /// Filter orders by tab + search query
+  List<OrderModel> get filteredOrders => orders
+      .where((e) => _matchesTab(e, selectedTab.value) && e.matchesQuery(searchQuery.value))
+      .toList();
 
   final tabs = [
     'All',
@@ -241,9 +247,18 @@ class MyOrdersController extends BaseController {
     selectedTab.value = index;
   }
 
-  /// Get order count by status
-  int getOrderCountByStatus(String status) {
-    if (status == 'all') return orders.length;
-    return orders.where((e) => e.orderStatus == status).toList().length;
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  /// Count for a tab index, ignoring the current search query — shown as a
+  /// badge on each filter chip so buyers can see where their orders are
+  /// before tapping in.
+  int tabCount(int tab) => orders.where((e) => _matchesTab(e, tab)).length;
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 }

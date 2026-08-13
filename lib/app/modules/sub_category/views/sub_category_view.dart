@@ -40,7 +40,7 @@ class SubCategoryView extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.accentColor,
+            color: AppColors.primaryColor,
             borderRadius: BorderRadius.circular(10),
           ),
           child: CartIconWithCount(color: AppColors.white, size: 25),

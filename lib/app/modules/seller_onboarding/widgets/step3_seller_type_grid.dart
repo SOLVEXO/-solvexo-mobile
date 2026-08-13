@@ -34,27 +34,78 @@ class Step3SellerTypeGrid extends StatelessWidget {
             color: AppColors.grey,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
-          Obx(
-            () => GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 1.2,
-              children: kSellerTypes
-                  .map(
-                    (t) => _TypeCard(
-                      data: t,
-                      isSelected: controller.sellerType.value == t.type,
-                      onTap: () => controller.selectSellerType(t.type),
-                    ),
-                  )
-                  .toList(),
-            ),
+          const SizedBox(height: 18),
+          Column(
+            children: [
+              for (int i = 0; i < kSellerTypes.length; i += 2)
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: i + 2 < kSellerTypes.length ? 10 : 0,
+                  ),
+                  child: _TypeCardRow(
+                    first: kSellerTypes[i],
+                    second: i + 1 < kSellerTypes.length
+                        ? kSellerTypes[i + 1]
+                        : null,
+                    controller: controller,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+}
+
+// Pairs two cards per row. Deliberately NOT `IntrinsicHeight` +
+// `CrossAxisAlignment.stretch` — that combo mismeasures here: IntrinsicHeight
+// computes each card's height from `Text.maxLines`-wrapped descriptions at a
+// width that doesn't match the Expanded's actual constrained width, so it
+// under-allocates by about one text line and every card overflows at the
+// bottom by a fixed ~20px regardless of content. Letting each card size to
+// its own natural height (`.start`, no IntrinsicHeight) avoids that
+// class of bug entirely — the tradeoff is a row's two cards may differ in
+// height when their descriptions wrap differently, which reads fine here.
+class _TypeCardRow extends StatelessWidget {
+  final SellerTypeData first;
+  final SellerTypeData? second;
+  final SellerOnboardingController controller;
+
+  const _TypeCardRow({
+    required this.first,
+    required this.second,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // The `.value` reads below must happen inside this Obx's own builder
+    // call to be tracked — reading them one widget down (inside _TypeCard's
+    // build) is outside the scope Obx watches and throws "improper use of
+    // GetX" the moment nothing else in this subtree is read directly here.
+    return Obx(
+      () => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: _TypeCard(
+              data: first,
+              isSelected: controller.sellerType.value == first.type,
+              onTap: () => controller.selectSellerType(first.type),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: second == null
+                ? const SizedBox.shrink()
+                : _TypeCard(
+                    data: second!,
+                    isSelected: controller.sellerType.value == second!.type,
+                    onTap: () => controller.selectSellerType(second!.type),
+                  ),
+          ),
         ],
       ),
     );
@@ -74,7 +125,7 @@ class _TypeCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryColor.withOpacity(0.05) : AppColors.white,
           borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
@@ -91,23 +142,24 @@ class _TypeCard extends StatelessWidget {
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CustomText(text: data.emoji, fontSize: 30),
+                CustomText(text: data.emoji, fontSize: 28),
                 _RadioDot(isSelected: isSelected),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             CustomText(
               text: data.name,
               fontSize: AppFontSize.small2,
               fontWeight: FontWeight.bold,
               color: isSelected ? AppColors.primaryColor : AppColors.black,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             CustomText(
               text: data.description,
               fontSize: AppFontSize.verySmall,

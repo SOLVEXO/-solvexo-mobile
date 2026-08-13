@@ -10,6 +10,7 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
+import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -69,10 +70,10 @@ class SellerAppBar extends StatelessWidget {
           GestureDetector(
             onTap: () => Get.toNamed(Routes.sellerMessages),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(BaseSpacing.xs),
               decoration: BoxDecoration(
                 color: AppColors.background.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(BaseRadius.sm),
               ),
               child: Obx(
                 () => UnreadCountBadge(
@@ -89,10 +90,10 @@ class SellerAppBar extends StatelessWidget {
           GestureDetector(
             onTap: () => Get.toNamed(Routes.notifications),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(BaseSpacing.xs),
               decoration: BoxDecoration(
                 color: AppColors.background.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(BaseRadius.sm),
               ),
               child: Obx(
                 () => UnreadCountBadge(

@@ -16,8 +16,8 @@ import 'package:shimmer/shimmer.dart';
 class CategoriesGrid extends StatelessWidget {
   CategoriesGrid({super.key});
 
-  static const double _railHeight = 92;
-  static const double _avatarSize = 60;
+  static const double _railHeight = 80;
+  static const double _avatarSize = 52;
 
   final CategoryController controller = Get.find();
 

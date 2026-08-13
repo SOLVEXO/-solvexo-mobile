@@ -8,14 +8,16 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 
 /// Interactive revenue-over-time line chart — tap/drag any point to see its
 /// exact date and net revenue in a tooltip.
 class AnalyticsRevenueChart extends StatelessWidget {
   final List<RevenuePointModel> series;
   final String granularity;
+  final String? currency;
 
-  const AnalyticsRevenueChart({super.key, required this.series, required this.granularity});
+  const AnalyticsRevenueChart({super.key, required this.series, required this.granularity, this.currency});
 
   String _dateLabel(DateTime d) => switch (granularity) {
         'month' => DateFormat('MMM').format(d),
@@ -85,7 +87,7 @@ class AnalyticsRevenueChart extends StatelessWidget {
               showTitles: true,
               reservedSize: 40,
               getTitlesWidget: (value, meta) => CustomText(
-                text: value >= 1000 ? '\$${(value / 1000).toStringAsFixed(0)}k' : '\$${value.toStringAsFixed(0)}',
+                text: CurrencyFormatter.compact(value, currency),
                 color: AppColors.gray600,
                 fontWeight: FontWeight.w600,
                 fontSize: 9.5,
@@ -119,7 +121,7 @@ class AnalyticsRevenueChart extends StatelessWidget {
             getTooltipItems: (touchedSpots) => touchedSpots.map((s) {
               final point = series[s.x.toInt()];
               return LineTooltipItem(
-                '${_dateLabel(point.date)}\n\$${point.netRevenue.toStringAsFixed(2)}',
+                '${_dateLabel(point.date)}\n${CurrencyFormatter.amount(point.netRevenue, currency)}',
                 BaseTypography.labelSmall(color: AppColors.white).copyWith(fontWeight: FontWeight.w600),
               );
             }).toList(),

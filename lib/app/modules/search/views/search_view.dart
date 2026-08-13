@@ -1,8 +1,9 @@
+import 'package:book_store_app/app/components/app_search_field.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/category/controllers/category_controller.dart';
 import 'package:book_store_app/app/modules/category/controllers/product_controller.dart';
 import 'package:book_store_app/app/modules/home/widgets/horizontal_product_card.dart';
 import 'package:book_store_app/app/modules/search/controllers/search_controller.dart';
@@ -20,8 +21,30 @@ import 'package:get/get.dart';
 class SearchView extends StatelessWidget {
   SearchView({super.key});
 
-  final c = Get.put(SearchBarController());
-  final productController = Get.put(ProductController());
+  // Was bare `Get.put(...)` field initializers — those only run once, when
+  // this widget instance is first constructed (as one of
+  // `BottomNavController.screens`), so if GetX's route-based dependency
+  // tracking ever disposes these controllers (e.g. across an
+  // `Get.offAllNamed` elsewhere in the app), this widget kept holding a
+  // reference to the now-disposed instance with nothing to recreate it —
+  // the next tap into a `TextField` bound to its (disposed)
+  // `TextEditingController` threw "used after being disposed" and crashed
+  // the app. Guarded getters (checked fresh on every `build()`, same as
+  // `_categoryController` below) recreate them instead.
+  SearchBarController get c {
+    if (!Get.isRegistered<SearchBarController>()) Get.put(SearchBarController());
+    return Get.find<SearchBarController>();
+  }
+
+  ProductController get productController {
+    if (!Get.isRegistered<ProductController>()) Get.put(ProductController());
+    return Get.find<ProductController>();
+  }
+
+  CategoryController get _categoryController {
+    if (!Get.isRegistered<CategoryController>()) Get.put(CategoryController());
+    return Get.find<CategoryController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,27 +58,26 @@ class SearchView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomTextField(
-                controller: c.textController,
-                onChanged: c.onSearchChanged,
-                onFieldSubmitted: (value) {
-                  c.performSearch(value);
-                  c.performStoreSearch(value);
-                },
-                suffixIcon: c.searchText.isNotEmpty
-                    ? SvgIcon(
-                        assetName: AppIcons.cross,
-                        color: AppColors.black,
-                        onTap: c.clearSearch,
-                      )
-                    : null,
-                isborder: true,
-                prefixIcon: SvgIcon(
-                  assetName: AppIcons.searchIcon,
-                  color: AppColors.lightGrey,
-                  size: 22,
+              Obx(
+                () => AppSearchField(
+                  controller: c.textController,
+                  onChanged: c.onSearchChanged,
+                  onFieldSubmitted: (value) {
+                    c.performSearch(value);
+                    c.performStoreSearch(value);
+                  },
+                  suffixIcon: c.searchText.isNotEmpty
+                      ? SvgIcon(
+                          assetName: AppIcons.cross,
+                          color: AppColors.black,
+                          onTap: c.clearSearch,
+                        )
+                      : null,
+                  staticHint: 'Search',
+                  rotatingHints: _categoryController.categoryTrees
+                      .map((cat) => cat.name)
+                      .toList(),
                 ),
-                hintText: "Search",
               ),
               // No Results Message — tab-aware (products vs stores)
               Obx(() {

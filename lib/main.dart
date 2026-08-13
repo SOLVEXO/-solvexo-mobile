@@ -50,6 +50,20 @@ class MyApp extends StatelessWidget {
           title: "Solvexo",
           initialRoute: AppPages.initialRoute,
           getPages: AppPages.routes,
+          // Clamp OS accessibility text scaling so extreme settings can't
+          // compound with CustomText's device-pixel-ratio-driven `.sp` and
+          // blow out hand-fit layouts (icon buttons, search bar, badges).
+          builder: (context, child) {
+            final mq = MediaQuery.of(context);
+            return MediaQuery(
+              data: mq.copyWith(
+                textScaler: TextScaler.linear(
+                  mq.textScaler.scale(1).clamp(0.9, 1.2),
+                ),
+              ),
+              child: child!,
+            );
+          },
         );
       },
     );

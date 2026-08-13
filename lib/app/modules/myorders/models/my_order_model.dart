@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart';
 import 'package:book_store_app/app/modules/myorders/models/shipping_address_model.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 
 class OrderModel {
@@ -88,7 +89,10 @@ class OrderModel {
 
   int get totalItemCount => stores.fold(0, (s, store) => s + store.itemCount);
 
-  String get formattedTotal => '\$${totalAmount.toStringAsFixed(2)}';
+  // The amount actually charged, in the currency it was actually charged in
+  // — historical orders are never re-converted to today's display currency
+  // (see CurrencyController), only correctly *labeled* with their own.
+  String get formattedTotal => CurrencyFormatter.amount(totalAmount, currency);
 
   String get formattedDate {
     const months = [
@@ -158,4 +162,12 @@ class OrderModel {
             (s.status == 'delivered' || s.status == 'completed') &&
             s.items.any((i) => i.type == 'physical' && i.returnStatus == 'none'),
       );
+
+  /// Order-number or any line-item name match, for the Orders search box.
+  bool matchesQuery(String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    if (orderNumber.toLowerCase().contains(q)) return true;
+    return allItems.any((i) => i.name.toLowerCase().contains(q));
+  }
 }

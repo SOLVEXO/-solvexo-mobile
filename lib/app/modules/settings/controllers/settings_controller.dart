@@ -61,6 +61,6 @@ class SettingsController extends GetxController {
 
   void signOut() {
     AppPreferences.clearAccessToken();
-    Get.offAllNamed(Routes.welcome);
+    Get.offAllNamed(Routes.mainHome);
   }
 }

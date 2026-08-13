@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/data/services/currency_controller.dart';
 import 'package:book_store_app/app/modules/product_details/controller/product_detail_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -13,15 +14,26 @@ class ProductPriceStockRow extends StatelessWidget {
   final ProductDetailController controller;
   const ProductPriceStockRow({super.key, required this.controller});
 
+  CurrencyController get _currencyController {
+    if (!Get.isRegistered<CurrencyController>()) {
+      Get.put(CurrencyController(), permanent: true);
+    }
+    return Get.find<CurrencyController>();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currencyController = _currencyController;
     return Obx(
       () => Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (controller.hasDiscount) ...[
             CustomText(
-              text: '\$${controller.displayCompareAtPrice!.toStringAsFixed(2)}',
+              text: currencyController.format(
+                controller.displayCompareAtPrice!,
+                controller.displayCurrency,
+              ),
               color: AppColors.gray600,
               fontSize: AppFontSize.extraSmall,
               fontWeight: FontWeight.w500,
@@ -31,7 +43,10 @@ class ProductPriceStockRow extends StatelessWidget {
             SizedBox(width: BaseSpacing.xs),
           ],
           CustomText(
-            text: '\$${controller.displayPrice.toStringAsFixed(2)}',
+            text: currencyController.format(
+              controller.displayPrice,
+              controller.displayCurrency,
+            ),
             color: AppColors.primaryColor,
             fontSize: AppFontSize.regular,
             fontWeight: FontWeight.w800,

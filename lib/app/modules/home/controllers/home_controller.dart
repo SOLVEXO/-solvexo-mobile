@@ -8,6 +8,7 @@ import 'package:book_store_app/app/data/repositories/marketing_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/promotions_repository.dart';
 import 'package:book_store_app/app/data/repositories/stores_repository.dart';
+import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/app/data/models/announcement_model.dart';
 import 'package:book_store_app/app/data/models/marketing/public_campaign_model.dart';
 import 'package:book_store_app/app/data/models/storefront/store_list_item_model.dart';
@@ -17,9 +18,11 @@ import 'package:book_store_app/app/modules/category/controllers/category_control
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
+import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/home/models/banner_model.dart';
 import 'package:book_store_app/app/modules/address/models/address_model.dart';
 import 'package:book_store_app/app/modules/wishlist/controllers/wishlist_controller.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -146,6 +149,10 @@ class HomeController extends BaseController {
     initializeHome();
     fetchBanners();
     fetchHomeExtras();
+    // Wishlist can change from screens other than this one (the Wishlist
+    // tab's per-item remove, Clear Wishlist, cart's "move to wishlist") —
+    // re-sync heart icons here whenever that happens, not just on fetch.
+    ever(wishlistController.wishlistItems, (_) => _updateFavouriteMap(products));
   }
 
   @override
@@ -379,10 +386,10 @@ class HomeController extends BaseController {
 
   final WishlistController wishlistController;
 
-  /// Toggle favourite (local only for now)
-  // void toggleFavourite(String productId) {
-  //   favouriteMap[productId] = !(favouriteMap[productId] ?? false);
-  // }
+  // Guards against a rapid second tap firing a second add/remove request
+  // before the first one's response comes back (was producing duplicate
+  // wishlist entries and contradictory toasts).
+  final Set<String> _wishlistTogglesInFlight = {};
 
   bool isFavourite(String productId) => favouriteMap[productId] ?? false;
 
@@ -390,21 +397,29 @@ class HomeController extends BaseController {
     String productId,
     String productVariantId,
   ) async {
+    if (_wishlistTogglesInFlight.contains(productId)) return;
+    final allowed = await AuthGateService.instance.requireAuth(
+      message: 'Login to save items to your wishlist.',
+    );
+    if (!allowed) return;
+    _wishlistTogglesInFlight.add(productId);
     try {
       if (isFavourite(productId)) {
-        wishlistController.removeFromWishlist(
+        await wishlistController.removeFromWishlist(
           productVariantId: productVariantId,
         );
-        ToastUtil.showToast("Item removed From Wishlist");
+        favouriteMap[productId] = false;
+      } else {
+        await wishlistController.addToWishlist(
+          productId: productId,
+          productVariantId: productVariantId,
+        );
+        favouriteMap[productId] = true;
       }
-      await wishlistController.addToWishlist(
-        productId: productId,
-        productVariantId: productVariantId,
-      );
-      favouriteMap[productId] = !(favouriteMap[productId] ?? false);
-      ToastUtil.showToast("Item Added to Wishlist");
     } catch (e) {
       ToastUtil.showToast("$e");
+    } finally {
+      _wishlistTogglesInFlight.remove(productId);
     }
   }
 
@@ -421,14 +436,36 @@ class HomeController extends BaseController {
       return;
     }
     final variant = product.variants.first;
+    if (!Get.isRegistered<CartController>()) Get.put(CartController());
+    final cartController = Get.find<CartController>();
+
+    if (!await AppPreferences.isLoggedIn()) {
+      await cartController.addLocalItem(
+        CartItem(
+          productId: product.id,
+          productVariantId: variant.id,
+          name: product.name,
+          sellerName: product.sellerName,
+          sellerVerified: product.sellerVerified,
+          price: variant.price,
+          quantity: 1,
+          images: variant.images.isNotEmpty ? variant.images : product.images,
+          productType: product.type,
+          options: variant.options,
+          currency: variant.currency,
+        ),
+      );
+      ToastUtil.showToast('${product.name} added to cart');
+      return;
+    }
+
     try {
       final cart = await _cartRepository.addToCart(
         productId: product.id,
         productVariantId: variant.id,
         quantity: 1,
       );
-      if (!Get.isRegistered<CartController>()) Get.put(CartController());
-      Get.find<CartController>().addToCartBackend(cart: cart);
+      cartController.addToCartBackend(cart: cart);
       ToastUtil.showToast('${product.name} added to cart');
     } catch (e) {
       ToastUtil.showToast('Failed to add to cart');
@@ -530,7 +567,8 @@ class HomeController extends BaseController {
 
   void _updateFavouriteMap(List<ProductModel> list) {
     for (final p in list) {
-      favouriteMap.putIfAbsent(p.id, () => false);
+      final variantId = p.variants.isNotEmpty ? p.variants.first.id : '';
+      favouriteMap[p.id] = variantId.isNotEmpty && wishlistController.isWishlisted(variantId);
     }
   }
 

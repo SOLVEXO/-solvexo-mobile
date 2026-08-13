@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_user_greeting.dart';
+import 'package:book_store_app/app/data/services/currency_controller.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -13,6 +14,13 @@ import 'package:get/get.dart';
 class BottomCheckoutBar extends StatelessWidget {
   BottomCheckoutBar({super.key});
   final controller = Get.find<CartController>();
+
+  CurrencyController get currencyController {
+    if (!Get.isRegistered<CurrencyController>()) {
+      Get.put(CurrencyController(), permanent: true);
+    }
+    return Get.find<CurrencyController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +56,7 @@ class BottomCheckoutBar extends StatelessWidget {
                         fontSize: AppFontSize.extraSmall,
                       ),
                       CustomText(
-                        text: "\$ ${controller.subtotal.toStringAsFixed(2)}",
+                        text: currencyController.format(controller.subtotal.value, controller.selectedCurrency),
                         color: AppColors.black,
                         fontSize: AppFontSize.small,
                         fontWeight: FontWeight.bold,

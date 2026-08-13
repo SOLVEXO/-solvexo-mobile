@@ -34,25 +34,23 @@ class Step4WhatYouSellGrid extends StatelessWidget {
             color: AppColors.grey,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
-          Obx(
-            () => GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 1.2,
-              children: kWhatYouSell
-                  .map(
-                    (d) => _SellCard(
-                      data: d,
-                      isSelected: controller.whatYouSell.contains(d.option),
-                      onTap: () => controller.toggleWhatYouSell(d.option),
-                    ),
-                  )
-                  .toList(),
-            ),
+          const SizedBox(height: 18),
+          Column(
+            children: [
+              for (int i = 0; i < kWhatYouSell.length; i += 2)
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: i + 2 < kWhatYouSell.length ? 10 : 0,
+                  ),
+                  child: _SellCardRow(
+                    first: kWhatYouSell[i],
+                    second: i + 1 < kWhatYouSell.length
+                        ? kWhatYouSell[i + 1]
+                        : null,
+                    controller: controller,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 16),
           Obx(() {
@@ -61,6 +59,58 @@ class Step4WhatYouSellGrid extends StatelessWidget {
             return _ToolsPanel(tools: tools);
           }),
           const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}
+
+// Pairs two cards per row. Deliberately NOT `IntrinsicHeight` +
+// `CrossAxisAlignment.stretch` — that combo mismeasures here: IntrinsicHeight
+// computes each card's height from `Text.maxLines`-wrapped descriptions at a
+// width that doesn't match the Expanded's actual constrained width, so it
+// under-allocates by about one text line and every card overflows at the
+// bottom by a fixed ~20px regardless of content (see Step3's identical
+// `_TypeCardRow`). Letting each card size to its own natural height
+// (`.start`, no IntrinsicHeight) avoids that class of bug entirely.
+class _SellCardRow extends StatelessWidget {
+  final WhatYouSellData first;
+  final WhatYouSellData? second;
+  final SellerOnboardingController controller;
+
+  const _SellCardRow({
+    required this.first,
+    required this.second,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // The `.contains` reads below must happen inside this Obx's own builder
+    // call to be tracked — reading them one widget down (inside _SellCard's
+    // build) is outside the scope Obx watches and throws "improper use of
+    // GetX" the moment nothing else in this subtree is read directly here.
+    return Obx(
+      () => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: _SellCard(
+              data: first,
+              isSelected: controller.whatYouSell.contains(first.option),
+              onTap: () => controller.toggleWhatYouSell(first.option),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: second == null
+                ? const SizedBox.shrink()
+                : _SellCard(
+                    data: second!,
+                    isSelected: controller.whatYouSell.contains(second!.option),
+                    onTap: () => controller.toggleWhatYouSell(second!.option),
+                  ),
+          ),
         ],
       ),
     );
@@ -80,7 +130,7 @@ class _SellCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryColor.withOpacity(0.05) : AppColors.white,
           borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
@@ -97,16 +147,17 @@ class _SellCard extends StatelessWidget {
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CustomText(text: data.emoji, fontSize: 30),
+                CustomText(text: data.emoji, fontSize: 28),
                 _CheckBadge(isSelected: isSelected),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             CustomText(
               text: data.name,
               fontSize: AppFontSize.small2,
@@ -115,7 +166,7 @@ class _SellCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             CustomText(
               text: data.description,
               fontSize: AppFontSize.verySmall,

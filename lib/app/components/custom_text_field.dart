@@ -26,7 +26,9 @@ class CustomTextField extends StatelessWidget {
   final bool ispadding;
   final bool isborder;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final double borderBorderradius;
+  final EdgeInsetsGeometry? contentPadding;
 
   const CustomTextField({
     super.key,
@@ -43,6 +45,7 @@ class CustomTextField extends StatelessWidget {
     this.ispadding = false,
     this.isborder = false,
     this.controller,
+    this.focusNode,
     this.onChanged,
     this.color = AppColors.white,
     this.textColor = AppColors.black,
@@ -51,6 +54,7 @@ class CustomTextField extends StatelessWidget {
     this.maxLines = 1,
     this.onFieldSubmitted,
     this.maxLength,
+    this.contentPadding,
   });
 
   @override
@@ -79,6 +83,7 @@ class CustomTextField extends StatelessWidget {
         onChanged: onChanged,
         keyboardType: keyboardType,
         controller: controller,
+        focusNode: focusNode,
         obscureText: obscureText,
         decoration: InputDecoration(
           prefixIcon: prefixIcon == null
@@ -104,12 +109,13 @@ class CustomTextField extends StatelessWidget {
           suffixIconColor: AppColors.grey,
           filled: filled,
           fillColor: fillColor,
-          contentPadding: EdgeInsets.only(
-            left: 12,
-            right: 18,
-            top: isTablet ? 20 : 16,
-            bottom: isTablet ? 20 : 16,
-          ),
+          contentPadding: contentPadding ??
+              EdgeInsets.only(
+                left: 12,
+                right: 18,
+                top: isTablet ? 20 : 16,
+                bottom: isTablet ? 20 : 16,
+              ),
           enabledBorder: isborder
               ? OutlineInputBorder(
                   borderRadius: BorderRadius.circular(borderBorderradius),

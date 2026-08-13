@@ -15,14 +15,14 @@ class IconBadge extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         Container(
-          width: 44,
-          height: 44,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: AppColors.primaryColor,
-            borderRadius: BorderRadius.circular(BaseRadius.md),
+            color: AppColors.primaryColor.withOpacity(0.10),
+            borderRadius: BorderRadius.circular(BaseRadius.sm),
           ),
           alignment: Alignment.center,
-          child: SvgIcon(assetName: icon, size: 25, color: AppColors.white),
+          child: SvgIcon(assetName: icon, size: 20, color: AppColors.primaryColor),
         ),
         if (count > 0)
           Positioned(

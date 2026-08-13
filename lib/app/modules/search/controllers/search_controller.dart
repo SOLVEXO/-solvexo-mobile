@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:book_store_app/app/data/models/storefront/store_list_item_model.dart';
-import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/search_repository.dart';
 import 'package:book_store_app/app/data/repositories/stores_repository.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SearchBarController extends GetxController {
-  final ProductRepository _productRepository = ProductRepository();
   final SearchRepository _searchRepository = SearchRepository();
   final StoresRepository _storesRepository = StoresRepository();
   final TextEditingController textController = TextEditingController();
@@ -353,22 +351,16 @@ class SearchBarController extends GetxController {
   final RxList<ProductModel> lastSeenProducts = <ProductModel>[].obs;
 
   Future<void> loadRecentlyViewed() async {
+    // Recently-viewed display is a login-only feature — guests still record
+    // views locally (see `recordProductView`, in case they log in later and
+    // want it), but never see the section itself.
+    if (!_isLoggedIn) {
+      lastSeenProducts.clear();
+      return;
+    }
     try {
-      if (_isLoggedIn) {
-        final products = await _searchRepository.getRecentlyViewed(limit: 10);
-        if (products != null) lastSeenProducts.assignAll(products);
-        return;
-      }
-
-      final ids = await AppPreferences.getRecentlyViewedProductIds();
-      if (ids == null || ids.isEmpty) return;
-
-      final products = <ProductModel>[];
-      for (final id in ids.take(6)) {
-        final product = await _productRepository.getProductById(id);
-        if (product != null) products.add(product);
-      }
-      lastSeenProducts.assignAll(products);
+      final products = await _searchRepository.getRecentlyViewed(limit: 10);
+      if (products != null) lastSeenProducts.assignAll(products);
     } catch (e) {
       debugPrint('❌ Error loading recently viewed: $e');
     }

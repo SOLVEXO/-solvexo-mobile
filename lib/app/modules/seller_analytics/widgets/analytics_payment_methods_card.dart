@@ -4,11 +4,13 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsPaymentMethodsCard extends StatelessWidget {
   final List<PaymentMethodBreakdownModel> methods;
-  const AnalyticsPaymentMethodsCard({super.key, required this.methods});
+  final String? currency;
+  const AnalyticsPaymentMethodsCard({super.key, required this.methods, this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,7 @@ class AnalyticsPaymentMethodsCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                           CustomText(
-                            text: '\$${m.revenue.toStringAsFixed(0)} · ${m.orderCount} orders',
+                            text: '${CurrencyFormatter.amount(m.revenue, currency, decimals: 0)} · ${m.orderCount} orders',
                             color: AppColors.gray600,
                             fontSize: AppFontSize.tiny,
                             fontWeight: FontWeight.w600,

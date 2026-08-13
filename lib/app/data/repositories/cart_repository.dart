@@ -177,6 +177,35 @@ class CartRepository {
     }
   }
 
+  // ─── Merge guest cart into account cart ───────────────────────────────────
+  // No dedicated backend endpoint for this — `addToCart` already sums
+  // quantities when a line already exists in the account cart (see
+  // `CartService.addToCart`), so replaying each local guest line through the
+  // normal endpoint achieves the same "sum on conflict" merge with no new
+  // backend surface. Called once, right after login/signup succeeds.
+  Future<void> mergeGuestCartIntoAccount() async {
+    final localItems = await AppPreferences.getGuestCartItems();
+    if (localItems.isEmpty) return;
+
+    for (final json in localItems) {
+      final productId = json['productId'] as String? ?? '';
+      final productVariantId = json['productVariantId'] as String? ?? '';
+      final quantity = (json['quantity'] as num?)?.toInt() ?? 1;
+      if (productId.isEmpty || productVariantId.isEmpty) continue;
+      try {
+        await addToCart(
+          productId: productId,
+          productVariantId: productVariantId,
+          quantity: quantity,
+        );
+      } catch (e) {
+        debugPrint('❌ Guest cart merge failed for $productId: $e');
+      }
+    }
+
+    await AppPreferences.clearGuestCart();
+  }
+
   // ─── Clear cart ────────────────────────────────────────────────────────────
   // DELETE /api/cart
 

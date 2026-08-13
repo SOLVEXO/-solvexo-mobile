@@ -47,8 +47,10 @@ class ProfileView extends BaseView<ProfileController> {
                 ),
                 child: Column(children: [
                   SizedBox(height: BaseSpacing.xl),
-                  ProfileStatsStrip(controller: controller),
-                  SizedBox(height: BaseSpacing.xl + BaseSpacing.xxs),
+                  if (controller.isLoggedIn) ...[
+                    ProfileStatsStrip(controller: controller),
+                    SizedBox(height: BaseSpacing.xl + BaseSpacing.xxs),
+                  ],
                   ...controller.sections.map(
                     (s) => Padding(
                       padding: EdgeInsets.only(bottom: BaseSpacing.xl + BaseSpacing.xxs),

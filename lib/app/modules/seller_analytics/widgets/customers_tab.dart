@@ -7,6 +7,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,14 +32,14 @@ class CustomersTab extends StatelessWidget {
             SizedBox(height: BaseSpacing.md),
             _SectionCard(
               title: 'Average Lifetime Value',
-              child: CustomText(text: '\$${data.averageLifetimeValue.toStringAsFixed(2)}', color: AppColors.primaryColor, fontSize: 26, fontWeight: FontWeight.w800),
+              child: CustomText(text: CurrencyFormatter.amount(data.averageLifetimeValue, controller.currency), color: AppColors.primaryColor, fontSize: 26, fontWeight: FontWeight.w800),
             ),
             SizedBox(height: BaseSpacing.md),
             _SectionCard(
               title: 'Top Customers by Lifetime Value',
               child: data.topCustomersByLtv.isEmpty
                   ? CustomText(text: 'No customers yet', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600)
-                  : Column(children: data.topCustomersByLtv.map((c) => _CustomerRow(customer: c)).toList()),
+                  : Column(children: data.topCustomersByLtv.map((c) => _CustomerRow(customer: c, currency: controller.currency)).toList()),
             ),
             if (data.geographicBreakdown.isNotEmpty) ...[
               SizedBox(height: BaseSpacing.md),
@@ -52,7 +53,7 @@ class CustomersTab extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 CustomText(text: g.state, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
-                                CustomText(text: '${g.orders} orders · \$${g.revenue.toStringAsFixed(0)}', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+                                CustomText(text: '${g.orders} orders · ${CurrencyFormatter.amount(g.revenue, controller.currency, decimals: 0)}', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
                               ],
                             ),
                           ))
@@ -178,7 +179,8 @@ class _SectionCard extends StatelessWidget {
 
 class _CustomerRow extends StatelessWidget {
   final TopCustomerModel customer;
-  const _CustomerRow({required this.customer});
+  final String? currency;
+  const _CustomerRow({required this.customer, this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +206,7 @@ class _CustomerRow extends StatelessWidget {
               ],
             ),
           ),
-          CustomText(text: '\$${customer.lifetimeValue.toStringAsFixed(0)}', color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w800),
+          CustomText(text: CurrencyFormatter.amount(customer.lifetimeValue, currency, decimals: 0), color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w800),
         ],
       ),
     );

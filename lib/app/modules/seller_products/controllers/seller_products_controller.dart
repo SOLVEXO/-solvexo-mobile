@@ -211,6 +211,7 @@ class SellerProductsController extends GetxController {
   final Rx<ProductStatus> selectedFilter = ProductStatus.all.obs;
   final RxString searchQuery = ''.obs;
   final RxString errorMessage = ''.obs;
+  final TextEditingController searchController = TextEditingController();
 
   final RxList<SellerProduct> _allProducts = <SellerProduct>[].obs;
   final RxInt totalProducts = 0.obs;
@@ -318,5 +319,11 @@ class SellerProductsController extends GetxController {
   void onInit() {
     super.onInit();
     _load();
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 }

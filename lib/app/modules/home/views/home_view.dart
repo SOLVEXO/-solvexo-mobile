@@ -3,6 +3,7 @@ import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/dynamic_shimmer.dart';
 import 'package:book_store_app/app/components/no_signal_view.dart';
+import 'package:book_store_app/app/components/sell_on_solvexo_card.dart';
 import 'package:book_store_app/app/components/shimmer/banner_shimmer.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/data/services/network_controller.dart';
@@ -14,7 +15,6 @@ import 'package:book_store_app/app/modules/home/widgets/categories_grid.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_greeting_header.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_search_filter_row.dart';
 import 'package:book_store_app/app/modules/home/widgets/home_section_header.dart';
-import 'package:book_store_app/app/modules/home/widgets/home_staff_picks.dart';
 import 'package:book_store_app/app/modules/home/widgets/platform_stats_strip.dart';
 import 'package:book_store_app/app/modules/home/widgets/products_grid.dart';
 import 'package:book_store_app/app/modules/home/widgets/testimonials_carousel.dart';
@@ -114,9 +114,11 @@ class HomeView extends BaseView<HomeController> {
                     onDismiss: controller.dismissAnnouncement,
                   ),
                 ),
-
+                SizedBox(height: BaseSpacing.sm),
+                const HomeSearchFilterRow(),
                 // ── Greeting ──────────────────────────────────────────
                 const HomeGreetingHeader(),
+
                 // ── Active marketing campaigns ─────────────────────────
                 CampaignsSection(),
                 SizedBox(height: BaseSpacing.xs),
@@ -148,7 +150,7 @@ class HomeView extends BaseView<HomeController> {
                 TopStoresRow(),
 
                 SizedBox(height: BaseSpacing.sm),
-                const HomeSearchFilterRow(),
+
                 // ── Trending Now ─────────────────────────────────────
                 HomeSectionHeader(
                   title: 'Trending near you',
@@ -163,12 +165,12 @@ class HomeView extends BaseView<HomeController> {
 
                 SizedBox(height: BaseSpacing.lg),
 
-                // ── Staff Picks ──────────────────────────────────────
-                const HomeSectionHeader(title: 'Staff Picks'),
+                // // ── Staff Picks ──────────────────────────────────────
+                // const HomeSectionHeader(title: 'Staff Picks'),
 
-                const HomeStaffPicks(),
+                // const HomeStaffPicks(),
 
-                SizedBox(height: BaseSpacing.lg),
+                // SizedBox(height: BaseSpacing.lg),
 
                 // ── What buyers say ───────────────────────────────────
                 Obx(
@@ -188,6 +190,18 @@ class HomeView extends BaseView<HomeController> {
                   child: const WorksheetTrialPromoCard(),
                 ),
 
+                // ── "Sell on Solvexo" — guests only, deliberately below
+                // the fold so it never competes with the login banner ───
+                if (profileController.user.isNull) ...[
+                  SizedBox(height: BaseSpacing.lg),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppDimen.allPadding,
+                    ),
+                    child: const SellOnSolvexoCard(),
+                  ),
+                ],
+
                 SizedBox(height: BaseSpacing.xxl),
               ],
             ),
@@ -198,7 +212,11 @@ class HomeView extends BaseView<HomeController> {
               left: BaseSpacing.sm,
               right: BaseSpacing.sm,
               bottom: BaseSpacing.sm,
-              child: SafeArea(child: LoginSignupCard()),
+              child: SafeArea(
+                child: LoginSignupCard(
+                  onLoggedIn: profileController.refreshProfile,
+                ),
+              ),
             ),
         ],
       );

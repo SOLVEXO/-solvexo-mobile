@@ -14,6 +14,7 @@ import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/checkout_controller.dart';
@@ -194,7 +195,7 @@ class CheckoutView extends StatelessWidget {
           Obx(
             () => CouponCodeListTile(
               isSubtitle: controller.hasCouponApplied,
-              subTitle: "You saved \$${controller.couponDiscountUSD.value.toStringAsFixed(2)} — tap to remove",
+              subTitle: "You saved ${CurrencyFormatter.amount(controller.couponDiscountUSD.value, controller.currency.value)} — tap to remove",
               title: controller.hasCouponApplied ? controller.appliedCouponCode.value : "Use Voucher",
               onTap: () => controller.useVoucher(size),
             ),
@@ -273,14 +274,14 @@ class CheckoutView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               CustomText(
-                                text: "\$${(item.originalPrice! * item.quantity).toStringAsFixed(2)}",
+                                text: CurrencyFormatter.amount(item.originalPrice! * item.quantity, controller.currency.value),
                                 color: AppColors.gray600,
                                 fontSize: AppFontSize.tiny,
                                 textDecoration: TextDecoration.lineThrough,
                                 fontFamily: AppTextStyles.monoFontFamily,
                               ),
                               CustomText(
-                                text: "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+                                text: CurrencyFormatter.amount(item.price * item.quantity, controller.currency.value),
                                 color: AppColors.primaryColor,
                                 fontSize: AppFontSize.extraSmall,
                                 fontWeight: FontWeight.bold,
@@ -289,7 +290,7 @@ class CheckoutView extends StatelessWidget {
                             ],
                           )
                         : CustomText(
-                            text: "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+                            text: CurrencyFormatter.amount(item.price * item.quantity, controller.currency.value),
                             color: AppColors.black,
                             fontSize: AppFontSize.extraSmall,
                             fontWeight: FontWeight.bold,
@@ -400,7 +401,7 @@ class CheckoutView extends StatelessWidget {
                             children: [
                               CustomText(
                                 text:
-                                    "Save \$${hint.potentialSavingsUSD.toStringAsFixed(2)} on this order",
+                                    "Save ${CurrencyFormatter.amount(hint.potentialSavingsUSD, controller.currency.value)} on this order",
                                 color: AppColors.black2,
                                 fontSize: AppFontSize.verySmall,
                                 fontWeight: FontWeight.w700,
@@ -464,8 +465,13 @@ class CheckoutView extends StatelessWidget {
                   children: [
                     const Icon(Icons.workspace_premium_outlined, size: 15, color: AppColors.greenSuccess),
                     CustomText(
+                      // Despite the "...USD" field name, CheckoutSummary.
+                      // subscriberSavingsUSD is actually computed from each
+                      // item's own price (see subscription-benefits.service.ts
+                      // resolveProductDiscount) — i.e. denominated the same as
+                      // the rest of this checkout's line items, not real USD.
                       text:
-                          "You saved \$${controller.subscriberSavings.value.toStringAsFixed(2)} with your membership",
+                          "You saved ${CurrencyFormatter.amount(controller.subscriberSavings.value, controller.currency.value)} with your membership",
                       color: AppColors.greenSuccess,
                       fontSize: AppFontSize.tiny,
                       fontWeight: FontWeight.w700,
@@ -511,7 +517,7 @@ class CheckoutView extends StatelessWidget {
         children: [
           CustomText(text: title, color: AppColors.black, fontSize: AppFontSize.extraSmall),
           CustomText(
-            text: "\$$value",
+            text: "${CurrencyFormatter.symbol(controller.currency.value)}$value",
             color: color ?? AppColors.black,
             fontSize: AppFontSize.extraSmall,
             fontWeight: bold ? FontWeight.bold : FontWeight.normal,

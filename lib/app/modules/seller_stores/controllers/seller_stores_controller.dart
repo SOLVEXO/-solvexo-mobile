@@ -16,6 +16,7 @@ class SellerStore {
   final String plan;
   final String sellerType;
   final bool isActive;
+  final String status;
   final int productCount;
   final double totalSales;
 
@@ -28,6 +29,7 @@ class SellerStore {
     this.plan = '',
     this.sellerType = '',
     this.isActive = true,
+    this.status = '',
     this.productCount = 0,
     this.totalSales = 0,
   });
@@ -42,6 +44,7 @@ class SellerStore {
     plan: m.plan,
     sellerType: m.sellerType,
     isActive: m.isActive,
+    status: m.status,
     productCount: m.productCount,
     totalSales: m.totalSalesUSD,
   );

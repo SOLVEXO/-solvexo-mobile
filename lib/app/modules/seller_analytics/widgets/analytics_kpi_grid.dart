@@ -3,6 +3,7 @@ import 'package:book_store_app/app/data/models/analytics/analytics_overview_mode
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 
 /// KPI cards row — revenue, orders, avg order value, repeat buyers — each
@@ -24,7 +25,7 @@ class AnalyticsKpiGrid extends StatelessWidget {
       children: [
         _KpiCard(
           label: 'Total Revenue',
-          value: '\$${_fmt(data.totalRevenue)}',
+          value: CurrencyFormatter.compact(data.totalRevenue, data.currency),
           changeText: _percentLabel(data.totalRevenueChangePercent, suffix: 'vs last period'),
           isPositive: (data.totalRevenueChangePercent ?? 0) >= 0,
         ),
@@ -36,7 +37,7 @@ class AnalyticsKpiGrid extends StatelessWidget {
         ),
         _KpiCard(
           label: 'Avg Order Value',
-          value: '\$${data.avgOrderValue.toStringAsFixed(2)}',
+          value: CurrencyFormatter.amount(data.avgOrderValue, data.currency),
           changeText: _percentLabel(data.avgOrderValueChangePercent, suffix: 'vs last period'),
           isPositive: (data.avgOrderValueChangePercent ?? 0) >= 0,
         ),
@@ -50,8 +51,6 @@ class AnalyticsKpiGrid extends StatelessWidget {
       ],
     );
   }
-
-  String _fmt(double n) => n >= 1000 ? '${(n / 1000).toStringAsFixed(1)}k' : n.toStringAsFixed(0);
 
   String _percentLabel(double? percent, {required String suffix}) {
     if (percent == null) return 'No prior data';

@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/data/models/refund_request_model.dart';
 import 'package:book_store_app/app/modules/seller_returns/controllers/seller_returns_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -7,16 +8,17 @@ import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-/// Bottom sheet collecting the reject reason before calling
-/// `SellerReturnsController.reject` — mirrors `_PlanFormSheet`
-/// (subscription_plans_tab.dart) for the modal shell + submit pattern.
+/// Bottom sheet collecting the reject reason (`notes`, min 3 / max 500 chars
+/// server-side) before calling `SellerReturnsController.reject` — mirrors
+/// `_PlanFormSheet` (subscription_plans_tab.dart) for the modal shell +
+/// submit pattern.
 class RejectReasonSheet extends StatefulWidget {
   final SellerReturnsController controller;
-  final SellerReturnItem item;
+  final RefundRequestModel item;
 
   const RejectReasonSheet({super.key, required this.controller, required this.item});
 
-  static void show(BuildContext context, SellerReturnsController controller, SellerReturnItem item) {
+  static void show(BuildContext context, SellerReturnsController controller, RefundRequestModel item) {
     Get.bottomSheet(
       RejectReasonSheet(controller: controller, item: item),
       isScrollControlled: true,
@@ -89,7 +91,8 @@ class _RejectReasonSheetState extends State<RejectReasonSheet> {
                 ),
                 SizedBox(height: BaseSpacing.sm),
                 CustomText(
-                  text: '${widget.item.productName} · ${widget.item.customerName}',
+                  text:
+                      '${widget.item.itemIds.length} item${widget.item.itemIds.length == 1 ? '' : 's'} · Order #${widget.item.orderId.length > 8 ? widget.item.orderId.substring(widget.item.orderId.length - 8) : widget.item.orderId}',
                   color: AppColors.grey,
                   fontSize: AppFontSize.verySmall,
                 ),

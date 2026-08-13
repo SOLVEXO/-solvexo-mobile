@@ -10,10 +10,12 @@ import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart
 import 'package:book_store_app/app/modules/checkout/models/create_checkout_response.dart';
 import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
 import 'package:book_store_app/app/modules/payment/controllers/payment_controller.dart';
+import 'package:book_store_app/app/modules/payment/models/payment_success_args.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +74,10 @@ class CheckoutController extends GetxController {
   final RxBool isLoadingShipping = false.obs;
   final RxBool isLoading = true.obs;
   final AddressController addressController;
+
+  /// The checkout's resolved currency ('PKR'|'USD') — set once from the
+  /// create-checkout response.
+  final RxString currency = 'PKR'.obs;
 
   // Allowed payment methods from the create-checkout API response
   final RxList<String> _allowedPaymentMethods = <String>[].obs;
@@ -144,6 +150,7 @@ class CheckoutController extends GetxController {
         _initialCheckoutResponse ?? Get.arguments as CreateCheckoutResponse?;
     if (response != null) {
       _checkoutId = response.checkout.id;
+      currency.value = response.checkout.currency;
       orderItems.assignAll(
         response.checkout.items.map((e) => e.toCheckoutItem()).toList(),
       );
@@ -285,8 +292,8 @@ class CheckoutController extends GetxController {
 
     isPlacingOrder.value = true;
     try {
-      final success = await _checkoutRepository.placeCodOrder(_checkoutId);
-      if (success) onPaymentSuccess();
+      final result = await _checkoutRepository.placeCodOrder(_checkoutId);
+      if (result.success) onPaymentSuccess(orderIds: result.orderIds);
     } finally {
       isPlacingOrder.value = false;
     }
@@ -349,8 +356,8 @@ class CheckoutController extends GetxController {
             const SizedBox(height: 8),
             CustomText(
               text:
-                  "You'll pay \$${digitalSubtotal.value.toStringAsFixed(2)} now online for the digital items. "
-                  "\$${codAmountDue.toStringAsFixed(2)} will be collected in cash when your physical order is delivered.",
+                  "You'll pay ${CurrencyFormatter.amount(digitalSubtotal.value, currency.value)} now online for the digital items. "
+                  "${CurrencyFormatter.amount(codAmountDue, currency.value)} will be collected in cash when your physical order is delivered.",
               fontSize: AppFontSize.verySmall,
               color: AppColors.grey,
               textAlign: TextAlign.center,
@@ -389,9 +396,16 @@ class CheckoutController extends GetxController {
   /// Shared by COD and Stripe checkout: re-sync the cart from the server
   /// (only the checked-out lines were removed server-side, so unselected
   /// lines must stay) and hand off to the success screen.
-  void onPaymentSuccess() {
+  void onPaymentSuccess({List<String> orderIds = const []}) {
     Get.find<CartController>().fetchCart();
-    Get.offAllNamed(Routes.paymentSuccessView, arguments: canSplitPay ? codAmountDue : null);
+    Get.offAllNamed(
+      Routes.paymentSuccessView,
+      arguments: PaymentSuccessArgs(
+        orderIds: orderIds,
+        codAmountDue: canSplitPay ? codAmountDue : null,
+        currency: currency.value,
+      ),
+    );
   }
 
   Future<void> selectShippingOption(ShippingOption option) async {

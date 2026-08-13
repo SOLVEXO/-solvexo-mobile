@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/app/modules/login/controller/auth_tabs_controller.dart';
 import 'package:book_store_app/app/modules/login/login_view.dart';
 import 'package:book_store_app/app/modules/signup/sign_up_view.dart';
@@ -19,40 +20,50 @@ class AuthTabsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AuthTabsController>();
-    return BaseViewScreen(
-      backgroundColor: AppColors.white,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          BaseSpacing.xl,
-          BaseSpacing.xl,
-          BaseSpacing.xl,
-          BaseSpacing.md,
-        ),
-        child: Column(
-          children: [
-            const _TopBrand(),
-            SizedBox(height: BaseSpacing.xl),
-            _TabToggle(controller: controller),
-            SizedBox(height: BaseSpacing.xs),
-            Obx(
-              () => AnimatedSwitcher(
-                duration: BaseMotion.normal,
-                transitionBuilder: (child, anim) => FadeTransition(
-                  opacity: anim,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.04, 0),
-                      end: Offset.zero,
-                    ).animate(anim),
-                    child: child,
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        // Backing out of a login/signup that was opened to resume a
+        // protected guest action (wishlist, message seller, ...) counts as
+        // "declined" — unblock the guard instead of leaving it hanging.
+        if (didPop && AuthGateService.instance.isAwaitingResume) {
+          AuthGateService.instance.resolveCancelled();
+        }
+      },
+      child: BaseViewScreen(
+        backgroundColor: AppColors.white,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            BaseSpacing.xl,
+            BaseSpacing.xl,
+            BaseSpacing.xl,
+            BaseSpacing.md,
+          ),
+          child: Column(
+            children: [
+              const _TopBrand(),
+              SizedBox(height: BaseSpacing.xl),
+              _TabToggle(controller: controller),
+              SizedBox(height: BaseSpacing.xs),
+              Obx(
+                () => AnimatedSwitcher(
+                  duration: BaseMotion.normal,
+                  transitionBuilder: (child, anim) => FadeTransition(
+                    opacity: anim,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.04, 0),
+                        end: Offset.zero,
+                      ).animate(anim),
+                      child: child,
+                    ),
                   ),
+                  child: controller.tabIndex.value == 0
+                      ? const LoginView(key: ValueKey(0))
+                      : const SignUpView(key: ValueKey(1)),
                 ),
-                child: controller.tabIndex.value == 0
-                    ? const LoginView(key: ValueKey(0))
-                    : const SignUpView(key: ValueKey(1)),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -52,7 +53,7 @@ class ProductsTab extends StatelessWidget {
                 ),
               );
             }
-            return _ProductRow(product: controller.products[i]);
+            return _ProductRow(product: controller.products[i], currency: controller.currency);
           },
         ),
       );
@@ -62,7 +63,8 @@ class ProductsTab extends StatelessWidget {
 
 class _ProductRow extends StatelessWidget {
   final ProductPerformanceModel product;
-  const _ProductRow({required this.product});
+  final String? currency;
+  const _ProductRow({required this.product, this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +96,7 @@ class _ProductRow extends StatelessWidget {
             children: [
               _Stat(icon: Icons.shopping_bag_outlined, label: '${product.unitsSold} sold'),
               SizedBox(width: BaseSpacing.md),
-              _Stat(icon: Icons.attach_money_rounded, label: '\$${product.revenue.toStringAsFixed(0)}'),
+              _Stat(icon: Icons.attach_money_rounded, label: CurrencyFormatter.amount(product.revenue, currency, decimals: 0)),
               SizedBox(width: BaseSpacing.md),
               _Stat(icon: Icons.inventory_outlined, label: '${product.currentStock} in stock'),
             ],

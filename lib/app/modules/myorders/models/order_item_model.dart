@@ -89,6 +89,10 @@ class OrderTracking {
 
 class OrderStore {
   final String storeId;
+  // The SellerOrder subdocument's own _id — distinct from storeId (the
+  // Store document's _id) — required by the refund-request API, which
+  // scopes each request to exactly one sellerOrder.
+  final String sellerOrderId;
   final String? sellerName;
   final bool sellerVerified;
   final String fulfillmentType;
@@ -102,6 +106,7 @@ class OrderStore {
 
   const OrderStore({
     required this.storeId,
+    required this.sellerOrderId,
     this.sellerName,
     this.sellerVerified = false,
     required this.fulfillmentType,
@@ -119,6 +124,7 @@ class OrderStore {
     final sellerVerified = json['sellerVerified'] == true;
     return OrderStore(
       storeId: json['storeId'] as String? ?? '',
+      sellerOrderId: json['sellerOrderId'] as String? ?? '',
       sellerName: sellerName,
       sellerVerified: sellerVerified,
       fulfillmentType: json['fulfillmentType'] as String? ?? 'physical',

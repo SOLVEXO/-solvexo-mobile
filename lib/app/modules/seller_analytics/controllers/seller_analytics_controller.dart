@@ -43,6 +43,11 @@ class SellerAnalyticsController extends GetxController {
   final RxList<PaymentMethodBreakdownModel> paymentMethods = <PaymentMethodBreakdownModel>[].obs;
   final Rx<RevenueBreakdownModel> revenueBreakdown = Rx<RevenueBreakdownModel>(RevenueBreakdownModel.empty);
 
+  /// Store's currency, or null if the seller's stores span more than one —
+  /// shared across every analytics widget rather than each endpoint
+  /// carrying its own copy.
+  String? get currency => overview.value.currency;
+
   // ── Products tab ───────────────────────────────────────────────────────
   final RxBool isLoadingProducts = false.obs;
   final RxList<ProductPerformanceModel> products = <ProductPerformanceModel>[].obs;

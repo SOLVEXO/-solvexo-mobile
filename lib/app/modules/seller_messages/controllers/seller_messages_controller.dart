@@ -6,6 +6,7 @@ import 'package:book_store_app/app/network/messaging_socket_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 enum InboxFilter { active, archived }
@@ -19,6 +20,7 @@ class SellerMessagesController extends GetxController {
   String storeId = '';
   final RxBool isLoading = true.obs;
   final RxString searchQuery = ''.obs;
+  final TextEditingController searchController = TextEditingController();
   final Rx<InboxFilter> filter = InboxFilter.active.obs;
   final RxBool unreadOnly = false.obs;
   final RxList<ConversationModel> conversations = <ConversationModel>[].obs;
@@ -53,6 +55,7 @@ class SellerMessagesController extends GetxController {
   void onClose() {
     _pollTimer?.cancel();
     _updateSub?.cancel();
+    searchController.dispose();
     super.onClose();
   }
 

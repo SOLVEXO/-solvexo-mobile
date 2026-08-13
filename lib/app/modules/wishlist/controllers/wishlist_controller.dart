@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/data/repositories/wishlist_repository.dart';
 import 'package:book_store_app/app/modules/wishlist/model/wishlist_model.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,9 @@ class WishlistController extends GetxController {
 
   Future<void> fetchWishlist() async {
     if (isLoading.value) return;
+    // Wishlist is a login-only feature backend-side — guests silently keep
+    // an empty list instead of hitting a 401 (and toasting) on every Home load.
+    if (!await AppPreferences.isLoggedIn()) return;
     try {
       isLoading.value = true;
       final items = await _repo.getWishlist();
@@ -53,6 +57,11 @@ class WishlistController extends GetxController {
       isLoading.value = true;
       final response = await _repo.clearWishList();
       if (response) {
+        // Clear the lookup state before the list itself, so anything
+        // listening for wishlistItems to change (e.g. HomeController
+        // re-syncing heart icons) sees consistent, already-cleared state.
+        _wishlistedVariantIds.clear();
+        _variantToWishlistId.clear();
         wishlistItems.clear();
         ToastUtil.showToast("Wishlist Items has been removed!");
       }

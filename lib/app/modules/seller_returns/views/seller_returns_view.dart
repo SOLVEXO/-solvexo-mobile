@@ -31,7 +31,7 @@ class SellerReturnsView extends StatelessWidget {
               onRefresh: controller.refreshData,
               child: Obx(() {
                 if (controller.isLoading.value) return const OrdersShimmer();
-                final items = controller.returns;
+                final items = controller.filteredRequests;
                 if (items.isEmpty) return const ReturnsEmptyState();
                 return NotificationListener<ScrollNotification>(
                   onNotification: (notification) {

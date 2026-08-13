@@ -137,6 +137,17 @@ class ApiConstants {
   static String returnRequest(String orderId) =>
       "$apiPrefix/orders/return-request/$orderId";
 
+  // ============ Refund Request Endpoints (item-level, supersedes return-request) ============
+  static const String createRefundRequest = "$apiPrefix/refund-request";
+  static String refundRequestsForOrder(String orderId) =>
+      "$apiPrefix/refund-request/order/$orderId";
+  static String refundRequestsForSeller(String storeId) =>
+      "$apiPrefix/refund-request/seller/$storeId";
+  static String approveRefundRequest(String id) =>
+      "$apiPrefix/refund-request/$id/approve";
+  static String rejectRefundRequest(String id) =>
+      "$apiPrefix/refund-request/$id/reject";
+
   // Digital product delivery — signed, short-lived download tokens.
   // `endpoint` in each returned file is relative (e.g. "/api/orders/download-file"),
   // so it's joined with `baseUrl` (not `apiPrefix`, it already includes "/api").
@@ -213,6 +224,14 @@ class ApiConstants {
   static const String myStores = "$apiPrefix/store/my-stores";
   static String getStoreById(String id) => "$apiPrefix/store/getStoreById/$id";
 
+  // ============ Store Verification (KYC) Endpoints — seller ============
+  static String storeVerification(String storeId) =>
+      "$apiPrefix/store/$storeId/verification";
+  static String storeVerificationDocuments(String storeId) =>
+      "$apiPrefix/store/$storeId/verification/documents";
+  static String storeVerificationSubmit(String storeId) =>
+      "$apiPrefix/store/$storeId/verification/submit";
+
   // ============ Public Storefront Endpoints ============
   static String publicStoreBySlug(String slug) =>
       "$apiPrefix/store/public/$slug";
@@ -238,6 +257,8 @@ class ApiConstants {
   static const String addDigitalProduct =
       "$apiPrefix/products/add-digital-product";
   static const String editProduct = "$apiPrefix/products/edit-product";
+  static String deleteProduct(String productId) =>
+      "$apiPrefix/products/delete-product/$productId";
   static String getMyProduct(String productId) =>
       "$apiPrefix/products/get-my-product/$productId";
   static String productVariants(String productId) =>
@@ -667,15 +688,21 @@ class ApiConstants {
       '$apiPrefix/subscriptions/my/credits';
 
   // ============ Promotions Endpoints — seller (paid ad placements) ============
-  static const String promotionsPreviewPrice = '$apiPrefix/promotions/preview-price';
-  static String promotionsList(String storeId) => '$apiPrefix/promotions/$storeId';
-  static String promotionsCreate(String storeId) => '$apiPrefix/promotions/$storeId';
+  static const String promotionsPreviewPrice =
+      '$apiPrefix/promotions/preview-price';
+  static String promotionsList(String storeId) =>
+      '$apiPrefix/promotions/$storeId';
+  static String promotionsCreate(String storeId) =>
+      '$apiPrefix/promotions/$storeId';
   static String promotionsAnalytics(String storeId) =>
       '$apiPrefix/promotions/$storeId/analytics';
   static String promotionsPay(String id) => '$apiPrefix/promotions/$id/pay';
-  static String promotionsConfirm(String id) => '$apiPrefix/promotions/$id/confirm';
-  static String promotionsCancel(String id) => '$apiPrefix/promotions/$id/cancel';
-  static String promotionsTimeline(String id) => '$apiPrefix/promotions/$id/timeline';
+  static String promotionsConfirm(String id) =>
+      '$apiPrefix/promotions/$id/confirm';
+  static String promotionsCancel(String id) =>
+      '$apiPrefix/promotions/$id/cancel';
+  static String promotionsTimeline(String id) =>
+      '$apiPrefix/promotions/$id/timeline';
 
   // ============ Promotions Endpoints — public tracking (anonymous-safe) =======
   static const String promotionTrackImpression =
@@ -683,7 +710,8 @@ class ApiConstants {
   static const String promotionTrackClick = '$apiPrefix/promotions/track/click';
 
   // ============ Store Banner Endpoints — seller (free storefront hero) ========
-  static String storeBanners(String storeId) => '$apiPrefix/store-banner/$storeId';
+  static String storeBanners(String storeId) =>
+      '$apiPrefix/store-banner/$storeId';
   static String storeBannerById(String storeId, String bannerId) =>
       '$apiPrefix/store-banner/$storeId/$bannerId';
   static String storeBannerPause(String storeId, String bannerId) =>
@@ -726,4 +754,7 @@ class ApiConstants {
       '$apiPrefix/notifications/device-token';
   static const String notificationPreferences =
       '$apiPrefix/notifications/preferences';
+
+  // ============ Exchange Rate Endpoints (public) ============
+  static const String exchangeRateCurrent = '$apiPrefix/exchange-rate/current';
 }

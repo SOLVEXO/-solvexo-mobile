@@ -1,7 +1,7 @@
+import 'package:book_store_app/app/components/app_search_field.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/dynamic_shimmer.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
@@ -109,39 +109,20 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: AppDimen.allPadding),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppDimen.allPadding),
-      ),
-      child: CustomTextField(
-        isDecoration: false,
+    return Obx(
+      () => AppSearchField(
         controller: controller.searchTextCtrl,
         onChanged: controller.onSearchChanged,
-        isborder: true,
-        hintText: 'Search products…',
-        borderBorderradius: AppDimen.borderRadius,
-        borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-        prefixIcon: SvgIcon(
-          assetName: AppIcons.searchIcon,
-          size: 20,
-          color: AppColors.iosGrey,
-        ),
-        suffixIcon: Obx(
-          () => controller.searchQuery.value.isNotEmpty
-              ? GestureDetector(
-                  onTap: controller.clearSearch,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm),
-                    child: const SvgIcon(
-                      assetName: AppIcons.cross,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                )
-              : SizedBox(width: BaseSpacing.sm),
-        ),
+        staticHint: 'Search products…',
+        suffixIcon: controller.searchQuery.value.isNotEmpty
+            ? GestureDetector(
+                onTap: controller.clearSearch,
+                child: const SvgIcon(
+                  assetName: AppIcons.cross,
+                  color: AppColors.textPrimary,
+                ),
+              )
+            : null,
       ),
     );
   }

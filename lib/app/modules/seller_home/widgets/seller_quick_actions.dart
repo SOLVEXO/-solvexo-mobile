@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/modules/seller/utils/seller_store_gate.dart';
 import 'package:book_store_app/app/modules/seller_home/controllers/seller_home_controller.dart';
 import 'package:book_store_app/app/modules/seller_home/widgets/custom_action_card.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -22,7 +23,7 @@ class SellerQuickActions extends StatelessWidget {
         (
           icon: AppIcons.addIcon,
           label: 'Add Product',
-          onTap: () => Get.toNamed(Routes.addSellerProduct),
+          onTap: openAddProductOrRequireVerification,
         ),
         if (homeController.posEnabled.value)
           (

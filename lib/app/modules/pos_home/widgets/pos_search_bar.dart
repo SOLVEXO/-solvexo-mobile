@@ -1,4 +1,4 @@
-import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/components/app_search_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/pos_home/controllers/pos_home_controller.dart';
 import 'package:book_store_app/app/modules/pos_home/widgets/pos_barcode_sheet.dart';
@@ -16,43 +16,36 @@ class PosSearchBar extends StatelessWidget {
     return Container(
       color: AppColors.white,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: CustomTextField(
-              controller: c.searchController,
-              onChanged: c.onSearchChanged,
-              hintText: 'Search products or SKU...',
-              fillColor: AppColors.textfldFillColor,
-              isborder: true,
-            ),
-          ),
-          const SizedBox(width: 10),
-          GestureDetector(
+      child: Obx(
+        () => AppSearchField(
+          controller: c.searchController,
+          onChanged: c.onSearchChanged,
+          staticHint: 'Search products or SKU...',
+          suffixIcon: c.searchText.value.isNotEmpty
+              ? GestureDetector(
+                  onTap: () {
+                    c.searchController.clear();
+                    c.onSearchChanged('');
+                  },
+                  child: const SvgIcon(
+                    assetName: AppIcons.cross,
+                    color: AppColors.textPrimary,
+                  ),
+                )
+              : null,
+          trailing: GestureDetector(
             onTap: () => Get.bottomSheet(
               PosBarcodeSheet(c: c),
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
             ),
-            child: Container(
-              width: 46,
-              height: 46,
-              padding: EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.primaryColor.withOpacity(0.25),
-                ),
-              ),
-              child: SvgIcon(
-                assetName: AppIcons.barcodeIcon,
-                color: AppColors.primaryColor,
-                size: 20,
-              ),
+            child: SvgIcon(
+              assetName: AppIcons.barcodeIcon,
+              color: AppColors.primaryColor,
+              size: 20,
             ),
           ),
-        ],
+        ),
       ),
     );
   }

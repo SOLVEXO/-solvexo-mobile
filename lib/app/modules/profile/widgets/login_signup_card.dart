@@ -1,6 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
@@ -9,10 +9,14 @@ import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class LoginSignupCard extends StatelessWidget {
-  const LoginSignupCard({super.key});
+  /// Called after a successful login/signup opened from this card, so the
+  /// screen can resume whatever it was trying to show (refetch orders,
+  /// reload the cart, ...) instead of relying on it to notice on its own.
+  final Future<void> Function()? onLoggedIn;
+
+  const LoginSignupCard({super.key, this.onLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +73,10 @@ class LoginSignupCard extends StatelessWidget {
           // Button
           Expanded(
             child: PrimaryButton(
-              onPressed: () => Get.toNamed(Routes.authTabView),
+              onPressed: () async {
+                final allowed = await AuthGateService.instance.requireAuth();
+                if (allowed) await onLoggedIn?.call();
+              },
               label: "LOGIN",
               compact: true,
             ),

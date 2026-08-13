@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,10 +11,13 @@ class AppPreferences {
   static const String _userRoleKey = 'user_role';
   static const String _userEmailKey = 'user_email';
   static const String _intentRoleKey = 'intent_role';
+  static const String _hasSeenOnboardingKey = 'has_seen_onboarding';
+  static const String _guestCartKey = 'guest_cart_items';
   static const String _recentSearchesKey = 'recent_searches';
   static const String _recentlyViewedKey = 'recently_viewed_products';
   static const String _storeIdKey   = 'store_id';
   static const String _storeNameKey = 'store_name';
+  static const String _displayCurrencyKey = 'display_currency';
 
   // ── POS employee / session context ────────────────────────────────────────────
   static const String _posEmployeeIdKey   = 'pos_employee_id';
@@ -152,6 +157,40 @@ class AppPreferences {
   static Future<void> clearIntentRole() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_intentRoleKey);
+  }
+
+  // ── First-launch onboarding carousel flag ─────────────────────────────────
+  static Future<void> setHasSeenOnboarding(bool seen) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hasSeenOnboardingKey, seen);
+  }
+
+  static Future<bool> getHasSeenOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_hasSeenOnboardingKey) ?? false;
+  }
+
+  // ── Guest cart (local-only until login merges it into the account cart) ────
+  static Future<void> saveGuestCartItems(List<Map<String, dynamic>> items) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_guestCartKey, jsonEncode(items));
+  }
+
+  static Future<List<Map<String, dynamic>>> getGuestCartItems() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_guestCartKey);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      return (jsonDecode(raw) as List).cast<Map<String, dynamic>>();
+    } catch (e) {
+      debugPrint('❌ Error decoding guest cart: $e');
+      return [];
+    }
+  }
+
+  static Future<void> clearGuestCart() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_guestCartKey);
   }
 
   // Clear all user data
@@ -309,6 +348,19 @@ class AppPreferences {
   static Future<int> getPosAutoLockMinutes() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_posAutoLockMinutesKey) ?? 5;
+  }
+
+  // ── Buyer display currency (device-local; source of truth is the backend
+  // `currencyPreference` for logged-in users once loaded — see
+  // CurrencyController) ────────────────────────────────────────────────────
+  static Future<void> saveDisplayCurrency(String currency) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_displayCurrencyKey, currency);
+  }
+
+  static Future<String?> getDisplayCurrency() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_displayCurrencyKey);
   }
 
   // Recently Viewed Products

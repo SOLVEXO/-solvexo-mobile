@@ -23,6 +23,7 @@ class CategoryController extends GetxController {
 
   final RxString searchQuery = ''.obs;
   final RxList<CategoryModel> searchResults = <CategoryModel>[].obs;
+  final TextEditingController searchController = TextEditingController();
 
   // ─── Rail selection (CategoryView's split layout) ─────────────────────────
   // null = "All": the grid shows every root category; otherwise it shows the
@@ -35,6 +36,12 @@ class CategoryController extends GetxController {
   void onInit() {
     super.onInit();
     fetchAllCategories();
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 
   // ─── Expand / collapse (for CategoryTile tree view) ──────────────────────

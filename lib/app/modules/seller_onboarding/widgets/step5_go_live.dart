@@ -40,7 +40,7 @@ class Step5GoLive extends StatelessWidget {
                 const CustomText(text: '🎉', fontSize: 52),
                 const SizedBox(height: 16),
                 const CustomText(
-                  text: 'Your store is ready!',
+                  text: 'Your store setup is ready!',
                   fontSize: AppFontSize.veryLarge,
                   fontWeight: FontWeight.bold,
                   color: AppColors.black,
@@ -48,7 +48,7 @@ class Step5GoLive extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const CustomText(
-                  text: 'Welcome to EduDeen. Your seller dashboard is set up and your tools are activated. Let\'s make your first sale.',
+                  text: 'Welcome to EduDeen. One more step: verify your business details so our team can approve your store — you can only publish products on Solvexo once it\'s approved.',
                   fontSize: AppFontSize.verySmall,
                   color: AppColors.grey,
                   textAlign: TextAlign.center,
@@ -56,9 +56,9 @@ class Step5GoLive extends StatelessWidget {
                 const SizedBox(height: 24),
                 _SetupSummary(controller: controller),
                 const SizedBox(height: 24),
-                const _SectionTitle(title: 'Recommended next steps'),
+                const _SectionTitle(title: 'What happens next'),
                 const SizedBox(height: 14),
-                _NextStepsRow(),
+                const _NextStepsTimeline(),
                 const SizedBox(height: 20),
                 _UpgradeNote(),
               ],
@@ -191,52 +191,108 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _NextStepsRow extends StatelessWidget {
+// Mirrors the real backend sequence (StoreService.createStore → status
+// 'pending'; StoreService.submitVerification; AdminMarketplaceService.
+// approveLead → status 'active', the only state ProductsService lets a
+// seller create products in) — purely informational, since tapping the
+// primary button below creates the store and drops the seller straight
+// into the verification form automatically.
+class _NextStepsTimeline extends StatelessWidget {
+  const _NextStepsTimeline();
+
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: const [
-        Expanded(child: _NextStepCard(emoji: '➕', label: 'Add your first product')),
-        SizedBox(width: 10),
-        Expanded(child: _NextStepCard(emoji: '🏗️', label: 'Customise your store')),
-        SizedBox(width: 10),
-        Expanded(child: _NextStepCard(emoji: '🛍️', label: 'Browse the marketplace')),
+        _TimelineStep(
+          emoji: '📋',
+          title: 'Verify your business',
+          subtitle: 'Submit a few business details & documents — required next.',
+        ),
+        _TimelineConnector(),
+        _TimelineStep(
+          emoji: '✅',
+          title: 'Get approved',
+          subtitle: 'Our team reviews it — usually within 1–2 business days.',
+        ),
+        _TimelineConnector(),
+        _TimelineStep(
+          emoji: '🛍️',
+          title: 'Start selling',
+          subtitle: 'Once approved, add products and go live on Solvexo.',
+          isLast: true,
+        ),
       ],
     );
   }
 }
 
-class _NextStepCard extends StatelessWidget {
+class _TimelineStep extends StatelessWidget {
   final String emoji;
-  final String label;
+  final String title;
+  final String subtitle;
+  final bool isLast;
 
-  const _NextStepCard({required this.emoji, required this.label});
+  const _TimelineStep({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    this.isLast = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-          border: Border.all(color: AppColors.lightGrey2),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.lightGrey2),
+          ),
+          alignment: Alignment.center,
+          child: CustomText(text: emoji, fontSize: 15),
         ),
-        child: Column(
-          children: [
-            CustomText(text: emoji, fontSize: 24),
-            const SizedBox(height: 8),
-            CustomText(
-              text: label,
-              fontSize: AppFontSize.tiny,
-              fontWeight: FontWeight.w500,
-              color: AppColors.black2,
-              textAlign: TextAlign.center,
+        const SizedBox(width: 12),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 2, top: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: title,
+                  fontSize: AppFontSize.verySmall,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.black2,
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  text: subtitle,
+                  fontSize: AppFontSize.tiny,
+                  color: AppColors.grey,
+                  height: 1.35,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+      ],
+    );
+  }
+}
+
+class _TimelineConnector extends StatelessWidget {
+  const _TimelineConnector();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.5),
+      child: Container(width: 1.5, height: 18, color: AppColors.lightGrey2),
     );
   }
 }

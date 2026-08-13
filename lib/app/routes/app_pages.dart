@@ -13,6 +13,8 @@ import '../modules/edit_seller_product/bindings/edit_seller_product_binding.dart
 import '../modules/edit_seller_product/views/edit_seller_product_view.dart';
 import '../modules/seller_store_profile/bindings/seller_store_profile_binding.dart';
 import '../modules/seller_store_profile/views/seller_store_profile_view.dart';
+import '../modules/store_verification/bindings/store_verification_binding.dart';
+import '../modules/store_verification/views/store_verification_view.dart';
 import '../modules/seller_shipping/bindings/seller_shipping_binding.dart';
 import '../modules/seller_shipping/views/seller_shipping_view.dart';
 import '../modules/seller_notifications/bindings/seller_notifications_binding.dart';
@@ -53,6 +55,8 @@ import '../modules/seller_stores/bindings/seller_stores_binding.dart';
 import '../modules/seller_stores/views/seller_stores_view.dart';
 import '../modules/welcome/views/welcome_view.dart';
 import '../modules/welcome/bindings/welcome_binding.dart';
+import '../modules/onboarding/views/onboarding_view.dart';
+import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/pos/bindings/pos_binding.dart';
 import '../modules/pos_orders/bindings/pos_orders_binding.dart';
 import '../modules/pos_products/bindings/pos_products_binding.dart';
@@ -213,6 +217,11 @@ class AppPages {
       name: Routes.welcome,
       page: () => const WelcomeView(),
       binding: WelcomeBinding(),
+    ),
+    GetPage(
+      name: Routes.onboarding,
+      page: () => const OnboardingView(),
+      binding: OnboardingBinding(),
     ),
     GetPage(
       name: Routes.sellerStores,
@@ -598,6 +607,11 @@ class AppPages {
       name: Routes.sellerStoreProfile,
       page: () => SellerStoreProfileView(),
       binding: SellerStoreProfileBinding(),
+    ),
+    GetPage(
+      name: Routes.storeVerification,
+      page: () => StoreVerificationView(),
+      binding: StoreVerificationBinding(),
     ),
     GetPage(
       name: Routes.sellerShipping,

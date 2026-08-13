@@ -9,7 +9,6 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -51,11 +50,14 @@ class ProductHeroGallery extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.accentColor,
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.accentColor.withOpacity(0.10),
+                    borderRadius: BorderRadius.circular(BaseRadius.sm),
                   ),
                   child: Center(
-                    child: CartIconWithCount(color: AppColors.white, size: 25),
+                    child: CartIconWithCount(
+                      color: AppColors.accentColor,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],
@@ -150,12 +152,16 @@ class _CircleIconButton extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: AppColors.primaryColor,
-          borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+          color: AppColors.primaryColor.withOpacity(0.10),
+          borderRadius: BorderRadius.circular(BaseRadius.sm),
           boxShadow: BaseShadows.forLevel(BaseElevation.level1),
         ),
         alignment: Alignment.center,
-        child: SvgIcon(assetName: assetName!, size: 22, color: AppColors.white),
+        child: SvgIcon(
+          assetName: assetName!,
+          size: 18,
+          color: AppColors.primaryColor,
+        ),
       ),
     );
   }

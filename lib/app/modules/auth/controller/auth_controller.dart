@@ -4,8 +4,11 @@ import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/data/models/common_models/auth_response_model.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
+import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
+import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/app/data/services/social_auth_service.dart';
+import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
@@ -197,7 +200,7 @@ class AuthController extends BaseController {
         return;
       }
 
-      _navigateByRole(auth.user.role);
+      await _navigateByRole(auth.user.role);
       _showSuccess('Welcome ${auth.user.name}!');
     } catch (e) {
       debugPrint('❌ Google sign in error: $e');
@@ -224,7 +227,7 @@ class AuthController extends BaseController {
         return;
       }
 
-      _navigateByRole(auth.user.role);
+      await _navigateByRole(auth.user.role);
       _showSuccess('Welcome ${auth.user.name}!');
     } catch (e) {
       debugPrint('❌ Facebook sign in error: $e');
@@ -251,7 +254,7 @@ class AuthController extends BaseController {
         return;
       }
 
-      _navigateByRole(auth.user.role);
+      await _navigateByRole(auth.user.role);
       _showSuccess('Welcome!');
     } catch (e) {
       debugPrint('❌ Apple sign in error: $e');
@@ -337,7 +340,7 @@ class AuthController extends BaseController {
         );
         ToastUtil.showToast('Login successful!');
         clearLoginForm();
-        _navigateByRole(authResponse.user.role);
+        await _navigateByRole(authResponse.user.role);
         debugPrint('User logged in successfully: ${authResponse.user.email}');
       }
     } catch (e) {
@@ -354,7 +357,8 @@ class AuthController extends BaseController {
     currentUser.value = null;
 
     _authRepository.logout();
-    Get.offAllNamed(Routes.welcome);
+    // Logout returns to guest-mode Home, not a login wall.
+    Get.offAllNamed(Routes.mainHome);
     ToastUtil.showToast('Logged out successfully');
   }
 
@@ -433,7 +437,17 @@ class AuthController extends BaseController {
   // UI HELPERS
   // ─────────────────────────────────────────
 
-  void _navigateByRole(String role) {
+  Future<void> _navigateByRole(String role) async {
+    // Buyer login/signup only — a seller account has no guest cart to merge.
+    if (role != 'seller') await _mergeGuestCartAndRefresh();
+
+    // This login/social-login was opened to resume a protected guest action
+    // (wishlist, message seller, ...) — pop back to where the guard was
+    // triggered and let that awaiting call resume, instead of navigating.
+    if (AuthGateService.instance.isAwaitingResume) {
+      AuthGateService.instance.resolveSuccess();
+      return;
+    }
     switch (role) {
       case 'seller':
         // SellerStoresController handles redirect to onboarding if no stores
@@ -441,6 +455,17 @@ class AuthController extends BaseController {
         break;
       default:
         Get.offAllNamed(Routes.mainHome);
+    }
+  }
+
+  /// Folds any locally-held guest cart into the now-logged-in buyer's
+  /// account cart (summing quantities on conflict — see
+  /// `CartRepository.mergeGuestCartIntoAccount`), then refreshes the shared
+  /// `CartController` so the badge/cart screen reflect it immediately.
+  Future<void> _mergeGuestCartAndRefresh() async {
+    await CartRepository().mergeGuestCartIntoAccount();
+    if (Get.isRegistered<CartController>()) {
+      await Get.find<CartController>().refreshCart();
     }
   }
 

@@ -35,6 +35,7 @@ class OverviewTab extends StatelessWidget {
             SizedBox(height: BaseSpacing.sm),
             AnalyticsRevenueBreakdownCard(
               data: controller.revenueBreakdown.value,
+              currency: controller.currency,
             ),
             if (controller.revenueBreakdown.value.recurringSubscriptionRevenue >
                 0)
@@ -42,6 +43,7 @@ class OverviewTab extends StatelessWidget {
             AnalyticsRevenueChart(
               series: controller.revenueSeries,
               granularity: controller.chartGranularity.value,
+              currency: controller.currency,
             ),
             SizedBox(height: BaseSpacing.sm),
             AnalyticsOrdersChart(
@@ -51,9 +53,9 @@ class OverviewTab extends StatelessWidget {
             SizedBox(height: BaseSpacing.sm),
             AnalyticsTrafficDonut(sources: controller.trafficSources),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsTopProductsCard(products: controller.topProducts),
+            AnalyticsTopProductsCard(products: controller.topProducts, currency: controller.currency),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsPaymentMethodsCard(methods: controller.paymentMethods),
+            AnalyticsPaymentMethodsCard(methods: controller.paymentMethods, currency: controller.currency),
             SizedBox(height: BaseSpacing.lg),
           ],
         ),

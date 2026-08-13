@@ -68,6 +68,8 @@ class Step2StoreInfoForm extends StatelessWidget {
                 const SizedBox(height: 16),
                 _CategoryField(controller: controller),
                 const SizedBox(height: 16),
+                _CurrencyField(controller: controller),
+                const SizedBox(height: 16),
                 const _FieldLabel(label: 'Store Description', optional: true),
                 const SizedBox(height: 6),
                 CustomTextField(
@@ -219,6 +221,57 @@ class _CategoryField extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CurrencyField extends StatelessWidget {
+  final SellerOnboardingController controller;
+  const _CurrencyField({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _FieldLabel(label: 'Store Currency', required: true),
+        const SizedBox(height: 6),
+        Obx(
+          () => GestureDetector(
+            onTap: controller.pickCurrency,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.textfldFillColor,
+                borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+                border: Border.all(color: AppColors.lightGrey, width: 0.3),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CustomText(
+                      text: controller.storeCurrency.value.isEmpty
+                          ? 'Select the currency for your prices...'
+                          : controller.storeCurrency.value,
+                      fontSize: AppFontSize.verySmall,
+                      color: controller.storeCurrency.value.isEmpty
+                          ? AppColors.grey
+                          : AppColors.black,
+                    ),
+                  ),
+                  const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.grey),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        const CustomText(
+          text: "This is the currency for your prices and payouts. It can't be changed after your store is created.",
+          fontSize: AppFontSize.tiny,
+          color: AppColors.grey,
         ),
       ],
     );

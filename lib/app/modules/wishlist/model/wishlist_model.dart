@@ -115,6 +115,11 @@ class WishlistItem {
       selectedVariant?.price ??
       (variants.isNotEmpty ? variants.first.price : product.price);
 
+  /// Currency backing [price] — mirrors its variant-fallback order.
+  String? get currency =>
+      selectedVariant?.currency ??
+      (variants.isNotEmpty ? variants.first.currency : product.currency);
+
   /// Display image from selected/first variant or product
   String get displayImage {
     final imgs =

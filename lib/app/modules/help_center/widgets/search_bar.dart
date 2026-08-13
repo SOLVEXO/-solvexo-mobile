@@ -1,4 +1,7 @@
-import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/components/app_search_field.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,23 +34,24 @@ class _HelpSearchBarState extends State<HelpSearchBar> {
     final controller = Get.find<FaqController>();
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xxs + 1),
-      child: CustomTextField(
-        controller: _searchController,
-        isborder: true,
-        hintText: "Search an issue",
-        prefixIcon: const Icon(Icons.search),
-        suffixIcon: Obx(
-          () => controller.searchQuery.value.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
+      child: Obx(
+        () => AppSearchField(
+          controller: _searchController,
+          staticHint: 'Search an issue',
+          onChanged: (v) => controller.searchQuery.value = v,
+          suffixIcon: controller.searchQuery.value.isNotEmpty
+              ? GestureDetector(
+                  onTap: () {
                     controller.searchQuery.value = "";
                     _searchController.clear();
                   },
+                  child: const SvgIcon(
+                    assetName: AppIcons.cross,
+                    color: AppColors.textPrimary,
+                  ),
                 )
-              : const SizedBox(),
+              : null,
         ),
-        onChanged: (v) => controller.searchQuery.value = v,
       ),
     );
   }

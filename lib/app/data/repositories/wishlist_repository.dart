@@ -125,7 +125,10 @@ class WishlistRepository {
 
       debugPrint('✅ removeFromWishlist: ${response.data}');
 
-      return response.statusCode == 200;
+      // NestJS returns 201 by default for a @Post() with no @HttpCode() —
+      // this was checking 200, which never matched, so a successful
+      // removal was always reported back as a failure.
+      return response.statusCode == 201;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
       return false;

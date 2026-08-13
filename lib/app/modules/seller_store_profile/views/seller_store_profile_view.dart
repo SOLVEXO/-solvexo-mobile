@@ -16,6 +16,7 @@ import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_pi
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_profile_hero.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_profile_shimmer.dart';
 import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_stats_strip.dart';
+import 'package:book_store_app/app/modules/seller_store_profile/widgets/store_verification_card.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -134,6 +135,8 @@ class _ProfileBody extends StatelessWidget {
                   children: [
                     const SizedBox(height: 20),
                     StoreStatsStrip(c: c),
+                    const SizedBox(height: 16),
+                    StoreVerificationCard(c: c),
                     const SizedBox(height: 16),
                     StoreAboutCard(c: c),
                     const SizedBox(height: 16),

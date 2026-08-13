@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/icon_with_text.dart';
+import 'package:book_store_app/app/data/services/currency_controller.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/modules/cart/widgets/inc_dicr_quantity_widget.dart';
@@ -18,6 +19,13 @@ class CartItemWidget extends StatelessWidget {
   CartItemWidget({super.key, required this.item});
 
   final controller = Get.find<CartController>();
+
+  CurrencyController get currencyController {
+    if (!Get.isRegistered<CurrencyController>()) {
+      Get.put(CurrencyController(), permanent: true);
+    }
+    return Get.find<CurrencyController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,12 +91,14 @@ class CartItemWidget extends StatelessWidget {
                         fontSize: AppFontSize.tiny,
                       ),
                     CustomText(text: "${item.quantity} Item", color: AppColors.gray600, fontSize: AppFontSize.tiny),
-                    CustomText(
-                      text: "\$${item.actualPrice.toStringAsFixed(2)}",
-                      color: AppColors.black,
-                      fontSize: AppFontSize.small,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: AppTextStyles.monoFontFamily,
+                    Obx(
+                      () => CustomText(
+                        text: currencyController.format(item.actualPrice, item.currency),
+                        color: AppColors.black,
+                        fontSize: AppFontSize.small,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: AppTextStyles.monoFontFamily,
+                      ),
                     ),
                   ],
                 ),

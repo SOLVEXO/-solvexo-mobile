@@ -92,7 +92,7 @@ class PaymentController extends GetxController {
     for (var attempt = 0; attempt < 10; attempt++) {
       final status = await _checkoutRepository.getPaymentStatus(checkoutId);
       if (status.isCompleted) {
-        checkoutController.onPaymentSuccess();
+        checkoutController.onPaymentSuccess(orderIds: status.orderIds);
         return;
       }
       if (status.isFailed) {

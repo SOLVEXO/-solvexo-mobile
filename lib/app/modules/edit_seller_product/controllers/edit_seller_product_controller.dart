@@ -495,10 +495,12 @@ class EditSellerProductController extends GetxController {
 
   Future<void> deleteProduct() async {
     isDeleting.value = true;
-    await Future.delayed(const Duration(milliseconds: 700));
+    final ok = await _repo.deleteProduct(product.id);
     isDeleting.value = false;
-    Get.back();
-    ToastUtil.showToast('${product.name} deleted.');
+    if (ok) {
+      Get.back(result: true);
+      ToastUtil.showToast('${product.name} deleted.');
+    }
   }
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────

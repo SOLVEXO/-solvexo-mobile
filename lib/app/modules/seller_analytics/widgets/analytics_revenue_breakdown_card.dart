@@ -3,6 +3,7 @@ import 'package:book_store_app/app/data/models/analytics/payment_method_breakdow
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 
 /// One-time order revenue vs recurring subscription revenue, for sellers
@@ -10,7 +11,8 @@ import 'package:flutter/material.dart';
 /// recurring revenue at all, so it doesn't clutter a store without plans.
 class AnalyticsRevenueBreakdownCard extends StatelessWidget {
   final RevenueBreakdownModel data;
-  const AnalyticsRevenueBreakdownCard({super.key, required this.data});
+  final String? currency;
+  const AnalyticsRevenueBreakdownCard({super.key, required this.data, this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class AnalyticsRevenueBreakdownCard extends StatelessWidget {
           ),
           SizedBox(height: BaseSpacing.xxs),
           CustomText(
-            text: '\$${data.totalRevenue.toStringAsFixed(0)}',
+            text: CurrencyFormatter.amount(data.totalRevenue, currency, decimals: 0),
             color: AppColors.white,
             fontWeight: FontWeight.w800,
             fontSize: 26,
@@ -53,9 +55,9 @@ class AnalyticsRevenueBreakdownCard extends StatelessWidget {
           SizedBox(height: BaseSpacing.sm),
           Row(
             children: [
-              _Legend(color: AppColors.white, label: 'Orders', value: '\$${data.oneTimeOrderRevenue.toStringAsFixed(0)}'),
+              _Legend(color: AppColors.white, label: 'Orders', value: CurrencyFormatter.amount(data.oneTimeOrderRevenue, currency, decimals: 0)),
               SizedBox(width: BaseSpacing.md),
-              _Legend(color: AppColors.white.withOpacity(0.45), label: 'Subscriptions', value: '\$${data.recurringSubscriptionRevenue.toStringAsFixed(0)}'),
+              _Legend(color: AppColors.white.withOpacity(0.45), label: 'Subscriptions', value: CurrencyFormatter.amount(data.recurringSubscriptionRevenue, currency, decimals: 0)),
             ],
           ),
         ],

@@ -1,7 +1,7 @@
+import 'package:book_store_app/app/components/app_search_field.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/recommended_product_list.dart';
 import 'package:book_store_app/app/components/shimmer/shimmer_effect.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -11,6 +11,7 @@ import 'package:book_store_app/app/modules/profile/widgets/login_signup_card.dar
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_animations.dart';
+import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_empty_view.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -30,7 +31,7 @@ class MyOrdersView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       // Root of the nav stack (root `MainView` is only reached via
       // `Get.offAllNamed`) when Orders is the active bottom-nav tab, so
       // `canPop` is false there and true when pushed via
@@ -42,78 +43,136 @@ class MyOrdersView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(AppDimen.allPadding),
-              child: CustomTextField(
-                isborder: true,
-                prefixIcon: SvgIcon(
-                  assetName: AppIcons.searchIcon,
-                  color: AppColors.lightGrey,
-                  size: 22,
-                ),
-                hintText: "Search",
-              ),
-            ),
-            Obx(
-              () => Container(
+            // ── Search + status filters — a single elevated block that
+            // reads as "sticky" above the scrolling list beneath it ─────
+            Container(
+              decoration: BoxDecoration(
                 color: AppColors.white,
-                padding: EdgeInsets.symmetric(vertical: BaseSpacing.sm - 1),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: BaseSpacing.md - 1),
-                  child: Row(
-                    children: List.generate(controller.tabs.length, (i) {
-                      final isActive = controller.selectedTab.value == i;
-                      return Padding(
-                        padding: EdgeInsets.only(right: BaseSpacing.xs),
-                        child: Semantics(
-                          button: true,
-                          selected: isActive,
-                          label: controller.tabs[i],
-                          child: GestureDetector(
-                            onTap: () => controller.changeTab(i),
-                            child: AnimatedContainer(
-                              duration: BaseMotion.normal,
-                              curve: Curves.easeInOut,
-                              constraints: const BoxConstraints(minHeight: 40),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: BaseSpacing.md + 2,
-                                vertical: BaseSpacing.xs,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isActive
-                                    ? AppColors.primaryColor
-                                    : AppColors.background,
-                                borderRadius: BorderRadius.circular(
-                                  BaseRadius.pill,
-                                ),
-                                border: Border.all(
-                                  color: isActive
-                                      ? AppColors.primaryColor
-                                      : AppColors.lightGrey2,
+                boxShadow: BaseShadows.forLevel(BaseElevation.level2),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      BaseSpacing.md,
+                      BaseSpacing.sm,
+                      BaseSpacing.md,
+                      BaseSpacing.xs,
+                    ),
+                    child: Obx(
+                      () => AppSearchField(
+                        controller: controller.searchController,
+                        onChanged: controller.updateSearchQuery,
+                        staticHint: 'Search by order # or product',
+                        suffixIcon: controller.searchQuery.value.isEmpty
+                            ? null
+                            : GestureDetector(
+                                onTap: () {
+                                  controller.searchController.clear();
+                                  controller.updateSearchQuery('');
+                                },
+                                child: const SvgIcon(
+                                  assetName: AppIcons.cross,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
-                              alignment: Alignment.center,
-                              child: CustomText(
-                                text: controller.tabs[i],
-                                color: isActive
-                                    ? AppColors.white
-                                    : AppColors.greyDefault,
-                                fontSize: AppFontSize.tiny,
-                                fontWeight: isActive
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Obx(
+                    () => SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.fromLTRB(
+                        BaseSpacing.md,
+                        0,
+                        BaseSpacing.md,
+                        BaseSpacing.sm + 1,
+                      ),
+                      child: Row(
+                        children: List.generate(controller.tabs.length, (i) {
+                          final isActive = controller.selectedTab.value == i;
+                          final count = controller.tabCount(i);
+                          return Padding(
+                            padding: EdgeInsets.only(right: BaseSpacing.xs),
+                            child: Semantics(
+                              button: true,
+                              selected: isActive,
+                              label: controller.tabs[i],
+                              child: GestureDetector(
+                                onTap: () => controller.changeTab(i),
+                                child: AnimatedContainer(
+                                  duration: BaseMotion.normal,
+                                  curve: Curves.easeInOut,
+                                  constraints: const BoxConstraints(minHeight: 36),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: BaseSpacing.sm + 2,
+                                    vertical: BaseSpacing.xxs + 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isActive
+                                        ? AppColors.primaryColor
+                                        : AppColors.background,
+                                    borderRadius: BorderRadius.circular(
+                                      BaseRadius.pill,
+                                    ),
+                                    border: Border.all(
+                                      color: isActive
+                                          ? AppColors.primaryColor
+                                          : AppColors.lightGrey2,
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CustomText(
+                                        text: controller.tabs[i],
+                                        color: isActive
+                                            ? AppColors.white
+                                            : AppColors.greyDefault,
+                                        fontSize: AppFontSize.tiny,
+                                        fontWeight: isActive
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                      ),
+                                      if (count > 0) ...[
+                                        SizedBox(width: BaseSpacing.xxs),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 1,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: isActive
+                                                ? AppColors.white.withOpacity(0.24)
+                                                : AppColors.lightGrey2,
+                                            borderRadius: BorderRadius.circular(
+                                              BaseRadius.pill,
+                                            ),
+                                          ),
+                                          child: CustomText(
+                                            text: '$count',
+                                            color: isActive
+                                                ? AppColors.white
+                                                : AppColors.gray600,
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    }),
+                          );
+                        }),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-            const Divider(height: 0, thickness: 1, color: AppColors.background),
             Expanded(
               child: Obx(() {
                 // Fixed: these branches previously built a widget without
@@ -121,30 +180,43 @@ class MyOrdersView extends StatelessWidget {
                 // loading shimmer never actually appeared — both fall through
                 // to (an empty) order list instead.
                 if (!controller.loginUser.value) {
-                  return SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        LoginSignupCard(),
-                        SizedBox(height: BaseSpacing.xl),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: BaseSpacing.md - 1,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CustomText(
-                                text: "Featured Items you may like",
-                                color: AppColors.black,
-                                fontSize: AppFontSize.small,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              RecommendedProductList(),
-                            ],
+                  // The `Expanded` above already gives this Column bounded
+                  // height — no extra ConstrainedBox/SingleChildScrollView
+                  // wrapper needed (that combination is what was producing
+                  // "RenderFlex... unbounded height constraints" here).
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: SingleChildScrollView(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
+                              child: LoginSignupCard(onLoggedIn: controller.fetchOrders),
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          BaseSpacing.md - 1,
+                          0,
+                          BaseSpacing.md - 1,
+                          BaseSpacing.md,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomText(
+                              text: "Featured Items you may like",
+                              color: AppColors.black,
+                              fontSize: AppFontSize.small,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            RecommendedProductList(),
+                          ],
+                        ),
+                      ),
+                    ],
                   );
                 }
 
@@ -153,25 +225,36 @@ class MyOrdersView extends StatelessWidget {
                 }
 
                 if (controller.filteredOrders.isEmpty) {
-                  return const BaseEmptyView(
-                    icon: Icons.receipt_long_outlined,
-                    title: 'No orders yet',
-                    subtitle: 'Orders you place will show up here.',
+                  final hasQuery = controller.searchQuery.value.isNotEmpty;
+                  return BaseEmptyView(
+                    icon: hasQuery
+                        ? Icons.search_off_rounded
+                        : Icons.receipt_long_outlined,
+                    title: hasQuery ? 'No matching orders' : 'No orders yet',
+                    subtitle: hasQuery
+                        ? 'Try a different order # or product name.'
+                        : 'Orders you place will show up here.',
                   );
                 }
 
                 return CustomRefreshWrapper(
                   onRefresh: () => controller.refreshOrders(),
                   child: ListView.builder(
+                    padding: EdgeInsets.fromLTRB(
+                      AppDimen.allPadding,
+                      BaseSpacing.sm,
+                      AppDimen.allPadding,
+                      BaseSpacing.xl,
+                    ),
                     physics: const AlwaysScrollableScrollPhysics(
                       parent: ClampingScrollPhysics(),
                     ),
                     itemCount: controller.filteredOrders.length,
                     itemBuilder: (_, i) {
                       final order = controller.filteredOrders[i];
-                      return GestureDetector(
+                      return MyOrderCard(
+                        order: order,
                         onTap: () => Get.to(() => OrderTrackingView(index: i)),
-                        child: MyOrderCard(order: order),
                       );
                     },
                   ),

@@ -1,12 +1,12 @@
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/modules/seller_returns/controllers/seller_returns_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 
+/// [status] is a `RefundRequestModel.status` value: 'pending' | 'approved' | 'rejected'.
 class ReturnStatusBadge extends StatelessWidget {
-  final ReturnStatus status;
+  final String status;
 
   const ReturnStatusBadge({super.key, required this.status});
 
@@ -29,14 +29,15 @@ class ReturnStatusBadge extends StatelessWidget {
     );
   }
 
-  static _BadgeStyle _resolveStyle(ReturnStatus status) {
+  static _BadgeStyle _resolveStyle(String status) {
     switch (status) {
-      case ReturnStatus.requested:
-        return const _BadgeStyle('Requested', AppColors.amberDark, AppColors.yellowBg);
-      case ReturnStatus.approved:
+      case 'approved':
         return const _BadgeStyle('Approved', AppColors.darkGreen, AppColors.greenContainerInnerColor);
-      case ReturnStatus.rejected:
+      case 'rejected':
         return const _BadgeStyle('Rejected', AppColors.red, AppColors.lightRed);
+      case 'pending':
+      default:
+        return const _BadgeStyle('Pending', AppColors.amberDark, AppColors.yellowBg);
     }
   }
 }
