@@ -1,7 +1,6 @@
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/components/unread_count_badge.dart';
+import 'package:book_store_app/app/modules/home/widgets/icon_badge.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/modules/seller/controllers/seller_bottom_nav_controller.dart';
 import 'package:book_store_app/app/modules/notifications/controllers/notifications_badge_controller.dart';
@@ -10,8 +9,8 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
-import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,7 +30,14 @@ class SellerAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(gradient: AppColors.appbarGradient),
+      margin: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(AppDimen.borderRadius),
+          bottomRight: Radius.circular(AppDimen.borderRadius),
+        ),
+      ),
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 20,
@@ -51,16 +57,15 @@ class SellerAppBar extends StatelessWidget {
                       text: controller.storeName.value,
                       fontFamily: AppTextStyles.headingFontFamily,
                       fontSize: AppFontSize.small2,
-                      color: AppColors.background,
+                      color: AppColors.primaryColor,
                       fontWeight: FontWeight.w400,
                     ),
-                    const SizedBox(height: 2),
                   ],
                   CustomText(
                     text: title,
                     fontFamily: AppTextStyles.headingFontFamily,
                     fontSize: AppFontSize.large,
-                    color: AppColors.white,
+                    color: AppColors.primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ],
@@ -69,51 +74,40 @@ class SellerAppBar extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () => Get.toNamed(Routes.sellerMessages),
-            child: Container(
-              padding: EdgeInsets.all(BaseSpacing.xs),
-              decoration: BoxDecoration(
-                color: AppColors.background.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(BaseRadius.sm),
-              ),
-              child: Obx(
-                () => UnreadCountBadge(
-                  count: messagingBadge.unreadCount.value,
-                  child: SvgIcon(
-                    assetName: AppIcons.messageIcon,
-                    color: AppColors.white,
-                  ),
-                ),
+            child: Obx(
+              () => IconBadge(
+                icon: AppIcons.messageIcon,
+                count: messagingBadge.unreadCount.value,
               ),
             ),
           ),
           const SizedBox(width: 10),
           GestureDetector(
             onTap: () => Get.toNamed(Routes.notifications),
-            child: Container(
-              padding: EdgeInsets.all(BaseSpacing.xs),
-              decoration: BoxDecoration(
-                color: AppColors.background.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(BaseRadius.sm),
-              ),
-              child: Obx(
-                () => UnreadCountBadge(
-                  count: notificationsBadge.unreadCount.value,
-                  child: SvgIcon(
-                    assetName: AppIcons.notificationIcon,
-                    color: AppColors.white,
-                  ),
-                ),
+            child: Obx(
+              () => IconBadge(
+                icon: AppIcons.notificationIcon,
+                count: notificationsBadge.unreadCount.value,
               ),
             ),
           ),
           const SizedBox(width: 10),
           Obx(() {
-            final profileController = Get.put(ProfileController());
+            if (!Get.isRegistered<ProfileController>()) {
+              Get.put(ProfileController(), permanent: true);
+            }
+            final profileController = Get.find<ProfileController>();
             final user = profileController.user.value;
             final imageUrl = user?.profileImage ?? '';
             final name = user?.name ?? '';
             final initials = name.trim().isNotEmpty
-                ? name.trim().split(' ').map((w) => w[0]).take(2).join().toUpperCase()
+                ? name
+                      .trim()
+                      .split(' ')
+                      .map((w) => w[0])
+                      .take(2)
+                      .join()
+                      .toUpperCase()
                 : 'Me';
 
             return GestureDetector(

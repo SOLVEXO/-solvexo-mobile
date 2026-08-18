@@ -25,12 +25,14 @@ class CustomActionButtons extends StatelessWidget {
     if (order.isCompleted) {
       return Row(
         children: [
-          Expanded(
-            child: PrimaryButton(
-              onPressed: () => ReviewItemPickerSheet.show(context, order),
-              label: "Write Review",
+          if (order.canReview) ...[
+            Expanded(
+              child: PrimaryButton(
+                onPressed: () => ReviewItemPickerSheet.show(context, order),
+                label: "Write Review",
+              ),
             ),
-          ),
+          ],
           if (order.canRequestReturn) ...[
             SizedBox(width: BaseSpacing.xs + 2),
             Expanded(

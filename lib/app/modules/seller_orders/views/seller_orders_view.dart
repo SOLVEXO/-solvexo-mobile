@@ -36,13 +36,16 @@ class SellerOrdersView extends StatelessWidget {
                 final orders = controller.filteredOrders;
                 if (orders.isEmpty) return const OrdersEmptyState();
                 return ListView.separated(
-                  padding: const EdgeInsets.all(AppDimen.allPadding),
+                  padding: EdgeInsets.fromLTRB(
+                    AppDimen.allPadding,
+                    AppDimen.allPadding,
+                    AppDimen.allPadding,
+                    Get.height / 8,
+                  ),
                   itemCount: orders.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) => OrderCard(
-                    order: orders[i],
-                    controller: controller,
-                  ),
+                  itemBuilder: (_, i) =>
+                      OrderCard(order: orders[i], controller: controller),
                 );
               }),
             ),

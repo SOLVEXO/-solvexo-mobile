@@ -10,6 +10,7 @@ class OrderItem {
   final double totalPrice;
   final String status;
   final String returnStatus;
+  final bool isReviewed;
 
   // Denormalized from the parent OrderStore at parse time (see
   // OrderStore.fromJson) — the backend attaches seller info per-store, not
@@ -29,6 +30,7 @@ class OrderItem {
     required this.totalPrice,
     required this.status,
     this.returnStatus = 'none',
+    this.isReviewed = false,
     this.sellerName,
     this.sellerVerified = false,
   });
@@ -46,6 +48,7 @@ class OrderItem {
       totalPrice: (json['totalPrice'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'pending',
       returnStatus: json['returnStatus'] as String? ?? 'none',
+      isReviewed: json['isReviewed'] as bool? ?? false,
     );
   }
 
@@ -62,6 +65,7 @@ class OrderItem {
         totalPrice: totalPrice,
         status: status,
         returnStatus: returnStatus,
+        isReviewed: isReviewed,
         sellerName: sellerName,
         sellerVerified: sellerVerified,
       );

@@ -57,6 +57,18 @@ class SellerOrderDetailView extends StatelessWidget {
                     _Row('Email', order.customerEmail),
                   ],
                 ),
+                if (order.shippingAddress != null) ...[
+                  const SizedBox(height: 12),
+                  _InfoCard(
+                    title: 'Shipping Address',
+                    icon: AppIcons.addressIcon,
+                    rows: [
+                      _Row('Recipient', order.shippingAddress!.recipientName),
+                      _Row('Phone', order.shippingAddress!.phoneNumber),
+                      _Row('Address', order.shippingAddress!.fullAddress),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 12),
                 _ItemsCard(order: order),
                 const SizedBox(height: 12),

@@ -20,13 +20,15 @@ class OrderActions extends StatelessWidget {
     if (order.isCompleted) {
       return Row(
         children: [
-          Expanded(
-            child: OutlineButton(
-              onPressed: () => ReviewItemPickerSheet.show(context, order),
-              label: 'Review',
-              compact: true,
+          if (order.canReview) ...[
+            Expanded(
+              child: OutlineButton(
+                onPressed: () => ReviewItemPickerSheet.show(context, order),
+                label: 'Review',
+                compact: true,
+              ),
             ),
-          ),
+          ],
           if (order.canRequestReturn) ...[
             SizedBox(width: BaseSpacing.xs + 2),
             Expanded(

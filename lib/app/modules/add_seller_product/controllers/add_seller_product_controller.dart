@@ -405,11 +405,11 @@ class AddSellerProductController extends GetxController {
       ToastUtil.showToast('A product needs at least one variant.');
       return;
     }
-    variants[index].dispose();
-    variants.removeAt(index);
+    final removed = variants.removeAt(index);
     if (!variants.any((v) => v.isDefault.value)) {
       variants.first.isDefault.value = true;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => removed.dispose());
   }
 
   void setDefaultVariant(int index) {
@@ -438,8 +438,8 @@ class AddSellerProductController extends GetxController {
 
   void removeDigitalFile(int index) {
     if (index < digitalFiles.length) {
-      digitalFiles[index].dispose();
-      digitalFiles.removeAt(index);
+      final removed = digitalFiles.removeAt(index);
+      WidgetsBinding.instance.addPostFrameCallback((_) => removed.dispose());
     }
   }
 

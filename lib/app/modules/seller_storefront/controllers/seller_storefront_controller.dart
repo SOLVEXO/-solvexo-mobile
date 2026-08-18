@@ -262,7 +262,7 @@ class SellerStorefrontController extends GetxController {
     if (Get.isRegistered<ProfileController>()) {
       return Get.find<ProfileController>();
     }
-    return Get.put(ProfileController());
+    return Get.put(ProfileController(), permanent: true);
   }
 
   // ── Message seller ───────────────────────────────────────────────────────

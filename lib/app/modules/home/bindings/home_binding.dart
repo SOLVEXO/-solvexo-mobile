@@ -7,6 +7,8 @@ class HomeBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(AuthController(), permanent: true);
-    Get.lazyPut<HomeController>(() => HomeController());
+    if (!Get.isRegistered<HomeController>()) {
+      Get.put(HomeController(), permanent: true);
+    }
   }
 }

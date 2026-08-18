@@ -73,6 +73,51 @@ class SellerOrderItem {
   double get totalPrice => price * quantity;
 }
 
+// ── Shipping address model ───────────────────────────────────────────────────
+
+class SellerOrderAddress {
+  final String recipientName;
+  final String phoneNumber;
+  final String addressLine1;
+  final String? addressLine2;
+  final String city;
+  final String state;
+  final String zipCode;
+
+  const SellerOrderAddress({
+    required this.recipientName,
+    required this.phoneNumber,
+    required this.addressLine1,
+    this.addressLine2,
+    required this.city,
+    required this.state,
+    required this.zipCode,
+  });
+
+  factory SellerOrderAddress.fromJson(Map<String, dynamic> json) {
+    return SellerOrderAddress(
+      recipientName: json['recipientName'] as String? ?? '',
+      phoneNumber: json['phoneNumber'] as String? ?? '',
+      addressLine1: json['addressLine1'] as String? ?? '',
+      addressLine2: json['addressLine2'] as String?,
+      city: json['city'] as String? ?? '',
+      state: json['state'] as String? ?? '',
+      zipCode: json['zipCode'] as String? ?? '',
+    );
+  }
+
+  String get fullAddress {
+    final parts = [
+      addressLine1,
+      if (addressLine2 != null && addressLine2!.isNotEmpty) addressLine2,
+      city,
+      state,
+      zipCode,
+    ].where((p) => p != null && p.isNotEmpty);
+    return parts.join(', ');
+  }
+}
+
 // ── Order model ───────────────────────────────────────────────────────────────
 
 class SellerOrder {
@@ -86,6 +131,7 @@ class SellerOrder {
   final bool isPaid;
   final String paymentType;
   final List<SellerOrderItem> items;
+  final SellerOrderAddress? shippingAddress;
 
   const SellerOrder({
     required this.id,
@@ -98,6 +144,7 @@ class SellerOrder {
     required this.isPaid,
     required this.paymentType,
     required this.items,
+    this.shippingAddress,
   });
 
   // Derived helpers — based on the first item for fallback display
@@ -125,6 +172,7 @@ class SellerOrder {
         isPaid: isPaid ?? this.isPaid,
         paymentType: paymentType,
         items: items,
+        shippingAddress: shippingAddress,
       );
 
   factory SellerOrder.fromApiJson(Map<String, dynamic> json) {
@@ -148,6 +196,8 @@ class SellerOrder {
             ),
           ];
 
+    final rawAddress = json['shippingAddress'] as Map<String, dynamic>?;
+
     return SellerOrder(
       id: json['orderId'] as String? ?? '',
       orderNumber: json['orderNumber'] as String? ?? '',
@@ -159,6 +209,8 @@ class SellerOrder {
       isPaid: json['isPaid'] as bool? ?? false,
       paymentType: json['paymentType'] as String? ?? '',
       items: items,
+      shippingAddress:
+          rawAddress != null ? SellerOrderAddress.fromJson(rawAddress) : null,
     );
   }
 

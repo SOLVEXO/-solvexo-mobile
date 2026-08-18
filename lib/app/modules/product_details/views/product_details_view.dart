@@ -25,7 +25,7 @@ class ProductDetailsView extends StatelessWidget {
   final controller = Get.put(ProductDetailController());
 
   ProfileController get profileController {
-    if (!Get.isRegistered<ProfileController>()) Get.put(ProfileController());
+    if (!Get.isRegistered<ProfileController>()) Get.put(ProfileController(), permanent: true);
     return Get.find<ProfileController>();
   }
 
@@ -36,17 +36,15 @@ class ProductDetailsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       // Bottom bar only shown once product is loaded and user is logged in
-      bottomNavigationBar: profileController.user.isNull
-          ? null
-          : Obx(
-              () => controller.isLoading.value
-                  ? const SizedBox.shrink()
-                  : ProductDetailsBottomBar(
-                      controller: controller,
-                      profileController: profileController,
-                      size: size,
-                    ),
-            ),
+      bottomNavigationBar: Obx(
+        () => controller.isLoading.value
+            ? const SizedBox.shrink()
+            : ProductDetailsBottomBar(
+                controller: controller,
+                profileController: profileController,
+                size: size,
+              ),
+      ),
       body: SafeArea(
         bottom: profileController.user.isNull,
         child: Obx(() {

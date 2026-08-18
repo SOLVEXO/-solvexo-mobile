@@ -52,7 +52,7 @@ class ProfileStatsStrip extends StatelessWidget {
                 ),
                 _vDivider(),
                 _StatCell(
-                  value: "${Get.find<WishlistController>().count}",
+                  value: "${Get.put(WishlistController()).count}",
                   label: 'Wishlist',
                 ),
                 _vDivider(),

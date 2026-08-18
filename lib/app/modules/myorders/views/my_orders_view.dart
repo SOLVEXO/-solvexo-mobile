@@ -14,6 +14,7 @@ import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_empty_view.dart';
+import 'package:book_store_app/core/widgets/wave_bottom_nav_bar.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ class MyOrdersView extends StatelessWidget {
         showLeading: Navigator.canPop(context),
       ),
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             // ── Search + status filters — a single elevated block that
@@ -103,7 +105,9 @@ class MyOrdersView extends StatelessWidget {
                                 child: AnimatedContainer(
                                   duration: BaseMotion.normal,
                                   curve: Curves.easeInOut,
-                                  constraints: const BoxConstraints(minHeight: 36),
+                                  constraints: const BoxConstraints(
+                                    minHeight: 36,
+                                  ),
                                   padding: EdgeInsets.symmetric(
                                     horizontal: BaseSpacing.sm + 2,
                                     vertical: BaseSpacing.xxs + 2,
@@ -144,7 +148,9 @@ class MyOrdersView extends StatelessWidget {
                                           ),
                                           decoration: BoxDecoration(
                                             color: isActive
-                                                ? AppColors.white.withOpacity(0.24)
+                                                ? AppColors.white.withOpacity(
+                                                    0.24,
+                                                  )
                                                 : AppColors.lightGrey2,
                                             borderRadius: BorderRadius.circular(
                                               BaseRadius.pill,
@@ -190,8 +196,12 @@ class MyOrdersView extends StatelessWidget {
                         child: Center(
                           child: SingleChildScrollView(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
-                              child: LoginSignupCard(onLoggedIn: controller.fetchOrders),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: BaseSpacing.xl,
+                              ),
+                              child: LoginSignupCard(
+                                onLoggedIn: controller.fetchOrders,
+                              ),
                             ),
                           ),
                         ),
@@ -244,7 +254,7 @@ class MyOrdersView extends StatelessWidget {
                       AppDimen.allPadding,
                       BaseSpacing.sm,
                       AppDimen.allPadding,
-                      BaseSpacing.xl,
+                      WaveBottomNavBar.totalHeight,
                     ),
                     physics: const AlwaysScrollableScrollPhysics(
                       parent: ClampingScrollPhysics(),

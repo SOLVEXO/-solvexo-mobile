@@ -1,6 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = "http://localhost:3002";
-  // static const String baseUrl = "https://staging.solvexo.store";
+  // static const String baseUrl = "http://localhost:3002";
+  static const String baseUrl = "https://staging.solvexo.store";
 
   // static const String baseUrl = "http://192.168.1.101:3002";
 
@@ -41,6 +41,9 @@ class ApiConstants {
   static const String deleteUserAccount = "$apiPrefix/users/profile";
   static const String changePassword = "$apiPrefix/users/change-password";
   static const String banners = "$apiPrefix/banners";
+
+  // ============ Onboarding Slides (public) ============
+  static const String onboardingSlides = "$apiPrefix/onboarding-slides";
 
   // ============ Category Endpoints ============
   static const String categories = "$apiPrefix/categories/category-tree";
@@ -686,6 +689,61 @@ class ApiConstants {
       '$apiPrefix/subscriptions/my/benefits/$storeId';
   static const String buyerMembershipCredits =
       '$apiPrefix/subscriptions/my/credits';
+
+  // ============ Services & Bookings Endpoints — seller (store-scoped) ============
+  // Backed by `src/bookings` on the API — sellers sell bookable appointments
+  // and multi-session packages to buyers (distinct from products/checkout).
+  static String sellerServices(String storeId) =>
+      '$apiPrefix/bookings/$storeId/services';
+  static String sellerServiceById(String storeId, String serviceId) =>
+      '$apiPrefix/bookings/$storeId/services/$serviceId';
+  static String sellerServiceAvailability(String storeId, String serviceId) =>
+      '$apiPrefix/bookings/$storeId/services/$serviceId/availability';
+  static String sellerServicePackages(String storeId, String serviceId) =>
+      '$apiPrefix/bookings/$storeId/services/$serviceId/packages';
+  static String sellerServicePackageById(
+    String storeId,
+    String serviceId,
+    String packageId,
+  ) => '$apiPrefix/bookings/$storeId/services/$serviceId/packages/$packageId';
+  static String sellerBookingsDashboard(String storeId) =>
+      '$apiPrefix/bookings/$storeId/bookings/dashboard';
+  static String sellerBookings(String storeId) =>
+      '$apiPrefix/bookings/$storeId/bookings';
+  static String sellerBookingById(String storeId, String id) =>
+      '$apiPrefix/bookings/$storeId/bookings/$id';
+  static String sellerBookingConfirm(String storeId, String id) =>
+      '$apiPrefix/bookings/$storeId/bookings/$id/confirm';
+  static String sellerBookingComplete(String storeId, String id) =>
+      '$apiPrefix/bookings/$storeId/bookings/$id/complete';
+  static String sellerBookingCancel(String storeId, String id) =>
+      '$apiPrefix/bookings/$storeId/bookings/$id/cancel';
+  static String sellerBookingReschedule(String storeId, String id) =>
+      '$apiPrefix/bookings/$storeId/bookings/$id/reschedule';
+  static String sellerBookingMeetingLink(String storeId, String id) =>
+      '$apiPrefix/bookings/$storeId/bookings/$id/meeting-link';
+
+  // ============ Services & Bookings Endpoints — buyer ============
+  static String buyerStoreServices(String storeId) =>
+      '$apiPrefix/bookings/public/$storeId/services';
+  static String buyerServiceById(String storeId, String serviceId) =>
+      '$apiPrefix/bookings/public/$storeId/services/$serviceId';
+  static String buyerServiceSlots(
+    String storeId,
+    String serviceId,
+    String date,
+  ) =>
+      '$apiPrefix/bookings/public/$storeId/services/$serviceId/slots?date=$date';
+  static const String bookAppointment = '$apiPrefix/bookings/book';
+  static String purchasePackage(String packageId) =>
+      '$apiPrefix/bookings/packages/$packageId/purchase';
+  static const String myBookings = '$apiPrefix/bookings/my';
+  static const String myPackages = '$apiPrefix/bookings/my/packages';
+  static String myBookingById(String id) => '$apiPrefix/bookings/my/$id';
+  static String myBookingCancel(String id) =>
+      '$apiPrefix/bookings/my/$id/cancel';
+  static String myBookingReschedule(String id) =>
+      '$apiPrefix/bookings/my/$id/reschedule';
 
   // ============ Promotions Endpoints — seller (paid ad placements) ============
   static const String promotionsPreviewPrice =

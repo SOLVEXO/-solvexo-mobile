@@ -9,6 +9,7 @@ NotificationType _mapBackendType(String? backendType) {
     case 'order_shipped':
     case 'order_delivered':
     case 'order_cancelled':
+    case 'refund_requested':
     case 'payment_success':
     case 'payment_failed':
     case 'low_stock':

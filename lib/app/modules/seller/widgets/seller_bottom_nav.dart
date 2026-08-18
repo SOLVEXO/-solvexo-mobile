@@ -2,83 +2,52 @@ import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/seller/controllers/seller_bottom_nav_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
+import 'package:book_store_app/core/widgets/wave_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SellerBottomNav extends StatelessWidget {
   const SellerBottomNav({super.key});
 
-  static const _items = [
-    _NavItem(icon: AppIcons.dashboardIcon, label: 'Dashboard'),
-    _NavItem(icon: AppIcons.ordersIcon, label: 'Orders'),
-    _NavItem(icon: AppIcons.shoppingBag, label: 'Products'),
-    _NavItem(icon: AppIcons.anylaticsIcon, label: 'Analytics'),
-    _NavItem(icon: AppIcons.settingIcon, label: 'Settings'),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
-    final controller = Get.find<SellerBottomNavController>();
+    final controller = Get.put(SellerBottomNavController());
     return Obx(() {
       final activeTab = controller.selectedIndex.value;
-      return Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.gray600.withOpacity(0.4),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        padding: EdgeInsets.only(bottom: bottomInset),
-        child: SizedBox(
-          height: 60,
-          child: Row(
-            children: List.generate(_items.length, (i) {
-              final item = _items[i];
-              final isActive = activeTab == i;
-              final color = isActive
-                  ? AppColors.primaryColor
-                  : AppColors.inactiveGrey;
-              return Expanded(
-                child: InkWell(
-                  onTap: () => controller.changeTab(i),
-                  splashColor: AppColors.primaryColor.withOpacity(0.1),
-                  highlightColor: AppColors.transparent,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgIcon(assetName: item.icon, color: color, size: 22),
-                      const SizedBox(height: 4),
-                      AnimatedContainer(
-                        height: 4,
-                        width: 20,
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: isActive
-                              ? AppColors.primaryColor
-                              : Colors.transparent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
+      return WaveBottomNavBar(
+        activeIndex: activeTab,
+        onTap: controller.changeTab,
+        centerItem: WaveNavItem(
+          index: 0,
+          label: 'Dashboard',
+          iconBuilder: (active) => SvgIcon(
+            assetName: AppIcons.dashboardIcon,
+            color: AppColors.white,
+            size: 26,
           ),
         ),
+        sideItems: [
+          _item(index: 1, icon: AppIcons.ordersIcon, label: 'Orders'),
+          _item(index: 2, icon: AppIcons.shoppingBag, label: 'Products'),
+          _item(index: 3, icon: AppIcons.anylaticsIcon, label: 'Analytics'),
+          _item(index: 4, icon: AppIcons.settingIcon, label: 'Settings'),
+        ],
       );
     });
   }
-}
 
-class _NavItem {
-  final String icon;
-  final String label;
-  const _NavItem({required this.icon, required this.label});
+  WaveNavItem _item({
+    required int index,
+    required String icon,
+    required String label,
+  }) {
+    return WaveNavItem(
+      index: index,
+      label: label,
+      iconBuilder: (active) => SvgIcon(
+        assetName: icon,
+        color: active ? AppColors.primaryColor : AppColors.inactiveGrey,
+      ),
+    );
+  }
 }

@@ -239,11 +239,11 @@ class EditSellerProductController extends GetxController {
     }
     final entry = variants[index];
     if (entry.remoteId == null) {
-      entry.dispose();
       variants.removeAt(index);
       if (!variants.any((v) => v.isDefault.value)) {
         variants.first.isDefault.value = true;
       }
+      WidgetsBinding.instance.addPostFrameCallback((_) => entry.dispose());
       return;
     }
 
@@ -256,11 +256,11 @@ class EditSellerProductController extends GetxController {
       onRightButtonTap: () {
         Get.back();
         _pendingVariantDeletions.add(entry.remoteId!);
-        entry.dispose();
         variants.removeAt(index);
         if (!variants.any((v) => v.isDefault.value)) {
           variants.first.isDefault.value = true;
         }
+        WidgetsBinding.instance.addPostFrameCallback((_) => entry.dispose());
       },
     );
   }
@@ -291,8 +291,8 @@ class EditSellerProductController extends GetxController {
 
   void removeDigitalFile(int index) {
     if (index < digitalFiles.length) {
-      digitalFiles[index].dispose();
-      digitalFiles.removeAt(index);
+      final removed = digitalFiles.removeAt(index);
+      WidgetsBinding.instance.addPostFrameCallback((_) => removed.dispose());
     }
   }
 

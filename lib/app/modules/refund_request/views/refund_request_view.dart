@@ -22,7 +22,7 @@ class RefundRequestView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarTwo(title: "Request Refund"),
       body: Obx(() {
         final store = controller.selectedStore.value;
@@ -42,7 +42,8 @@ class RefundRequestView extends StatelessWidget {
 
                 if (controller.eligibleStores.isEmpty)
                   const CustomText(
-                    text: "No items on this order are eligible for a refund request.",
+                    text:
+                        "No items on this order are eligible for a refund request.",
                     fontSize: AppFontSize.small,
                     color: AppColors.grey,
                   )
@@ -63,10 +64,16 @@ class RefundRequestView extends StatelessWidget {
                   Obx(
                     () => AppButton(
                       iconWidget: controller.isLoading.value
-                          ? const CircularProgressIndicator(color: AppColors.background)
+                          ? const CircularProgressIndicator(
+                              color: AppColors.background,
+                            )
                           : const SizedBox(),
-                      label: controller.isLoading.value ? "Submitting" : "Submit Request",
-                      onPressed: controller.canContinue ? controller.submitRefund : null,
+                      label: controller.isLoading.value
+                          ? "Submitting"
+                          : "Submit Request",
+                      onPressed: controller.canContinue
+                          ? controller.submitRefund
+                          : null,
                     ),
                   ),
                 ],
@@ -161,7 +168,8 @@ class RefundRequestView extends StatelessWidget {
         const SizedBox(height: 12),
         if (items.isEmpty)
           const CustomText(
-            text: "No items from this store are currently eligible for a refund.",
+            text:
+                "No items from this store are currently eligible for a refund.",
             fontSize: AppFontSize.small,
             color: AppColors.grey,
           )
@@ -180,7 +188,9 @@ class RefundRequestView extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primaryColor.withOpacity(0.06) : AppColors.background,
+            color: selected
+                ? AppColors.primaryColor.withOpacity(0.06)
+                : AppColors.background,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected ? AppColors.primaryColor : AppColors.transparent,
@@ -191,7 +201,11 @@ class RefundRequestView extends StatelessWidget {
               if (item.image != null)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: CommonImageView(url: item.image, width: 44, height: 44),
+                  child: CommonImageView(
+                    url: item.image,
+                    width: 44,
+                    height: 44,
+                  ),
                 ),
               if (item.image != null) const SizedBox(width: 10),
               Expanded(
@@ -207,7 +221,8 @@ class RefundRequestView extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     CustomText(
-                      text: 'Qty ${item.quantity} · \$${item.totalPrice.toStringAsFixed(2)}',
+                      text:
+                          'Qty ${item.quantity} · \$${item.totalPrice.toStringAsFixed(2)}',
                       fontSize: AppFontSize.tiny,
                       color: AppColors.grey,
                     ),
@@ -255,9 +270,13 @@ class RefundRequestView extends StatelessWidget {
                         ),
                       ),
                       Icon(
-                        selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                        selected
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
                         size: 27,
-                        color: selected ? AppColors.primaryColor : AppColors.grey,
+                        color: selected
+                            ? AppColors.primaryColor
+                            : AppColors.grey,
                       ),
                     ],
                   ),
@@ -361,7 +380,10 @@ class RefundRequestView extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: style.bg,
                   borderRadius: BorderRadius.circular(20),
@@ -378,13 +400,16 @@ class RefundRequestView extends StatelessWidget {
           if (r.isApproved && r.buyerRefundAmount != null) ...[
             const SizedBox(height: 6),
             CustomText(
-              text: 'Refunded: ${CurrencyFormatter.amount(r.buyerRefundAmount!, r.buyerRefundCurrency)}',
+              text:
+                  'Refunded: ${CurrencyFormatter.amount(r.buyerRefundAmount!, r.buyerRefundCurrency)}',
               fontSize: AppFontSize.verySmall,
               color: AppColors.darkGreen,
               fontWeight: FontWeight.w600,
             ),
           ],
-          if (r.isRejected && r.resolutionNotes != null && r.resolutionNotes!.isNotEmpty) ...[
+          if (r.isRejected &&
+              r.resolutionNotes != null &&
+              r.resolutionNotes!.isNotEmpty) ...[
             const SizedBox(height: 6),
             CustomText(
               text: 'Seller note: ${r.resolutionNotes}',
@@ -400,11 +425,23 @@ class RefundRequestView extends StatelessWidget {
   _StatusStyle _resolveStatusStyle(String status) {
     switch (status) {
       case 'approved':
-        return const _StatusStyle('Approved', AppColors.darkGreen, AppColors.greenContainerInnerColor);
+        return const _StatusStyle(
+          'Approved',
+          AppColors.darkGreen,
+          AppColors.greenContainerInnerColor,
+        );
       case 'rejected':
-        return const _StatusStyle('Rejected', AppColors.red, AppColors.lightRed);
+        return const _StatusStyle(
+          'Rejected',
+          AppColors.red,
+          AppColors.lightRed,
+        );
       default:
-        return const _StatusStyle('Pending', AppColors.amberDark, AppColors.yellowBg);
+        return const _StatusStyle(
+          'Pending',
+          AppColors.amberDark,
+          AppColors.yellowBg,
+        );
     }
   }
 }

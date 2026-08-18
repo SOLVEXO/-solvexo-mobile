@@ -1,7 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/product_details/controller/product_detail_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
-import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
@@ -24,21 +23,21 @@ class ProductDetailsBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (profileController.user.value.isNull) {
-      return Container(
-        color: AppColors.white,
-        padding: EdgeInsets.only(
-          left: BaseSpacing.xxl - 2,
-          right: BaseSpacing.xxl - 2,
-          bottom: BaseSpacing.md + 4,
-          top: BaseSpacing.xxs + 1,
-        ),
-        child: PrimaryButton(
-          label: 'Login',
-          onPressed: () => Get.toNamed(Routes.authTabView),
-        ),
-      );
-    }
+    // if (profileController.user.value.isNull) {
+    //   return Container(
+    //     color: AppColors.white,
+    //     padding: EdgeInsets.only(
+    //       left: BaseSpacing.xxl - 2,
+    //       right: BaseSpacing.xxl - 2,
+    //       bottom: BaseSpacing.md + 4,
+    //       top: BaseSpacing.xxs + 1,
+    //     ),
+    //     child: PrimaryButton(
+    //       label: 'Login',
+    //       onPressed: () => Get.toNamed(Routes.authTabView),
+    //     ),
+    //   );
+    // }
 
     return Container(
       color: AppColors.white,
@@ -92,7 +91,8 @@ class ProductDetailsBottomBar extends StatelessWidget {
                     ? 'Add to cart'
                     : 'Out of stock',
                 isLoading: controller.isAddtoCartLoading.value,
-                onPressed: (controller.isAddtoCartLoading.value || !controller.inStock)
+                onPressed:
+                    (controller.isAddtoCartLoading.value || !controller.inStock)
                     ? null
                     : () => controller.addToCart(),
               ),

@@ -13,6 +13,7 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/core/widgets/wave_bottom_nav_bar.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,8 @@ class SearchView extends StatelessWidget {
   // the app. Guarded getters (checked fresh on every `build()`, same as
   // `_categoryController` below) recreate them instead.
   SearchBarController get c {
-    if (!Get.isRegistered<SearchBarController>()) Get.put(SearchBarController());
+    if (!Get.isRegistered<SearchBarController>())
+      Get.put(SearchBarController());
     return Get.find<SearchBarController>();
   }
 
@@ -42,7 +44,9 @@ class SearchView extends StatelessWidget {
   }
 
   CategoryController get _categoryController {
-    if (!Get.isRegistered<CategoryController>()) Get.put(CategoryController());
+    if (!Get.isRegistered<CategoryController>()) {
+      Get.put(CategoryController(), permanent: true);
+    }
     return Get.find<CategoryController>();
   }
 
@@ -53,6 +57,7 @@ class SearchView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppDimen.allPadding),
           child: Column(
@@ -82,7 +87,9 @@ class SearchView extends StatelessWidget {
               // No Results Message — tab-aware (products vs stores)
               Obx(() {
                 final onStoresTab = c.searchTab.value == 1;
-                final isEmpty = onStoresTab ? c.storeResults.isEmpty : !c.hasResults;
+                final isEmpty = onStoresTab
+                    ? c.storeResults.isEmpty
+                    : !c.hasResults;
                 if (!(c.showResults.value && !c.loading.value && isEmpty)) {
                   return const SizedBox();
                 }
@@ -101,7 +108,9 @@ class SearchView extends StatelessWidget {
                           color: AppColors.shimmerBase,
                         ),
                         CustomText(
-                          text: onStoresTab ? "No Stores Found" : "No Products Found",
+                          text: onStoresTab
+                              ? "No Stores Found"
+                              : "No Products Found",
                           textAlign: TextAlign.center,
                           color: AppColors.black,
                           fontSize: AppFontSize.small2,
@@ -151,15 +160,20 @@ class SearchView extends StatelessWidget {
 
               // Products / Stores tabs — only once there's something to switch between
               Obx(
-                () => c.showResults.value && (c.hasResults || c.storeResults.isNotEmpty)
+                () =>
+                    c.showResults.value &&
+                        (c.hasResults || c.storeResults.isNotEmpty)
                     ? _searchTypeTabs()
                     : const SizedBox(),
               ),
 
               // Section Header (Products/Last Seen/Recommended)
               Obx(() {
-                if (c.showResults.value && (c.hasResults || c.storeResults.isNotEmpty)) {
-                  final count = c.searchTab.value == 1 ? c.storeResults.length : c.resultsCount;
+                if (c.showResults.value &&
+                    (c.hasResults || c.storeResults.isNotEmpty)) {
+                  final count = c.searchTab.value == 1
+                      ? c.storeResults.length
+                      : c.resultsCount;
                   final label = c.searchTab.value == 1 ? 'Stores' : 'Products';
                   return _sectionHeader("$label ($count)");
                 } else if (c.searchText.value.isEmpty &&
@@ -196,6 +210,7 @@ class SearchView extends StatelessWidget {
     return Obx(() {
       if (c.searchTab.value == 1) {
         return ListView.builder(
+          padding: EdgeInsets.only(bottom: WaveBottomNavBar.totalHeight),
           itemCount: c.storeResults.length,
           itemBuilder: (_, i) => Padding(
             padding: EdgeInsets.only(bottom: BaseSpacing.sm),
@@ -212,6 +227,7 @@ class SearchView extends StatelessWidget {
               ),
             )
           : ListView.builder(
+              padding: EdgeInsets.only(bottom: WaveBottomNavBar.totalHeight),
               itemCount: c.filteredProducts.length,
               itemBuilder: (_, i) {
                 final prod = c.filteredProducts[i];
@@ -253,7 +269,10 @@ class SearchView extends StatelessWidget {
       return GestureDetector(
         onTap: () => c.switchSearchTab(index),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: BaseSpacing.xxs, horizontal: BaseSpacing.xs),
+          padding: EdgeInsets.symmetric(
+            vertical: BaseSpacing.xxs,
+            horizontal: BaseSpacing.xs,
+          ),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(

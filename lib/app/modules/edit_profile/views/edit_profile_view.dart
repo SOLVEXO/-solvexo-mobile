@@ -19,7 +19,10 @@ class EditProfileView extends StatelessWidget {
   const EditProfileView({super.key});
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ProfileController());
+    if (!Get.isRegistered<ProfileController>()) {
+      Get.put(ProfileController(), permanent: true);
+    }
+    final controller = Get.find<ProfileController>();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBarTwo(title: "Edit Profile"),

@@ -4,6 +4,7 @@ import 'package:book_store_app/app/components/custom_bread_crumbs.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/cart/widgets/wishlist_icon_count.dart';
+import 'package:book_store_app/app/modules/home/widgets/icon_badge.dart';
 import 'package:book_store_app/app/modules/sub_category/controller/sub_category_controller.dart';
 import 'package:book_store_app/app/modules/sub_category/widgets/floating_item_row.dart';
 import 'package:book_store_app/app/modules/home/widgets/banner_carousel.dart';
@@ -32,18 +33,14 @@ class SubCategoryView extends StatelessWidget {
       horizontalPadding: false,
       verticalPadding: false,
       resizeToAvoidBottomInset: true,
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.white,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: CustomFloatingButton(),
       screenName: c.categoryName,
       actions: [
-        Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppColors.primaryColor,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: CartIconWithCount(color: AppColors.white, size: 25),
+        IconBadge(
+          ischild: true,
+          child: CartIconWithCount(color: AppColors.primaryColor, size: 20),
         ),
         SizedBox(width: BaseSpacing.xxs + 3),
         WishlistIconCount(),

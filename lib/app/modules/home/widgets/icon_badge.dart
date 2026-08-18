@@ -1,13 +1,22 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:flutter/material.dart';
 
 class IconBadge extends StatelessWidget {
   final String icon;
   final int count;
-  const IconBadge({super.key, required this.icon, this.count = 0});
+  final Widget? child;
+  final bool ischild;
+  const IconBadge({
+    super.key,
+    this.ischild = false,
+    this.icon = AppIcons.searchIcon,
+    this.count = 0,
+    this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +31,13 @@ class IconBadge extends StatelessWidget {
             borderRadius: BorderRadius.circular(BaseRadius.sm),
           ),
           alignment: Alignment.center,
-          child: SvgIcon(assetName: icon, size: 20, color: AppColors.primaryColor),
+          child: ischild
+              ? child
+              : SvgIcon(
+                  assetName: icon,
+                  size: 20,
+                  color: AppColors.primaryColor,
+                ),
         ),
         if (count > 0)
           Positioned(

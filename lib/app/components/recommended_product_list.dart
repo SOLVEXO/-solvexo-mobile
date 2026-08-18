@@ -11,7 +11,10 @@ class RecommendedProductList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ProductController());
+    if (!Get.isRegistered<ProductController>()) {
+      Get.put(ProductController());
+    }
+    final controller = Get.find<ProductController>();
 
     return Obx(() {
       // ── Loading ───────────────────────────────────────────────────────

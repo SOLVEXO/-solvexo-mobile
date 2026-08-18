@@ -4,6 +4,7 @@ import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/components/custom_icon_button.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/modules/home/widgets/icon_badge.dart';
 import 'package:book_store_app/app/modules/map_picker/controllers/mappicker_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -23,7 +24,8 @@ class MapPickerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topInset = MediaQuery.of(context).padding.top + AppDimen.bottomPadding;
+    final topInset =
+        MediaQuery.of(context).padding.top + AppDimen.bottomPadding;
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
@@ -71,16 +73,20 @@ class MapPickerScreen extends StatelessWidget {
                 spacing: AppDimen.bottomPadding,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.lightGrey, width: 0.3),
                       color: AppColors.white,
-                      borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppDimen.borderRadius,
+                      ),
                     ),
-                    child: CustomIconButton(
-                      onPressed: () => Get.back(),
-                      assetName: AppIcons.chevronLeft,
-                      size: 35,
+                    child: IconBadge(
+                      ischild: true,
+                      child: CustomIconButton(
+                        onPressed: () => Get.back(),
+                        assetName: AppIcons.chevronLeft,
+                        color: AppColors.primaryColor,
+                        size: 25,
+                      ),
                     ),
                   ),
                   Expanded(

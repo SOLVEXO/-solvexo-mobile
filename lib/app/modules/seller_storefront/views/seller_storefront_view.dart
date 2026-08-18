@@ -8,6 +8,7 @@ import 'package:book_store_app/app/modules/seller_storefront/widgets/store_banne
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_filter_bar.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_header.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_plans_teaser.dart';
+import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_services_teaser.dart';
 import 'package:book_store_app/app/modules/seller_storefront/widgets/storefront_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -59,6 +60,11 @@ class SellerStorefrontView extends StatelessWidget {
               // active membership plans.
               SliverToBoxAdapter(
                 child: StorefrontPlansTeaser(storeId: store.storeId, storeName: store.name),
+              ),
+              // Hidden entirely (renders nothing) when the store has no
+              // active bookable services.
+              SliverToBoxAdapter(
+                child: StorefrontServicesTeaser(storeId: store.storeId, storeName: store.name),
               ),
               // ── Merchandising rows — handpicked pinned products read as
               // "curated by the seller", so they lead; the rest follow in a

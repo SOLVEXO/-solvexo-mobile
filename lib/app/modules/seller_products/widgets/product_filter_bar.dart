@@ -59,7 +59,6 @@ class ProductFilterBar extends StatelessWidget {
               ),
             ),
           ),
-          const Divider(height: 1, color: AppColors.lightGrey2),
         ],
       ),
     );

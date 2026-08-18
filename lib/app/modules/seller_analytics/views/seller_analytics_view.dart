@@ -57,10 +57,9 @@ class SellerAnalyticsView extends StatelessWidget {
           ),
           Container(
             color: AppColors.white,
-            padding: EdgeInsets.only(bottom: 5),
+            padding: EdgeInsets.only(bottom: 10),
             child: AnalyticsTabBar(controller: controller),
           ),
-          const Divider(height: 1, color: AppColors.lightGrey2),
           Expanded(
             child: Obx(() {
               return switch (controller.tab.value) {

@@ -77,6 +77,13 @@ class OrderModel {
   List<OrderItem> get allItems =>
       stores.expand((s) => s.items).toList();
 
+  /// Items the buyer hasn't already reviewed — the "Review" action only
+  /// makes sense for these; a rating can only be given once per product.
+  List<OrderItem> get unreviewedItems =>
+      allItems.where((i) => !i.isReviewed).toList();
+
+  bool get canReview => unreviewedItems.isNotEmpty;
+
   /// First item's image, used as the order thumbnail
   String? get thumbnailImage {
     for (final store in stores) {

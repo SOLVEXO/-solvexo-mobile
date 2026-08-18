@@ -13,6 +13,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
+import 'package:book_store_app/core/widgets/wave_bottom_nav_bar.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,12 +36,20 @@ class CartView extends BaseView<CartController> {
   // singleton-replacement issue fixed elsewhere: this ran every time the
   // Cart tab was shown, wiping the shared ProfileController.
   ProfileController get _profileController {
-    if (!Get.isRegistered<ProfileController>()) Get.put(ProfileController());
+    if (!Get.isRegistered<ProfileController>())
+      Get.put(ProfileController(), permanent: true);
     return Get.find<ProfileController>();
   }
 
   @override
   Color? get backgroundColor => AppColors.white;
+
+  // `BaseView`'s default `SafeArea` reserves bottom padding matching the
+  // floating bottom-nav bar's full height, which would otherwise push the
+  // checkout bar up behind the nav bar's overlap zone. Clearance is added
+  // manually below (after `BottomCheckoutBar`) instead.
+  @override
+  bool get useSafeArea => false;
 
   // `MainView` (the bottom-nav shell) is only ever reached via
   // `Get.offAllNamed`, so when Cart is the active tab it sits at the root
@@ -63,116 +72,122 @@ class CartView extends BaseView<CartController> {
   Widget buildBody(BuildContext context) {
     final profileController = _profileController;
 
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return ShimmerEffect(itemCount: 3);
-      }
-      if (controller.cartItems.isEmpty) {
-        // Guests with an empty local cart get the same nudge + recommendations
-        // as before; a guest with items in their cart falls through below to
-        // see the actual cart (guest-allowed) with just a slim login nudge —
-        // checkout itself is the protected action, not viewing the cart.
-        if (profileController.user.isNull) {
-          // Scaffold's body slot already gives this Column bounded height —
-          // no extra ConstrainedBox/SingleChildScrollView wrapper needed
-          // (that combination produces "RenderFlex... unbounded height
-          // constraints" once an Expanded child is involved).
-          return Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
-                      child: LoginSignupCard(onLoggedIn: _onLoggedIn),
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  BaseSpacing.xl,
-                  0,
-                  BaseSpacing.xl,
-                  BaseSpacing.md,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomText(
-                      text: "Featured Items you may like",
-                      color: AppColors.black,
-                      fontSize: AppFontSize.small,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    RecommendedProductList(),
-                  ],
-                ),
-              ),
-            ],
-          );
+    return SafeArea(
+      bottom: false,
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return ShimmerEffect(itemCount: 3);
         }
-        return const EmptyCartText();
-      }
-      return CustomRefreshWrapper(
-        onRefresh: controller.refreshCart,
-        child: Column(
-          children: [
-            if (profileController.user.isNull)
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  BaseSpacing.md,
-                  BaseSpacing.sm,
-                  BaseSpacing.md,
-                  0,
-                ),
-                child: LoginSignupCard(onLoggedIn: _onLoggedIn),
-              ),
-            _selectAllRow(),
-            const Divider(height: 1, thickness: 0.5),
-            Expanded(
-              child: Scrollbar(
-                trackVisibility: true,
-                interactive: true,
-                thickness: 4,
-                child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: ClampingScrollPhysics(),
-                  ),
-                  itemCount: controller.cartItems.length,
-                  itemBuilder: (context, index) {
-                    final cartItem = controller.cartItems[index];
-                    return Column(
-                      children: [
-                        CartItemWidget(item: cartItem),
-                        const Divider(height: 1, thickness: 0.5),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ),
-            if (controller.cartItems.length <= 2)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomText(
-                      text: "Featured Items you may like",
-                      color: AppColors.black,
-                      fontSize: AppFontSize.small,
-                      fontWeight: FontWeight.w600,
+        if (controller.cartItems.isEmpty) {
+          // Guests with an empty local cart get the same nudge + recommendations
+          // as before; a guest with items in their cart falls through below to
+          // see the actual cart (guest-allowed) with just a slim login nudge —
+          // checkout itself is the protected action, not viewing the cart.
+          if (profileController.user.isNull) {
+            // Scaffold's body slot already gives this Column bounded height —
+            // no extra ConstrainedBox/SingleChildScrollView wrapper needed
+            // (that combination produces "RenderFlex... unbounded height
+            // constraints" once an Expanded child is involved).
+            return Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: BaseSpacing.xl,
+                        ),
+                        child: LoginSignupCard(onLoggedIn: _onLoggedIn),
+                      ),
                     ),
-                    RecommendedProductList(),
-                  ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    BaseSpacing.xl,
+                    0,
+                    BaseSpacing.xl,
+                    BaseSpacing.md,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        text: "Featured Items you may like",
+                        color: AppColors.black,
+                        fontSize: AppFontSize.small,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      RecommendedProductList(),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+          return const EmptyCartText();
+        }
+        return CustomRefreshWrapper(
+          onRefresh: controller.refreshCart,
+          child: Column(
+            children: [
+              if (profileController.user.isNull)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    BaseSpacing.md,
+                    BaseSpacing.sm,
+                    BaseSpacing.md,
+                    0,
+                  ),
+                  child: LoginSignupCard(onLoggedIn: _onLoggedIn),
+                ),
+              _selectAllRow(),
+              const Divider(height: 1, thickness: 0.5),
+              Expanded(
+                child: Scrollbar(
+                  trackVisibility: true,
+                  interactive: true,
+                  thickness: 4,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: ClampingScrollPhysics(),
+                    ),
+                    itemCount: controller.cartItems.length,
+                    itemBuilder: (context, index) {
+                      final cartItem = controller.cartItems[index];
+                      return Column(
+                        children: [
+                          CartItemWidget(item: cartItem),
+                          const Divider(height: 1, thickness: 0.5),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
-            BottomCheckoutBar(),
-          ],
-        ),
-      );
-    });
+              if (controller.cartItems.length <= 2)
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        text: "Featured Items you may like",
+                        color: AppColors.black,
+                        fontSize: AppFontSize.small,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      RecommendedProductList(),
+                    ],
+                  ),
+                ),
+              BottomCheckoutBar(),
+              SizedBox(height: WaveBottomNavBar.totalHeight),
+            ],
+          ),
+        );
+      }),
+    );
   }
 
   Widget _selectAllRow() {

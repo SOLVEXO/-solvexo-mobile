@@ -32,6 +32,7 @@ class SellerHomeView extends StatelessWidget {
             child: CustomRefreshWrapper(
               onRefresh: () => controller.refreshData(),
               child: SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: Get.height / 9),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

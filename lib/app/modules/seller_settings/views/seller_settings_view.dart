@@ -23,7 +23,6 @@ class SellerSettingsView extends StatelessWidget {
       body: Column(
         children: [
           SellerAppBar(title: 'Settings'),
-          const Divider(height: 1, color: AppColors.lightGrey2),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) return const SettingsShimmer();
@@ -31,13 +30,9 @@ class SellerSettingsView extends StatelessWidget {
               return CustomRefreshWrapper(
                 onRefresh: controller.refreshData,
                 child: ListView(
-                  padding: const EdgeInsets.only(
-                    top: AppDimen.allPadding,
-                    bottom: AppDimen.allPadding,
-                  ),
+                  padding: EdgeInsets.only(bottom: Get.height / 8),
                   children: [
                     SettingsProfileCard(controller: controller),
-                    const SizedBox(height: 24),
                     ...controller.sections.map(
                       (s) => Padding(
                         padding: const EdgeInsets.only(bottom: 24),

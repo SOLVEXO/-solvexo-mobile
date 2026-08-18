@@ -43,8 +43,8 @@ class VariantEntry {
 
   void removeOption(int index) {
     if (index < options.length) {
-      options[index].dispose();
-      options.removeAt(index);
+      final removed = options.removeAt(index);
+      WidgetsBinding.instance.addPostFrameCallback((_) => removed.dispose());
     }
   }
 

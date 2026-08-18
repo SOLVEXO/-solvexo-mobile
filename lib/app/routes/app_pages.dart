@@ -86,6 +86,8 @@ import '../modules/seller_loyalty/bindings/seller_loyalty_binding.dart';
 import '../modules/seller_loyalty/views/seller_loyalty_view.dart';
 import '../modules/seller_subscriptions/bindings/seller_subscriptions_binding.dart';
 import '../modules/seller_subscriptions/views/seller_subscriptions_view.dart';
+import '../modules/seller_services/bindings/seller_services_binding.dart';
+import '../modules/seller_services/views/seller_services_view.dart';
 import '../modules/seller_platform_plans/bindings/seller_platform_plans_binding.dart';
 import '../modules/seller_platform_plans/views/seller_platform_plans_view.dart';
 import '../modules/seller_seo/bindings/seller_seo_binding.dart';
@@ -102,6 +104,12 @@ import '../modules/loyalty_rewards/bindings/loyalty_rewards_binding.dart';
 import '../modules/loyalty_rewards/views/loyalty_rewards_view.dart';
 import '../modules/my_memberships/bindings/my_memberships_binding.dart';
 import '../modules/my_memberships/views/my_memberships_view.dart';
+import '../modules/store_services/bindings/store_services_binding.dart';
+import '../modules/store_services/bindings/store_service_detail_binding.dart';
+import '../modules/store_services/views/store_services_view.dart';
+import '../modules/store_services/views/store_service_detail_view.dart';
+import '../modules/my_bookings/bindings/my_bookings_binding.dart';
+import '../modules/my_bookings/views/my_bookings_view.dart';
 import '../modules/worksheet_trial/bindings/worksheet_trial_binding.dart';
 import '../modules/worksheet_trial/views/worksheet_trial_view.dart';
 import '../modules/seller_edit_profile/bindings/seller_edit_profile_binding.dart';
@@ -504,6 +512,11 @@ class AppPages {
       binding: SellerSubscriptionsBinding(),
     ),
     GetPage(
+      name: Routes.sellerServices,
+      page: () => SellerServicesView(),
+      binding: SellerServicesBinding(),
+    ),
+    GetPage(
       name: Routes.sellerPlatformPlan,
       page: () => const SellerPlatformPlansView(),
       binding: SellerPlatformPlansBinding(),
@@ -542,6 +555,21 @@ class AppPages {
       name: Routes.myMemberships,
       page: () => MyMembershipsView(),
       binding: MyMembershipsBinding(),
+    ),
+    GetPage(
+      name: Routes.storeServices,
+      page: () => StoreServicesView(),
+      binding: StoreServicesBinding(),
+    ),
+    GetPage(
+      name: Routes.storeServiceDetail,
+      page: () => StoreServiceDetailView(),
+      binding: StoreServiceDetailBinding(),
+    ),
+    GetPage(
+      name: Routes.myBookings,
+      page: () => MyBookingsView(),
+      binding: MyBookingsBinding(),
     ),
     GetPage(
       name: Routes.worksheetTrial,

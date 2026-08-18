@@ -56,7 +56,7 @@ class HomeController extends BaseController {
            categoryController ??
            (Get.isRegistered<CategoryController>()
                ? Get.find<CategoryController>()
-               : Get.put(CategoryController()));
+               : Get.put(CategoryController(), permanent: true));
 
   final ProductRepository _productRepository;
   final CategoryRepository _categoryRepository;

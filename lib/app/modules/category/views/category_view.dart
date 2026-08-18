@@ -26,7 +26,9 @@ class CategoryView extends StatelessWidget {
   // `CategoryController` singleton (also used by Home's "Browse by
   // Category" section) every time this screen was opened.
   CategoryController get controller {
-    if (!Get.isRegistered<CategoryController>()) Get.put(CategoryController());
+    if (!Get.isRegistered<CategoryController>()) {
+      Get.put(CategoryController(), permanent: true);
+    }
     return Get.find<CategoryController>();
   }
 

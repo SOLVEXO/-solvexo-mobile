@@ -12,7 +12,8 @@ class SellerMainView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
+      extendBody: true,
       body: Obx(() => controller.screens[controller.selectedIndex.value]),
       bottomNavigationBar: const SellerBottomNav(),
     );

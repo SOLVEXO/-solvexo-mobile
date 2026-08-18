@@ -32,7 +32,7 @@ class HomeGreetingHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
-        : Get.put(ProfileController());
+        : Get.put(ProfileController(), permanent: true);
     final messagingBadge = Get.put(MessagingBadgeController());
     final notificationsBadge = Get.put(NotificationsBadgeController());
 

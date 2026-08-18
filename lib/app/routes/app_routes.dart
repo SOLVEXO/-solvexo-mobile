@@ -86,6 +86,7 @@ abstract class Routes {
   static const sellerCoupons = '/seller/coupons';
   static const sellerLoyalty = '/seller/loyalty';
   static const sellerSubscriptionPlans = '/seller/subscription-plans';
+  static const sellerServices = '/seller/services';
   static const sellerPlatformPlan = '/seller/platform-plan';
   static const sellerSeo = '/seller/seo';
   static const sellerSeoProducts = '/seller/seo/products';
@@ -110,6 +111,11 @@ abstract class Routes {
 
   // Buyer — store memberships (subscriptions)
   static const myMemberships = '/my-memberships';
+
+  // Buyer — store services & bookings
+  static const storeServices = '/store/services';
+  static const storeServiceDetail = '/store/services/detail';
+  static const myBookings = '/my-bookings';
 
   // Buyer/guest — free, unauthenticated AI Worksheet Builder trial
   static const worksheetTrial = '/worksheet-trial';

@@ -15,7 +15,7 @@ class ReviewItemPickerSheet {
   ReviewItemPickerSheet._();
 
   static void show(BuildContext context, OrderModel order) {
-    final items = order.allItems;
+    final items = order.unreviewedItems;
     if (items.isEmpty) return;
 
     if (items.length == 1) {

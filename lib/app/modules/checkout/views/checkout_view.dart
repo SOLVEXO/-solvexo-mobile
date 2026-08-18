@@ -256,8 +256,10 @@ class CheckoutView extends StatelessWidget {
                           ),
                       ],
                     ),
-                    subtitle: Row(
+                    subtitle: Wrap(
                       spacing: BaseSpacing.xxs + 2,
+                      runSpacing: BaseSpacing.xxs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         CustomText(
                           text: "${item.quantity} Item",

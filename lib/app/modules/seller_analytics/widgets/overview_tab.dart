@@ -28,7 +28,7 @@ class OverviewTab extends StatelessWidget {
             BaseSpacing.md,
             0,
             BaseSpacing.md,
-            BaseSpacing.md,
+            Get.height / 8,
           ),
           children: [
             AnalyticsKpiGrid(data: controller.overview.value),
@@ -53,9 +53,15 @@ class OverviewTab extends StatelessWidget {
             SizedBox(height: BaseSpacing.sm),
             AnalyticsTrafficDonut(sources: controller.trafficSources),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsTopProductsCard(products: controller.topProducts, currency: controller.currency),
+            AnalyticsTopProductsCard(
+              products: controller.topProducts,
+              currency: controller.currency,
+            ),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsPaymentMethodsCard(methods: controller.paymentMethods, currency: controller.currency),
+            AnalyticsPaymentMethodsCard(
+              methods: controller.paymentMethods,
+              currency: controller.currency,
+            ),
             SizedBox(height: BaseSpacing.lg),
           ],
         ),

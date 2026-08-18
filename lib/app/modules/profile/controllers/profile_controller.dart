@@ -37,6 +37,11 @@ class ProfileController extends GetxController {
             title: 'My Memberships',
             onTap: () => Get.toNamed(Routes.myMemberships),
           ),
+          SettingsTile(
+            icon: AppIcons.calenderIcon,
+            title: 'My Bookings',
+            onTap: () => Get.toNamed(Routes.myBookings),
+          ),
         ],
       ),
     if (isLoggedIn)

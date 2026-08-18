@@ -19,12 +19,21 @@ class InventoryTab extends StatelessWidget {
       if (controller.isLoadingInventory.value) return const AnalyticsShimmer();
 
       final data = controller.inventory.value;
-      final isEmpty = data.outOfStock.isEmpty && data.fastMoving.isEmpty && data.slowMoving.isEmpty && data.reorderSuggestions.isEmpty;
+      final isEmpty =
+          data.outOfStock.isEmpty &&
+          data.fastMoving.isEmpty &&
+          data.slowMoving.isEmpty &&
+          data.reorderSuggestions.isEmpty;
 
       return CustomRefreshWrapper(
         onRefresh: controller.loadInventory,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.sm, BaseSpacing.md, BaseSpacing.md),
+          padding: EdgeInsets.fromLTRB(
+            BaseSpacing.md,
+            BaseSpacing.sm,
+            BaseSpacing.md,
+            Get.height / 8,
+          ),
           children: [
             if (data.note.isNotEmpty) _NoteBanner(text: data.note),
             if (data.note.isNotEmpty) SizedBox(height: BaseSpacing.md),
@@ -34,9 +43,18 @@ class InventoryTab extends StatelessWidget {
                 child: Center(
                   child: Column(
                     children: [
-                      Icon(Icons.inventory_2_outlined, size: 44, color: AppColors.lightGrey),
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 44,
+                        color: AppColors.lightGrey,
+                      ),
                       SizedBox(height: BaseSpacing.sm),
-                      CustomText(text: 'Nothing to flag right now', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400),
+                      CustomText(
+                        text: 'Nothing to flag right now',
+                        color: AppColors.gray600,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ],
                   ),
                 ),
@@ -48,7 +66,13 @@ class InventoryTab extends StatelessWidget {
                   icon: Icons.shopping_cart_checkout_rounded,
                   iconColor: AppColors.orange,
                   items: data.reorderSuggestions
-                      .map((e) => _Row(name: e.name, trailing: '${e.currentStock} left · ~${e.estimatedWeeksRemaining?.toStringAsFixed(1)}w'))
+                      .map(
+                        (e) => _Row(
+                          name: e.name,
+                          trailing:
+                              '${e.currentStock} left · ~${e.estimatedWeeksRemaining?.toStringAsFixed(1)}w',
+                        ),
+                      )
                       .toList(),
                 ),
                 SizedBox(height: BaseSpacing.md),
@@ -58,7 +82,14 @@ class InventoryTab extends StatelessWidget {
                   title: 'Out of Stock',
                   icon: Icons.remove_shopping_cart_outlined,
                   iconColor: AppColors.red,
-                  items: data.outOfStock.map((e) => _Row(name: e.name, trailing: '${e.unitsSoldLast30Days} sold (30d)')).toList(),
+                  items: data.outOfStock
+                      .map(
+                        (e) => _Row(
+                          name: e.name,
+                          trailing: '${e.unitsSoldLast30Days} sold (30d)',
+                        ),
+                      )
+                      .toList(),
                 ),
                 SizedBox(height: BaseSpacing.md),
               ],
@@ -67,7 +98,15 @@ class InventoryTab extends StatelessWidget {
                   title: 'Fast Moving',
                   icon: Icons.trending_up_rounded,
                   iconColor: AppColors.greenSuccess,
-                  items: data.fastMoving.map((e) => _Row(name: e.name, trailing: '${e.sellThroughRatePercent?.toStringAsFixed(0)}% sell-through')).toList(),
+                  items: data.fastMoving
+                      .map(
+                        (e) => _Row(
+                          name: e.name,
+                          trailing:
+                              '${e.sellThroughRatePercent?.toStringAsFixed(0)}% sell-through',
+                        ),
+                      )
+                      .toList(),
                 ),
                 SizedBox(height: BaseSpacing.md),
               ],
@@ -76,7 +115,15 @@ class InventoryTab extends StatelessWidget {
                   title: 'Slow Moving',
                   icon: Icons.trending_down_rounded,
                   iconColor: AppColors.gray600,
-                  items: data.slowMoving.map((e) => _Row(name: e.name, trailing: '${e.sellThroughRatePercent?.toStringAsFixed(0)}% sell-through')).toList(),
+                  items: data.slowMoving
+                      .map(
+                        (e) => _Row(
+                          name: e.name,
+                          trailing:
+                              '${e.sellThroughRatePercent?.toStringAsFixed(0)}% sell-through',
+                        ),
+                      )
+                      .toList(),
                 ),
             ],
             SizedBox(height: BaseSpacing.xxl),
@@ -102,9 +149,20 @@ class _NoteBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primaryColor),
+          Icon(
+            Icons.info_outline_rounded,
+            size: 16,
+            color: AppColors.primaryColor,
+          ),
           SizedBox(width: BaseSpacing.xs),
-          Expanded(child: CustomText(text: text, color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600)),
+          Expanded(
+            child: CustomText(
+              text: text,
+              color: AppColors.primaryColor,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -116,14 +174,23 @@ class _SectionCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final List<_Row> items;
-  const _SectionCard({required this.title, required this.icon, required this.iconColor, required this.items});
+  const _SectionCard({
+    required this.title,
+    required this.icon,
+    required this.iconColor,
+    required this.items,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(BaseSpacing.sm + 2),
-      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(BaseRadius.lg), boxShadow: BaseShadows.forLevel(BaseElevation.level1)),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(BaseRadius.lg),
+        boxShadow: BaseShadows.forLevel(BaseElevation.level1),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -131,9 +198,19 @@ class _SectionCard extends StatelessWidget {
             children: [
               Icon(icon, size: 16, color: iconColor),
               SizedBox(width: BaseSpacing.xs),
-              CustomText(text: title, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
+              CustomText(
+                text: title,
+                color: AppColors.black2,
+                fontSize: AppFontSize.extraSmall,
+                fontWeight: FontWeight.w700,
+              ),
               const Spacer(),
-              CustomText(text: '${items.length}', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+              CustomText(
+                text: '${items.length}',
+                color: AppColors.gray600,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
+              ),
             ],
           ),
           SizedBox(height: BaseSpacing.xs),
@@ -155,8 +232,22 @@ class _Row extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: BaseSpacing.xxs + 1),
       child: Row(
         children: [
-          Expanded(child: CustomText(text: name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w400, maxLines: 1, overflow: TextOverflow.ellipsis)),
-          CustomText(text: trailing, color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+          Expanded(
+            child: CustomText(
+              text: name,
+              color: AppColors.black2,
+              fontSize: AppFontSize.tiny,
+              fontWeight: FontWeight.w400,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          CustomText(
+            text: trailing,
+            color: AppColors.gray600,
+            fontSize: AppFontSize.tiny,
+            fontWeight: FontWeight.w600,
+          ),
         ],
       ),
     );
