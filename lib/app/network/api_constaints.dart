@@ -1,6 +1,6 @@
 class ApiConstants {
   // static const String baseUrl = "http://localhost:3002";
-  static const String baseUrl = "https://staging.solvexo.store";
+  static const String baseUrl = "https://api.solvexo.store";
 
   // static const String baseUrl = "http://192.168.1.101:3002";
 

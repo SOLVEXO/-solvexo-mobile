@@ -5,7 +5,6 @@ import 'package:book_store_app/app/modules/seller_settings/widgets/settings_prof
 import 'package:book_store_app/app/modules/seller_settings/widgets/settings_section.dart';
 import 'package:book_store_app/app/modules/seller_settings/widgets/settings_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

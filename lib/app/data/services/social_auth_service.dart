@@ -31,7 +31,12 @@ class SocialAuthService {
     try {
       debugPrint('🔄 Starting Google Sign In...');
 
-      await _googleSignIn.initialize();
+      await _googleSignIn.initialize(
+        clientId:
+            '707145385701-8fq45ig5sadbpdgvr463du7r2migqn6t.apps.googleusercontent.com',
+        serverClientId:
+            '707145385701-quuhmj7p5tgvr1jjuuqgb0h0t2r7rqk2.apps.googleusercontent.com',
+      );
 
       final GoogleSignInAccount account = await _googleSignIn.authenticate();
 

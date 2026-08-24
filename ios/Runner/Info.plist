@@ -29,12 +29,14 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.926956554370-ehairlh6acrmhvu3fn0470m6vudq8tef</string>
+				<string>com.googleusercontent.apps.707145385701-8fq45ig5sadbpdgvr463du7r2migqn6t</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>2</string>
+	<key>GIDClientID</key>
+	<string>707145385701-8fq45ig5sadbpdgvr463du7r2migqn6t.apps.googleusercontent.com</string>
 	<key>GMSApiKey</key>
 	<string>AIzaSyBbnJMcOAOF5hP0GVMgbKduGtYRa5Q56v0</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
