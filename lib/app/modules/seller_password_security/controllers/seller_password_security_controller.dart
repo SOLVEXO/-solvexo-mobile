@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
+import 'package:book_store_app/utils/password_rules.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,8 @@ class SellerPasswordSecurityController extends GetxController {
 
   bool get canSave =>
       currentPwd.value.isNotEmpty &&
-      newPwd.value.length >= 8 &&
+      newPwd.value.length >= PasswordRules.minLength &&
+      newPwd.value.length <= PasswordRules.maxLength &&
       newPwd.value == confirmPwd.value;
 
   String? get strengthLabel {

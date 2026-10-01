@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
+import 'package:book_store_app/utils/password_rules.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
@@ -99,10 +100,7 @@ class ChangePasswordView extends StatelessWidget {
                           if (value == null || value.isEmpty) {
                             return 'Please enter new password';
                           }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          return null;
+                          return PasswordRules.validateNew(value);
                         },
                         isborder: true,
                         fillColor: AppColors.textfldFillColor,

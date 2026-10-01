@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/auth_or_row.dart';
+import 'package:book_store_app/utils/password_rules.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
@@ -128,7 +129,7 @@ class SignUpView extends StatelessWidget {
                 ),
                 controller: authController.registerPasswordController,
                 obscureText: !authController.isPasswordVisible.value,
-                validator: authController.validatePassword,
+                validator: authController.validateNewPassword,
                 suffixIcon: SvgIcon(
                   assetName: authController.isPasswordVisible.value
                       ? AppIcons.hidePassword

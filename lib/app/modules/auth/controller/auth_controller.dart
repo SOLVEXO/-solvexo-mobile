@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:book_store_app/utils/password_rules.dart';
 
 import 'package:dio/dio.dart';
 
@@ -143,6 +144,9 @@ class AuthController extends BaseController {
 
     return null;
   }
+
+  /// Validate a NEW password (sign-up): 8–72 characters, as the API requires.
+  String? validateNewPassword(String? value) => PasswordRules.validateNew(value);
 
   /// Validate confirm password
   String? validateConfirmPassword(String? value) {

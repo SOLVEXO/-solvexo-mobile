@@ -1,4 +1,5 @@
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/password_rules.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
@@ -41,7 +42,7 @@ class ResetPasswordController extends BaseController {
   // ================= VALIDATION =================
 
   @override
-  String? validatePassword(String? value, {int minLength = 6}) {
+  String? validatePassword(String? value, {int minLength = PasswordRules.minLength}) {
     if (value == null || value.isEmpty) {
       return "Enter new password";
     }
@@ -76,8 +77,9 @@ class ResetPasswordController extends BaseController {
       return;
     }
 
-    if (passwordController.text.length < 6) {
-      ToastUtil.showToast("Password must be at least 6 characters");
+    final passwordError = PasswordRules.validateNew(passwordController.text);
+    if (passwordError != null) {
+      ToastUtil.showToast(passwordError);
       return;
     }
 
