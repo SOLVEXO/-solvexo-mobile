@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:book_store_app/config/feature_flags.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
@@ -37,11 +38,12 @@ class ProfileController extends GetxController {
             title: 'My Memberships',
             onTap: () => Get.toNamed(Routes.myMemberships),
           ),
-          SettingsTile(
-            icon: AppIcons.calenderIcon,
-            title: 'My Bookings',
-            onTap: () => Get.toNamed(Routes.myBookings),
-          ),
+          if (FeatureFlags.bookings)
+            SettingsTile(
+              icon: AppIcons.calenderIcon,
+              title: 'My Bookings',
+              onTap: () => Get.toNamed(Routes.myBookings),
+            ),
         ],
       ),
     if (isLoggedIn)

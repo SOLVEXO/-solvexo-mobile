@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/config/feature_flags.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/home/widgets/product_card.dart';
 import 'package:book_store_app/app/modules/seller_storefront/controllers/seller_storefront_controller.dart';
@@ -63,9 +64,10 @@ class SellerStorefrontView extends StatelessWidget {
               ),
               // Hidden entirely (renders nothing) when the store has no
               // active bookable services.
-              SliverToBoxAdapter(
-                child: StorefrontServicesTeaser(storeId: store.storeId, storeName: store.name),
-              ),
+              if (FeatureFlags.bookings)
+                SliverToBoxAdapter(
+                  child: StorefrontServicesTeaser(storeId: store.storeId, storeName: store.name),
+                ),
               // ── Merchandising rows — handpicked pinned products read as
               // "curated by the seller", so they lead; the rest follow in a
               // discovery-oriented order. Each hides itself when empty.

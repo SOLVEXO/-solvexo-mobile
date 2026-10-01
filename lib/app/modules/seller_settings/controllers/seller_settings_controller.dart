@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
+import 'package:book_store_app/config/feature_flags.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/data/repositories/notifications_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
@@ -113,11 +114,12 @@ class SellerSettingsController extends GetxController {
           title: 'Subscription Plans',
           onTap: () => Get.toNamed(Routes.sellerSubscriptionPlans),
         ),
-        SettingsTile(
-          emoji: AppIcons.calenderIcon,
-          title: 'Services & Bookings',
-          onTap: () => Get.toNamed(Routes.sellerServices),
-        ),
+        if (FeatureFlags.bookings)
+          SettingsTile(
+            emoji: AppIcons.calenderIcon,
+            title: 'Services & Bookings',
+            onTap: () => Get.toNamed(Routes.sellerServices),
+          ),
         SettingsTile(
           emoji: AppIcons.dashboardIcon,
           title: 'Storefront Banners',

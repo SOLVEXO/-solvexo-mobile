@@ -158,7 +158,6 @@ class ApiConstants {
   static const String orders = "$apiPrefix/orders";
   static const String myOrders = "$apiPrefix/orders/my-orders";
   static String getOrderById(String id) => "$apiPrefix/orders/$id";
-  static String updateOrderToPaid(String id) => "$apiPrefix/orders/$id/pay";
   static String cancelOrder(String id) => "$apiPrefix/orders/cancel/$id";
   static String returnRequest(String orderId) =>
       "$apiPrefix/orders/return-request/$orderId";

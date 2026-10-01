@@ -121,38 +121,6 @@ class OrderRepository {
     }
   }
 
-  /// Update order to paid
-  Future<bool> updateOrderToPaid({
-    required String orderId,
-    required String paymentId,
-    required String paymentStatus,
-    String? emailAddress,
-  }) async {
-    try {
-      // final token = await AppPreferences.getAccessTokenAsync();
-
-      debugPrint('🔄 Updating order to paid: $orderId');
-
-      final response = await _baseClient.put(
-        '${ApiConstants.orders}/$orderId/pay',
-
-        data: {
-          'id': paymentId,
-          'status': paymentStatus,
-          'update_time': DateTime.now().toIso8601String(),
-          'email_address': emailAddress,
-        },
-      );
-
-      debugPrint('✅ Update to Paid Response: ${response.data}');
-
-      return response.data['success'] == true;
-    } catch (e) {
-      debugPrint('❌ Update to Paid error: $e');
-      rethrow;
-    }
-  }
-
   // ─── Digital product delivery ──────────────────────────────────────────────
 
   /// GET /api/orders/download-url — signed, short-lived (10-min) tokens for
