@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:book_store_app/app/network/api_error.dart';
+import 'package:book_store_app/utils/otp_errors.dart';
 
 import 'package:book_store_app/app/data/models/common_models/auth_response_model.dart';
 import 'package:book_store_app/app/data/models/common_models/social_login_model.dart';
@@ -15,6 +16,15 @@ import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
+
+/// Outcome of `POST /auth/verifyOtp`.
+class OtpVerifyResult {
+  OtpVerifyResult({this.auth, this.message, this.failure});
+  final AuthResponseModel? auth;
+  final String? message;
+  final OtpFailure? failure;
+  bool get ok => auth != null;
+}
 
 class AuthRepository {
   final BaseClient _baseClient = BaseClient();
@@ -61,7 +71,7 @@ class AuthRepository {
   }
 
   // ================= VERIFY EMAIL OTP =================
-  Future<AuthResponseModel?> verifyEmailOtp({
+  Future<OtpVerifyResult> verifyEmailOtp({
     required String email,
     required String otp,
     String role = 'user',
@@ -88,14 +98,28 @@ class AuthRepository {
         );
         unawaited(FcmService().init());
 
-        return auth;
+        return OtpVerifyResult(auth: auth);
       }
 
-      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Invalid OTP');
-      return null;
+      final message = ApiError.fromBody(response.data) ?? 'Invalid OTP';
+      return OtpVerifyResult(
+        message: message,
+        failure: OtpErrors.classify(message),
+      );
+    } on DioException catch (e) {
+      debugPrint("Verify OTP error: ${e.response?.statusCode}");
+      final message = ApiError.fromDio(e) ??
+          'Could not verify the code. Please check your connection.';
+      return OtpVerifyResult(
+        message: message,
+        failure: OtpErrors.classify(ApiError.fromDio(e)),
+      );
     } catch (e) {
       debugPrint("Verify OTP error: $e");
-      return null;
+      return OtpVerifyResult(
+        message: 'Could not verify the code. Please try again.',
+        failure: OtpFailure.other,
+      );
     }
   }
 
@@ -133,7 +157,7 @@ class AuthRepository {
     }
   }
 
-  Future<bool> resetPassword({
+  Future<({bool success, String? message, OtpFailure? failure})> resetPassword({
     required String email,
     required String otp,
     required String newPassword,
@@ -151,9 +175,24 @@ class AuthRepository {
         requiresAuth: false,
       );
 
-      return res.data['success'] == true;
+      if (res.data['success'] == true) {
+        return (success: true, message: null, failure: null);
+      }
+      final message = ApiError.fromBody(res.data);
+      return (
+        success: false,
+        message: message,
+        failure: OtpErrors.classify(message),
+      );
+    } on DioException catch (e) {
+      final message = ApiError.fromDio(e);
+      return (
+        success: false,
+        message: message,
+        failure: OtpErrors.classify(message),
+      );
     } catch (_) {
-      return false;
+      return (success: false, message: null, failure: OtpFailure.other);
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/otp_errors.dart';
 import 'package:book_store_app/utils/password_rules.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -86,7 +87,7 @@ class ResetPasswordController extends BaseController {
     isLoading.value = true;
 
     final intentRole = await AppPreferences.getIntentRole();
-    final success = await _authRepository.resetPassword(
+    final result = await _authRepository.resetPassword(
       email: email,
       otp: otp,
       newPassword: passwordController.text,
@@ -95,8 +96,19 @@ class ResetPasswordController extends BaseController {
 
     isLoading.value = false;
 
-    if (!success) {
-      ToastUtil.showToast("Failed to reset password. OTP may have expired.");
+    if (!result.success) {
+      if (result.failure == OtpFailure.burned) {
+        // Expired or burned after 5 wrong tries: go back to the code screen,
+        // where the user can request a new one.
+        ToastUtil.showToast(
+          result.message ?? 'This code is no longer valid. Please request a new one.',
+        );
+        Get.back();
+      } else if (result.failure == OtpFailure.invalid) {
+        ToastUtil.showToast('That code is incorrect. Go back and re-enter it.');
+      } else {
+        ToastUtil.showToast(result.message ?? 'Failed to reset password.');
+      }
       return;
     }
 

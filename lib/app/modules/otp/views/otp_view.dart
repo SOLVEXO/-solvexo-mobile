@@ -40,7 +40,8 @@ class OtpView extends StatelessWidget {
           /// numeric keyboard, and — via `enablePinAutofill`, on by default —
           /// wires the OS one-time-code autofill hint so iOS/Android can
           /// suggest the code as soon as it arrives.
-          PinCodeTextField(
+          Obx(() => PinCodeTextField(
+            enabled: !controller.isLocked.value,
             appContext: context,
             length: controller.otpLength,
             controller: controller.otpTextController,
@@ -72,7 +73,7 @@ class OtpView extends StatelessWidget {
             enableActiveFill: true,
             onChanged: controller.onOtpChanged,
             onCompleted: controller.submitOtp,
-          ),
+          )),
 
           // Inline error — the old flow only shook the boxes on a wrong code
           // with no explanation; this makes the failure legible.
@@ -139,7 +140,7 @@ class OtpView extends StatelessWidget {
             return PrimaryButton(
               label: controller.isLoading.value ? "Verifying..." : "Verify",
               isLoading: controller.isLoading.value,
-              onPressed: controller.isLoading.value
+              onPressed: controller.isLoading.value || controller.isLocked.value
                   ? null
                   : () => controller.submitOtp(),
             );

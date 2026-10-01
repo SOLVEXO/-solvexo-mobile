@@ -11,6 +11,7 @@ import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart'
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
+import 'package:book_store_app/utils/otp_errors.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 
 class OtpController extends BaseController {
@@ -56,6 +57,11 @@ class OtpController extends BaseController {
   RxInt timerSec = 60.obs;
   RxBool isResending = false.obs;
   RxString errorText = ''.obs;
+
+  /// The current code can't be used any more (burned after 5 wrong tries, or
+  /// expired). Input and Verify are disabled until a new code is requested.
+  RxBool isLocked = false.obs;
+  int _wrongAttempts = 0;
   @override
   RxBool isLoading = false.obs;
 
@@ -107,6 +113,7 @@ class OtpController extends BaseController {
   /// directly avoids a race where `otpTextController.text` hasn't caught up
   /// yet when the last digit lands.
   Future<void> submitOtp([String? completedCode]) async {
+    if (isLocked.value) return;
     final code = completedCode ?? otpCode;
     if (code.length != otpLength) {
       ToastUtil.showToast("Please enter all 6 digits");
@@ -118,7 +125,7 @@ class OtpController extends BaseController {
     if (otpType == "verify_email") {
       final intentRole = await AppPreferences.getIntentRole();
 
-      final auth = await _authRepository.verifyEmailOtp(
+      final result = await _authRepository.verifyEmailOtp(
         email: email,
         otp: code,
         role: intentRole ?? 'user',
@@ -126,10 +133,9 @@ class OtpController extends BaseController {
 
       isLoading.value = false;
 
+      final auth = result.auth;
       if (auth == null) {
-        errorText.value = 'Incorrect code. Please try again.';
-        errorController.add(ErrorAnimationType.shake);
-        clearOtp();
+        _handleFailedAttempt(result.failure, result.message);
         return;
       }
 
@@ -166,6 +172,36 @@ class OtpController extends BaseController {
     }
   }
 
+  /// Wrong code, burned code, or a non-OTP failure. The server answers the 5th
+  /// wrong try with "Invalid OTP" while already burning the code, so the client
+  /// counts attempts too and locks input on the 5th.
+  void _handleFailedAttempt(OtpFailure? failure, String? message) {
+    errorController.add(ErrorAnimationType.shake);
+    clearOtp();
+
+    if (failure == OtpFailure.invalid) {
+      _wrongAttempts++;
+      if (_wrongAttempts >= OtpErrors.maxAttempts) {
+        _lock('Too many wrong attempts. This code is no longer valid.');
+      } else {
+        final left = OtpErrors.maxAttempts - _wrongAttempts;
+        errorText.value =
+            'Incorrect code. $left ${left == 1 ? 'try' : 'tries'} left.';
+      }
+    } else if (failure == OtpFailure.burned) {
+      _lock(message ?? 'This code is no longer valid.');
+    } else {
+      errorText.value = message ?? 'Could not verify the code. Please try again.';
+    }
+  }
+
+  void _lock(String reason) {
+    isLocked.value = true;
+    errorText.value = '$reason Request a new code.';
+    // No point making the user wait out the resend timer for a dead code.
+    resendAvailable.value = true;
+  }
+
   // ================= RESEND =================
 
   Future<void> resendCode() async {
@@ -173,15 +209,21 @@ class OtpController extends BaseController {
 
     isResending.value = true;
     final intentRole = await AppPreferences.getIntentRole();
-    final ok = await _authRepository.resendVerificationOtp(
-      email,
-      role: intentRole ?? 'user',
-    );
+    // Password reset: the account is already verified, so resend-otp would be
+    // refused ("User already verified"). Re-run forgot-password to get a new code.
+    final ok = otpType == 'password_reset'
+        ? await _authRepository.forgotPassword(email, role: intentRole ?? 'user')
+        : await _authRepository.resendVerificationOtp(
+            email,
+            role: intentRole ?? 'user',
+          );
     isResending.value = false;
 
     if (ok) {
       ToastUtil.showToast("OTP sent again");
       errorText.value = '';
+      isLocked.value = false;
+      _wrongAttempts = 0;
       clearOtp();
       startTimer();
     } else {
