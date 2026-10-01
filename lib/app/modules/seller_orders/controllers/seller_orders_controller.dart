@@ -304,6 +304,14 @@ class SellerOrdersController extends GetxController {
     if (idx != -1) _allOrders[idx] = updated;
   }
 
+  /// Sub-orders the API refused to let this seller manage (403): they are
+  /// fulfilled by Edudeen, so the status / tracking / mark-paid actions are
+  /// hidden. The order list does not carry `fulfillmentMode` (BACKEND GAP), so
+  /// this is learned from the first refusal.
+  final RxSet<String> platformFulfilledIds = <String>{}.obs;
+  bool isPlatformFulfilled(String orderId) =>
+      platformFulfilledIds.contains(orderId);
+
   bool isMarkingPaid(String orderId) => _markingPaidIds.contains(orderId);
   bool isUpdatingStatus(String orderId) => _updatingStatusIds.contains(orderId);
 
@@ -321,6 +329,7 @@ class SellerOrdersController extends GetxController {
         storeId: storeId,
         status: newStatus,
         tracking: tracking,
+        onForbidden: () => platformFulfilledIds.add(orderId),
       );
       if (success) {
         final idx = _allOrders.indexWhere((o) => o.id == orderId);
@@ -343,7 +352,10 @@ class SellerOrdersController extends GetxController {
     if (_markingPaidIds.contains(orderId)) return false;
     _markingPaidIds.add(orderId);
     try {
-      final success = await _repo.markOrderPaid(orderId);
+      final success = await _repo.markOrderPaid(
+        orderId,
+        onForbidden: () => platformFulfilledIds.add(orderId),
+      );
       if (success) {
         final idx = _allOrders.indexWhere((o) => o.id == orderId);
         if (idx != -1) {

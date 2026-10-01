@@ -260,6 +260,18 @@ class _DetailUpdateStatusButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final detailCtrl = Get.find<SellerOrderDetailController>();
     final ordersCtrl = Get.find<SellerOrdersController>();
+    return Obx(() {
+      if (ordersCtrl.isPlatformFulfilled(detailCtrl.order.value.id)) {
+        return const SizedBox.shrink();
+      }
+      return _button(detailCtrl, ordersCtrl);
+    });
+  }
+
+  Widget _button(
+    SellerOrderDetailController detailCtrl,
+    SellerOrdersController ordersCtrl,
+  ) {
     return GestureDetector(
       onTap: () async {
         await OrderStatusPickerSheet.show(detailCtrl.order.value, ordersCtrl);
@@ -303,6 +315,9 @@ class _DetailMarkAsPaidButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<SellerOrdersController>();
     return Obx(() {
+      if (controller.isPlatformFulfilled(orderId)) {
+        return const SizedBox.shrink();
+      }
       final isLoading = controller.isMarkingPaid(orderId);
       return GestureDetector(
         onTap: isLoading

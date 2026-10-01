@@ -52,7 +52,12 @@ class SellerVerificationBanner extends StatelessWidget {
           verificationStatus.isEmpty ? 'not_started' : verificationStatus,
         );
         color = style.color;
-        label = style.label;
+        // A new store stays `pending` until an admin approves it; say so
+        // plainly instead of only showing the KYC step's label.
+        final awaitingApproval = storeStatus == 'pending' &&
+            (verificationStatus == 'pending' ||
+                verificationStatus == 'under_review');
+        label = awaitingApproval ? 'Under review' : style.label;
       }
       final rejectionReason = controller.storeRejectionReason.value;
 
@@ -130,15 +135,15 @@ class SellerVerificationBanner extends StatelessWidget {
       return 'Your store is suspended. Contact support for details.';
     switch (verificationStatus) {
       case 'under_review':
-        return "Your business verification is being reviewed. You can't publish products until it's approved.";
+        return "Your store is under review and goes live once an admin approves it. You can keep adding products in the meantime.";
       case 'pending':
-        return "Your verification has been submitted and is awaiting review.";
+        return "Your store is under review and goes live once an admin approves it. You can keep adding products in the meantime.";
       case 'rejected':
         return rejectionReason.isNotEmpty
             ? 'Rejected: $rejectionReason. Fix the details and resubmit to start selling.'
             : 'Your submission was rejected. Review the reason and resubmit to start selling.';
       default: // 'not_started'
-        return "Verify your business details to get approved — you can't publish products until then.";
+        return "Verify your business details so an admin can approve your store. You can add products now; they go live with the store.";
     }
   }
 

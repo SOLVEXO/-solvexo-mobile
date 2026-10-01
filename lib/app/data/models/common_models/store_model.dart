@@ -75,6 +75,10 @@ class StoreModel {
   /// Set by AdminMarketplaceService.rejectLead — null unless `status == 'rejected'`.
   final String? rejectionReason;
   final String? baseCurrency;
+
+  /// 'seller' (the seller ships) or 'platform' (Edudeen ships). Sellers can
+  /// only ever choose 'seller'; an admin grants 'platform' — display only.
+  final String fulfillmentMode;
   /// Where the seller says they operate — drives KYC requirement calculation
   /// server-side. Defaults to EduDeen's home market ('PK').
   final String country;
@@ -131,6 +135,7 @@ class StoreModel {
     required this.status,
     this.rejectionReason,
     this.baseCurrency,
+    this.fulfillmentMode = 'seller',
     this.country = 'PK',
     this.businessType,
     this.verificationLevel,
@@ -184,6 +189,7 @@ class StoreModel {
         status: json['status'] as String? ?? '',
         rejectionReason: json['rejectionReason'] as String?,
         baseCurrency: json['baseCurrency'] as String?,
+        fulfillmentMode: json['fulfillmentMode'] as String? ?? 'seller',
         country: json['country'] as String? ?? 'PK',
         businessType: json['businessType'] as String?,
         verificationLevel: json['verificationLevel'] as String?,

@@ -217,6 +217,15 @@ class _UpdateStatusButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isPlatformFulfilled(order.id)) {
+        return const SizedBox.shrink();
+      }
+      return _button();
+    });
+  }
+
+  Widget _button() {
     return GestureDetector(
       onTap: () => OrderStatusPickerSheet.show(order, controller),
       child: Container(
@@ -294,6 +303,9 @@ class _MarkAsPaidButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      if (controller.isPlatformFulfilled(order.id)) {
+        return const SizedBox.shrink();
+      }
       final isLoading = controller.isMarkingPaid(order.id);
       return GestureDetector(
         onTap: isLoading ? null : () => controller.markOrderPaid(order.id),

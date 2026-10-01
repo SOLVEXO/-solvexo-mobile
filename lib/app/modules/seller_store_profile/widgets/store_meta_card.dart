@@ -41,6 +41,15 @@ class StoreMetaCard extends StatelessWidget {
                 value: storeStatusStyle(s?.status ?? '').label,
                 valueColor: storeStatusStyle(s?.status ?? '').color,
               ),
+              const Divider(height: 1, indent: 54, color: AppColors.lightGrey2),
+              // Read-only: only an admin can switch a store to Edudeen fulfilment.
+              StoreInfoRow(
+                icon: AppIcons.cartIcon,
+                label: 'Order Fulfilment',
+                value: s?.fulfillmentMode == 'platform'
+                    ? 'Fulfilled by Edudeen'
+                    : 'Shipped by you',
+              ),
             ],
           );
         }),

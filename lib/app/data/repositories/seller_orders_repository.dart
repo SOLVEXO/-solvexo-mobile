@@ -82,6 +82,7 @@ class SellerOrdersRepository {
     required String storeId,
     required String status,
     Map<String, String>? tracking,
+    void Function()? onForbidden,
   }) async {
     try {
       final body = <String, dynamic>{
@@ -104,6 +105,14 @@ class SellerOrdersRepository {
       return false;
     } on DioException catch (e) {
       debugPrint('❌ updateOrderStatus DioException: ${e.response?.statusCode}');
+      if (e.response?.statusCode == 403) {
+        // Edudeen-fulfilled sub-order: shipping status/tracking belong to Edudeen.
+        onForbidden?.call();
+        ToastUtil.showToast(
+          ApiError.fromDio(e) ?? 'Edudeen manages this order\'s shipping.',
+        );
+        return false;
+      }
       DioExceptionHandler.handleDioException(e);
       return false;
     } catch (e) {
@@ -115,7 +124,7 @@ class SellerOrdersRepository {
 
   // ─── POST /api/orders/mark-paid/:orderId ──────────────────────────────────
 
-  Future<bool> markOrderPaid(String orderId) async {
+  Future<bool> markOrderPaid(String orderId, {void Function()? onForbidden}) async {
     try {
       final response = await _client.put(
         ApiConstants.markOrderPaid(orderId),
@@ -130,6 +139,14 @@ class SellerOrdersRepository {
       return false;
     } on DioException catch (e) {
       debugPrint('❌ markOrderPaid DioException: ${e.response?.statusCode}');
+      if (e.response?.statusCode == 403) {
+        // Only Edudeen can mark an Edudeen-fulfilled (platform COD) order paid.
+        onForbidden?.call();
+        ToastUtil.showToast(
+          ApiError.fromDio(e) ?? 'Edudeen manages payment for this order.',
+        );
+        return false;
+      }
       DioExceptionHandler.handleDioException(e);
       return false;
     } catch (e) {
