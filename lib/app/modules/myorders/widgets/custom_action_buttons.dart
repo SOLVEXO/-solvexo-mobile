@@ -22,7 +22,7 @@ class CustomActionButtons extends StatelessWidget {
     final controller = Get.find<MyOrdersController>();
     final order = controller.orders[index];
 
-    if (order.isCompleted) {
+    if (order.isCompleted || order.canReview) {
       return Row(
         children: [
           if (order.canReview) ...[

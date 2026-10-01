@@ -45,7 +45,7 @@ class ReviewsController extends GetxController {
 
     isSubmitting.value = true;
     final comment = commentController.text.trim();
-    final success = await _repo.addReview(
+    final result = await _repo.addReview(
       productId: product.productId,
       orderId: orderId.isNotEmpty ? orderId : null,
       rating: rating.value,
@@ -53,11 +53,20 @@ class ReviewsController extends GetxController {
     );
     isSubmitting.value = false;
 
-    if (success) {
+    if (result.success) {
       ToastUtil.showToast('Thanks for your review!');
       Get.back();
+    } else if (result.notEligible) {
+      // 403: no qualifying purchase — nothing to retry, so leave the screen.
+      ToastUtil.showToast(
+        'You can only review products you have purchased '
+        '(physical items once delivered, digital items once paid).',
+      );
+      Get.back();
     } else {
-      ToastUtil.showToast('Could not submit your review. Please try again.');
+      ToastUtil.showToast(
+        result.message ?? 'Could not submit your review. Please try again.',
+      );
     }
   }
 }

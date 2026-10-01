@@ -17,7 +17,7 @@ class OrderActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<MyOrdersController>();
 
-    if (order.isCompleted) {
+    if (order.isCompleted || order.canReview) {
       return Row(
         children: [
           if (order.canReview) ...[

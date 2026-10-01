@@ -1,20 +1,42 @@
 import 'package:book_store_app/app/data/models/rating/review_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
-import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 /// Product reviews — `solvexo-api`'s `/api/rating/*` (`RatingController`).
+/// Outcome of `POST /rating/add-review`.
+class ReviewResult {
+  const ReviewResult.ok()
+      : success = true,
+        notEligible = false,
+        message = null;
+  const ReviewResult.notEligible(this.message)
+      : success = false,
+        notEligible = true;
+  const ReviewResult.failed(this.message)
+      : success = false,
+        notEligible = false;
+
+  final bool success;
+  final bool notEligible;
+  final String? message;
+}
+
 class RatingRepository {
   final BaseClient _client = BaseClient();
 
   /// Writes a new review, or — if the buyer already reviewed this product —
   /// appends an extra comment to it (mirrors the backend's `addReview`
   /// upsert-like behaviour).
-  Future<bool> addReview({
+  ///
+  /// A 403 means the buyer has no qualifying purchase of this product (only
+  /// verified purchasers may review) — reported via [ReviewResult.notEligible]
+  /// so the screen can explain it instead of showing a generic failure.
+  Future<ReviewResult> addReview({
     required String productId,
     String? productVariantId,
     String? orderId,
@@ -34,14 +56,21 @@ class RatingRepository {
           if (isAnonymous != null) 'isAnonymous': isAnonymous,
         },
       );
-      return response.data['success'] == true;
+      if (response.data['success'] == true) return const ReviewResult.ok();
+      return ReviewResult.failed(ApiError.fromBody(response.data));
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
-      return false;
+      if (e.response?.statusCode == 403) {
+        return ReviewResult.notEligible(
+          ApiError.fromDio(e) ??
+              'Only customers who purchased this product can review it.',
+        );
+      }
+      return ReviewResult.failed(
+        ApiError.fromDio(e) ?? 'Could not submit your review. Please try again.',
+      );
     } catch (e) {
       debugPrint('❌ addReview error: $e');
-      ToastUtil.showToast('Could not submit your review.');
-      return false;
+      return const ReviewResult.failed('Could not submit your review.');
     }
   }
 
