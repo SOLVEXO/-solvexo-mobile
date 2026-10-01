@@ -1,12 +1,15 @@
-/// The API reports every OTP problem as a 401 with only a text `message`, so the
-/// kind of failure is read from that text.
+/// OTP failures come back as 401 with a machine-readable `code` in the body
+/// (and `attemptsLeft` on `OTP_INVALID`) — never match on the message text.
 enum OtpFailure {
-  /// Wrong code; the user may try again (the server allows 5 wrong tries).
+  /// `OTP_INVALID`: wrong code; the user may try again.
   invalid,
 
-  /// The code can no longer be used: expired, or burned after 5 wrong tries.
-  /// The user must request a new one.
-  burned,
+  /// `OTP_LOCKED`: the code was burned by too many wrong tries (this response
+  /// is also the one for the attempt that burned it).
+  locked,
+
+  /// `OTP_EXPIRED`: no code was issued, or it is past its time.
+  expired,
 
   /// Anything else (network, throttling, account state).
   other,
@@ -15,18 +18,20 @@ enum OtpFailure {
 class OtpErrors {
   OtpErrors._();
 
-  /// Wrong tries after which the server burns the code. The server answers the
-  /// 5th wrong try with "Invalid OTP" too, so the client counts as well.
-  static const int maxAttempts = 5;
-
-  static OtpFailure classify(String? message) {
-    final m = (message ?? '').toLowerCase();
-    if (m.contains('too many wrong attempts') ||
-        m.contains('expired') ||
-        m.contains('request a new')) {
-      return OtpFailure.burned;
+  static OtpFailure fromCode(String? code) {
+    switch (code) {
+      case 'OTP_INVALID':
+        return OtpFailure.invalid;
+      case 'OTP_LOCKED':
+        return OtpFailure.locked;
+      case 'OTP_EXPIRED':
+        return OtpFailure.expired;
+      default:
+        return OtpFailure.other;
     }
-    if (m.contains('invalid otp')) return OtpFailure.invalid;
-    return OtpFailure.other;
   }
+
+  /// The code can no longer be used; the user must request a new one.
+  static bool isBurned(OtpFailure? failure) =>
+      failure == OtpFailure.locked || failure == OtpFailure.expired;
 }

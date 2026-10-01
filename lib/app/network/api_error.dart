@@ -27,6 +27,20 @@ class ApiError {
   static String? fromBody(dynamic body) =>
       body is Map ? msg(body['message']) : null;
 
+  /// Machine-readable `code` (e.g. `OTP_INVALID`) of an error body, or null.
+  static String? codeFromBody(dynamic body) =>
+      body is Map && body['code'] is String ? body['code'] as String : null;
+
+  /// `attemptsLeft` of an error body (sent with `OTP_INVALID`), or null.
+  static int? attemptsLeftFromBody(dynamic body) =>
+      body is Map && body['attemptsLeft'] is num
+          ? (body['attemptsLeft'] as num).toInt()
+          : null;
+
   /// `message` of a [DioException]'s response body, or null.
   static String? fromDio(DioException e) => fromBody(e.response?.data);
+
+  static String? codeFromDio(DioException e) => codeFromBody(e.response?.data);
+  static int? attemptsLeftFromDio(DioException e) =>
+      attemptsLeftFromBody(e.response?.data);
 }

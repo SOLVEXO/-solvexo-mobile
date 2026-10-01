@@ -61,7 +61,6 @@ class OtpController extends BaseController {
   /// The current code can't be used any more (burned after 5 wrong tries, or
   /// expired). Input and Verify are disabled until a new code is requested.
   RxBool isLocked = false.obs;
-  int _wrongAttempts = 0;
   @override
   RxBool isLoading = false.obs;
 
@@ -135,7 +134,7 @@ class OtpController extends BaseController {
 
       final auth = result.auth;
       if (auth == null) {
-        _handleFailedAttempt(result.failure, result.message);
+        _handleFailedAttempt(result);
         return;
       }
 
@@ -172,26 +171,29 @@ class OtpController extends BaseController {
     }
   }
 
-  /// Wrong code, burned code, or a non-OTP failure. The server answers the 5th
-  /// wrong try with "Invalid OTP" while already burning the code, so the client
-  /// counts attempts too and locks input on the 5th.
-  void _handleFailedAttempt(OtpFailure? failure, String? message) {
+  /// Uses the API's `code` / `attemptsLeft`: the 5th wrong try already comes
+  /// back as `OTP_LOCKED`, so no client-side counting is needed.
+  void _handleFailedAttempt(OtpVerifyResult result) {
     errorController.add(ErrorAnimationType.shake);
     clearOtp();
 
-    if (failure == OtpFailure.invalid) {
-      _wrongAttempts++;
-      if (_wrongAttempts >= OtpErrors.maxAttempts) {
+    switch (result.failure) {
+      case OtpFailure.invalid:
+        final left = result.attemptsLeft;
+        errorText.value = left == null
+            ? 'Incorrect code. Please try again.'
+            : 'Incorrect code. $left ${left == 1 ? 'try' : 'tries'} left.';
+        break;
+      case OtpFailure.locked:
         _lock('Too many wrong attempts. This code is no longer valid.');
-      } else {
-        final left = OtpErrors.maxAttempts - _wrongAttempts;
+        break;
+      case OtpFailure.expired:
+        _lock('This code has expired.');
+        break;
+      case OtpFailure.other:
+      case null:
         errorText.value =
-            'Incorrect code. $left ${left == 1 ? 'try' : 'tries'} left.';
-      }
-    } else if (failure == OtpFailure.burned) {
-      _lock(message ?? 'This code is no longer valid.');
-    } else {
-      errorText.value = message ?? 'Could not verify the code. Please try again.';
+            result.message ?? 'Could not verify the code. Please try again.';
     }
   }
 
@@ -223,7 +225,6 @@ class OtpController extends BaseController {
       ToastUtil.showToast("OTP sent again");
       errorText.value = '';
       isLocked.value = false;
-      _wrongAttempts = 0;
       clearOtp();
       startTimer();
     } else {

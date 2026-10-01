@@ -97,7 +97,7 @@ class ResetPasswordController extends BaseController {
     isLoading.value = false;
 
     if (!result.success) {
-      if (result.failure == OtpFailure.burned) {
+      if (OtpErrors.isBurned(result.failure)) {
         // Expired or burned after 5 wrong tries: go back to the code screen,
         // where the user can request a new one.
         ToastUtil.showToast(
@@ -105,7 +105,12 @@ class ResetPasswordController extends BaseController {
         );
         Get.back();
       } else if (result.failure == OtpFailure.invalid) {
-        ToastUtil.showToast('That code is incorrect. Go back and re-enter it.');
+        final left = result.attemptsLeft;
+        ToastUtil.showToast(
+          left == null
+              ? 'That code is incorrect. Go back and re-enter it.'
+              : 'That code is incorrect ($left ${left == 1 ? 'try' : 'tries'} left). Go back and re-enter it.',
+        );
       } else {
         ToastUtil.showToast(result.message ?? 'Failed to reset password.');
       }

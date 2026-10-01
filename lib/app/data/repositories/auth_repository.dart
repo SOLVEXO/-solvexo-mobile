@@ -19,10 +19,11 @@ import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 
 /// Outcome of `POST /auth/verifyOtp`.
 class OtpVerifyResult {
-  OtpVerifyResult({this.auth, this.message, this.failure});
+  OtpVerifyResult({this.auth, this.message, this.failure, this.attemptsLeft});
   final AuthResponseModel? auth;
   final String? message;
   final OtpFailure? failure;
+  final int? attemptsLeft;
   bool get ok => auth != null;
 }
 
@@ -101,10 +102,10 @@ class AuthRepository {
         return OtpVerifyResult(auth: auth);
       }
 
-      final message = ApiError.fromBody(response.data) ?? 'Invalid OTP';
       return OtpVerifyResult(
-        message: message,
-        failure: OtpErrors.classify(message),
+        message: ApiError.fromBody(response.data) ?? 'Invalid OTP',
+        failure: OtpErrors.fromCode(ApiError.codeFromBody(response.data)),
+        attemptsLeft: ApiError.attemptsLeftFromBody(response.data),
       );
     } on DioException catch (e) {
       debugPrint("Verify OTP error: ${e.response?.statusCode}");
@@ -112,7 +113,8 @@ class AuthRepository {
           'Could not verify the code. Please check your connection.';
       return OtpVerifyResult(
         message: message,
-        failure: OtpErrors.classify(ApiError.fromDio(e)),
+        failure: OtpErrors.fromCode(ApiError.codeFromDio(e)),
+        attemptsLeft: ApiError.attemptsLeftFromDio(e),
       );
     } catch (e) {
       debugPrint("Verify OTP error: $e");
@@ -157,7 +159,7 @@ class AuthRepository {
     }
   }
 
-  Future<({bool success, String? message, OtpFailure? failure})> resetPassword({
+  Future<({bool success, String? message, OtpFailure? failure, int? attemptsLeft})> resetPassword({
     required String email,
     required String otp,
     required String newPassword,
@@ -176,23 +178,23 @@ class AuthRepository {
       );
 
       if (res.data['success'] == true) {
-        return (success: true, message: null, failure: null);
+        return (success: true, message: null, failure: null, attemptsLeft: null);
       }
-      final message = ApiError.fromBody(res.data);
       return (
         success: false,
-        message: message,
-        failure: OtpErrors.classify(message),
+        message: ApiError.fromBody(res.data),
+        failure: OtpErrors.fromCode(ApiError.codeFromBody(res.data)),
+        attemptsLeft: ApiError.attemptsLeftFromBody(res.data),
       );
     } on DioException catch (e) {
-      final message = ApiError.fromDio(e);
       return (
         success: false,
-        message: message,
-        failure: OtpErrors.classify(message),
+        message: ApiError.fromDio(e),
+        failure: OtpErrors.fromCode(ApiError.codeFromDio(e)),
+        attemptsLeft: ApiError.attemptsLeftFromDio(e),
       );
     } catch (_) {
-      return (success: false, message: null, failure: OtpFailure.other);
+      return (success: false, message: null, failure: OtpFailure.other, attemptsLeft: null);
     }
   }
 
