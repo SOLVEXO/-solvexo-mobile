@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/product_details/models/product_detail_response.dart';
 import 'package:book_store_app/app/modules/product_preview/models/product_preview_model.dart';
@@ -170,7 +171,12 @@ class ProductRepository {
 
   Future<ProductDetailResponse?> getProductDetailById(String id) async {
     try {
-      final response = await _baseClient.get(ApiConstants.getProductById(id));
+      // Send the buyer token when there is one: `canReview` / `hasReviewed` are
+      // only included for a logged-in buyer.
+      final response = await _baseClient.get(
+        ApiConstants.getProductById(id),
+        requiresAuth: await AppPreferences.isLoggedIn(),
+      );
       if (response.data['success'] == true) {
         return ProductDetailResponse.fromJson(response.data);
       }

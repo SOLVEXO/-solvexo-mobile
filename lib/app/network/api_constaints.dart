@@ -153,6 +153,8 @@ class ApiConstants {
   // ============ Order Endpoints ============
   static const String orders = "$apiPrefix/orders";
   static const String myOrders = "$apiPrefix/orders/my-orders";
+  static String ordersByCheckout(String checkoutId) =>
+      "$apiPrefix/orders/by-checkout/$checkoutId";
   static String getOrderById(String id) => "$apiPrefix/orders/$id";
   static String cancelOrder(String id) => "$apiPrefix/orders/cancel/$id";
   static String returnRequest(String orderId) =>

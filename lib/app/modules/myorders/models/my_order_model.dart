@@ -77,22 +77,12 @@ class OrderModel {
   List<OrderItem> get allItems =>
       stores.expand((s) => s.items).toList();
 
-  /// Items the buyer can review. Mirrors the API's verified-purchase rule
-  /// (`rating.service.ts#checkVerifiedPurchase`): a physical line must be
-  /// delivered/completed; a digital line counts once the order is paid and the
-  /// line is not cancelled or refunded. A rating can only be given once per
-  /// product, so already-reviewed items are excluded. The server still decides
-  /// (403 otherwise); this only avoids offering the action when it can't work.
+  /// Items the buyer can review from this order. `canReview` is decided by
+  /// the server (same verified-purchase rule `add-review` enforces) and is
+  /// scoped to this order, so reviewing one of these must send this orderId.
+  /// A rating can only be given once per product, so reviewed items are out.
   List<OrderItem> get unreviewedItems =>
-      allItems.where((i) => !i.isReviewed && _isVerifiedPurchase(i)).toList();
-
-  bool _isVerifiedPurchase(OrderItem i) {
-    if (i.status == 'delivered' || i.status == 'completed') return true;
-    return i.type == 'digital' &&
-        isPaid &&
-        i.status != 'cancelled' &&
-        i.status != 'refunded';
-  }
+      allItems.where((i) => !i.isReviewed && i.canReview).toList();
 
   bool get canReview => unreviewedItems.isNotEmpty;
 

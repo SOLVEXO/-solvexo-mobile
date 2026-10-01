@@ -130,6 +130,10 @@ class SellerOrder {
   final OrderStatus status;
   final bool isPaid;
   final String paymentType;
+
+  /// 'seller' or 'platform' (Edudeen ships; the seller can't change status,
+  /// tracking or payment). Missing means seller-fulfilled.
+  final String fulfillmentMode;
   final List<SellerOrderItem> items;
   final SellerOrderAddress? shippingAddress;
 
@@ -143,6 +147,7 @@ class SellerOrder {
     required this.status,
     required this.isPaid,
     required this.paymentType,
+    this.fulfillmentMode = 'seller',
     required this.items,
     this.shippingAddress,
   });
@@ -152,6 +157,7 @@ class SellerOrder {
       items.isNotEmpty ? items.first.productName : '';
   String get primaryType => items.isNotEmpty ? items.first.type : '';
   bool get isCod => paymentType == 'cash_on_delivery';
+  bool get isPlatformFulfilled => fulfillmentMode == 'platform';
   bool get isPhysical =>
       items.any((item) => item.type.toLowerCase() == 'physical');
   bool get canMarkPaid =>
@@ -171,6 +177,7 @@ class SellerOrder {
         status: status ?? this.status,
         isPaid: isPaid ?? this.isPaid,
         paymentType: paymentType,
+        fulfillmentMode: fulfillmentMode,
         items: items,
         shippingAddress: shippingAddress,
       );
@@ -208,6 +215,7 @@ class SellerOrder {
       status: _parseStatus(json['status'] as String? ?? ''),
       isPaid: json['isPaid'] as bool? ?? false,
       paymentType: json['paymentType'] as String? ?? '',
+      fulfillmentMode: json['fulfillmentMode'] as String? ?? 'seller',
       items: items,
       shippingAddress:
           rawAddress != null ? SellerOrderAddress.fromJson(rawAddress) : null,
@@ -306,11 +314,13 @@ class SellerOrdersController extends GetxController {
 
   /// Sub-orders the API refused to let this seller manage (403): they are
   /// fulfilled by Edudeen, so the status / tracking / mark-paid actions are
-  /// hidden. The order list does not carry `fulfillmentMode` (BACKEND GAP), so
-  /// this is learned from the first refusal.
+  /// hidden. Rows carry `fulfillmentMode`, so this normally knows up front; the
+  /// 403 is only a fallback for rows that don't.
   final RxSet<String> platformFulfilledIds = <String>{}.obs;
   bool isPlatformFulfilled(String orderId) =>
-      platformFulfilledIds.contains(orderId);
+      platformFulfilledIds.contains(orderId) ||
+      (_allOrders.firstWhereOrNull((o) => o.id == orderId)?.isPlatformFulfilled ??
+          false);
 
   bool isMarkingPaid(String orderId) => _markingPaidIds.contains(orderId);
   bool isUpdatingStatus(String orderId) => _updatingStatusIds.contains(orderId);

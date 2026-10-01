@@ -4,7 +4,9 @@ import 'package:book_store_app/app/data/models/rating/review_model.dart';
 import 'package:book_store_app/app/modules/product_details/controller/product_detail_controller.dart';
 import 'package:book_store_app/app/modules/product_details/widgets/product_section_title.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
+import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -51,27 +53,81 @@ class ProductReviewsSection extends StatelessWidget {
     );
   }
 
+  /// "Write a review" for a buyer who qualifies and hasn't reviewed yet; a note
+  /// once they have. Nothing for guests or non-purchasers (flags are absent or
+  /// false). The server still enforces the rule (403 fallback on submit).
+  Widget _writeReviewEntry() {
+    return Obx(() {
+      final product = controller.product.value;
+      if (product == null) return const SizedBox.shrink();
+      if (controller.hasReviewed.value == true) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: BaseSpacing.sm),
+          child: CustomText(
+            text: "You've reviewed this product.",
+            color: AppColors.gray600,
+            fontSize: AppFontSize.tiny,
+          ),
+        );
+      }
+      if (controller.canReview.value != true) return const SizedBox.shrink();
+      return Padding(
+        padding: EdgeInsets.only(bottom: BaseSpacing.sm),
+        child: OutlineButton(
+          label: 'Write a review',
+          compact: true,
+          expand: false,
+          onPressed: () => Get.toNamed(
+            Routes.reviewsView,
+            arguments: {
+              // Product-detail eligibility is any-order, so no orderId is sent.
+              'orderId': '',
+              'item': OrderItem(
+                itemId: '',
+                productId: product.id,
+                name: product.name,
+                image: product.images.isNotEmpty ? product.images.first : null,
+                type: product.type,
+                quantity: 1,
+                price: 0,
+                totalPrice: 0,
+                status: '',
+              ),
+            },
+          )?.then((_) => controller.reloadReviewState()),
+        ),
+      );
+    });
+  }
+
   Widget _content() {
     return Obx(() {
       if (controller.isLoadingReviews.value && controller.reviews.isEmpty) {
         return const _CenteredSpinner();
       }
+      final entry = _writeReviewEntry();
 
       if (controller.reviews.isEmpty && controller.reviewSort.value == 'newest') {
-        return Padding(
-          padding: EdgeInsets.symmetric(vertical: BaseSpacing.md),
-          child: CustomText(
-            text: 'No reviews yet. Be the first to review this product!',
-            textAlign: TextAlign.center,
-            color: AppColors.gray600,
-            fontSize: AppFontSize.tiny,
-          ),
+        return Column(
+          children: [
+            entry,
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: BaseSpacing.md),
+              child: CustomText(
+                text: 'No reviews yet. Be the first to review this product!',
+                textAlign: TextAlign.center,
+                color: AppColors.gray600,
+                fontSize: AppFontSize.tiny,
+              ),
+            ),
+          ],
         );
       }
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          entry,
           _sortChips(),
           SizedBox(height: BaseSpacing.sm),
           if (controller.isLoadingReviews.value)

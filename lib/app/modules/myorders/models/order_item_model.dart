@@ -12,6 +12,10 @@ class OrderItem {
   final String returnStatus;
   final bool isReviewed;
 
+  /// Server-decided and order-scoped: would a review sent with THIS order's
+  /// id be accepted (verified purchase)? Absent only on very old responses.
+  final bool canReview;
+
   // Denormalized from the parent OrderStore at parse time (see
   // OrderStore.fromJson) — the backend attaches seller info per-store, not
   // per-item, but flat item listings (e.g. OrderItems widget) need it too.
@@ -31,6 +35,7 @@ class OrderItem {
     required this.status,
     this.returnStatus = 'none',
     this.isReviewed = false,
+    this.canReview = false,
     this.sellerName,
     this.sellerVerified = false,
   });
@@ -49,6 +54,7 @@ class OrderItem {
       status: json['status'] as String? ?? 'pending',
       returnStatus: json['returnStatus'] as String? ?? 'none',
       isReviewed: json['isReviewed'] as bool? ?? false,
+      canReview: json['canReview'] as bool? ?? false,
     );
   }
 
@@ -66,6 +72,7 @@ class OrderItem {
         status: status,
         returnStatus: returnStatus,
         isReviewed: isReviewed,
+        canReview: canReview,
         sellerName: sellerName,
         sellerVerified: sellerVerified,
       );
@@ -100,6 +107,13 @@ class OrderStore {
   final String? sellerName;
   final bool sellerVerified;
   final String fulfillmentType;
+
+  /// Who ships this sub-order: 'seller' or 'platform' (Edudeen). Defaults to
+  /// 'seller' like the API does for older orders.
+  final String fulfillmentMode;
+
+  /// This store's own shipping line, in the order's currency (0 when digital).
+  final double shippingFee;
   final String status;
   final double subtotal;
   final int itemCount;
@@ -114,6 +128,8 @@ class OrderStore {
     this.sellerName,
     this.sellerVerified = false,
     required this.fulfillmentType,
+    this.fulfillmentMode = 'seller',
+    this.shippingFee = 0,
     required this.status,
     required this.subtotal,
     required this.itemCount,
@@ -132,6 +148,8 @@ class OrderStore {
       sellerName: sellerName,
       sellerVerified: sellerVerified,
       fulfillmentType: json['fulfillmentType'] as String? ?? 'physical',
+      fulfillmentMode: json['fulfillmentMode'] as String? ?? 'seller',
+      shippingFee: (json['shippingFee'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'pending',
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
       itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
@@ -150,6 +168,8 @@ class OrderStore {
           : null,
     );
   }
+
+  bool get isPlatformFulfilled => fulfillmentMode == 'platform';
 
   List<OrderItem> get allItems => items;
 }

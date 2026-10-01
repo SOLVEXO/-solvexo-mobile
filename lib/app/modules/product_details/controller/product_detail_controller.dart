@@ -26,6 +26,10 @@ class ProductDetailController extends GetxController {
 
   // ─── State ────────────────────────────────────────────────────────────────
   final Rx<ProductModel?> product = Rx<ProductModel?>(null);
+
+  /// From the product-detail response; null when logged out.
+  final RxnBool canReview = RxnBool();
+  final RxnBool hasReviewed = RxnBool();
   final RxList<ProductVariant> variants = <ProductVariant>[].obs;
   final Rx<ProductVariant?> selectedVariant = Rx<ProductVariant?>(null);
   final Rx<ProductVariant?> defaultVariant = Rx<ProductVariant?>(null);
@@ -104,6 +108,8 @@ class ProductDetailController extends GetxController {
 
       if (response != null) {
         product.value = response.product;
+        canReview.value = response.canReview;
+        hasReviewed.value = response.hasReviewed;
         variants.assignAll(response.variants);
 
         // Select default variant; fall back to first variant if none
@@ -141,6 +147,16 @@ class ProductDetailController extends GetxController {
   }
 
   // ─── 1b. Fetch this product's review feed ────────────────────────────────
+
+  /// After writing a review: refresh the buyer flags and the review list.
+  Future<void> reloadReviewState() async {
+    final response = await _productRepository.getProductDetailById(productId);
+    if (response != null) {
+      canReview.value = response.canReview;
+      hasReviewed.value = response.hasReviewed;
+    }
+    await fetchReviews();
+  }
 
   Future<void> fetchReviews() async {
     if (productId.isEmpty) return;

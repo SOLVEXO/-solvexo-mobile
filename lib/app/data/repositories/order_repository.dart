@@ -42,6 +42,32 @@ class OrderRepository {
   }
 
 
+  /// GET /api/orders/by-checkout/:checkoutId — every order one checkout
+  /// produced (up to two: one digital, one physical), same per-order shape as
+  /// my-orders. 404 for another buyer's checkout.
+  Future<List<OrderModel>> getOrdersByCheckout(String checkoutId) async {
+    try {
+      final response = await _baseClient.get(
+        ApiConstants.ordersByCheckout(checkoutId),
+        requiresAuth: true,
+      );
+      return parseOrdersByCheckout(response.data);
+    } on DioException catch (e) {
+      debugPrint('❌ getOrdersByCheckout: ${e.response?.statusCode}');
+      rethrow;
+    }
+  }
+
+  /// `data.orders[]` of a by-checkout (or my-orders) response body.
+  static List<OrderModel> parseOrdersByCheckout(dynamic body) {
+    final data = body is Map ? body['data'] : null;
+    final list = data is Map ? data['orders'] : null;
+    if (list is! List) return const [];
+    return list
+        .map((e) => OrderModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Get single order by ID
   Future<OrderModel?> getOrderById(String orderId) async {
     try {

@@ -8,10 +8,17 @@ class ProductDetailResponse {
   final List<ProductVariant> variants;
   final ProductVariant? defaultVariant;
 
+  /// Logged-in buyer only (null otherwise): may this buyer review the product
+  /// (any of their orders qualifies), and have they already reviewed it.
+  final bool? canReview;
+  final bool? hasReviewed;
+
   ProductDetailResponse({
     required this.product,
     required this.variants,
     this.defaultVariant,
+    this.canReview,
+    this.hasReviewed,
   });
 
   factory ProductDetailResponse.fromJson(Map<String, dynamic> json) {
@@ -43,6 +50,8 @@ class ProductDetailResponse {
       product: product,
       variants: variantsList,
       defaultVariant: defaultVariant,
+      canReview: data['canReview'] as bool?,
+      hasReviewed: data['hasReviewed'] as bool?,
     );
   }
 }
