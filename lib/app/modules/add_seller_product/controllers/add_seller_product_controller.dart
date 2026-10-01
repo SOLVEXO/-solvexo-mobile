@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:book_store_app/utils/price_rules.dart';
 import 'dart:io';
 
 import 'package:book_store_app/app/data/models/common_models/variant_entry.dart';
@@ -529,8 +530,9 @@ class AddSellerProductController extends GetxController {
     }
 
     final parsedPrice = double.tryParse(priceCtrl.text.trim());
-    if (parsedPrice == null) {
-      ToastUtil.showToast('Please enter a valid price.');
+    final priceError = PriceRules.validate(parsedPrice);
+    if (priceError != null) {
+      ToastUtil.showToast(priceError);
       return false;
     }
 
@@ -546,6 +548,11 @@ class AddSellerProductController extends GetxController {
     }
 
     final parsedCompare = double.tryParse(compareAtPriceCtrl.text.trim());
+    final compareError = PriceRules.validateOptional(parsedCompare);
+    if (compareError != null) {
+      ToastUtil.showToast(compareError);
+      return false;
+    }
 
     final tagList = tagsCtrl.text
         .split(',')
@@ -577,7 +584,7 @@ class AddSellerProductController extends GetxController {
     return _repo.addDigitalProduct(
       storeId: storeId,
       name: nameCtrl.text.trim(),
-      price: parsedPrice,
+      price: parsedPrice!,
       status: publishMode.value.apiStatus,
       scheduledAt: scheduledAt.value?.toIso8601String(),
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
@@ -615,7 +622,9 @@ class AddSellerProductController extends GetxController {
     for (var i = 0; i < variants.length; i++) {
       final json = variants[i].toJson();
       if (json == null) {
-        ToastUtil.showToast('Variant ${i + 1}: please enter a valid price.');
+        ToastUtil.showToast(
+          'Variant ${i + 1}: ${PriceRules.validate(double.tryParse(variants[i].priceCtrl.text.trim()))}',
+        );
         return false;
       }
       variantJsonList.add(json);

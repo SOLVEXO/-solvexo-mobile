@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:book_store_app/utils/price_rules.dart';
 import 'dart:io';
 
 import 'package:book_store_app/app/data/models/common_models/variant_entry.dart';
@@ -344,8 +345,9 @@ class EditSellerProductController extends GetxController {
 
     if (!isPhysical) {
       final parsedPrice = double.tryParse(priceCtrl.text.trim());
-      if (parsedPrice == null) {
-        ToastUtil.showToast('Please enter a valid price.');
+      final priceError = PriceRules.validate(parsedPrice);
+      if (priceError != null) {
+        ToastUtil.showToast(priceError);
         isSaving.value = false;
         return;
       }
@@ -363,7 +365,7 @@ class EditSellerProductController extends GetxController {
         }
       }
 
-      final success = await _saveDigital(parsedPrice);
+      final success = await _saveDigital(parsedPrice!);
       isSaving.value = false;
       if (success) {
         Get.back();
@@ -394,7 +396,9 @@ class EditSellerProductController extends GetxController {
     for (var i = 0; i < variants.length; i++) {
       final json = variants[i].toJson();
       if (json == null) {
-        ToastUtil.showToast('Variant ${i + 1}: please enter a valid price.');
+        ToastUtil.showToast(
+          'Variant ${i + 1}: ${PriceRules.validate(double.tryParse(variants[i].priceCtrl.text.trim()))}',
+        );
         return false;
       }
       variantJsonList.add(json);
@@ -451,6 +455,11 @@ class EditSellerProductController extends GetxController {
 
   Future<bool> _saveDigital(double parsedPrice) async {
     final parsedCompare = double.tryParse(compareAtPriceCtrl.text.trim());
+    final compareError = PriceRules.validateOptional(parsedCompare);
+    if (compareError != null) {
+      ToastUtil.showToast(compareError);
+      return false;
+    }
 
     final files = digitalFiles
         .map((e) => e.toJson())

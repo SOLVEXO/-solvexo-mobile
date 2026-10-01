@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:book_store_app/utils/price_rules.dart';
 import 'package:get/get.dart';
 
 /// One attribute row within a variant card, e.g. Color: Red.
@@ -62,7 +63,7 @@ class VariantEntry {
   /// doesn't parse (caller surfaces a toast and aborts on null).
   Map<String, dynamic>? toJson() {
     final price = double.tryParse(priceCtrl.text.trim());
-    if (price == null) return null;
+    if (!PriceRules.isValid(price)) return null;
     return {
       'price': price,
       'compareAtPrice': double.tryParse(compareAtPriceCtrl.text.trim()),
