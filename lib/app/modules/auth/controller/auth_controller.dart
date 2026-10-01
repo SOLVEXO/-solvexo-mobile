@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
+
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/data/models/common_models/auth_response_model.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
@@ -8,6 +10,7 @@ import 'package:book_store_app/app/data/repositories/cart_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/app/data/services/social_auth_service.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
@@ -193,6 +196,11 @@ class AuthController extends BaseController {
       }
 
       // 2. Send to backend — AuthRepository.socialLogin persists tokens/user itself
+      if (dto.token == null || dto.token!.isEmpty) {
+        _showError(_socialErrorMessage(null, dto.authProvider));
+        return;
+      }
+
       final role = await AppPreferences.getIntentRole();
       final auth = await _authRepository.socialLogin(
         dto.copyWith(role: role ?? 'user'),
@@ -207,7 +215,7 @@ class AuthController extends BaseController {
       _showSuccess('Welcome ${auth.user.name}!');
     } catch (e) {
       debugPrint('❌ Google sign in error: $e');
-      _showError('Google sign in failed: ${e.toString()}');
+      _showError(_socialErrorMessage(e, 'Google'));
     } finally {
       isSocialLoading.value = false;
       activeSocialProvider.value = '';
@@ -223,6 +231,11 @@ class AuthController extends BaseController {
       final dto = await _socialAuth.signInWithFacebook();
       if (dto == null) return;
 
+      if (dto.token == null || dto.token!.isEmpty) {
+        _showError(_socialErrorMessage(null, dto.authProvider));
+        return;
+      }
+
       final role = await AppPreferences.getIntentRole();
       final auth = await _authRepository.socialLogin(
         dto.copyWith(role: role ?? 'user'),
@@ -237,7 +250,7 @@ class AuthController extends BaseController {
       _showSuccess('Welcome ${auth.user.name}!');
     } catch (e) {
       debugPrint('❌ Facebook sign in error: $e');
-      _showError('Facebook sign in failed: ${e.toString()}');
+      _showError(_socialErrorMessage(e, 'Facebook'));
     } finally {
       isSocialLoading.value = false;
       activeSocialProvider.value = '';
@@ -253,6 +266,11 @@ class AuthController extends BaseController {
       final dto = await _socialAuth.signInWithApple();
       if (dto == null) return;
 
+      if (dto.token == null || dto.token!.isEmpty) {
+        _showError(_socialErrorMessage(null, dto.authProvider));
+        return;
+      }
+
       final role = await AppPreferences.getIntentRole();
       final auth = await _authRepository.socialLogin(
         dto.copyWith(role: role ?? 'user'),
@@ -267,7 +285,7 @@ class AuthController extends BaseController {
       _showSuccess('Welcome!');
     } catch (e) {
       debugPrint('❌ Apple sign in error: $e');
-      _showError('Apple sign in failed: ${e.toString()}');
+      _showError(_socialErrorMessage(e, 'Apple'));
     } finally {
       isSocialLoading.value = false;
       activeSocialProvider.value = '';
@@ -480,6 +498,21 @@ class AuthController extends BaseController {
 
   void _showSuccess(String message) {
     CustomAppSnackbar.success(message);
+  }
+
+  /// The server's own message when it sent one (e.g. "did not share a verified
+  /// email address. Please sign up with email instead."), else a generic one.
+  String _socialErrorMessage(Object? e, String provider) {
+    if (e is DioException) {
+      final apiMessage = ApiError.fromDio(e);
+      if (apiMessage != null) return apiMessage;
+    }
+    final label = provider.isEmpty
+        ? provider
+        : provider[0].toUpperCase() + provider.substring(1);
+    return e == null
+        ? '$label did not return a sign-in token. Please try again.'
+        : '$label sign in failed. Please try again.';
   }
 
   void _showError(String message) {

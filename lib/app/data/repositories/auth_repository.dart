@@ -29,6 +29,7 @@ class AuthRepository {
 
       final response = await _baseClient.post(
         ApiConstants.socialLogin,
+        requiresAuth: false,
         data: dto.toJson(),
       );
 
@@ -68,6 +69,7 @@ class AuthRepository {
     try {
       final response = await _baseClient.post(
         ApiConstants.verifyOtp,
+        requiresAuth: false,
         data: {"email": email, "otp": otp, 'role': role},
       );
 
@@ -101,6 +103,7 @@ class AuthRepository {
     try {
       final res = await _baseClient.post(
         ApiConstants.resendOtp,
+        requiresAuth: false,
         data: {"email": email, 'role': role},
       );
 

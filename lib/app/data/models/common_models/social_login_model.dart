@@ -37,7 +37,9 @@ class SocialLoginModel {
       'authProvider': authProvider,
       'socialId': socialId,
       'userName': userName,
-      'email': email,
+      // The server takes the email from the provider's verified token and
+      // ignores this; an empty string would fail its @IsEmail check.
+      if (email.isNotEmpty) 'email': email,
       if (image != null) 'image': image,
       if (fcmToken != null) 'fcmToken': fcmToken,
       if (token != null) 'token': token,
