@@ -10,6 +10,7 @@ import 'package:book_store_app/app/modules/add_seller_product/controllers/add_se
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:book_store_app/utils/upload_rules.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -299,7 +300,10 @@ class EditSellerProductController extends GetxController {
   Future<void> pickAndUploadDigitalFile(int index) async {
     if (index >= digitalFiles.length) return;
 
-    final result = await FilePicker.platform.pickFiles(type: FileType.any);
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: UploadRules.privateExtensions,
+    );
     if (result == null || result.files.isEmpty) return;
 
     final picked = result.files.first;
@@ -312,10 +316,8 @@ class EditSellerProductController extends GetxController {
 
     entry.isUploading.value = false;
 
-    if (data == null) {
-      ToastUtil.showToast('File upload failed. Please try again.');
-      return;
-    }
+    // uploadPrivateFile already told the user why (server message included).
+    if (data == null) return;
 
     entry.publicId.value = data['publicId'] as String? ?? '';
     entry.fileName.value = data['fileName'] as String? ?? picked.name;

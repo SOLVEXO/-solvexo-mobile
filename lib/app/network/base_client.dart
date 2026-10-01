@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:book_store_app/app/network/dio_service.dart';
 import 'package:dio/dio.dart';
+import 'package:book_store_app/utils/upload_rules.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:flutter/material.dart';
 
@@ -119,12 +120,11 @@ class BaseClient {
 
     for (final file in files) {
       final name = file.path.split('/').last;
-      final ext = name.split('.').last.toLowerCase();
 
       map[fieldName] = await MultipartFile.fromFile(
         file.path,
         filename: name,
-        contentType: MediaType('image', ext),
+        contentType: MediaType.parse(UploadRules.mimeFromExtension(name)),
       );
     }
 

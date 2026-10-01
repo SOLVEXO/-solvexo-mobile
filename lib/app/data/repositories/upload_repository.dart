@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:book_store_app/app/network/api_constaints.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:book_store_app/utils/upload_rules.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,6 +42,11 @@ class UploadRepository {
   // Uploads any file and returns its Cloudinary URL, or null on failure.
 
   Future<String?> uploadFile(File file) async {
+    final fileName = file.path.split('/').last;
+    if (!UploadRules.isAllowedPublic(fileName)) {
+      ToastUtil.showToast(UploadRules.notAllowedMessage(fileName));
+      return null;
+    }
     final bytes = await file.length();
     if (bytes > 5 * 1024 * 1024) {
       ToastUtil.showToast('Image is too large. Please use an image under 5 MB');
@@ -49,7 +56,7 @@ class UploadRepository {
       debugPrint('🔄 Uploading file: ${file.path}');
 
       final filename = file.path.split('/').last;
-      final mime = _mimeFromExtension(filename);
+      final mime = UploadRules.mimeFromExtension(filename);
 
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
@@ -72,6 +79,9 @@ class UploadRepository {
       }
 
       debugPrint('❌ Upload failed: ${response.data}');
+      ToastUtil.showToast(
+        ApiError.fromBody(response.data) ?? 'Upload failed. Please try again.',
+      );
       return null;
     } on DioException catch (e) {
       debugPrint('❌ uploadFile DioException: ${e.response?.statusCode}');
@@ -80,6 +90,7 @@ class UploadRepository {
       return null;
     } catch (e) {
       debugPrint('❌ uploadFile error: $e');
+      ToastUtil.showToast('Upload failed. Please try again.');
       return null;
     }
   }
@@ -93,6 +104,11 @@ class UploadRepository {
   // Returns the full data map: { publicId, fileName, fileSize, mimeType, … }
 
   Future<Map<String, dynamic>?> uploadPrivateFile(File file, {String? purpose}) async {
+    final fileName = file.path.split('/').last;
+    if (!UploadRules.isAllowedPrivate(fileName)) {
+      ToastUtil.showToast(UploadRules.notAllowedMessage(fileName));
+      return null;
+    }
     final bytes = await file.length();
     if (bytes > 20 * 1024 * 1024) {
       ToastUtil.showToast('File is too large. Please upload a file under 20 MB');
@@ -102,7 +118,7 @@ class UploadRepository {
       debugPrint('🔄 Uploading private file: ${file.path}');
 
       final filename = file.path.split('/').last;
-      final mime = _mimeFromExtension(filename);
+      final mime = UploadRules.mimeFromExtension(filename);
 
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
@@ -126,6 +142,9 @@ class UploadRepository {
       }
 
       debugPrint('❌ Private upload failed: ${response.data}');
+      ToastUtil.showToast(
+        ApiError.fromBody(response.data) ?? 'File upload failed. Please try again.',
+      );
       return null;
     } on DioException catch (e) {
       debugPrint('❌ uploadPrivateFile DioException: ${e.response?.statusCode}');
@@ -134,26 +153,8 @@ class UploadRepository {
       return null;
     } catch (e) {
       debugPrint('❌ uploadPrivateFile error: $e');
+      ToastUtil.showToast('File upload failed. Please try again.');
       return null;
-    }
-  }
-
-  static String _mimeFromExtension(String filename) {
-    final ext = filename.split('.').last.toLowerCase();
-    switch (ext) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      case 'gif':
-        return 'image/gif';
-      case 'webp':
-        return 'image/webp';
-      case 'pdf':
-        return 'application/pdf';
-      default:
-        return 'application/octet-stream';
     }
   }
 
