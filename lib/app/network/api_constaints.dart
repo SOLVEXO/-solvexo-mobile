@@ -52,10 +52,6 @@ class ApiConstants {
 
   static const String faqs = '$apiPrefix/faqs';
   static const String contactUs = '$apiPrefix/contact';
-  // OAuth endpoints
-  static const String googleAuth = "$apiPrefix/auth/google";
-  static const String facebookAuth = "$apiPrefix/auth/facebook";
-  static const String appleAuth = "$apiPrefix/auth/apple";
 
   // ============ User Profile Endpoints ============
   static const String getUserProfile = "$apiPrefix/auth/getprofile";
