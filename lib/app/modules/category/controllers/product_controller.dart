@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/buttons/app_button.dart';
+import 'package:book_store_app/utils/cart_limits.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
@@ -174,6 +175,10 @@ class ProductController extends GetxController {
 
   void increaseQty() {
     if (selectedProduct.value == null) return;
+    if (!CartLimits.canIncrease(productQty.value)) {
+      ToastUtil.showToast('Maximum quantity per item is ${CartLimits.maxQuantity}');
+      return;
+    }
     if (productQty.value < selectedProduct.value!.stock) {
       productQty.value++;
     } else {
@@ -182,7 +187,7 @@ class ProductController extends GetxController {
   }
 
   void decreaseQty() {
-    if (productQty.value > 1) productQty.value--;
+    if (CartLimits.canDecrease(productQty.value)) productQty.value--;
   }
 
   void selectVariant(int index) {

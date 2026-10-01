@@ -207,7 +207,10 @@ class ApiConstants {
   // Cart endpoints
   static const String getCart = '$apiPrefix/cart/get-cart';
   static const String clearCart = '$apiPrefix/cart/clear-cart';
-  static const String cartCount = '$apiPrefix/cart/count';
+  // Unified (all stores) cart: flat lines, per-store subtotals, `totalItems`,
+  // `grandTotal`. Replaces the removed `cart/count`.
+  static const String cartUnified = '$apiPrefix/cart/unified';
+  static const String clearAllCarts = '$apiPrefix/cart/clear-all';
   static const String addToCart = '$apiPrefix/cart/add-to-cart';
   static const String removeCartItem = '$apiPrefix/cart/remove-cart-item';
   static const String updateCartQuantity =

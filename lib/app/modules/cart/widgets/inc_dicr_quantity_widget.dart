@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/utils/cart_limits.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -35,10 +36,18 @@ class IncDicrQuantityWidget extends StatelessWidget {
                 ),
               ),
               child: InkWell(
-                onTap: () => controller.decreaseQuantity(item.productId, item.productVariantId),
+                onTap: CartLimits.canDecrease(item.quantity)
+                    ? () => controller.decreaseQuantity(item.productId, item.productVariantId)
+                    : null,
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs),
-                  child: Icon(Icons.remove, color: AppColors.grey, size: 18),
+                  child: Icon(
+                    Icons.remove,
+                    color: CartLimits.canDecrease(item.quantity)
+                        ? AppColors.grey
+                        : AppColors.grey.withOpacity(0.35),
+                    size: 18,
+                  ),
                 ),
               ),
             ),
@@ -70,10 +79,18 @@ class IncDicrQuantityWidget extends StatelessWidget {
                 ),
               ),
               child: InkWell(
-                onTap: () => controller.increaseQuantity(item.productId, item.productVariantId),
+                onTap: CartLimits.canIncrease(item.quantity)
+                    ? () => controller.increaseQuantity(item.productId, item.productVariantId)
+                    : null,
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: BaseSpacing.xs),
-                  child: Icon(Icons.add, color: AppColors.primaryColor, size: 18),
+                  child: Icon(
+                    Icons.add,
+                    color: CartLimits.canIncrease(item.quantity)
+                        ? AppColors.primaryColor
+                        : AppColors.primaryColor.withOpacity(0.35),
+                    size: 18,
+                  ),
                 ),
               ),
             ),

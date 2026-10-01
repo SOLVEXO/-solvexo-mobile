@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:book_store_app/utils/cart_limits.dart';
 
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/data/models/rating/review_model.dart';
@@ -246,6 +247,10 @@ class ProductDetailController extends GetxController {
   // ─── 4. Quantity controls ─────────────────────────────────────────────────
 
   void increaseQty() {
+    if (!CartLimits.canIncrease(productQty.value)) {
+      ToastUtil.showToast('Maximum quantity per item is ${CartLimits.maxQuantity}');
+      return;
+    }
     if (product.value?.isDigital ?? false) {
       productQty.value++;
       return;
@@ -260,7 +265,7 @@ class ProductDetailController extends GetxController {
   }
 
   void decreaseQty() {
-    if (productQty.value > 1) productQty.value--;
+    if (CartLimits.canDecrease(productQty.value)) productQty.value--;
   }
 
   // ─── 5. Add to cart ───────────────────────────────────────────────────────

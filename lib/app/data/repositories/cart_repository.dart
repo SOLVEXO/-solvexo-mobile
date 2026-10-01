@@ -42,18 +42,26 @@ class CartRepository {
   }
 
   // ─── Get cart count ────────────────────────────────────────────────────────
+  // GET /api/cart/unified → data.totalItems (there is no /cart/count endpoint)
 
   Future<int> getCartCount() async {
     try {
-      final response = await _baseClient.get(ApiConstants.cartCount);
-      if (response.data['success'] == true) {
-        return (response.data['count'] as num?)?.toInt() ?? 0;
-      }
-      return 0;
+      final response = await _baseClient.get(
+        ApiConstants.cartUnified,
+        requiresAuth: true,
+      );
+      return parseTotalItems(response.data);
     } catch (e) {
       debugPrint('❌ Error in getCartCount: $e');
       return 0;
     }
+  }
+
+  /// `totalItems` of a `/cart/unified` response body, 0 when absent.
+  static int parseTotalItems(dynamic body) {
+    final data = body is Map ? body['data'] : null;
+    final total = data is Map ? data['totalItems'] : null;
+    return total is num ? total.toInt() : 0;
   }
 
   // ─── Add to cart ───────────────────────────────────────────────────────────

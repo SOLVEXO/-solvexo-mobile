@@ -1,4 +1,5 @@
 import 'package:book_store_app/core/base/base_controller.dart';
+import 'package:book_store_app/utils/cart_limits.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -118,7 +119,9 @@ class CartController extends BaseController {
     );
     if (index != -1) {
       cartItems[index] = cartItems[index].copyWith(
-        quantity: cartItems[index].quantity + newItem.quantity,
+        quantity: CartLimits.clamp(
+          cartItems[index].quantity + newItem.quantity,
+        ),
       );
     } else {
       cartItems.add(newItem);
@@ -158,15 +161,26 @@ class CartController extends BaseController {
     String productVariantId,
     String action,
   ) async {
+    // Never send a request the API will reject (quantity must stay 1..1000).
+    final line = cartItems.firstWhereOrNull(
+      (i) => i.productId == productId && i.productVariantId == productVariantId,
+    );
+    if (line != null) {
+      if (action == 'increase' && !CartLimits.canIncrease(line.quantity)) {
+        ToastUtil.showToast('Maximum quantity per item is ${CartLimits.maxQuantity}');
+        return;
+      }
+      if (action == 'decrease' && !CartLimits.canDecrease(line.quantity)) return;
+    }
     if (!await isUserLogin()) {
       final index = cartItems.indexWhere(
         (i) => i.productId == productId && i.productVariantId == productVariantId,
       );
       if (index == -1) return;
       final current = cartItems[index];
-      final newQty = action == 'increase'
-          ? current.quantity + 1
-          : (current.quantity - 1).clamp(1, current.quantity);
+      final newQty = CartLimits.clamp(
+        action == 'increase' ? current.quantity + 1 : current.quantity - 1,
+      );
       cartItems[index] = current.copyWith(quantity: newQty);
       cartItems.refresh();
       calculateTotal();
