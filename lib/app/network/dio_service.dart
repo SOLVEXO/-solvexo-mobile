@@ -1,4 +1,9 @@
+import 'package:book_store_app/app/network/auth_refresh_interceptor.dart';
+import 'package:book_store_app/app/network/messaging_socket_service.dart';
+import 'package:book_store_app/app/network/notifications_socket_service.dart';
+import 'package:book_store_app/app/network/token_refresher.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/util.dart';
 import 'package:dio/dio.dart';
@@ -44,20 +49,8 @@ class DioService {
           debugPrint("❌ Dio Error: ${e.response?.statusCode}");
           debugPrint("❌ Response: ${e.response?.data}");
 
-          // Only an expired/invalid *session token* should force a logout —
-          // that's a 401 on a request that actually sent one
-          // (`requiresAuth: true`). A 401 from an unauthenticated request
-          // like login/register just means "wrong credentials" and must be
-          // returned to the caller normally, not treated as a session drop.
-          final requiresAuth = e.requestOptions.extra['requiresAuth'] ?? false;
-          if (e.response?.statusCode == 401 && requiresAuth) {
-            // Session expired or token invalid — clear local data and drop
-            // back to guest-mode Home, not a login wall.
-            await AppPreferences.clearPreference();
-            if (Get.currentRoute != Routes.mainHome) {
-              Get.offAllNamed(Routes.mainHome);
-            }
-          }
+          // 401 handling (refresh once, retry, end the session) lives in
+          // AuthRefreshInterceptor, added below.
 
           // Always hand the error back down the chain — swallowing it here
           // (via a bare `return`) leaves the original request's Future
@@ -68,7 +61,42 @@ class DioService {
       ),
     );
 
+    dio.interceptors.add(
+      AuthRefreshInterceptor(
+        dio: dio,
+        refresher: TokenRefresher.instance,
+        onSessionExpired: _endSession,
+      ),
+    );
+
     return dio;
+  }
+
+  static bool _endingSession = false;
+
+  /// The refresh token was refused (password reset, suspension, expiry): drop
+  /// the local session and send the user to login.
+  static Future<void> _endSession() async {
+    if (_endingSession) return;
+    _endingSession = true;
+    try {
+      // Onboarding is a device-level flag, not session state.
+      final hasSeenOnboarding = await AppPreferences.getHasSeenOnboarding();
+      await AppPreferences.clearPreference();
+      await AppPreferences.setHasSeenOnboarding(hasSeenOnboarding);
+      if (Get.isRegistered<MessagingSocketService>()) {
+        Get.find<MessagingSocketService>().disconnect();
+      }
+      if (Get.isRegistered<NotificationsSocketService>()) {
+        Get.find<NotificationsSocketService>().disconnect();
+      }
+      ToastUtil.showToast('Your session has expired. Please log in again.');
+      if (Get.currentRoute != Routes.authTabView) {
+        Get.offAllNamed(Routes.authTabView);
+      }
+    } finally {
+      _endingSession = false;
+    }
   }
 }
 

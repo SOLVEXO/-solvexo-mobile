@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConstants {
   // Backend URL. Production by default; point the app at a local API without
   // editing code by passing a compile-time define:
@@ -11,6 +13,21 @@ class ApiConstants {
     defaultValue: "https://api.edudeen.com",
   );
   static const String apiPrefix = "$baseUrl/api";
+
+  /// True when the build still points at the production API.
+  static bool get isProduction => baseUrl.contains('api.edudeen.com');
+
+  /// Debug builds must not exercise new flows against production. Called once
+  /// from `main()`; only prints, never blocks the app.
+  static void warnIfDebugBuildUsesProduction() {
+    if (kDebugMode && isProduction) {
+      debugPrint(
+        '\n⚠️⚠️⚠️  DEBUG BUILD IS POINTING AT PRODUCTION ($baseUrl)  ⚠️⚠️⚠️\n'
+        '    Pass --dart-define=API_BASE_URL=http://10.0.2.2:3009 (Android emulator)\n'
+        '    or  --dart-define=API_BASE_URL=http://localhost:3009 (iOS simulator).\n',
+      );
+    }
+  }
   // Timeouts
   static const int connectTimeout = 30000; // 30 seconds
   static const int receiveTimeout = 30000;
@@ -24,6 +41,7 @@ class ApiConstants {
   static const String register = "$apiPrefix/auth/register";
   static const String socialLogin = '$apiPrefix/auth/social-login';
   static const String login = "$apiPrefix/auth/login";
+  static const String refreshToken = "$apiPrefix/auth/refresh";
   static const String getMe = "$apiPrefix/auth/getprofile";
   static const String logout = "$apiPrefix/auth/logout";
   // static const String verifyEmail = "$apiPrefix/auth/verify-email";

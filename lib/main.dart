@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/notification/fcm_background_handler.dart';
 import 'package:book_store_app/app/notification/local_notification_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -16,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ApiConstants.warnIfDebugBuildUsesProduction();
   await dotenv.load(fileName: ".env");
   // Initialize SharedPreferences
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
