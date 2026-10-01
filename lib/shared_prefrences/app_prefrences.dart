@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPreferences {
@@ -19,6 +20,61 @@ class AppPreferences {
   static const String _storeNameKey = 'store_name';
   static const String _displayCurrencyKey = 'display_currency';
 
+  // ── Tokens (flutter_secure_storage) ───────────────────────────────────────
+  // Access + refresh tokens live in the platform keystore/keychain, never in
+  // SharedPreferences. The in-memory copy avoids a keystore round-trip on every
+  // request and is the single source for the refresh interceptor.
+  static const FlutterSecureStorage _secure = FlutterSecureStorage(
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
+  static const String _secureInitKey = 'secure_tokens_initialised';
+  static String? _accessCache;
+  static String? _refreshCache;
+  static bool _tokensLoaded = false;
+
+  /// Call once from `main()` before `runApp`.
+  ///
+  /// * Upgrade from a build that kept tokens in SharedPreferences: move them
+  ///   into secure storage and delete the plaintext copies.
+  /// * Fresh install: iOS Keychain entries survive uninstall, so wipe any
+  ///   stale tokens on the first run of a new install.
+  static Future<void> initSecureStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final legacyAccess = prefs.getString(_accessTokenKey);
+      final legacyRefresh = prefs.getString(_refreshTokenKey);
+
+      if (legacyAccess != null && legacyAccess.isNotEmpty) {
+        await _secure.write(key: _accessTokenKey, value: legacyAccess);
+        if (legacyRefresh != null && legacyRefresh.isNotEmpty) {
+          await _secure.write(key: _refreshTokenKey, value: legacyRefresh);
+        }
+      } else if (!(prefs.getBool(_secureInitKey) ?? false)) {
+        await _secure.delete(key: _accessTokenKey);
+        await _secure.delete(key: _refreshTokenKey);
+      }
+      await prefs.remove(_accessTokenKey);
+      await prefs.remove(_refreshTokenKey);
+      await prefs.setBool(_secureInitKey, true);
+    } catch (e) {
+      debugPrint('❌ Secure storage init failed: $e');
+    }
+    await _loadTokens();
+  }
+
+  static Future<void> _loadTokens() async {
+    if (_tokensLoaded) return;
+    try {
+      _accessCache = await _secure.read(key: _accessTokenKey);
+      _refreshCache = await _secure.read(key: _refreshTokenKey);
+    } catch (e) {
+      debugPrint('❌ Secure storage read failed: $e');
+    }
+    _tokensLoaded = true;
+  }
+
   // Save access token
   static Future<void> setAccessToken(
     String accessToken,
@@ -29,45 +85,34 @@ class AppPreferences {
 
   // Get access token
   static Future<String?> getAccessTokenAsync() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_accessTokenKey);
+    await _loadTokens();
+    return _accessCache;
   }
 
   // Save refresh token
   static Future<void> setRefreshToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_refreshTokenKey, token);
+    await _secure.write(key: _refreshTokenKey, value: token);
+    _refreshCache = token;
+    _tokensLoaded = true;
   }
 
   // Get refresh token
   static Future<String?> getRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_refreshTokenKey);
+    await _loadTokens();
+    return _refreshCache;
   }
 
-  // ✅ Save both tokens at once
+  // Save both tokens at once
   static Future<void> setTokens({
     required String accessToken,
     required String refreshToken,
   }) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      debugPrint('💾 Saving tokens...');
-      final accessSaved = await prefs.setString(_accessTokenKey, accessToken);
-      final refreshSaved = await prefs.setString(
-        _refreshTokenKey,
-        refreshToken,
-      );
-
-      debugPrint('✅ Access token saved: $accessSaved');
-      debugPrint('✅ Refresh token saved: $refreshSaved');
-
-      // Verify
-      final savedAccess = prefs.getString(_accessTokenKey);
-      final savedRefresh = prefs.getString(_refreshTokenKey);
-      debugPrint('✅ Verified access: ${savedAccess?.substring(0, 20)}...');
-      debugPrint('✅ Verified refresh: ${savedRefresh?.substring(0, 20)}...');
+      await _secure.write(key: _accessTokenKey, value: accessToken);
+      await _secure.write(key: _refreshTokenKey, value: refreshToken);
+      _accessCache = accessToken;
+      _refreshCache = refreshToken;
+      _tokensLoaded = true;
     } catch (e) {
       debugPrint('❌ Error saving tokens: $e');
       rethrow;
@@ -76,21 +121,22 @@ class AppPreferences {
 
   // Clear access token
   static Future<void> clearAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_accessTokenKey);
+    await _secure.delete(key: _accessTokenKey);
+    _accessCache = null;
   }
 
   // Clear refresh token
   static Future<void> clearRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_refreshTokenKey);
+    await _secure.delete(key: _refreshTokenKey);
+    _refreshCache = null;
   }
 
   // Clear both tokens
   static Future<void> clearTokens() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_accessTokenKey);
-    await prefs.remove(_refreshTokenKey);
+    await _secure.delete(key: _accessTokenKey);
+    await _secure.delete(key: _refreshTokenKey);
+    _accessCache = null;
+    _refreshCache = null;
   }
 
   // Save user data
@@ -193,6 +239,10 @@ class AppPreferences {
   static Future<void> clearPreference() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+    await clearTokens();
+    // `clear()` also dropped the "already initialised" flag; without it the
+    // next launch would treat this as a fresh install and wipe a new login.
+    await prefs.setBool(_secureInitKey, true);
   }
 
   // Check if user is logged in

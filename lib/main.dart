@@ -2,6 +2,7 @@ import 'package:book_store_app/app/notification/fcm_background_handler.dart';
 import 'package:book_store_app/app/notification/local_notification_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_theme.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/config/stripe_config.dart';
 import 'package:book_store_app/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -26,6 +27,7 @@ void main() async {
   // actually display something once it starts running.
   await LocalNotificationService().init();
   await SharedPreferences.getInstance();
+  await AppPreferences.initSecureStorage();
   if (StripeConfig.isConfigured) {
     Stripe.publishableKey = StripeConfig.publishableKey;
     await Stripe.instance.applySettings();
