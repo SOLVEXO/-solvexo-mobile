@@ -64,7 +64,7 @@ class AuthGateService {
 
   Future<void> _goToAuth({required int initialTab}) async {
     // Guarded actions are always buyer-side — force the intent so a stale
-    // 'seller' intent left over from a "Sell on Solvexo" visit never leaks
+    // 'seller' intent left over from a "Sell on EduDeen" visit never leaks
     // into this login/signup.
     await AppPreferences.saveIntentRole('user');
     Get.toNamed(Routes.authTabView, arguments: {'initialTab': initialTab});

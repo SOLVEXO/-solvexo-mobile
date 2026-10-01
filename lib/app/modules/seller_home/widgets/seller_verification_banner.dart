@@ -67,7 +67,9 @@ class SellerVerificationBanner extends StatelessWidget {
           padding: const EdgeInsets.all(AppDimen.allPadding),
           decoration: BoxDecoration(
             color: color.withOpacity(0.06),
-            borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+            borderRadius: BorderRadius.circular(
+              AppDimen.serviceCountTileRadius,
+            ),
             border: Border.all(color: color.withOpacity(0.3)),
           ),
           child: Column(
@@ -89,7 +91,11 @@ class SellerVerificationBanner extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               CustomText(
-                text: _description(isSuspended, verificationStatus, rejectionReason),
+                text: _description(
+                  isSuspended,
+                  verificationStatus,
+                  rejectionReason,
+                ),
                 fontSize: AppFontSize.tiny,
                 color: AppColors.grey,
                 height: 1.45,
@@ -115,8 +121,13 @@ class SellerVerificationBanner extends StatelessWidget {
     });
   }
 
-  String _description(bool isSuspended, String verificationStatus, String rejectionReason) {
-    if (isSuspended) return 'Your store is suspended. Contact support for details.';
+  String _description(
+    bool isSuspended,
+    String verificationStatus,
+    String rejectionReason,
+  ) {
+    if (isSuspended)
+      return 'Your store is suspended. Contact support for details.';
     switch (verificationStatus) {
       case 'under_review':
         return "Your business verification is being reviewed. You can't publish products until it's approved.";

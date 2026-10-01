@@ -60,7 +60,6 @@ abstract class Routes {
 
   // Role-based homes
   static const sellerHome = '/seller/home';
-  static const posHome = '/pos/home';
 
   // Seller sub-screens
   static const sellerMessages = '/seller/messages';
@@ -119,26 +118,4 @@ abstract class Routes {
 
   // Buyer/guest — free, unauthenticated AI Worksheet Builder trial
   static const worksheetTrial = '/worksheet-trial';
-
-  // POS sub-screens
-  static const posOrders = '/pos/orders';
-  static const posProducts = '/pos/products';
-  static const posSettings = '/pos/settings';
-
-  // Seller POS management
-  static const sellerPosManagement = '/seller/pos-management';
-  static const sellerPosLocations = '/seller/pos-locations';
-
-  // POS entry flow
-  static const posPinLogin = '/pos/pin-login';
-  static const posOpenRegister = '/pos/open-register';
-
-  // POS operational screens
-  static const posHeldSales = '/pos/held-sales';
-  static const posSaleDetail = '/pos/sale-detail';
-  static const posSessionReport = '/pos/session-report';
-  static const posDailyReport = '/pos/daily-report';
-  static const posSessionHistory = '/pos/session-history';
-  static const posAuditLog = '/pos/audit-log';
-  static const posRangeReport = '/pos/range-report';
 }

@@ -216,7 +216,7 @@ class HomeView extends BaseView<HomeController> {
                     child: const WorksheetTrialPromoCard(),
                   ),
 
-                  // ── "Sell on Solvexo" — guests only, deliberately below
+                  // ── "Sell on EduDeen" — guests only, deliberately below
                   // the fold so it never competes with the login banner ───
                   if (profileController.user.isNull) ...[
                     SizedBox(height: BaseSpacing.lg),

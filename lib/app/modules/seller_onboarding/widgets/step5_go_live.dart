@@ -48,7 +48,7 @@ class Step5GoLive extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const CustomText(
-                  text: 'Welcome to EduDeen. One more step: verify your business details so our team can approve your store — you can only publish products on Solvexo once it\'s approved.',
+                  text: 'Welcome to EduDeen. One more step: verify your business details so our team can approve your store — you can only publish products on EduDeen once it\'s approved.',
                   fontSize: AppFontSize.verySmall,
                   color: AppColors.grey,
                   textAlign: TextAlign.center,
@@ -219,7 +219,7 @@ class _NextStepsTimeline extends StatelessWidget {
         _TimelineStep(
           emoji: '🛍️',
           title: 'Start selling',
-          subtitle: 'Once approved, add products and go live on Solvexo.',
+          subtitle: 'Once approved, add products and go live on EduDeen.',
           isLast: true,
         ),
       ],
@@ -337,7 +337,7 @@ class _UpgradeNoteState extends State<_UpgradeNote> {
             recognizer: _recognizer,
           ),
           const TextSpan(
-            text: ' to unlock unlimited products, AI Studio, POS, and custom domain.',
+            text: ' to unlock unlimited products, AI Studio, and custom domain.',
           ),
         ],
       ),

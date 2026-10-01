@@ -6,20 +6,15 @@ class AppColors {
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
-  static const Color primaryColor = Color(0xFFd97757);
-  // static const Color primaryColor = Color(0xFF7a73ff);
-  // static const Color primaryColorLight = Color.fromARGB(168, 122, 115, 255);
-  static const Color primaryColorLight = Color.fromARGB(179, 234, 140, 109);
-  static const Color secondryColor = Color(0xFF6FBF4A);
-  static const Color secondryColorLight = Color.fromARGB(179, 111, 191, 74);
-  static const Color accentColor = Color(0xFFd97757); // Gold
-  static const Color lightgradianColor = Color.fromARGB(
-    69,
-    194,
-    102,
-    72,
-  ); // Gold
-  // purple
+  // EduDeen brand blue (from Edudeen-Logo icon mark)
+  static const Color primaryColor = Color(0xFF3474B9);
+  static const Color primaryColorLight = Color.fromARGB(179, 82, 148, 205);
+  // EduDeen brand green ("Your partner in Tarbiyyah" tag)
+  static const Color secondryColor = Color(0xFF72BE45);
+  static const Color secondryColorLight = Color.fromARGB(179, 114, 190, 69);
+  // EduDeen brand gold (minaret/crescent)
+  static const Color accentColor = Color(0xFF3474B9);
+  static const Color lightgradianColor = Color.fromARGB(69, 52, 116, 185);
   static const Color white = Color(0xFFFFFFFF);
   static const Color white2 = Color(0xFFF0F0F0);
   static const Color background = Color.fromARGB(242, 249, 249, 249);
@@ -105,7 +100,7 @@ class AppColors {
 
   static const Color dottedBorderColor = Color(0xFF707581);
 
-  // Dark theme (seller / POS modules)
+  // Dark theme (seller modules)
   // static const Color darkBackground = Color(0xFF1C1C1E);
   static const Color darkCard = Color(0xFF2C2C2E);
   static const Color iosGrey = Color(0xFF8E8E93);
@@ -129,7 +124,7 @@ class AppColors {
   static const Color blackOverlay5 = Color(0x0D000000);
   static const Color blackOverlay10 = Color(0x1A000000);
 
-  // Dark nav bar color (seller / POS bottom nav)
+  // Dark nav bar color (seller bottom nav)
   static const Color darkNavBar = Color(0xFF1A1A1A);
 
   // Shimmer / skeleton

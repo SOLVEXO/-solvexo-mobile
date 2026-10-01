@@ -32,7 +32,7 @@ class AuthMiddleware extends GetMiddleware {
 }
 
 /// Extends AuthMiddleware to also verify the user's role matches
-/// the expected role for this section (seller / pos / user).
+/// the expected role for this section (seller / user).
 class RoleMiddleware extends GetMiddleware {
   final String expectedRole;
 
@@ -69,54 +69,8 @@ class RoleMiddleware extends GetMiddleware {
       case 'seller':
         Get.offAllNamed(Routes.sellerHome);
         break;
-      case 'pos':
-        Get.offAllNamed(Routes.posHome);
-        break;
       default:
         Get.offAllNamed(Routes.mainHome);
-    }
-  }
-}
-
-/// Guards the POS terminal screens. Every POS backend endpoint requires the
-/// store owner's own `seller` JWT — there is no separate "pos" account role,
-/// so (unlike [RoleMiddleware]) this checks for `role == 'seller'`.
-///
-/// [requireActiveSession] additionally requires a PIN-logged-in employee with
-/// an open register session (tracked locally via [AppPreferences] POS keys).
-/// Use this on the POS terminal shell and its tabs; leave it false for the
-/// PIN-login and open-register screens themselves, which establish that
-/// session in the first place.
-class PosAccessMiddleware extends GetMiddleware {
-  final bool requireActiveSession;
-
-  PosAccessMiddleware({this.requireActiveSession = false});
-
-  @override
-  int? get priority => 1;
-
-  @override
-  GetPage? onPageCalled(GetPage? page) {
-    _check();
-    return page;
-  }
-
-  Future<void> _check() async {
-    final token = await AppPreferences.getAccessTokenAsync();
-    if (token == null || token.isEmpty) {
-      await AppPreferences.clearTokens();
-      Get.offAllNamed(Routes.authTabView);
-      return;
-    }
-
-    final role = await AppPreferences.getUserRole();
-    if (role != 'seller') {
-      Get.offAllNamed(Routes.mainHome);
-      return;
-    }
-
-    if (requireActiveSession && !await AppPreferences.hasPosSession()) {
-      Get.offAllNamed(Routes.posPinLogin);
     }
   }
 }

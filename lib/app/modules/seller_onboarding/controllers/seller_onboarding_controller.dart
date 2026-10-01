@@ -27,13 +27,12 @@ enum SellerTypeOption {
   mixOfAbove,
 }
 
+// Edudeen only sells physical and digital (incl. educational) products —
+// no services/bookings, recurring subscriptions, or in-person selling.
 enum WhatYouSellOption {
   physicalProducts,
   digitalDownloads,
   educationalResources,
-  servicesBookings,
-  subscriptions,
-  inPersonPos,
 }
 
 // ── Data models ────────────────────────────────────────────────────────────────
@@ -98,7 +97,7 @@ const kSellerTypes = [
     type: SellerTypeOption.brandBusiness,
     emoji: '💼',
     name: 'Brand / Business',
-    description: 'Run a full online store with inventory and POS',
+    description: 'Run a full online store with inventory',
   ),
   SellerTypeData(
     type: SellerTypeOption.freelancer,
@@ -160,39 +159,6 @@ const kWhatYouSell = [
       ),
     ],
   ),
-  WhatYouSellData(
-    option: WhatYouSellOption.servicesBookings,
-    emoji: '📋',
-    name: 'Services / Bookings',
-    description: 'Appointments and packages',
-    tools: [
-      ActivatedTool(
-        'Booking Calendar',
-        AppColors.accepted,
-        AppColors.acceptedBg,
-      ),
-    ],
-  ),
-  WhatYouSellData(
-    option: WhatYouSellOption.subscriptions,
-    emoji: '🔄',
-    name: 'Subscriptions',
-    description: 'Recurring membership access',
-    tools: [
-      ActivatedTool('Subscriptions', AppColors.grey, AppColors.background),
-    ],
-  ),
-  WhatYouSellData(
-    option: WhatYouSellOption.inPersonPos,
-    emoji: '🖥️',
-    name: 'In-Person / POS',
-    description: 'Sell at a physical location',
-    tools: [
-      ActivatedTool('POS Register', AppColors.red, AppColors.lightRed),
-      ActivatedTool('AI Studio', AppColors.purpleColor, AppColors.lightPurple),
-      ActivatedTool('Marketplace Listing', AppColors.blue, AppColors.lightBlue),
-    ],
-  ),
 ];
 
 const kStoreCurrencies = ['PKR', 'USD'];
@@ -230,7 +196,7 @@ extension SellerTypeApi on SellerTypeOption {
       case SellerTypeOption.freelancer:
         return 'freelancer';
       case SellerTypeOption.mixOfAbove:
-        return 'mix_of_above';
+        return 'mix'; // backend SellerType.MIX
     }
   }
 }
@@ -244,12 +210,6 @@ extension WhatYouSellApi on WhatYouSellOption {
         return 'digital_downloads';
       case WhatYouSellOption.educationalResources:
         return 'educational_resources';
-      case WhatYouSellOption.servicesBookings:
-        return 'services_bookings';
-      case WhatYouSellOption.subscriptions:
-        return 'subscriptions';
-      case WhatYouSellOption.inPersonPos:
-        return 'in_person_pos';
     }
   }
 }

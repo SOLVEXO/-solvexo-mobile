@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 class StoreStatusStyle {
   /// Full label — used where there's room (meta card info row, verification CTA card).
   final String label;
+
   /// Compact label — used in tight inline pills (store list card badge).
   final String shortLabel;
   final Color color;
@@ -29,7 +30,7 @@ StoreStatusStyle storeStatusStyle(String status) {
       return const StoreStatusStyle(
         'Pending Verification',
         'Pending',
-        AppColors.orange,
+        AppColors.iosOrange,
       );
     case 'rejected':
       return const StoreStatusStyle(
@@ -69,7 +70,7 @@ VerificationStatusStyle verificationStatusStyle(String verificationStatus) {
       return const VerificationStatusStyle(
         'Submitted — Awaiting Review',
         'Submitted',
-        AppColors.amberDark,
+        AppColors.primaryColor,
       );
     case 'under_review':
       return const VerificationStatusStyle(

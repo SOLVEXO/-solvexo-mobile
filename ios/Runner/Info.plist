@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Solvexo</string>
+	<string>EduDeen</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Solvexo</string>
+	<string>EduDeen</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -52,12 +52,8 @@
 	<string>This app needs access to your calendar to display and manage events.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera to take photos or scan QR codes.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app requires access to your location even when the app is in the background to support location-based features.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We need your location to provide continuous tracking.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to show nearby services.</string>
+	<string>Edudeen uses your location while the app is open to show nearby sellers and products, and to pick your address on the map.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need access to your microphone to record audio during video capture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

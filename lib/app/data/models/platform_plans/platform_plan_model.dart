@@ -52,7 +52,6 @@ class PlatformPlanModel {
 class PlatformPlanLimits {
   final int maxProducts;
   final int maxStaffAccounts;
-  final int maxPosLocations;
   final int aiCreditsPerMonth;
   final double transactionFeeRate;
   final bool prioritySupport;
@@ -60,7 +59,6 @@ class PlatformPlanLimits {
   const PlatformPlanLimits({
     required this.maxProducts,
     required this.maxStaffAccounts,
-    required this.maxPosLocations,
     required this.aiCreditsPerMonth,
     required this.transactionFeeRate,
     required this.prioritySupport,
@@ -71,7 +69,6 @@ class PlatformPlanLimits {
     return PlatformPlanLimits(
       maxProducts: json['maxProducts'] as int? ?? 0,
       maxStaffAccounts: json['maxStaffAccounts'] as int? ?? 0,
-      maxPosLocations: json['maxPosLocations'] as int? ?? 0,
       aiCreditsPerMonth: json['aiCreditsPerMonth'] as int? ?? 0,
       transactionFeeRate: (json['transactionFeeRate'] as num?)?.toDouble() ?? 0,
       prioritySupport: json['prioritySupport'] as bool? ?? false,

@@ -85,7 +85,7 @@ class SellerPromotionsController extends GetxController {
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: result.clientSecret!,
-          merchantDisplayName: 'Solvexo',
+          merchantDisplayName: 'EduDeen',
         ),
       );
 

@@ -17,7 +17,7 @@ import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-// Seller-only landing screen. Reached exclusively via the "Sell on Solvexo"
+// Seller-only landing screen. Reached exclusively via the "Sell on EduDeen"
 // entry point (Account tab, or a Home banner) — never shown at first launch.
 // Buyers never see a role picker; guest browsing is the default.
 class WelcomeView extends StatelessWidget {
@@ -110,7 +110,7 @@ class _LogoSection extends StatelessWidget {
         ),
         SizedBox(height: BaseSpacing.lg),
         CustomText(
-          text: 'Sell on Solvexo',
+          text: 'Sell on EduDeen',
           color: AppColors.white,
           fontFamily: AppTextStyles.headingFontFamily,
           fontSize: AppFontSize.large,
@@ -124,7 +124,7 @@ class _LogoSection extends StatelessWidget {
         ),
         SizedBox(height: BaseSpacing.xxs - 2),
         CustomText(
-          text: 'Reach thousands of buyers already shopping on Solvexo.',
+          text: 'Reach thousands of buyers already shopping on EduDeen.',
           textAlign: TextAlign.center,
           color: AppColors.white.withOpacity(0.65),
           fontSize: AppFontSize.tiny,
@@ -160,7 +160,7 @@ class _BottomSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomText(
-            text: 'Why sell on Solvexo?',
+            text: 'Why sell on EduDeen?',
             color: AppColors.black,
             fontFamily: AppTextStyles.headingFontFamily,
             fontSize: AppFontSize.small2,

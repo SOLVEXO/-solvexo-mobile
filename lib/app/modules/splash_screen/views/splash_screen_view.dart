@@ -2,10 +2,8 @@ import 'dart:math' as math;
 import 'package:book_store_app/app/components/animated_background_circles.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/splash_screen/controllers/splash_screen_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
@@ -32,10 +30,8 @@ class SplashView extends StatelessWidget {
             height: double.infinity,
             decoration: const BoxDecoration(gradient: AppColors.appbarGradient),
           ),
-
           // ── Animated background circles ──────────────────────────────────
           const AnimatedBackgroundCircles(),
-
           // ── Main content ─────────────────────────────────────────────────
           SafeArea(
             child: Column(
@@ -105,7 +101,7 @@ class SplashView extends StatelessWidget {
                         children: [
                           // Brand name
                           CustomText(
-                            text: 'Solvexo',
+                            text: 'EduDeen',
                             textAlign: TextAlign.center,
                             color: AppColors.white,
                             fontFamily: AppTextStyles.headingFontFamily,
@@ -180,9 +176,10 @@ class SplashView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(BaseRadius.sm),
                           color: AppColors.white.withOpacity(0.2),
                         ),
-                        child: SvgIcon(
-                          assetName: AppIcons.appLogoSvg,
-                          size: 22,
+                        child: CommonImageView(
+                          imagePath: AppImages.logoImage,
+                          width: 22,
+                          height: 22,
                         ),
                       ),
                     ],

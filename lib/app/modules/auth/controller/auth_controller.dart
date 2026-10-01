@@ -193,7 +193,10 @@ class AuthController extends BaseController {
       }
 
       // 2. Send to backend — AuthRepository.socialLogin persists tokens/user itself
-      final auth = await _authRepository.socialLogin(dto);
+      final role = await AppPreferences.getIntentRole();
+      final auth = await _authRepository.socialLogin(
+        dto.copyWith(role: role ?? 'user'),
+      );
 
       if (auth == null) {
         _showError('Google sign in failed. Please try again.');
@@ -220,7 +223,10 @@ class AuthController extends BaseController {
       final dto = await _socialAuth.signInWithFacebook();
       if (dto == null) return;
 
-      final auth = await _authRepository.socialLogin(dto);
+      final role = await AppPreferences.getIntentRole();
+      final auth = await _authRepository.socialLogin(
+        dto.copyWith(role: role ?? 'user'),
+      );
 
       if (auth == null) {
         _showError('Facebook sign in failed. Please try again.');
@@ -247,7 +253,10 @@ class AuthController extends BaseController {
       final dto = await _socialAuth.signInWithApple();
       if (dto == null) return;
 
-      final auth = await _authRepository.socialLogin(dto);
+      final role = await AppPreferences.getIntentRole();
+      final auth = await _authRepository.socialLogin(
+        dto.copyWith(role: role ?? 'user'),
+      );
 
       if (auth == null) {
         _showError('Apple sign in failed. Please try again.');
@@ -356,7 +365,7 @@ class AuthController extends BaseController {
     // Clear user data
     currentUser.value = null;
 
-    _authRepository.logout();
+    await _authRepository.logout();
     // Logout returns to guest-mode Home, not a login wall.
     Get.offAllNamed(Routes.mainHome);
     ToastUtil.showToast('Logged out successfully');

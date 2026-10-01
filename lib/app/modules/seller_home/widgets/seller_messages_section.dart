@@ -72,14 +72,19 @@ class _MessageCard extends StatelessWidget {
     final name = conversation.peerName('seller');
     final avatar = conversation.peerAvatar('seller');
     final unread = conversation.unreadFor('seller') > 0;
-    final initials = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : '?';
+    final initials = name.trim().isNotEmpty
+        ? name.trim()[0].toUpperCase()
+        : '?';
 
     return GestureDetector(
-      onTap: () => Get.toNamed(Routes.chatView, arguments: {
-        'conversationId': conversation.id,
-        'peerName': name,
-        'peerAvatar': avatar,
-      }),
+      onTap: () => Get.toNamed(
+        Routes.chatView,
+        arguments: {
+          'conversationId': conversation.id,
+          'peerName': name,
+          'peerAvatar': avatar,
+        },
+      ),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
@@ -134,7 +139,9 @@ class _MessageCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   CustomText(
-                    text: conversation.lastMessage?.previewText ?? 'Start the conversation',
+                    text:
+                        conversation.lastMessage?.previewText ??
+                        'Start the conversation',
                     fontSize: AppFontSize.verySmall,
                     color: AppColors.grey,
                     overflow: TextOverflow.ellipsis,
@@ -156,7 +163,8 @@ class _MessageCard extends StatelessWidget {
     final diff = now.difference(local);
     if (diff.inMinutes < 1) return 'now';
     if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24 && now.day == local.day) return DateFormat('h:mm a').format(local);
+    if (diff.inHours < 24 && now.day == local.day)
+      return DateFormat('h:mm a').format(local);
     if (diff.inDays < 7) return DateFormat('EEE').format(local);
     return DateFormat('MMM d').format(local);
   }
@@ -173,7 +181,12 @@ class _Avatar extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: avatarUrl != null && avatarUrl!.isNotEmpty
-          ? CommonImageView(url: avatarUrl!, width: 44, height: 44, fit: BoxFit.cover)
+          ? CommonImageView(
+              url: avatarUrl!,
+              width: 44,
+              height: 44,
+              fit: BoxFit.cover,
+            )
           : Container(
               width: 44,
               height: 44,

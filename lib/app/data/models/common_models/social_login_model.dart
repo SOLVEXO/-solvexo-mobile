@@ -6,6 +6,7 @@ class SocialLoginModel {
   final String? image;
   final String? fcmToken;
   final String? token;
+  final String? role;
 
   SocialLoginModel({
     required this.authProvider,
@@ -15,7 +16,21 @@ class SocialLoginModel {
     this.image,
     this.fcmToken,
     this.token,
+    this.role,
   });
+
+  SocialLoginModel copyWith({String? role}) {
+    return SocialLoginModel(
+      authProvider: authProvider,
+      socialId: socialId,
+      userName: userName,
+      email: email,
+      image: image,
+      fcmToken: fcmToken,
+      token: token,
+      role: role ?? this.role,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -26,6 +41,7 @@ class SocialLoginModel {
       if (image != null) 'image': image,
       if (fcmToken != null) 'fcmToken': fcmToken,
       if (token != null) 'token': token,
+      if (role != null) 'role': role,
     };
   }
 }

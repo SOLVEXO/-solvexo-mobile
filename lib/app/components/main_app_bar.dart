@@ -124,7 +124,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
           CommonImageView(imagePath: AppImages.logoImage, width: 26),
           SizedBox(width: BaseSpacing.xxs + 2),
           CustomText(
-            text: "Solvexo",
+            text: "EduDeen",
             fontWeight: FontWeight.w600,
             letterSpacing: 1.5,
             color: AppColors.acceptedBg,

@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/auth_or_row.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/components/social_sign_in_row.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -107,10 +108,8 @@ class LoginView extends StatelessWidget {
 
           // ── Social buttons ──────────────────────────────────────────────
           Obx(
-            () => _SocialRow(
+            () => SocialSignInRow(
               onGoogle: authController.signInWithGoogle,
-              onFacebook: authController.signInWithFacebook,
-              onApple: authController.signInWithApple,
               isBusy: authController.isSocialLoading.value,
               activeProvider: authController.activeSocialProvider.value,
             ),
@@ -142,119 +141,6 @@ class _LabeledField extends StatelessWidget {
         SizedBox(height: BaseSpacing.xxs + 2),
         child,
       ],
-    );
-  }
-}
-
-// ── Social sign-in row — outlined pill buttons with icon + label ────────────
-
-class _SocialRow extends StatelessWidget {
-  const _SocialRow({
-    required this.onGoogle,
-    required this.onFacebook,
-    required this.onApple,
-    required this.isBusy,
-    required this.activeProvider,
-  });
-  final VoidCallback onGoogle;
-  final VoidCallback onFacebook;
-  final VoidCallback onApple;
-  final bool isBusy;
-  final String activeProvider;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _SocialButton(
-          icon: AppIcons.googleIcon,
-          label: 'Google',
-          onTap: onGoogle,
-          disabled: isBusy,
-          isLoading: activeProvider == 'google',
-        ),
-        SizedBox(width: BaseSpacing.sm),
-        _SocialButton(
-          icon: AppIcons.facebookIcon,
-          label: 'Facebook',
-          onTap: onFacebook,
-          disabled: isBusy,
-          isLoading: activeProvider == 'facebook',
-        ),
-        SizedBox(width: BaseSpacing.sm),
-        _SocialButton(
-          icon: AppIcons.appleIcon,
-          label: 'Apple',
-          onTap: onApple,
-          disabled: isBusy,
-          isLoading: activeProvider == 'apple',
-        ),
-      ],
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.disabled = false,
-    this.isLoading = false,
-  });
-  final String icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool disabled;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: disabled ? null : onTap,
-        child: Opacity(
-          opacity: disabled && !isLoading ? 0.5 : 1,
-          child: Container(
-            height: 48,
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.lightGrey2),
-              borderRadius: BorderRadius.circular(BaseRadius.md),
-              color: AppColors.white,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: isLoading
-                  ? [
-                      SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(
-                            AppColors.primaryColor,
-                          ),
-                        ),
-                      ),
-                    ]
-                  : [
-                      SvgIcon(assetName: icon, size: 18),
-                      SizedBox(width: BaseSpacing.xxs + 1),
-                      Flexible(
-                        child: CustomText(
-                          text: label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          color: AppColors.black2,
-                          fontSize: AppFontSize.tiny,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

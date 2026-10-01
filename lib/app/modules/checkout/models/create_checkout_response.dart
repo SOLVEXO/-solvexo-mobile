@@ -97,7 +97,7 @@ class CheckoutSession {
       userId: json['userId'] as String,
       addressId: json['addressId'] as String?,
       // Matches the backend's own resolveCheckoutCurrency fallback (PKR,
-      // since Solvexo is Pakistan-origin) — should never actually be hit
+      // since EduDeen is Pakistan-origin) — should never actually be hit
       // since the backend always sets Checkout.currency, but keeps this
       // consistent rather than silently assuming USD.
       currency: json['currency'] as String? ?? 'PKR',

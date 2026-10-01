@@ -37,7 +37,7 @@ class SellerStoreProfileController extends GetxController {
   final RxString editCategoryId =
       ''.obs; // real category _id sent to the backend
 
-  // What the store sells (multi-select) — drives which tools (incl. POS)
+  // What the store sells (multi-select) — drives which tools
   // get enabled server-side via `resolveTools()`.
   final RxSet<WhatYouSellOption> editProductTypes = <WhatYouSellOption>{}.obs;
 

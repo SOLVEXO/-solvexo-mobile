@@ -1,6 +1,8 @@
+import 'package:book_store_app/app/components/auth_or_row.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/custom_text_field.dart';
+import 'package:book_store_app/app/components/social_sign_in_row.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -174,6 +176,22 @@ class SignUpView extends StatelessWidget {
                 onPressed: authController.isLoading.value
                     ? null
                     : authController.register,
+              ),
+            ),
+
+            SizedBox(height: BaseSpacing.lg),
+
+            // ── Divider ───────────────────────────────────────────────────
+            const AuthOrRow(label: 'or continue with'),
+
+            SizedBox(height: BaseSpacing.md),
+
+            // ── Social buttons ────────────────────────────────────────────
+            Obx(
+              () => SocialSignInRow(
+                onGoogle: authController.signInWithGoogle,
+                isBusy: authController.isSocialLoading.value,
+                activeProvider: authController.activeSocialProvider.value,
               ),
             ),
           ],

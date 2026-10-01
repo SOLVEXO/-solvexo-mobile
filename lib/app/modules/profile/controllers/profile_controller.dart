@@ -75,7 +75,7 @@ class ProfileController extends GetxController {
       tiles: [
         SettingsTile(
           icon: AppIcons.cashIcon,
-          title: 'Sell on Solvexo',
+          title: 'Sell on EduDeen',
           onTap: goToSellerLanding,
         ),
       ],
@@ -131,7 +131,7 @@ class ProfileController extends GetxController {
   void goToSellerLanding() => Get.toNamed(Routes.welcome);
 
   /// Guest CTA — explicitly tags the intent as buyer so a stale 'seller'
-  /// intent left over from a previous "Sell on Solvexo" visit never leaks
+  /// intent left over from a previous "Sell on EduDeen" visit never leaks
   /// into a plain buyer login/signup.
   Future<void> goToLogin() async {
     await AppPreferences.saveIntentRole('user');

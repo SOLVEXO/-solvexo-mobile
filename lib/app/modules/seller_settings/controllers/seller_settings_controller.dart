@@ -57,10 +57,6 @@ class SellerSettingsController extends GetxController {
   final RxString storeName = 'My Shop'.obs;
   final RxString shippingZones = '3 zones configured'.obs;
 
-  // Only stores that opted into `in_person_pos` (via onboarding or Edit
-  // Store) get a POS Management tile — digital-only stores never see it.
-  final RxBool posEnabled = true.obs;
-
   // ── Account settings ────────────────────────────────────────────────────────
   final RxBool twoFactorEnabled = true.obs;
   final RxString language = 'English'.obs;
@@ -92,12 +88,6 @@ class SellerSettingsController extends GetxController {
           trailing: shippingZones.value,
           onTap: () => Get.toNamed(Routes.sellerShipping),
         ),
-        if (posEnabled.value)
-          SettingsTile(
-            emoji: AppIcons.posIcon,
-            title: 'POS Management',
-            onTap: () => Get.toNamed(Routes.sellerPosManagement),
-          ),
         SettingsTile(
           emoji: AppIcons.reportIcon,
           title: 'Activity Log',
@@ -269,7 +259,6 @@ class SellerSettingsController extends GetxController {
     final store = await _repo.getStoreById(storeId);
     if (store != null) {
       storeName.value = store.name;
-      posEnabled.value = store.enabledTools.contains('pos_register');
     }
   }
 

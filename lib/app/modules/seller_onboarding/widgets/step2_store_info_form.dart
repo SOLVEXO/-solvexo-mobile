@@ -21,28 +21,13 @@ class Step2StoreInfoForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 8),
-          const CustomText(
-            text: 'Set up your store',
-            fontFamily: AppTextStyles.headingFontFamily,
-            fontSize: AppFontSize.veryLarge,
-            fontWeight: FontWeight.bold,
-            color: AppColors.black,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 6),
-          const CustomText(
-            text: 'You can always update these details later from Settings.',
-            fontSize: AppFontSize.verySmall,
-            color: AppColors.grey,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(AppDimen.allPadding),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius + 4),
+              borderRadius: BorderRadius.circular(
+                AppDimen.serviceCountTileRadius + 4,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.black.withOpacity(0.05),
@@ -54,6 +39,22 @@ class Step2StoreInfoForm extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const CustomText(
+                  text: 'Set up your store',
+                  fontFamily: AppTextStyles.headingFontFamily,
+                  fontSize: AppFontSize.regular,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.black,
+                  textAlign: TextAlign.center,
+                ),
+                const CustomText(
+                  text:
+                      'You can always update these details later from Settings.',
+                  fontSize: AppFontSize.verySmall,
+                  color: AppColors.grey,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
                 _LogoUpload(controller: controller),
                 const SizedBox(height: 20),
                 _FieldLabel(label: 'Store Name', required: true),
@@ -102,76 +103,93 @@ class _LogoUpload extends StatelessWidget {
         color: AppColors.background,
         borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
       ),
-      child: Row(children: [
-        Obx(() {
-          final hasFile = controller.logoFile.value != null;
-          return GestureDetector(
-            onTap: controller.pickLogo,
-            child: Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-                border: Border.all(
-                  color: AppColors.primaryColor.withOpacity(0.5),
-                  width: 1.5,
-                ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: hasFile
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
-                      child: CommonImageView(
-                        file: controller.logoFile.value,
-                        fit: BoxFit.cover,
-                        width: 70,
-                        height: 70,
-                      ),
-                    )
-                  : const Icon(
-                      Icons.camera_alt_outlined,
-                      size: 28,
-                      color: AppColors.primaryColor,
-                    ),
-            ),
-          );
-        }),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const CustomText(
-              text: 'Upload your store logo',
-              fontSize: AppFontSize.verySmall,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black,
-            ),
-            const SizedBox(height: 4),
-            const CustomText(
-              text: 'PNG or JPG, min 200×200px.\nHelps buyers recognise your brand.',
-              fontSize: AppFontSize.tiny,
-              color: AppColors.grey,
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
+      child: Row(
+        children: [
+          Obx(() {
+            final hasFile = controller.logoFile.value != null;
+            return GestureDetector(
               onTap: controller.pickLogo,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                width: 70,
+                height: 70,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(
+                    AppDimen.serviceCountTileRadius,
+                  ),
+                  border: Border.all(
+                    color: AppColors.primaryColor.withOpacity(0.5),
+                    width: 1.5,
+                  ),
                 ),
-                child: Obx(() => CustomText(
-                  text: controller.logoFile.value != null ? 'Change Photo' : 'Choose File',
-                  fontSize: AppFontSize.tiny,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryColor,
-                )),
+                clipBehavior: Clip.antiAlias,
+                child: hasFile
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                          AppDimen.serviceCountTileRadius,
+                        ),
+                        child: CommonImageView(
+                          file: controller.logoFile.value,
+                          fit: BoxFit.cover,
+                          width: 70,
+                          height: 70,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.camera_alt_outlined,
+                        size: 28,
+                        color: AppColors.primaryColor,
+                      ),
               ),
+            );
+          }),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CustomText(
+                  text: 'Upload your store logo',
+                  fontSize: AppFontSize.verySmall,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
+                const SizedBox(height: 4),
+                const CustomText(
+                  text:
+                      'PNG or JPG, min 200×200px.\nHelps buyers recognise your brand.',
+                  fontSize: AppFontSize.tiny,
+                  color: AppColors.grey,
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: controller.pickLogo,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Obx(
+                      () => CustomText(
+                        text: controller.logoFile.value != null
+                            ? 'Change Photo'
+                            : 'Choose File',
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ]),
-        ),
-      ]),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -214,9 +232,16 @@ class _CategoryField extends StatelessWidget {
                       ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryColor),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryColor,
+                          ),
                         )
-                      : const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.grey),
+                      : const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 20,
+                          color: AppColors.grey,
+                        ),
                 ],
               ),
             ),
@@ -261,7 +286,11 @@ class _CurrencyField extends StatelessWidget {
                           : AppColors.black,
                     ),
                   ),
-                  const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.grey),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: AppColors.grey,
+                  ),
                 ],
               ),
             ),
@@ -269,7 +298,8 @@ class _CurrencyField extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         const CustomText(
-          text: "This is the currency for your prices and payouts. It can't be changed after your store is created.",
+          text:
+              "This is the currency for your prices and payouts. It can't be changed after your store is created.",
           fontSize: AppFontSize.tiny,
           color: AppColors.grey,
         ),
@@ -300,9 +330,18 @@ class _FieldLabel extends StatelessWidget {
           color: AppColors.black2,
         ),
         if (required)
-          const CustomText(text: ' *', fontSize: AppFontSize.verySmall, fontWeight: FontWeight.w600, color: AppColors.red),
+          const CustomText(
+            text: ' *',
+            fontSize: AppFontSize.verySmall,
+            fontWeight: FontWeight.w600,
+            color: AppColors.red,
+          ),
         if (optional)
-          const CustomText(text: ' (optional)', fontSize: AppFontSize.tiny, color: AppColors.grey),
+          const CustomText(
+            text: ' (optional)',
+            fontSize: AppFontSize.tiny,
+            color: AppColors.grey,
+          ),
       ],
     );
   }

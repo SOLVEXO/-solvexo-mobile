@@ -41,20 +41,20 @@ class _OrderCard extends StatelessWidget {
   const _OrderCard({required this.order});
 
   static Color _statusColor(OrderStatus s) => switch (s) {
-        OrderStatus.completed => AppColors.greenSuccess,
-        OrderStatus.processing => AppColors.iosBlue,
-        OrderStatus.shipped => const Color(0xFF5856D6),
-        OrderStatus.refunded => AppColors.lightGrey5,
-        _ => AppColors.iosOrange,
-      };
+    OrderStatus.completed => AppColors.greenSuccess,
+    OrderStatus.processing => AppColors.iosBlue,
+    OrderStatus.shipped => const Color(0xFF5856D6),
+    OrderStatus.refunded => AppColors.lightGrey5,
+    _ => AppColors.iosOrange,
+  };
 
   static String _statusLabel(OrderStatus s) => switch (s) {
-        OrderStatus.completed => 'Completed',
-        OrderStatus.processing => 'Processing',
-        OrderStatus.shipped => 'Shipped',
-        OrderStatus.refunded => 'Refunded',
-        _ => 'Pending',
-      };
+    OrderStatus.completed => 'Completed',
+    OrderStatus.processing => 'Processing',
+    OrderStatus.shipped => 'Shipped',
+    OrderStatus.refunded => 'Refunded',
+    _ => 'Pending',
+  };
 
   String get _itemsSummary {
     final items = order.items;
@@ -170,8 +170,11 @@ class _EmptyOrders extends StatelessWidget {
         ),
         child: const Column(
           children: [
-            Icon(Icons.receipt_long_outlined,
-                size: 36, color: AppColors.lightGrey5),
+            Icon(
+              Icons.receipt_long_outlined,
+              size: 36,
+              color: AppColors.lightGrey5,
+            ),
             SizedBox(height: 10),
             CustomText(
               text: 'No orders yet',

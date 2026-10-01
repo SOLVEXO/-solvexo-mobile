@@ -438,7 +438,22 @@ class AuthRepository {
 
       debugPrint("Change Password Response --> ${response.data}");
 
-      return response.statusCode == 200 && response.data['success'] == true;
+      final ok = response.statusCode == 200 && response.data['success'] == true;
+      if (ok) {
+        // The API revokes every session on a password change (tokenVersion bump)
+        // and returns a fresh pair for THIS device. Without saving it, the next
+        // request 401s and the user is logged out right after changing password.
+        final token = (response.data['data'] as Map?)?['token'];
+        if (token is Map &&
+            token['accessToken'] is String &&
+            token['refreshToken'] is String) {
+          await AppPreferences.setTokens(
+            accessToken: token['accessToken'] as String,
+            refreshToken: token['refreshToken'] as String,
+          );
+        }
+      }
+      return ok;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
       return false;

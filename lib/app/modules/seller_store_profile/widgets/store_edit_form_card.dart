@@ -50,13 +50,6 @@ class StoreEditFormCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _fieldLabel('What You Sell', required: true),
-          const SizedBox(height: 4),
-          const CustomText(
-            text:
-                'Selecting "In-Person / POS" is what enables the POS register for this store.',
-            fontSize: AppFontSize.tiny,
-            color: AppColors.grey,
-          ),
           const SizedBox(height: 8),
           Obx(
             () => Wrap(

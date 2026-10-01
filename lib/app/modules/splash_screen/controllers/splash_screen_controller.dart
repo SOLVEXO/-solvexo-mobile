@@ -130,9 +130,6 @@ class SplashScreenController extends GetxController
       case 'seller':
         Get.offAllNamed(Routes.sellerStores);
         break;
-      case 'pos':
-        Get.offAllNamed(Routes.posHome);
-        break;
       default:
         Get.offAllNamed(Routes.mainHome);
     }

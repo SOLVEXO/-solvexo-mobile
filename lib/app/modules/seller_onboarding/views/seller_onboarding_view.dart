@@ -1,5 +1,4 @@
-import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/controllers/seller_onboarding_controller.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/onboarding_bottom_bar.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/onboarding_step_bar.dart';
@@ -9,8 +8,6 @@ import 'package:book_store_app/app/modules/seller_onboarding/widgets/step4_what_
 import 'package:book_store_app/app/modules/seller_onboarding/widgets/step5_go_live.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
-import 'package:book_store_app/config/resources/app_text_styles.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -97,25 +94,38 @@ class _TopHeader extends StatelessWidget {
         top: MediaQuery.of(context).padding.top + 8,
         left: AppDimen.allPadding,
         right: AppDimen.allPadding,
-        bottom: 10,
+        // bottom: 10,
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgIcon(assetName: AppImages.logoImage, size: 40),
-          const SizedBox(width: 5),
-          const CustomText(
-            text: 'SOLVEXO',
-            fontFamily: AppTextStyles.headingFontFamily,
-            fontSize: AppFontSize.medium,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primaryColor,
-          ),
-          const Spacer(),
-          const CustomText(
-            text: 'Set up your store',
-            fontSize: AppFontSize.tiny,
-            color: AppColors.grey,
-          ),
+          CommonImageView(imagePath: AppImages.fullLogo, width: 150),
+          // SvgIcon(assetName: AppImages.fullLogo, size: 100),
+
+          // Row(
+          //   children: [
+          //     const CustomText(
+          //       text: 'Edu',
+          //       fontFamily: AppTextStyles.headingFontFamily,
+          //       fontSize: AppFontSize.medium,
+          //       fontWeight: FontWeight.bold,
+          //       color: AppColors.primaryColor,
+          //     ),
+          //     const CustomText(
+          //       text: 'Deen',
+          //       fontFamily: AppTextStyles.headingFontFamily,
+          //       fontSize: AppFontSize.medium,
+          //       fontWeight: FontWeight.bold,
+          //       color: AppColors.accentColor,
+          //     ),
+          //   ],
+          // ),
+          // const Spacer(),
+          // const CustomText(
+          //   text: 'Set up your store',
+          //   fontSize: AppFontSize.tiny,
+          //   color: AppColors.grey,
+          // ),
         ],
       ),
     );

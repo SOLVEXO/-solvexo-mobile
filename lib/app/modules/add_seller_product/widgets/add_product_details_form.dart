@@ -180,7 +180,7 @@ class AddProductDetailsForm extends StatelessWidget {
                 _SubcategoryField(controller: controller),
                 const SizedBox(height: 16),
 
-                // List on Solvexo Marketplace toggle
+                // List on EduDeen Marketplace toggle
                 _ListedToggle(controller: controller),
                 const SizedBox(height: 16),
               ],
@@ -257,7 +257,7 @@ class _TypePreviewBadge extends StatelessWidget {
   }
 }
 
-// ── List on Solvexo toggle ────────────────────────────────────────────────────
+// ── List on EduDeen toggle ────────────────────────────────────────────────────
 
 class _SubcategoryField extends StatelessWidget {
   final AddSellerProductController controller;
@@ -437,7 +437,7 @@ class _ListedToggle extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomText(
-                    text: 'List on Solvexo Marketplace',
+                    text: 'List on EduDeen Marketplace',
                     fontSize: AppFontSize.verySmall,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black2,
@@ -754,7 +754,7 @@ class _DigitalFields extends StatelessWidget {
         _SubcategoryField(controller: controller),
         const SizedBox(height: 16),
 
-        // List on Solvexo toggle (shared)
+        // List on EduDeen toggle (shared)
         _ListedToggle(controller: controller),
         const SizedBox(height: 16),
 

@@ -1,11 +1,16 @@
 class ApiConstants {
-  // static const String baseUrl = "http://localhost:3002";
-  static const String baseUrl = "https://api.solvexo.store";
-
-  // static const String baseUrl = "http://192.168.1.101:3002";
-
+  // Backend URL. Production by default; point the app at a local API without
+  // editing code by passing a compile-time define:
+  //   iOS simulator / macOS / web : flutter run --dart-define=API_BASE_URL=http://localhost:3009
+  //   Android emulator            : flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3009
+  //   real phone (same Wi-Fi)     : flutter run --dart-define=API_BASE_URL=http://<your-LAN-IP>:3009
+  // The REST routes live under `<baseUrl>/api`; sockets connect to `<baseUrl>/messaging`
+  // and `<baseUrl>/notifications`, so no trailing slash and no `/api` in the define.
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: "https://api.edudeen.com",
+  );
   static const String apiPrefix = "$baseUrl/api";
-
   // Timeouts
   static const int connectTimeout = 30000; // 30 seconds
   static const int receiveTimeout = 30000;
@@ -281,86 +286,6 @@ class ApiConstants {
   static String returnAction(String orderId) =>
       "$apiPrefix/orders/return-action/$orderId";
 
-  // ============ POS Endpoints ============
-  // All GET endpoints below intentionally return a bare path — query params
-  // are passed via BaseClient's `queryParameters:` map by the repository, not
-  // string-interpolated here, so values are always properly encoded.
-  static const String posPinLogin = '$apiPrefix/pos/pin-login';
-
-  // Employees
-  static String posEmployees(String storeId) =>
-      '$apiPrefix/pos/employees/$storeId';
-  static const String posEmployeesCreate = '$apiPrefix/pos/employees';
-  static String posEmployeeLegacy(String employeeId) =>
-      '$apiPrefix/pos/employees/$employeeId';
-  static String posEmployeeV2(String storeId, String employeeId) =>
-      '$apiPrefix/pos/employees/$storeId/$employeeId';
-  static String posEmployeeResetPin(String storeId, String employeeId) =>
-      '$apiPrefix/pos/employees/$storeId/$employeeId/reset-pin';
-
-  // Registers
-  static String posRegisters(String storeId) =>
-      '$apiPrefix/pos/registers/$storeId';
-  static String posRegisterById(String storeId, String registerId) =>
-      '$apiPrefix/pos/registers/$storeId/$registerId';
-
-  // Shifts
-  static String posShifts(String storeId) => '$apiPrefix/pos/shifts/$storeId';
-  static String posShiftById(String storeId, String shiftId) =>
-      '$apiPrefix/pos/shifts/$storeId/$shiftId';
-
-  // Sessions
-  static const String posSessionsOpen = '$apiPrefix/pos/sessions/open';
-  static const String posSessionsClose = '$apiPrefix/pos/sessions/close';
-  static const String posSessionsActive = '$apiPrefix/pos/sessions/active';
-  static const String posSessionsHistory = '$apiPrefix/pos/sessions/history';
-  static String posSessionCashAdjustment(String sessionId) =>
-      '$apiPrefix/pos/sessions/$sessionId/cash-adjustment';
-  static String posSessionReport(String sessionId) =>
-      '$apiPrefix/pos/sessions/$sessionId/report';
-  static String posSessionForceClose(String sessionId) =>
-      '$apiPrefix/pos/sessions/$sessionId/force-close';
-
-  // Products (POS browse / search / barcode)
-  static String posProducts(String storeId) =>
-      '$apiPrefix/pos/products/$storeId';
-  static const String posProductsSearch = '$apiPrefix/pos/products/search';
-  static String posProductBarcode(String storeId, String barcode) =>
-      '$apiPrefix/pos/products/barcode/$storeId/$barcode';
-
-  // Sales
-  static const String posSales = '$apiPrefix/pos/sales';
-  static const String posSalesHeld = '$apiPrefix/pos/sales/held';
-  static String posSaleById(String saleId) => '$apiPrefix/pos/sales/$saleId';
-  static String posSaleComplete(String saleId) =>
-      '$apiPrefix/pos/sales/$saleId/complete';
-  static String posSaleDiscard(String saleId) =>
-      '$apiPrefix/pos/sales/$saleId/discard';
-  static String posSaleRefund(String saleId) =>
-      '$apiPrefix/pos/sales/$saleId/refund';
-  static String posSaleVoid(String saleId) =>
-      '$apiPrefix/pos/sales/$saleId/void';
-  static String posSaleItems(String saleId) =>
-      '$apiPrefix/pos/sales/$saleId/items';
-
-  // Reports
-  static const String posReportsDaily = '$apiPrefix/pos/reports/daily';
-  static const String posReportsDailyExport =
-      '$apiPrefix/pos/reports/daily/export';
-  static const String posReportsRange = '$apiPrefix/pos/reports/range';
-  static String posReportsRegister(String registerId) =>
-      '$apiPrefix/pos/reports/register/$registerId';
-  static String posReportsEmployee(String employeeId) =>
-      '$apiPrefix/pos/reports/employee/$employeeId';
-
-  // Settings
-  static String posSettings(String storeId) =>
-      '$apiPrefix/pos/settings/$storeId';
-
-  // Audit logs
-  static String posAuditLogs(String storeId) =>
-      '$apiPrefix/pos/audit-logs/$storeId';
-
   // ============ Activity Log Endpoints (store-wide, seller-only) ============
   static String activityLog(String storeId) =>
       '$apiPrefix/activity-log/$storeId';
@@ -598,14 +523,6 @@ class ApiConstants {
       '$apiPrefix/ai-studio/$storeId/image-enhancer/generate';
   static String aiStudioImageEnhancerJob(String storeId, String jobId) =>
       '$apiPrefix/ai-studio/$storeId/image-enhancer/jobs/$jobId';
-
-  // ============ POS Multi-Location Endpoints (store branches) ============
-  static String posLocations(String storeId) =>
-      '$apiPrefix/pos/locations/$storeId';
-  static String posLocationsOverview(String storeId) =>
-      '$apiPrefix/pos/locations/$storeId/overview';
-  static String posLocationById(String storeId, String locationId) =>
-      '$apiPrefix/pos/locations/$storeId/$locationId';
 
   // ============ SEO Endpoints (seller-only, store-scoped) ============
   // Backed by `src/seo` on the API — store/product on-page SEO management.

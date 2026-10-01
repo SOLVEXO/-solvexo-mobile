@@ -17,7 +17,6 @@ class AppIcons {
   static const String addIcon = '${_baseIconsPath}add.svg';
   static const String aiStudioIcon = '${_baseIconsPath}ai.svg';
   static const String aiBeautyIcon = '${_baseIconsPath}ai-beautify.svg';
-  static const String posIcon = '${_baseIconsPath}point-of-sale.svg';
   static const String alertIcon = '${_baseIconsPath}alert.svg';
   static const String profileIcon = '${_baseIconsPath}user-profile.svg';
   static const String barcodeIcon = '${_baseIconsPath}barcode.svg';

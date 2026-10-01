@@ -56,13 +56,6 @@ class SellerHomeController extends GetxController {
   // Low stock alert — real data from `api/inventory/low-stock-summary`.
   final RxList<String> lowStockItems = <String>[].obs;
 
-  // POS access is entitlement-based in the merged platform-plans system —
-  // every plan includes at least one POS location, so there's no paywall
-  // gate anymore; "Open POS" navigates straight to POS management. It's
-  // still hidden entirely for stores that never opted into
-  // `in_person_pos` (e.g. a digital-only store) via `enabledTools`.
-  final RxBool posEnabled = true.obs;
-
   // Store marketplace LISTING status (`pending|active|rejected|suspended` —
   // see Store.status in the backend) — a seller can't create products until
   // this is 'active' (ProductsService.createProduct/createDigitalProduct).
@@ -117,7 +110,6 @@ class SellerHomeController extends GetxController {
       if (storeId == null || storeId.isEmpty) return;
       final store = await _sellerRepo.getStoreById(storeId);
       if (store != null) {
-        posEnabled.value = store.enabledTools.contains('pos_register');
         this.storeId.value = store.id;
         storeStatus.value = store.status;
         storeVerificationStatus.value = store.verificationStatus;

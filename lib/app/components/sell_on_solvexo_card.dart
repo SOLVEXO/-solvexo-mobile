@@ -20,7 +20,7 @@ class SellOnSolvexoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Sell on Solvexo',
+      label: 'Sell on EduDeen',
       child: PressableScale(
         onTap: () => Get.toNamed(Routes.welcome),
         child: Container(
@@ -61,7 +61,7 @@ class SellOnSolvexoCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                     CustomText(
-                      text: 'Open your store on Solvexo',
+                      text: 'Open your store on EduDeen',
                       color: AppColors.grey,
                       fontSize: AppFontSize.tiny,
                     ),

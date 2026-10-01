@@ -92,7 +92,7 @@ class ActivityLogRepository {
   }
 
   /// Raw CSV bytes for sharing/saving; null on failure. Mirrors
-  /// `PosRepository.exportDailyReportCsv` (same raw, non-enveloped response).
+  /// the other CSV export endpoints (same raw, non-enveloped response).
   Future<List<int>?> exportCsv(
     String storeId, {
     String? category,

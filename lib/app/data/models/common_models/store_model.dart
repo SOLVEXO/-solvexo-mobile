@@ -76,7 +76,7 @@ class StoreModel {
   final String? rejectionReason;
   final String? baseCurrency;
   /// Where the seller says they operate — drives KYC requirement calculation
-  /// server-side. Defaults to Solvexo's home market ('PK').
+  /// server-side. Defaults to EduDeen's home market ('PK').
   final String country;
   /// KYC business type ('individual'|'company'|'partnership') — top-level on
   /// Store, separate from [sellerType] (a marketplace concept like 'creator').

@@ -65,7 +65,7 @@ const List<AddonCatalogEntry> kAddonCatalog = [
   AddonCatalogEntry(
     type: 'extra_staff_seat',
     name: 'Extra Staff Seat',
-    description: 'One additional POS/staff account',
+    description: 'One additional staff account',
     unitPriceUSD: 5,
     recurring: true,
   ),

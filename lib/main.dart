@@ -18,7 +18,6 @@ void main() async {
   await dotenv.load(fileName: ".env");
   // Initialize SharedPreferences
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   // Must be registered before runApp() — see the handler's own doc comment
   // for why it has to be a top-level function.
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -26,7 +25,6 @@ void main() async {
   // notifications plugin so FcmService's foreground-message listener can
   // actually display something once it starts running.
   await LocalNotificationService().init();
-
   await SharedPreferences.getInstance();
   if (StripeConfig.isConfigured) {
     Stripe.publishableKey = StripeConfig.publishableKey;
@@ -47,7 +45,7 @@ class MyApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
           debugShowCheckedModeBanner: false,
-          title: "Solvexo",
+          title: "EduDeen",
           initialRoute: AppPages.initialRoute,
           getPages: AppPages.routes,
           // Clamp OS accessibility text scaling so extreme settings can't

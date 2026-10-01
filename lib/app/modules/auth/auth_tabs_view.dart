@@ -87,7 +87,7 @@ class _TopBrand extends StatelessWidget {
         ),
         SizedBox(height: BaseSpacing.sm),
         CustomText(
-          text: 'Solvexo',
+          text: 'EduDeen',
           color: AppColors.black2,
           fontFamily: AppTextStyles.headingFontFamily,
           fontSize: AppFontSize.large,

@@ -170,7 +170,9 @@ class SellerHomeShimmer extends StatelessWidget {
                 children: [
                   Row(
                     children: const [
-                      Expanded(child: Skeleton(height: 14, width: double.infinity)),
+                      Expanded(
+                        child: Skeleton(height: 14, width: double.infinity),
+                      ),
                       SizedBox(width: 40),
                       Skeleton(height: 11, width: 44),
                     ],
