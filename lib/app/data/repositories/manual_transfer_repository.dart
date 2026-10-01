@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/payment/manual_payment_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -21,7 +22,7 @@ class ManualTransferRepository {
       if (response.data['success'] == true) {
         return ManualPaymentBankDetails.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Bank transfer is not available right now.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Bank transfer is not available right now.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -60,13 +61,13 @@ class ManualTransferRepository {
         return (
           success: true,
           proof: ManualPaymentProof.fromJson(data['proof'] as Map<String, dynamic>),
-          message: response.data['message'] as String?,
+          message: ApiError.msg(response.data['message']),
         );
       }
-      return (success: false, proof: null, message: response.data['message'] as String?);
+      return (success: false, proof: null, message: ApiError.msg(response.data['message']));
     } on DioException catch (e) {
       final data = e.response?.data;
-      final message = data is Map ? data['message'] as String? : null;
+      final message = data is Map ? ApiError.msg(data['message']) : null;
       DioExceptionHandler.handleDioException(e, showToast: false);
       return (success: false, proof: null, message: message ?? 'Failed to submit payment proof');
     } catch (e) {
@@ -101,13 +102,13 @@ class ManualTransferRepository {
         return (
           success: true,
           proof: ManualPaymentProof.fromJson(response.data['data'] as Map<String, dynamic>),
-          message: response.data['message'] as String?,
+          message: ApiError.msg(response.data['message']),
         );
       }
-      return (success: false, proof: null, message: response.data['message'] as String?);
+      return (success: false, proof: null, message: ApiError.msg(response.data['message']));
     } on DioException catch (e) {
       final data = e.response?.data;
-      final message = data is Map ? data['message'] as String? : null;
+      final message = data is Map ? ApiError.msg(data['message']) : null;
       DioExceptionHandler.handleDioException(e, showToast: false);
       return (success: false, proof: null, message: message ?? 'Failed to re-upload payment proof');
     } catch (e) {

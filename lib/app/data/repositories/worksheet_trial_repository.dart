@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/network/api_constaints.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -42,11 +43,11 @@ class WorksheetTrialRepository {
       return (
         success: false,
         output: null,
-        message: response.data['message'] as String?,
+        message: ApiError.msg(response.data['message']),
       );
     } on DioException catch (e) {
       final data = e.response?.data;
-      final message = data is Map ? data['message'] as String? : null;
+      final message = data is Map ? ApiError.msg(data['message']) : null;
       return (
         success: false,
         output: null,

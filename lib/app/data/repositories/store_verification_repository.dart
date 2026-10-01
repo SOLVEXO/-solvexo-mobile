@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/store_verification_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -54,7 +55,7 @@ class StoreVerificationRepository {
         );
       }
       ToastUtil.showToast(
-        response.data['message'] as String? ??
+        ApiError.msg(response.data['message']) ??
             'Failed to save verification details.',
       );
       return null;
@@ -91,7 +92,7 @@ class StoreVerificationRepository {
       );
       if (response.data['success'] == true) return true;
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to attach document.',
+        ApiError.msg(response.data['message']) ?? 'Failed to attach document.',
       );
       return false;
     } on DioException catch (e) {
@@ -115,7 +116,7 @@ class StoreVerificationRepository {
       );
       if (response.data['success'] == true) return true;
       ToastUtil.showToast(
-        response.data['message'] as String? ??
+        ApiError.msg(response.data['message']) ??
             'Failed to submit for review.',
       );
       return false;

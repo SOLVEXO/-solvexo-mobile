@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/refund_request_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -41,7 +42,7 @@ class RefundRequestRepository {
       if (response.data['success'] == true) return true;
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to submit refund request.',
+        ApiError.msg(response.data['message']) ?? 'Failed to submit refund request.',
       );
       return false;
     } on DioException catch (e) {
@@ -130,7 +131,7 @@ class RefundRequestRepository {
       if (response.data['success'] == true) return true;
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to approve refund request.',
+        ApiError.msg(response.data['message']) ?? 'Failed to approve refund request.',
       );
       return false;
     } on DioException catch (e) {
@@ -157,7 +158,7 @@ class RefundRequestRepository {
       if (response.data['success'] == true) return true;
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to reject refund request.',
+        ApiError.msg(response.data['message']) ?? 'Failed to reject refund request.',
       );
       return false;
     } on DioException catch (e) {

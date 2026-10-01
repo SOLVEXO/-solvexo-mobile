@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/network/api_constaints.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -98,7 +99,7 @@ class SellerOrdersRepository {
       if (response.data['success'] == true) return true;
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to update status',
+        ApiError.msg(response.data['message']) ?? 'Failed to update status',
       );
       return false;
     } on DioException catch (e) {
@@ -124,7 +125,7 @@ class SellerOrdersRepository {
       if (response.data['success'] == true) return true;
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to mark order as paid',
+        ApiError.msg(response.data['message']) ?? 'Failed to mark order as paid',
       );
       return false;
     } on DioException catch (e) {
@@ -222,7 +223,7 @@ class SellerOrdersRepository {
       if (response.data['success'] == true) return true;
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to process return',
+        ApiError.msg(response.data['message']) ?? 'Failed to process return',
       );
       return false;
     } on DioException catch (e) {

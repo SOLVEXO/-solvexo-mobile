@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:book_store_app/app/network/api_error.dart';
 
 import 'package:book_store_app/app/data/models/promotions/promotion_analytics_model.dart';
 import 'package:book_store_app/app/data/models/promotions/promotion_price_breakdown_model.dart';
@@ -130,13 +131,13 @@ class PromotionsRepository {
         return (
           success: true,
           data: PromotionRequestModel.fromJson(response.data['data'] as Map<String, dynamic>),
-          message: response.data['message'] as String?,
+          message: ApiError.msg(response.data['message']),
         );
       }
-      return (success: false, data: null, message: response.data['message'] as String?);
+      return (success: false, data: null, message: ApiError.msg(response.data['message']));
     } on DioException catch (e) {
       final data = e.response?.data;
-      final msg = data is Map ? data['message'] as String? : null;
+      final msg = data is Map ? ApiError.msg(data['message']) : null;
       return (success: false, data: null, message: msg ?? 'Failed to submit promotion request');
     } catch (e) {
       debugPrint('❌ promotions create error: $e');
@@ -162,10 +163,10 @@ class PromotionsRepository {
           message: null,
         );
       }
-      return (success: false, clientSecret: null, amount: 0.0, message: response.data['message'] as String?);
+      return (success: false, clientSecret: null, amount: 0.0, message: ApiError.msg(response.data['message']));
     } on DioException catch (e) {
       final data = e.response?.data;
-      final msg = data is Map ? data['message'] as String? : null;
+      final msg = data is Map ? ApiError.msg(data['message']) : null;
       return (success: false, clientSecret: null, amount: 0.0, message: msg ?? 'Failed to start payment');
     } catch (e) {
       debugPrint('❌ promotions pay error: $e');

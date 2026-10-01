@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/subscriptions/buyer_credit_wallet_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/subscriptions/buyer_store_benefits_model.dart';
 import 'package:book_store_app/app/data/models/subscriptions/buyer_store_plan_model.dart';
 import 'package:book_store_app/app/data/models/subscriptions/buyer_subscription_model.dart';
@@ -52,7 +53,7 @@ class BuyerMembershipsRepository {
         final data = response.data['data'] as Map<String, dynamic>;
         return BuyerSubscriptionModel.fromJson(data['subscription'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to subscribe');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to subscribe');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -126,10 +127,10 @@ class BuyerMembershipsRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Membership paused');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Membership paused');
         return BuyerSubscriptionModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to pause membership');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to pause membership');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -148,10 +149,10 @@ class BuyerMembershipsRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Membership resumed');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Membership resumed');
         return BuyerSubscriptionModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to resume membership');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to resume membership');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -177,10 +178,10 @@ class BuyerMembershipsRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Membership canceled');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Membership canceled');
         return BuyerSubscriptionModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to cancel membership');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to cancel membership');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);

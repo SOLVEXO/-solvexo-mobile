@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:book_store_app/app/network/api_error.dart';
 
 import 'package:book_store_app/app/data/models/common_models/auth_response_model.dart';
 import 'package:book_store_app/app/data/models/common_models/social_login_model.dart';
@@ -88,7 +89,7 @@ class AuthRepository {
         return auth;
       }
 
-      ToastUtil.showToast(response.data['message'] ?? 'Invalid OTP');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Invalid OTP');
       return null;
     } catch (e) {
       debugPrint("Verify OTP error: $e");
@@ -107,7 +108,7 @@ class AuthRepository {
         debugPrint("Otp has sent once again");
         return true;
       } else {
-        debugPrint("Message = ${res.data['message']}");
+        debugPrint("Message = ${ApiError.msg(res.data['message'])}");
         return false;
       }
     } catch (_) {
@@ -179,13 +180,13 @@ class AuthRepository {
       if (response.data['success'] == true) {
         return true;
       } else {
-        debugPrint("MESSAGE: ${response.data['message']}");
-        ToastUtil.showToast(response.data['message']);
+        debugPrint("MESSAGE: ${ApiError.msg(response.data['message'])}");
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Request failed');
         return false;
       }
     } on DioException catch (e) {
       debugPrint("❌ Status Code: ${e.response?.statusCode}");
-      ToastUtil.showToast("${e.response?.data['message']}");
+      ToastUtil.showToast("${ApiError.msg(e.response?.data['message'])}");
       debugPrint("❌ Response: ${e.response?.data}");
       debugPrint("Register error: $e");
       return false;
@@ -371,7 +372,7 @@ class AuthRepository {
         return UserModel.fromJson(response.data['data']);
       }
 
-      ToastUtil.showToast(response.data['message'] ?? 'Update failed');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Update failed');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);

@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/ai_studio/ai_credits_overview_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/ai_studio/ai_generate_response.dart';
 import 'package:book_store_app/app/data/models/ai_studio/ai_generation_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
@@ -284,12 +285,12 @@ class AiStudioRepository {
       if (response.data['success'] == true) {
         return AiGenerateOutcome(data: parse(response.data['data'] as Map<String, dynamic>));
       }
-      return AiGenerateOutcome(message: response.data['message'] as String? ?? 'Generation failed.');
+      return AiGenerateOutcome(message: ApiError.msg(response.data['message']) ?? 'Generation failed.');
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       final body = e.response?.data;
       final errorCode = body is Map ? body['errorCode'] as String? : null;
-      final message = body is Map ? body['message'] as String? : null;
+      final message = body is Map ? ApiError.msg(body['message']) : null;
       final innerData = body is Map ? body['data'] as Map? : null;
 
       if (status == 402 || errorCode == 'INSUFFICIENT_AI_CREDITS') {

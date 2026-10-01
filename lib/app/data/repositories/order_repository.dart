@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/orders/digital_download_file_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -105,7 +106,7 @@ class OrderRepository {
       if (response.data['success'] == true) return true;
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to submit refund request.',
+        ApiError.msg(response.data['message']) ?? 'Failed to submit refund request.',
       );
       return false;
     } on DioException catch (e) {
@@ -174,7 +175,7 @@ class OrderRepository {
             .toList();
       }
 
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to get download link.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to get download link.');
       return [];
     } on DioException catch (e) {
       debugPrint('❌ getDigitalDownloadLinks DioException: ${e.response?.statusCode}');

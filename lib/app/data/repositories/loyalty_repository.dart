@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/loyalty/loyalty_member_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/loyalty/loyalty_overview_model.dart';
 import 'package:book_store_app/app/data/models/loyalty/loyalty_program_model.dart';
 import 'package:book_store_app/app/data/models/loyalty/my_loyalty_balance_model.dart';
@@ -58,7 +59,7 @@ class LoyaltyRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Program updated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Program updated');
         return LoyaltyProgramModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
       return null;
@@ -91,7 +92,7 @@ class LoyaltyRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Earning rules updated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Earning rules updated');
         return LoyaltyProgramModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
       return null;
@@ -113,7 +114,7 @@ class LoyaltyRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Tiers updated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Tiers updated');
         return LoyaltyProgramModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
       return null;
@@ -191,7 +192,7 @@ class LoyaltyRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Points awarded');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Points awarded');
         return true;
       }
       return false;
@@ -248,10 +249,10 @@ class LoyaltyRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Reward created');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Reward created');
         return RewardModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to create reward');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to create reward');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -291,10 +292,10 @@ class LoyaltyRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Reward updated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Reward updated');
         return RewardModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to update reward');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to update reward');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -310,7 +311,7 @@ class LoyaltyRepository {
     try {
       final response = await _client.delete(ApiConstants.loyaltyRewardById(storeId, rewardId), requiresAuth: true);
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Reward deleted');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Reward deleted');
         return true;
       }
       return false;
@@ -370,11 +371,11 @@ class LoyaltyRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Reward redeemed');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Reward redeemed');
         final data = response.data['data'] as Map<String, dynamic>;
         return data['remainingBalance'] as int?;
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to redeem reward');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to redeem reward');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);

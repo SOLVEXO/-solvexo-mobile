@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/marketing/coupon_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -81,10 +82,10 @@ class CouponsRepository {
       );
 
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Coupon created');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Coupon created');
         return CouponModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to create coupon');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to create coupon');
       return null;
     } on DioException catch (e) {
       debugPrint('❌ createCoupon DioException: ${e.response?.statusCode}');
@@ -126,10 +127,10 @@ class CouponsRepository {
       );
 
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Coupon updated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Coupon updated');
         return CouponModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to update coupon');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to update coupon');
       return null;
     } on DioException catch (e) {
       debugPrint('❌ updateCoupon DioException: ${e.response?.statusCode}');
@@ -152,10 +153,10 @@ class CouponsRepository {
       );
 
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Coupon deleted');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Coupon deleted');
         return true;
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to delete coupon');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to delete coupon');
       return false;
     } on DioException catch (e) {
       debugPrint('❌ deleteCoupon DioException: ${e.response?.statusCode}');

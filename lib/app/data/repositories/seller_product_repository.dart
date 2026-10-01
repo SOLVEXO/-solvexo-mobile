@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/network/api_constaints.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -163,7 +164,7 @@ class SellerProductRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to update product.',
+        ApiError.msg(response.data['message']) ?? 'Failed to update product.',
       );
       return false;
     } on DioException catch (e) {
@@ -234,7 +235,7 @@ class SellerProductRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to update product.',
+        ApiError.msg(response.data['message']) ?? 'Failed to update product.',
       );
       return false;
     } on DioException catch (e) {
@@ -326,7 +327,7 @@ class SellerProductRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to create product.',
+        ApiError.msg(response.data['message']) ?? 'Failed to create product.',
       );
       return false;
     } on DioException catch (e) {
@@ -386,7 +387,7 @@ class SellerProductRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to create product.',
+        ApiError.msg(response.data['message']) ?? 'Failed to create product.',
       );
       return false;
     } on DioException catch (e) {
@@ -442,7 +443,7 @@ class SellerProductRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to update product.',
+        ApiError.msg(response.data['message']) ?? 'Failed to update product.',
       );
       return false;
     } on DioException catch (e) {
@@ -504,7 +505,7 @@ class SellerProductRepository {
       );
       if (response.data['success'] == true) return true;
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to add variant.',
+        ApiError.msg(response.data['message']) ?? 'Failed to add variant.',
       );
       return false;
     } on DioException catch (e) {
@@ -534,7 +535,7 @@ class SellerProductRepository {
       );
       if (response.data['success'] == true) return true;
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to update variant.',
+        ApiError.msg(response.data['message']) ?? 'Failed to update variant.',
       );
       return false;
     } on DioException catch (e) {
@@ -562,7 +563,7 @@ class SellerProductRepository {
       );
       if (response.data['success'] == true) return true;
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to delete variant.',
+        ApiError.msg(response.data['message']) ?? 'Failed to delete variant.',
       );
       return false;
     } on DioException catch (e) {
@@ -587,7 +588,7 @@ class SellerProductRepository {
       );
       if (response.data['success'] == true) return true;
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to delete product.',
+        ApiError.msg(response.data['message']) ?? 'Failed to delete product.',
       );
       return false;
     } on DioException catch (e) {

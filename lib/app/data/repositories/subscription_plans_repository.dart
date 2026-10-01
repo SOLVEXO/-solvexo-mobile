@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/subscriptions/subscriber_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/subscriptions/subscription_dashboard_model.dart';
 import 'package:book_store_app/app/data/models/subscriptions/subscription_plan_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
@@ -114,7 +115,7 @@ class SubscriptionPlansRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Plan archived');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Plan archived');
         return true;
       }
       return false;
@@ -210,7 +211,7 @@ class SubscriptionPlansRepository {
     try {
       final response = await _client.patch(url, requiresAuth: true);
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Updated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Updated');
         return true;
       }
       return false;

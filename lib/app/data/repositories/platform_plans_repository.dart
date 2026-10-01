@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/platform_plans/platform_addon_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_entitlements_model.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_invoice_model.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_plan_model.dart';
@@ -86,12 +87,12 @@ class PlatformPlansRepository {
         headers: _idempotencyHeader,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] as String? ?? 'Plan updated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Plan updated');
         final data = response.data['data'] as Map<String, dynamic>? ?? const {};
         final sub = data['subscription'];
         return sub != null ? PlatformSubscriptionModel.fromJson(sub as Map<String, dynamic>) : null;
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to change plan.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to change plan.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -167,10 +168,10 @@ class PlatformPlansRepository {
         headers: _idempotencyHeader,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] as String? ?? 'Add-on activated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Add-on activated');
         return true;
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to purchase add-on.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to purchase add-on.');
       return false;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -185,10 +186,10 @@ class PlatformPlansRepository {
     try {
       final response = await _client.delete(ApiConstants.platformCancelAddon(storeId, addonId));
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] as String? ?? 'Add-on canceled');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Add-on canceled');
         return true;
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to cancel add-on.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to cancel add-on.');
       return false;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -216,7 +217,7 @@ class PlatformPlansRepository {
       if (response.data['success'] == true) {
         return PlatformPlanPreviewResult.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to preview plan change.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to preview plan change.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -239,12 +240,12 @@ class PlatformPlansRepository {
         headers: _idempotencyHeader,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] as String? ?? 'Cancellation scheduled.');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Cancellation scheduled.');
         final data = response.data['data'] as Map<String, dynamic>? ?? const {};
         final sub = data['subscription'];
         return sub != null ? PlatformSubscriptionModel.fromJson(sub as Map<String, dynamic>) : null;
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to cancel subscription.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to cancel subscription.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -265,12 +266,12 @@ class PlatformPlansRepository {
         headers: _idempotencyHeader,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] as String? ?? 'Subscription reactivated.');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Subscription reactivated.');
         final data = response.data['data'] as Map<String, dynamic>? ?? const {};
         final sub = data['subscription'];
         return sub != null ? PlatformSubscriptionModel.fromJson(sub as Map<String, dynamic>) : null;
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to reactivate subscription.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to reactivate subscription.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -295,7 +296,7 @@ class PlatformPlansRepository {
         final data = response.data['data'] as Map<String, dynamic>? ?? const {};
         return data['url'] as String?;
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to open billing portal.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to open billing portal.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);

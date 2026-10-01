@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -54,8 +55,9 @@ class DioExceptionHandler {
     try {
       // Our backend sends errors in this format:
       // { "success": false, "message": "Error message here" }
-      if (response.data is Map && response.data["message"] != null) {
-        errorMessage = response.data["message"];
+      final apiMessage = ApiError.fromBody(response.data);
+      if (apiMessage != null) {
+        errorMessage = apiMessage;
       } else if (response.data is String &&
           !(response.data as String).trimLeft().startsWith('<')) {
         // Only use the raw string if it is not an HTML error page (e.g. nginx 413)

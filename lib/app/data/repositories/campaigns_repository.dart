@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/marketing/campaign_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -47,10 +48,10 @@ class CampaignsRepository {
       );
 
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Joined campaign');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Joined campaign');
         return true;
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to join campaign');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to join campaign');
       return false;
     } on DioException catch (e) {
       debugPrint('❌ joinCampaign DioException: ${e.response?.statusCode}');
@@ -73,10 +74,10 @@ class CampaignsRepository {
       );
 
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Left campaign');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Left campaign');
         return true;
       }
-      ToastUtil.showToast(response.data['message'] ?? 'Failed to leave campaign');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to leave campaign');
       return false;
     } on DioException catch (e) {
       debugPrint('❌ leaveCampaign DioException: ${e.response?.statusCode}');

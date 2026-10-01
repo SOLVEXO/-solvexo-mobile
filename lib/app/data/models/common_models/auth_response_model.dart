@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/common_models/token_pair.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +25,7 @@ class AuthResponseModel {
       return AuthResponseModel(
         // ✅ Safe parsing (avoid crash if null)
         success: json['success'] ?? false,
-        message: json['message'] ?? '',
+        message: ApiError.msg(json['message']) ?? '',
 
         // ✅ Nested parsing with safety
         user: UserModel.fromJson((data['user'] ?? {}) as Map<String, dynamic>),

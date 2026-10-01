@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/seo/seo_dashboard_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/seo/seo_meta_model.dart';
 import 'package:book_store_app/app/data/models/seo/seo_product_list_item_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
@@ -102,7 +103,7 @@ class SeoRepository {
         ToastUtil.showToast('Store SEO updated');
         return SeoMetaModel.fromJson(response.data['data'] as Map<String, dynamic>?);
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to update store SEO.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to update store SEO.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -148,7 +149,7 @@ class SeoRepository {
             .map((e) => SeoChecklistItemModel.fromJson(e as Map<String, dynamic>))
             .toList();
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to update checklist.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to update checklist.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -243,7 +244,7 @@ class SeoRepository {
         ToastUtil.showToast('Product SEO updated');
         return SeoMetaModel.fromJson(response.data['data'] as Map<String, dynamic>?);
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to update product SEO.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to update product SEO.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -284,7 +285,7 @@ class SeoRepository {
         ToastUtil.showToast('Updated SEO for $updated product(s)');
         return updated;
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to apply template.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to apply template.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);

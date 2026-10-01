@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/modules/checkout/models/create_checkout_response.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
@@ -47,11 +48,11 @@ class CheckoutRepository {
         );
       }
 
-      final message = response.data['message'] as String?;
+      final message = ApiError.msg(response.data['message']);
       return (success: false, data: null, addressRequired: _isAddressRequiredMessage(message), message: message ?? 'Failed to create checkout');
     } on DioException catch (e) {
       final data = e.response?.data;
-      final message = data is Map ? data['message'] as String? : null;
+      final message = data is Map ? ApiError.msg(data['message']) : null;
       return (success: false, data: null, addressRequired: _isAddressRequiredMessage(message), message: message ?? 'Failed to create checkout');
     } catch (e) {
       return (success: false, data: null, addressRequired: false, message: 'Failed to create checkout');
@@ -84,7 +85,7 @@ class CheckoutRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to update shipping',
+        ApiError.msg(response.data['message']) ?? 'Failed to update shipping',
       );
       return null;
     } on DioException catch (e) {
@@ -119,10 +120,10 @@ class CheckoutRepository {
           message: null,
         );
       }
-      return (success: false, result: null, message: response.data['message'] as String?);
+      return (success: false, result: null, message: ApiError.msg(response.data['message']));
     } on DioException catch (e) {
       final data = e.response?.data;
-      final message = data is Map ? data['message'] as String? : null;
+      final message = data is Map ? ApiError.msg(data['message']) : null;
       return (success: false, result: null, message: message ?? 'Failed to apply coupon');
     } catch (e) {
       return (success: false, result: null, message: 'Failed to apply coupon');
@@ -140,7 +141,7 @@ class CheckoutRepository {
       if (response.data['success'] == true) {
         return AddShippingResult.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to remove coupon');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to remove coupon');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -168,7 +169,7 @@ class CheckoutRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to place order',
+        ApiError.msg(response.data['message']) ?? 'Failed to place order',
       );
       return (success: false, orderIds: <String>[]);
     } on DioException catch (e) {
@@ -215,10 +216,10 @@ class CheckoutRepository {
         );
       }
 
-      return (success: false, intent: null, message: response.data['message'] as String?);
+      return (success: false, intent: null, message: ApiError.msg(response.data['message']));
     } on DioException catch (e) {
       final data = e.response?.data;
-      final message = data is Map ? data['message'] as String? : null;
+      final message = data is Map ? ApiError.msg(data['message']) : null;
       return (success: false, intent: null, message: message ?? 'Failed to start payment');
     } catch (e) {
       return (success: false, intent: null, message: 'Failed to start payment');

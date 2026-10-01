@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:book_store_app/app/network/api_error.dart';
 
 import 'package:book_store_app/app/data/models/activity_log/activity_log_model.dart';
 import 'package:book_store_app/app/data/models/store_banner/store_banner_model.dart';
@@ -69,13 +70,13 @@ class StoreBannerRepository {
         return (
           success: true,
           data: StoreBannerModel.fromJson(response.data['data'] as Map<String, dynamic>),
-          message: response.data['message'] as String?,
+          message: ApiError.msg(response.data['message']),
         );
       }
-      return (success: false, data: null, message: response.data['message'] as String?);
+      return (success: false, data: null, message: ApiError.msg(response.data['message']));
     } on DioException catch (e) {
       final data = e.response?.data;
-      final msg = data is Map ? data['message'] as String? : null;
+      final msg = data is Map ? ApiError.msg(data['message']) : null;
       return (success: false, data: null, message: msg ?? 'Failed to create store banner');
     } catch (e) {
       debugPrint('❌ store banner create error: $e');
@@ -118,13 +119,13 @@ class StoreBannerRepository {
         return (
           success: true,
           data: StoreBannerModel.fromJson(response.data['data'] as Map<String, dynamic>),
-          message: response.data['message'] as String?,
+          message: ApiError.msg(response.data['message']),
         );
       }
-      return (success: false, data: null, message: response.data['message'] as String?);
+      return (success: false, data: null, message: ApiError.msg(response.data['message']));
     } on DioException catch (e) {
       final data = e.response?.data;
-      final msg = data is Map ? data['message'] as String? : null;
+      final msg = data is Map ? ApiError.msg(data['message']) : null;
       return (success: false, data: null, message: msg ?? 'Failed to update store banner');
     } catch (e) {
       debugPrint('❌ store banner update error: $e');

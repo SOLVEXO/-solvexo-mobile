@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/store/store_announcement_bar_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -98,7 +99,7 @@ class SellerRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to update store.',
+        ApiError.msg(response.data['message']) ?? 'Failed to update store.',
       );
       return null;
     } on DioException catch (e) {
@@ -126,7 +127,7 @@ class SellerRepository {
         final data = response.data['data'] as Map<String, dynamic>;
         return (data['pinnedProductIds'] as List?)?.cast<String>() ?? const [];
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to update pinned products.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to update pinned products.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -149,7 +150,7 @@ class SellerRepository {
       if (response.data['success'] == true) {
         return StoreAnnouncementBarModel.fromJson(response.data['data'] as Map<String, dynamic>);
       }
-      ToastUtil.showToast(response.data['message'] as String? ?? 'Failed to update announcement bar.');
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to update announcement bar.');
       return null;
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
@@ -199,7 +200,7 @@ class SellerRepository {
       }
 
       ToastUtil.showToast(
-        response.data['message'] as String? ?? 'Failed to create store.',
+        ApiError.msg(response.data['message']) ?? 'Failed to create store.',
       );
       return null;
     } on DioException catch (e) {

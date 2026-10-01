@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/bookings/bookable_service_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/bookings/booking_model.dart';
 import 'package:book_store_app/app/data/models/bookings/bookings_dashboard_model.dart';
 import 'package:book_store_app/app/data/models/bookings/package_purchase_model.dart';
@@ -83,7 +84,7 @@ class BookingsRepository {
     try {
       final response = await _client.delete(ApiConstants.sellerServiceById(storeId, serviceId), requiresAuth: true);
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Service archived');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Service archived');
         return true;
       }
       return false;
@@ -193,7 +194,7 @@ class BookingsRepository {
     try {
       final response = await _client.delete(ApiConstants.sellerServicePackageById(storeId, serviceId, packageId), requiresAuth: true);
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Package archived');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Package archived');
         return true;
       }
       return false;
@@ -296,7 +297,7 @@ class BookingsRepository {
     try {
       final response = await _client.patch(url, data: data, requiresAuth: true);
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Updated');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Updated');
         return true;
       }
       return false;
@@ -493,7 +494,7 @@ class BookingsRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Booking cancelled');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Booking cancelled');
         return true;
       }
       return false;
@@ -515,7 +516,7 @@ class BookingsRepository {
         requiresAuth: true,
       );
       if (response.data['success'] == true) {
-        ToastUtil.showToast(response.data['message'] ?? 'Booking rescheduled');
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Booking rescheduled');
         return true;
       }
       return false;
