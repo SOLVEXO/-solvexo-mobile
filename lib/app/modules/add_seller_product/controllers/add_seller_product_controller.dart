@@ -107,6 +107,9 @@ class DigitalFileEntry {
 
   Map<String, dynamic> toJson() => {
     'publicId': publicId.value,
+    // The API reads the stored file reference from `url` (it is the upload's
+    // publicId); `publicId` alone is rejected with "A file reference is required".
+    'url': publicId.value,
     'name': nameCtrl.text.trim().isEmpty
         ? fileName.value
         : nameCtrl.text.trim(),

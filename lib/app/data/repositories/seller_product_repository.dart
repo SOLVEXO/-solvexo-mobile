@@ -289,7 +289,7 @@ class SellerProductRepository {
         'status': status,
         if (scheduledAt != null) 'scheduledAt': scheduledAt,
         'productType': productType,
-        'isListedOnSolvexo': isListedOnSolvexo,
+        'isListedOnEdudeen': isListedOnSolvexo,
         'images': images,
         'subCategoryId': subCategoryId,
         if (description != null && description.isNotEmpty)
@@ -363,7 +363,7 @@ class SellerProductRepository {
         'status': status,
         'variants': variants,
         if (scheduledAt != null) 'scheduledAt': scheduledAt,
-        'isListedOnSolvexo': isListedOnSolvexo,
+        'isListedOnEdudeen': isListedOnSolvexo,
         'images': images,
         if (description != null && description.isNotEmpty)
           'description': description,
