@@ -26,13 +26,32 @@ class SellerOrdersView extends StatelessWidget {
         children: [
           SellerAppBar(title: 'Orders'),
           _ReturnsEntryPoint(),
-          OrderFilterBar(controller: controller),
+          OrdersTabsBar(controller: controller),
+          FreeClaimsCard(controller: controller),
           const Divider(height: 1, color: AppColors.lightGrey2),
           Expanded(
             child: CustomRefreshWrapper(
-              onRefresh: controller.refreshData,
+              onRefresh: () async {
+                await Future.wait([controller.refreshData(), controller.loadFreeClaims()]);
+              },
               child: Obx(() {
                 if (controller.isLoading.value) return const OrdersShimmer();
+                if (controller.loadFailed.value) {
+                  return ListView(children: [
+                    const SizedBox(height: 80),
+                    const Icon(Icons.cloud_off_rounded, size: 56),
+                    const SizedBox(height: 12),
+                    const Text('Could not load orders', textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(minimumSize: const Size(160, 48)),
+                        onPressed: controller.refreshData,
+                        child: const Text('Retry'),
+                      ),
+                    ),
+                  ]);
+                }
                 final orders = controller.filteredOrders;
                 if (orders.isEmpty) return const OrdersEmptyState();
                 return ListView.separated(

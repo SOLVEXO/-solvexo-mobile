@@ -1,5 +1,6 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orders_controller.dart';
+import 'package:book_store_app/app/modules/seller_orders/widgets/order_filter_bar.dart';
 import 'package:book_store_app/app/modules/seller_orders/widgets/order_status_badge.dart';
 import 'package:book_store_app/app/modules/seller_orders/widgets/order_status_picker_sheet.dart';
 import 'package:book_store_app/app/modules/seller_orders/widgets/order_type_badge.dart';
@@ -20,6 +21,8 @@ class OrderCard extends StatelessWidget {
 
   bool get _isCompleted =>
       order.status == OrderStatus.completed ||
+      order.status == OrderStatus.delivered ||
+      order.status == OrderStatus.cancelled ||
       order.status == OrderStatus.refunded;
 
   // COD + unpaid + still active → show both Mark as Paid and View Details
@@ -61,6 +64,18 @@ class OrderCard extends StatelessWidget {
           _metaRow(),
           const SizedBox(height: 4),
           _dateRow(),
+          if (order.shipByDeadline != null) ...[
+            const SizedBox(height: 8),
+            ShipByBadge(due: order.shipByDeadline!),
+          ],
+          if (order.status == OrderStatus.cancelled && order.cancelReason != null) ...[
+            const SizedBox(height: 6),
+            CustomText(
+              text: 'Buyer cancelled: ${order.cancelReason}',
+              fontSize: AppFontSize.tiny,
+              color: AppColors.grey,
+            ),
+          ],
           if (_isCompleted) ...[
             const SizedBox(height: 12),
             const Divider(height: 1, color: AppColors.lightGrey2),

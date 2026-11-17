@@ -46,6 +46,8 @@ class _OrderCard extends StatelessWidget {
     OrderStatus.processing => AppColors.iosBlue,
     OrderStatus.shipped => const Color(0xFF5856D6),
     OrderStatus.refunded => AppColors.lightGrey5,
+    OrderStatus.delivered => AppColors.greenSuccess,
+    OrderStatus.cancelled => AppColors.lightGrey5,
     _ => AppColors.iosOrange,
   };
 
@@ -54,6 +56,8 @@ class _OrderCard extends StatelessWidget {
     OrderStatus.processing => 'Processing',
     OrderStatus.shipped => 'Shipped',
     OrderStatus.refunded => 'Refunded',
+    OrderStatus.delivered => 'Delivered',
+    OrderStatus.cancelled => 'Cancelled',
     _ => 'Pending',
   };
 

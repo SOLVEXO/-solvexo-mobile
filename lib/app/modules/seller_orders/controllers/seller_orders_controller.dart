@@ -7,7 +7,68 @@ import 'package:intl/intl.dart';
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
-enum OrderStatus { all, pending, processing, shipped, completed, refunded }
+enum OrderStatus { all, pending, processing, shipped, delivered, completed, cancelled, refunded }
+
+/// Orders tabs (docs Part B 6.5) = the API's `tab` values.
+enum OrdersTab {
+  needsAction('needs_action', 'Needs action'),
+  shipped('shipped', 'Shipped'),
+  delivered('delivered', 'Delivered'),
+  completed('completed', 'Completed'),
+  cancelled('cancelled', 'Cancelled'),
+  all('all', 'All');
+
+  const OrdersTab(this.api, this.label);
+  final String api;
+  final String label;
+}
+
+/// Ship-by badge (docs Part B 2.4 / 6.5: ship within 48 h of payment).
+enum ShipByLevel { normal, soon, overdue }
+
+ShipByLevel shipByLevel(DateTime due, DateTime now) {
+  final left = due.difference(now);
+  if (left.isNegative) return ShipByLevel.overdue;
+  if (left < const Duration(hours: 12)) return ShipByLevel.soon;
+  return ShipByLevel.normal;
+}
+
+String shipByLabel(DateTime due, DateTime now) {
+  final left = due.difference(now);
+  if (left.isNegative) {
+    final h = -left.inHours;
+    return h >= 24 ? 'Ship overdue ${h ~/ 24}d' : 'Ship overdue ${h < 1 ? 1 : h}h';
+  }
+  final h = left.inHours;
+  return h >= 24 ? 'Ship in ${h ~/ 24}d ${h % 24}h' : 'Ship in ${h < 1 ? 1 : h}h';
+}
+
+/// GET seller-free-claims row ("Availed" free digital items, excluded from
+/// revenue). The test store had none, so keys are read defensively.
+class FreeClaim {
+  const FreeClaim({
+    required this.buyerName,
+    required this.productName,
+    required this.orderNumber,
+    this.date,
+  });
+
+  final String buyerName;
+  final String productName;
+  final String orderNumber;
+  final DateTime? date;
+
+  factory FreeClaim.fromJson(Map<String, dynamic> j) {
+    final buyer = j['buyer'] is Map ? j['buyer'] as Map : (j['customer'] is Map ? j['customer'] as Map : const {});
+    final product = j['product'] is Map ? j['product'] as Map : const {};
+    return FreeClaim(
+      buyerName: '${buyer['name'] ?? j['buyerName'] ?? ''}',
+      productName: '${j['productName'] ?? product['name'] ?? (j['product'] is String ? j['product'] : '') ?? ''}',
+      orderNumber: '${j['orderNumber'] ?? ''}',
+      date: DateTime.tryParse('${j['date'] ?? j['claimedAt'] ?? j['createdAt'] ?? ''}')?.toLocal(),
+    );
+  }
+}
 
 // ── Stats model ───────────────────────────────────────────────────────────────
 
@@ -145,6 +206,16 @@ class SellerOrder {
   final List<SellerOrderItem> items;
   final SellerOrderAddress? shippingAddress;
 
+  /// Server ship-by deadline when sent; else paidAt + 48 h for physical
+  /// packages (display only).
+  final DateTime? shipBy;
+  final DateTime? paidAt;
+
+  /// Buyer's cancel reason (cancelled-by-buyer), gift note, real buyer phone.
+  final String? cancelReason;
+  final String? giftNote;
+  final String? buyerPhone;
+
   const SellerOrder({
     required this.id,
     required this.orderNumber,
@@ -160,7 +231,19 @@ class SellerOrder {
     this.paymentStatus = '',
     required this.items,
     this.shippingAddress,
+    this.shipBy,
+    this.paidAt,
+    this.cancelReason,
+    this.giftNote,
+    this.buyerPhone,
   });
+
+  /// Only while the package still has to go out.
+  DateTime? get shipByDeadline {
+    if (!isPhysical || isPlatformFulfilled) return null;
+    if (status != OrderStatus.pending && status != OrderStatus.processing) return null;
+    return shipBy ?? paidAt?.add(const Duration(hours: 48));
+  }
 
   // Derived helpers — based on the first item for fallback display
   String get primaryProductName =>
@@ -215,6 +298,11 @@ class SellerOrder {
         paymentStatus: paymentStatus,
         items: items,
         shippingAddress: shippingAddress,
+        shipBy: shipBy,
+        paidAt: paidAt,
+        cancelReason: cancelReason,
+        giftNote: giftNote,
+        buyerPhone: buyerPhone,
       );
 
   factory SellerOrder.fromApiJson(Map<String, dynamic> json) {
@@ -256,7 +344,19 @@ class SellerOrder {
       items: items,
       shippingAddress:
           rawAddress != null ? SellerOrderAddress.fromJson(rawAddress) : null,
+      shipBy: _date(json['shipBy'] ?? json['shipByAt'] ?? json['dispatchBy']),
+      paidAt: _date(json['paidAt']),
+      cancelReason: _str(json['cancelReason'] ?? json['cancellationReason']),
+      giftNote: _str(json['giftMessage'] ?? json['giftNote']),
+      buyerPhone: _str(customer['phone'] ?? rawAddress?['phone'] ?? json['buyerPhone']),
     );
+  }
+
+  static DateTime? _date(dynamic v) => v == null ? null : DateTime.tryParse('$v')?.toLocal();
+  static String? _str(dynamic v) {
+    if (v == null || v is Map || v is List) return null;
+    final s = '$v'.trim();
+    return s.isEmpty ? null : s;
   }
 
   static OrderStatus _parseStatus(String s) {
@@ -267,8 +367,13 @@ class SellerOrder {
         return OrderStatus.processing;
       case 'shipped':
         return OrderStatus.shipped;
+      case 'delivered':
+        return OrderStatus.delivered;
       case 'completed':
         return OrderStatus.completed;
+      case 'cancelled':
+      case 'canceled':
+        return OrderStatus.cancelled;
       case 'refunded':
         return OrderStatus.refunded;
       default:
@@ -302,7 +407,39 @@ class SellerOrdersController extends GetxController {
 
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
-  final Rx<OrderStatus> selectedFilter = OrderStatus.all.obs;
+  final RxBool loadFailed = false.obs;
+  final Rx<OrdersTab> selectedTab = OrdersTab.needsAction.obs;
+
+  /// Server counts per tab (+ 'toShip', 'overdue').
+  final RxMap<String, int> counts = <String, int>{}.obs;
+  int countForTab(OrdersTab t) => counts[t.api] ?? 0;
+
+  void setTab(OrdersTab t) {
+    if (selectedTab.value == t) return;
+    selectedTab.value = t;
+    refreshData();
+  }
+
+  // ── Free claims card ──────────────────────────────────────────────────────
+  final RxList<FreeClaim> freeClaims = <FreeClaim>[].obs;
+  final RxInt freeClaimsTotal = 0.obs;
+  final RxBool freeClaimsLoading = false.obs;
+  final RxBool freeClaimsFailed = false.obs;
+
+  Future<void> loadFreeClaims() async {
+    freeClaimsLoading.value = true;
+    freeClaimsFailed.value = false;
+    try {
+      final storeId = await AppPreferences.getStoreId() ?? '';
+      final r = await _repo.getFreeClaims(storeId);
+      freeClaims.assignAll(r.claims);
+      freeClaimsTotal.value = r.total;
+    } catch (_) {
+      freeClaimsFailed.value = true;
+    } finally {
+      freeClaimsLoading.value = false;
+    }
+  }
   final Rx<SellerOrderStats> stats = SellerOrderStats.empty.obs;
   final RxInt totalOrders = 0.obs;
 
@@ -316,25 +453,12 @@ class SellerOrdersController extends GetxController {
 
   // ── Computed ──────────────────────────────────────────────────────────────
 
-  List<SellerOrder> get filteredOrders {
-    if (selectedFilter.value == OrderStatus.all) {
-      return List<SellerOrder>.from(_allOrders);
-    }
-    return _allOrders
-        .where((o) => o.status == selectedFilter.value)
-        .toList();
-  }
+  /// Rows of the selected tab (filtered by the server).
+  List<SellerOrder> get filteredOrders => List<SellerOrder>.from(_allOrders);
 
   bool get hasMore => _hasMore;
 
-  int countFor(OrderStatus status) {
-    if (status == OrderStatus.all) return totalOrders.value;
-    return _allOrders.where((o) => o.status == status).length;
-  }
-
   // ── Actions ───────────────────────────────────────────────────────────────
-
-  void setFilter(OrderStatus status) => selectedFilter.value = status;
 
   SellerOrder? findOrder(String id) {
     try {
@@ -450,7 +574,15 @@ class SellerOrdersController extends GetxController {
         storeId: storeId,
         page: page,
         limit: _pageSize,
+        tab: selectedTab.value.api,
       );
+      if (result.failed && page == 1) {
+        loadFailed.value = true;
+        _allOrders.clear();
+        return;
+      }
+      loadFailed.value = false;
+      if (result.counts.isNotEmpty) counts.assignAll(result.counts);
 
       final parsed = result.orders
           .map((json) => SellerOrder.fromApiJson(json))
@@ -485,5 +617,6 @@ class SellerOrdersController extends GetxController {
   void onInit() {
     super.onInit();
     _load();
+    loadFreeClaims();
   }
 }

@@ -34,7 +34,7 @@ by calling the API. Tick items off in commits that name the item number.
 8. [x] **Returns (§6.6)**: one list (`seller-returns-all` = item returns +
    refund requests), respond-by 48 h pills, reject reason ≥ 10 chars,
    follow-up `item_received → replacement_sent`. Currently separate calls.
-9. **Orders (§6.5)**: tabs Needs action / Shipped / Delivered / Completed /
+9. [x] **Orders (§6.5)**: tabs Needs action / Shipped / Delivered / Completed /
    Cancelled / All, ship-by 48 h badges, Free claims card, buyer cancel reason.
 
 ## P2 — features the web has

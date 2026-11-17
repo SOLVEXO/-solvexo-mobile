@@ -37,8 +37,12 @@ class OrderStatusBadge extends StatelessWidget {
         return const _BadgeStyle('Processing', AppColors.iosBlue, AppColors.lightBlue);
       case OrderStatus.shipped:
         return const _BadgeStyle('Shipped', Color(0xFF7B5EA7), Color(0xFFF3EEFF));
+      case OrderStatus.delivered:
+        return const _BadgeStyle('Delivered', AppColors.darkGreen, AppColors.greenContainerInnerColor);
       case OrderStatus.completed:
         return const _BadgeStyle('Completed', AppColors.darkGreen, AppColors.greenContainerInnerColor);
+      case OrderStatus.cancelled:
+        return const _BadgeStyle('Cancelled', AppColors.grey, AppColors.background);
       case OrderStatus.refunded:
         return const _BadgeStyle('Refunded', AppColors.red, AppColors.lightRed);
       default:

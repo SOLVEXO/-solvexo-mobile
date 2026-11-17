@@ -317,6 +317,8 @@ class ApiConstants {
       "$apiPrefix/inventory/low-stock-summary/$storeId";
   static String sellerOrders(String storeId) =>
       "$apiPrefix/orders/seller-orders/$storeId";
+  static String sellerFreeClaims(String storeId) =>
+      "$apiPrefix/orders/seller-free-claims/$storeId";
   static String markOrderPaid(String orderId) =>
       "$apiPrefix/orders/mark-paid/$orderId";
   static const String updateOrderStatus = "$apiPrefix/orders/update-status";

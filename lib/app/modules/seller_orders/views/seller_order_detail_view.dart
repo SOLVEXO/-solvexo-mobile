@@ -13,6 +13,7 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
+import 'package:book_store_app/app/modules/seller_orders/widgets/order_filter_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -73,6 +74,26 @@ class SellerOrderDetailView extends StatelessWidget {
                 const SizedBox(height: 12),
                 _ItemsCard(order: order),
                 const SizedBox(height: 12),
+                if (order.shipByDeadline != null) ...[
+                  ShipByBadge(due: order.shipByDeadline!),
+                  const SizedBox(height: 12),
+                ],
+                if (order.buyerPhone != null ||
+                    order.giftNote != null ||
+                    (order.status == OrderStatus.cancelled && order.cancelReason != null)) ...[
+                  _InfoCard(
+                    title: 'Buyer',
+                    icon: AppIcons.profileIcon,
+                    rows: [
+                      if (order.customerName.isNotEmpty) _Row('Name', order.customerName),
+                      if (order.buyerPhone != null) _Row('Phone', order.buyerPhone!),
+                      if (order.giftNote != null) _Row('Gift note', order.giftNote!),
+                      if (order.status == OrderStatus.cancelled && order.cancelReason != null)
+                        _Row('Cancel reason', order.cancelReason!),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 _InfoCard(
                   title: 'Payment',
                   icon: AppIcons.cardIcon,

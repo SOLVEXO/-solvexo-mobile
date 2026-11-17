@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orders_controller.dart' show FreeClaim;
 import 'package:book_store_app/app/modules/seller_returns/models/seller_return_item.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/api_error.dart';
@@ -12,6 +13,22 @@ class SellerOrdersRepository {
 
   final BaseClient _client;
 
+  // ─── GET /api/orders/seller-free-claims/:storeId ──────────────────────────
+  // Verified: {success, data:{claims:[], total, page, totalPages}}. Throws.
+  Future<({List<FreeClaim> claims, int total})> getFreeClaims(String storeId, {int page = 1}) async {
+    final res = await _client.get(
+      ApiConstants.sellerFreeClaims(storeId),
+      queryParameters: {'page': page},
+      requiresAuth: true,
+    );
+    final data = Map<String, dynamic>.from((res.data as Map)['data'] as Map);
+    final list = data['claims'] is List ? data['claims'] as List : const [];
+    return (
+      claims: list.whereType<Map>().map((m) => FreeClaim.fromJson(Map<String, dynamic>.from(m))).toList(),
+      total: (data['total'] as num?)?.toInt() ?? list.length,
+    );
+  }
+
   // ─── GET /api/orders/seller-orders/:storeId ───────────────────────────────
 
   Future<
@@ -20,20 +37,31 @@ class SellerOrdersRepository {
         Map<String, dynamic> stats,
         int totalOrders,
         bool hasMore,
+        Map<String, int> counts,
+        bool failed,
       })> fetchSellerOrders({
     required String storeId,
     int page = 1,
     int limit = 20,
+    // needs_action | shipped | delivered | completed | cancelled | all
+    // (verified; anything else -> 400 "Invalid tab"). With a tab the API
+    // also returns data.counts for every tab (+ toShip, overdue).
+    String? tab,
   }) async {
     try {
       final response = await _client.get(
         ApiConstants.sellerOrders(storeId),
-        queryParameters: {'page': page, 'limit': limit},
+        queryParameters: {'page': page, 'limit': limit, if (tab != null) 'tab': tab},
         requiresAuth: true,
       );
 
       if (response.data['success'] == true) {
         final data = response.data['data'] as Map<String, dynamic>;
+        final rawCounts = data['counts'] is Map ? data['counts'] as Map : const {};
+        final counts = <String, int>{
+          for (final e in rawCounts.entries)
+            if (e.value is num) '${e.key}': (e.value as num).toInt(),
+        };
         final pagination = data['pagination'] as Map<String, dynamic>;
         final orders =
             (data['orders'] as List).cast<Map<String, dynamic>>();
@@ -47,6 +75,8 @@ class SellerOrdersRepository {
           stats: stats,
           totalOrders: totalOrders,
           hasMore: page < totalPages,
+          counts: counts,
+          failed: false,
         );
       }
 
@@ -55,6 +85,8 @@ class SellerOrdersRepository {
         stats: <String, dynamic>{},
         totalOrders: 0,
         hasMore: false,
+        counts: <String, int>{},
+        failed: true,
       );
     } on DioException catch (e) {
       debugPrint('❌ fetchSellerOrders DioException: ${e.response?.statusCode}');
@@ -65,6 +97,8 @@ class SellerOrdersRepository {
         stats: <String, dynamic>{},
         totalOrders: 0,
         hasMore: false,
+        counts: <String, int>{},
+        failed: true,
       );
     } catch (e) {
       debugPrint('❌ fetchSellerOrders error: $e');
@@ -74,6 +108,8 @@ class SellerOrdersRepository {
         stats: <String, dynamic>{},
         totalOrders: 0,
         hasMore: false,
+        counts: <String, int>{},
+        failed: true,
       );
     }
   }
