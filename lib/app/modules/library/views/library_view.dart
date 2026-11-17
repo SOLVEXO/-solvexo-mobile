@@ -276,6 +276,8 @@ class _FileCard extends StatelessWidget {
                     label: Text(busy ? 'Preparing…'.tr : 'Download'.tr),
                   );
                 })
+              else if (!file.available)
+                Chip(label: Text('No longer available'.tr))
               else
                 Chip(
                   label: Text('Awaiting payment'.tr),

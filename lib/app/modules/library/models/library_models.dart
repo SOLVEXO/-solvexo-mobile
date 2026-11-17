@@ -5,13 +5,17 @@ import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart
 /// orders. Only paid orders unlock downloads; unpaid ones (bank transfer
 /// awaiting approval) are listed with a status so the buyer knows why.
 class LibraryFile {
-  LibraryFile({required this.order, required this.item});
+  LibraryFile({required this.order, required this.item, this.available = true});
 
   final OrderModel order;
   final OrderItem item;
 
+  /// False when the product no longer exists (GET product -> "Product not
+  /// found"); its files cannot be downloaded any more.
+  final bool available;
+
   String get key => '${order.orderId}:${item.itemId}';
-  bool get canDownload => order.isPaid && !order.isCancelled;
+  bool get canDownload => available && order.isPaid && !order.isCancelled;
   DateTime get purchasedAt => order.paidAt ?? order.createdAt;
 }
 

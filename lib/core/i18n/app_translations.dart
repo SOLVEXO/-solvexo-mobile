@@ -100,6 +100,7 @@ class AppTranslations extends Translations {
     'A seller account will be made with this email and password. Then set up your store.': 'اسی ای میل اور پاس ورڈ سے سیلر اکاؤنٹ بنے گا۔ پھر اپنا اسٹور سیٹ کریں۔',
     'Continue': 'جاری رکھیں',
     'Access ended': 'رسائی ختم ہو گئی',
+    'No longer available': 'اب دستیاب نہیں',
     'Email or phone': 'ای میل یا فون',
     'Please enter your name.': 'براہ کرم اپنا نام لکھیں۔',
     'Enter a valid email or phone number.': 'درست ای میل یا فون نمبر لکھیں۔',
