@@ -134,6 +134,14 @@ class SellerOrder {
   /// 'seller' or 'platform' (Edudeen ships; the seller can't change status,
   /// tracking or payment). Missing means seller-fulfilled.
   final String fulfillmentMode;
+
+  /// COD per package (docs Part B 2.3): who collects the cash, 'seller' or
+  /// 'platform' (Edudeen courier). Null when the row does not say.
+  final String? codCollector;
+
+  /// Order-level payment status; 'partially_paid' when only some packages
+  /// of a multi-seller COD order are confirmed paid.
+  final String paymentStatus;
   final List<SellerOrderItem> items;
   final SellerOrderAddress? shippingAddress;
 
@@ -148,6 +156,8 @@ class SellerOrder {
     required this.isPaid,
     required this.paymentType,
     this.fulfillmentMode = 'seller',
+    this.codCollector,
+    this.paymentStatus = '',
     required this.items,
     this.shippingAddress,
   });
@@ -160,8 +170,31 @@ class SellerOrder {
   bool get isPlatformFulfilled => fulfillmentMode == 'platform';
   bool get isPhysical =>
       items.any((item) => item.type.toLowerCase() == 'physical');
+  /// Who collects this package's cash. Rows without `codCollector` follow
+  /// the fulfilment: Edudeen collects only when its courier delivers
+  /// (docs Part B 2.3; couriers are off today, so normally the seller).
+  String get effectiveCodCollector =>
+      codCollector ?? (isPlatformFulfilled ? 'platform' : 'seller');
+
+  /// "Mark paid" only for seller-collected COD (docs Part B 2.3); Edudeen
+  /// confirms platform-collected packages.
   bool get canMarkPaid =>
-      isCod && !isPaid && status != OrderStatus.completed && status != OrderStatus.refunded;
+      isCod &&
+      !isPaid &&
+      effectiveCodCollector == 'seller' &&
+      status != OrderStatus.completed &&
+      status != OrderStatus.refunded;
+
+  bool get isPartiallyPaid => paymentStatus == 'partially_paid';
+
+  /// Payment line for this package. The package's own isPaid decides; the
+  /// order-level 'partially_paid' is shown as context.
+  String get paymentLabel {
+    if (isPaid) return 'Paid';
+    if (isPartiallyPaid) return 'Unpaid (order partly paid)';
+    if (isCod && effectiveCodCollector == 'platform') return 'Unpaid - Edudeen collects';
+    return 'Unpaid';
+  }
   bool get canUpdateStatus =>
       isPhysical &&
       status != OrderStatus.completed &&
@@ -178,6 +211,8 @@ class SellerOrder {
         isPaid: isPaid ?? this.isPaid,
         paymentType: paymentType,
         fulfillmentMode: fulfillmentMode,
+        codCollector: codCollector,
+        paymentStatus: paymentStatus,
         items: items,
         shippingAddress: shippingAddress,
       );
@@ -216,6 +251,8 @@ class SellerOrder {
       isPaid: json['isPaid'] as bool? ?? false,
       paymentType: json['paymentType'] as String? ?? '',
       fulfillmentMode: json['fulfillmentMode'] as String? ?? 'seller',
+      codCollector: json['codCollector'] as String?,
+      paymentStatus: json['paymentStatus'] as String? ?? '',
       items: items,
       shippingAddress:
           rawAddress != null ? SellerOrderAddress.fromJson(rawAddress) : null,
@@ -362,19 +399,17 @@ class SellerOrdersController extends GetxController {
     if (_markingPaidIds.contains(orderId)) return false;
     _markingPaidIds.add(orderId);
     try {
+      final storeId = await AppPreferences.getStoreId() ?? '';
       final success = await _repo.markOrderPaid(
         orderId,
+        storeId: storeId,
         onForbidden: () => platformFulfilledIds.add(orderId),
       );
       if (success) {
+        // Only the payment changes; the status stays the server's own.
         final idx = _allOrders.indexWhere((o) => o.id == orderId);
-        if (idx != -1) {
-          _allOrders[idx] = _allOrders[idx].copyWith(
-            isPaid: true,
-            status: OrderStatus.completed,
-          );
-        }
-        ToastUtil.showToast('Order marked as paid');
+        if (idx != -1) _allOrders[idx] = _allOrders[idx].copyWith(isPaid: true);
+        ToastUtil.showToast('Package marked as paid');
       }
       return success;
     } finally {

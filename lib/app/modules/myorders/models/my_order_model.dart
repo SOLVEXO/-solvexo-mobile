@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart';
 import 'package:book_store_app/app/modules/myorders/models/shipping_address_model.dart';
 import 'package:book_store_app/utils/currency_formatter.dart';
@@ -146,6 +147,8 @@ class OrderModel {
     switch (paymentStatus) {
       case 'pending_verification': return 'Verifying Payment';
       case 'paid':                 return 'Paid';
+      // Multi-seller COD: some packages confirmed paid (docs Part B 2.3).
+      case 'partially_paid':       return 'Partly paid'.tr;
       case 'failed':                return 'Payment Failed';
       case 'refunded':              return 'Refunded';
       case 'unpaid':
@@ -157,6 +160,7 @@ class OrderModel {
     switch (paymentStatus) {
       case 'pending_verification': return const Color(0xFFF59E0B);
       case 'paid':                 return const Color(0xFF22C55E);
+      case 'partially_paid':       return const Color(0xFF3B82F6);
       case 'failed':                return const Color(0xFFEF4444);
       case 'refunded':              return const Color(0xFF6B7280);
       case 'unpaid':

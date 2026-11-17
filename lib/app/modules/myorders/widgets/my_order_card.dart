@@ -213,6 +213,8 @@ class _PaymentStatusChip extends StatelessWidget {
     switch (order.paymentStatus) {
       case 'paid':
         return Icons.check_circle_rounded;
+      case 'partially_paid':
+        return Icons.timelapse_rounded;
       case 'pending_verification':
         return Icons.hourglass_top_rounded;
       case 'failed':

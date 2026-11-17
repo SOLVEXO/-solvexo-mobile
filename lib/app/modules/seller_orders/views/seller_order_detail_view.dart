@@ -83,9 +83,14 @@ class SellerOrderDetailView extends StatelessWidget {
                           ? 'Cash on Delivery'
                           : _formatPaymentType(order.paymentType),
                     ),
+                    if (order.isCod)
+                      _Row(
+                        'Cash collected by',
+                        order.effectiveCodCollector == 'platform' ? 'Edudeen courier' : 'You',
+                      ),
                     _Row(
                       'Status',
-                      order.isPaid ? 'Paid' : 'Unpaid',
+                      order.paymentLabel,
                       valueColor: order.isPaid
                           ? AppColors.darkGreen
                           : AppColors.amberDark,

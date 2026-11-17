@@ -7,7 +7,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class SellerOrdersRepository {
-  final BaseClient _client = BaseClient();
+  SellerOrdersRepository({BaseClient? client}) : _client = client ?? BaseClient();
+
+  final BaseClient _client;
 
   // ─── GET /api/orders/seller-orders/:storeId ───────────────────────────────
 
@@ -124,10 +126,17 @@ class SellerOrdersRepository {
 
   // ─── POST /api/orders/mark-paid/:orderId ──────────────────────────────────
 
-  Future<bool> markOrderPaid(String orderId, {void Function()? onForbidden}) async {
+  /// PUT /api/orders/mark-paid/:orderId {storeId}: confirms THIS store's
+  /// COD package only (multi-seller orders are paid per package).
+  Future<bool> markOrderPaid(
+    String orderId, {
+    required String storeId,
+    void Function()? onForbidden,
+  }) async {
     try {
       final response = await _client.put(
         ApiConstants.markOrderPaid(orderId),
+        data: {'storeId': storeId},
         requiresAuth: true,
       );
 

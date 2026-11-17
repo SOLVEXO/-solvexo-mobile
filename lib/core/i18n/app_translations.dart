@@ -101,6 +101,7 @@ class AppTranslations extends Translations {
     'Continue': 'جاری رکھیں',
     'Access ended': 'رسائی ختم ہو گئی',
     'No longer available': 'اب دستیاب نہیں',
+    'Partly paid': 'جزوی ادائیگی',
     'Email or phone': 'ای میل یا فون',
     'Please enter your name.': 'براہ کرم اپنا نام لکھیں۔',
     'Enter a valid email or phone number.': 'درست ای میل یا فون نمبر لکھیں۔',
