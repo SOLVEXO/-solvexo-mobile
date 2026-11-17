@@ -36,8 +36,9 @@ class CartView extends BaseView<CartController> {
   // singleton-replacement issue fixed elsewhere: this ran every time the
   // Cart tab was shown, wiping the shared ProfileController.
   ProfileController get _profileController {
-    if (!Get.isRegistered<ProfileController>())
+    if (!Get.isRegistered<ProfileController>()) {
       Get.put(ProfileController(), permanent: true);
+    }
     return Get.find<ProfileController>();
   }
 

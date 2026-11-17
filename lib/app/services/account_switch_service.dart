@@ -106,7 +106,7 @@ class AccountSwitchService {
     await AppPreferences.saveIntentRole(s.user.role);
     // Push registration must never undo a successful switch.
     try {
-      unawaited(FcmService().init().catchError((_) {}));
+      unawaited(FcmService().init().catchError((_) => null));
     } catch (_) {}
   }
 

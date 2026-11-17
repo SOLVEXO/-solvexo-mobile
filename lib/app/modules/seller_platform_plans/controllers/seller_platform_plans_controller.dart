@@ -95,8 +95,9 @@ class SellerPlatformPlansController extends GetxController {
   Future<void> selectPlan(PlatformPlanModel plan) async {
     if (isUpdating.value || isPreviewing.value) return;
     if (isCurrentPlan(plan) &&
-        myPlan.value?.billingInterval == billingInterval.value)
+        myPlan.value?.billingInterval == billingInterval.value) {
       return;
+    }
 
     isPreviewing.value = true;
     try {

@@ -13,7 +13,7 @@ import 'package:get/get.dart';
 
 class OrderTrackingView extends StatelessWidget {
   final int index;
-  OrderTrackingView({super.key, required this.index});
+  const OrderTrackingView({super.key, required this.index});
 
   // Was unconditional `Get.put(MyOrdersController())` — this screen is
   // pushed (not a tab) every time an order is tapped from `MyOrdersView`,

@@ -14,8 +14,6 @@ class ForgotPasswordController extends BaseController {
 
   final emailController = TextEditingController();
 
-  @override
-  RxBool isLoading = false.obs;
 
   Future<void> sendOtp() async {
     final email = emailController.text.trim();

@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SearchView extends StatelessWidget {
-  SearchView({super.key});
+  const SearchView({super.key});
 
   // Was bare `Get.put(...)` field initializers — those only run once, when
   // this widget instance is first constructed (as one of
@@ -33,8 +33,9 @@ class SearchView extends StatelessWidget {
   // the app. Guarded getters (checked fresh on every `build()`, same as
   // `_categoryController` below) recreate them instead.
   SearchBarController get c {
-    if (!Get.isRegistered<SearchBarController>())
+    if (!Get.isRegistered<SearchBarController>()) {
       Get.put(SearchBarController());
+    }
     return Get.find<SearchBarController>();
   }
 

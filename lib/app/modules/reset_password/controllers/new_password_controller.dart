@@ -25,8 +25,6 @@ class ResetPasswordController extends BaseController {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  @override
-  RxBool isLoading = false.obs;
   RxBool showPassword = false.obs;
   RxBool showConfirmPassword = false.obs;
 

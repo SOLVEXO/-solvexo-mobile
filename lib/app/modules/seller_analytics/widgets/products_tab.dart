@@ -18,8 +18,9 @@ class ProductsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.isLoadingProducts.value && controller.products.isEmpty)
+      if (controller.isLoadingProducts.value && controller.products.isEmpty) {
         return const AnalyticsShimmer();
+      }
 
       if (controller.products.isEmpty) {
         return Center(

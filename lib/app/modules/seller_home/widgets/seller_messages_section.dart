@@ -163,8 +163,9 @@ class _MessageCard extends StatelessWidget {
     final diff = now.difference(local);
     if (diff.inMinutes < 1) return 'now';
     if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24 && now.day == local.day)
+    if (diff.inHours < 24 && now.day == local.day) {
       return DateFormat('h:mm a').format(local);
+    }
     if (diff.inDays < 7) return DateFormat('EEE').format(local);
     return DateFormat('MMM d').format(local);
   }

@@ -373,7 +373,8 @@ class ChatController extends GetxController {
       targetId: conversationId,
       reason: reason,
     );
-    if (ok)
+    if (ok) {
       ToastUtil.showToast('Reported. Our team will review this conversation.');
+    }
   }
 }

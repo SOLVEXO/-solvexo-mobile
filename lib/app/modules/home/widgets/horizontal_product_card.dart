@@ -14,7 +14,7 @@ import 'package:get/get.dart';
 class HorizontalProductCard extends StatelessWidget {
   final ProductModel prod;
   final Function()? onTap;
-  HorizontalProductCard({super.key, this.onTap, required this.prod});
+  const HorizontalProductCard({super.key, this.onTap, required this.prod});
 
   CurrencyController get currencyController {
     if (!Get.isRegistered<CurrencyController>()) {

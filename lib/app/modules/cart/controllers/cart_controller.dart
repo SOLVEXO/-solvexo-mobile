@@ -40,8 +40,6 @@ class CartController extends BaseController {
   // ─── State ────────────────────────────────────────────────────────────────
   final RxList<CartItem> cartItems = <CartItem>[].obs;
   final RxBool selectAll = false.obs;
-  @override
-  final RxBool isLoading = false.obs;
   final RxBool isCheckingOut = false.obs;
 
   final Rx<double> subtotal = 0.0.obs;

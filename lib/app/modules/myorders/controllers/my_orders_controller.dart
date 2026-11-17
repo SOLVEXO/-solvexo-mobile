@@ -25,8 +25,6 @@ class MyOrdersController extends BaseController {
 
   final OrderRepository _orderRepository;
 
-  @override
-  RxBool isLoading = false.obs;
   RxList<OrderModel> orders = <OrderModel>[].obs;
 
   // ── Digital product delivery ──────────────────────────────────────────────

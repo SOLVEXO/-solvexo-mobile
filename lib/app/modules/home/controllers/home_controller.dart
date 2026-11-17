@@ -74,15 +74,11 @@ class HomeController extends BaseController {
   // scrolls back and forth (or a rebuild replaying index 0) must never
   // double-fire.
   final Set<String> _impressedBannerIds = {};
-  @override
-  final RxBool isLoading = true.obs;
   final RxBool isFetchingProducts = false.obs;
   final RxInt selectedCategoryIndex = 0.obs;
   final RxInt tabIndex = 0.obs;
 
   // ─── Pagination ───────────────────────────────────────────────────────────
-  @override
-  final RxInt currentPage = 1.obs;
   final RxInt totalPages = 1.obs;
   final RxBool hasMoreProducts = true.obs;
   final RxInt totalProductsCount = 0.obs;
@@ -146,6 +142,8 @@ class HomeController extends BaseController {
   @override
   void onInit() {
     super.onInit();
+    // Home starts in its loading state (BaseController defaults to false).
+    isLoading.value = true;
     initializeHome();
     fetchBanners();
     fetchHomeExtras();

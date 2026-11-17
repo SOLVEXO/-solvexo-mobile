@@ -35,8 +35,6 @@ class AuthController extends BaseController {
   final SocialAuthService _socialAuth;
   // Observables
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
-  @override
-  final RxBool isLoading = false.obs;
   final RxBool isSocialLoading = false.obs;
   // Which provider's button should show its own spinner — the other two
   // stay disabled but plain, rather than all three animating identically.

@@ -61,8 +61,6 @@ class OtpController extends BaseController {
   /// The current code can't be used any more (burned after 5 wrong tries, or
   /// expired). Input and Verify are disabled until a new code is requested.
   RxBool isLocked = false.obs;
-  @override
-  RxBool isLoading = false.obs;
 
   final String otpType;
   final String email;
