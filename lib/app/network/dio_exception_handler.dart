@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:book_store_app/app/network/api_error.dart';
+import 'package:book_store_app/app/services/account_switch_prompt.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +43,15 @@ class DioExceptionHandler {
       case DioExceptionType.unknown:
         errorMessage = "An unexpected error occurred. Please try again";
         break;
+    }
+
+    // A seller session on checkout/payment gets 403 (buyer-only, docs
+    // Part B 1): offer "Switch to your buyer account" instead of a toast.
+    if (showToast &&
+        dioException.response?.statusCode == 403 &&
+        AccountSwitchPrompt.isBuyerOnlyPath(dioException.requestOptions.path)) {
+      unawaited(AccountSwitchPrompt.onBuyerOnly403(errorMessage));
+      return;
     }
 
     if (showToast) {

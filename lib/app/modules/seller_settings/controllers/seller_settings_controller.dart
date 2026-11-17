@@ -5,6 +5,7 @@ import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/app/services/account_switch_prompt.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
@@ -182,6 +183,12 @@ class SellerSettingsController extends GetxController {
           title: 'Language',
           trailing: language.value,
           onTap: () => Get.toNamed(Routes.sellerLanguage),
+        ),
+        // Checklist #5: switch-to-buyer (or create-buyer-account).
+        SettingsTile(
+          emoji: AppIcons.shoppingBag,
+          title: 'Switch to buyer account',
+          onTap: AccountSwitchPrompt.toBuyer,
         ),
       ],
     ),

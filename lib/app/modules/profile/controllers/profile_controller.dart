@@ -8,6 +8,7 @@ import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/modules/settings/controllers/settings_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/app/services/account_switch_prompt.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
@@ -169,7 +170,9 @@ class ProfileController extends GetxController {
 
   /// Entry into the in-app seller landing (Welcome). Works for guests and
   /// buyers; a buyer's seller account is created on the same email.
-  void goToSellerLanding() => Get.toNamed(Routes.welcome);
+  /// Signed-in buyer: become-seller (or open the existing seller account);
+  /// guest: the seller landing.
+  Future<void> goToSellerLanding() => AccountSwitchPrompt.toSeller();
 
   /// Guest CTA — explicitly tags the intent as buyer so a stale 'seller'
   /// intent left over from a previous "Sell on EduDeen" visit never leaks

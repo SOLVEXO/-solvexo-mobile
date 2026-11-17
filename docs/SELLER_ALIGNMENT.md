@@ -17,7 +17,7 @@ by calling the API. Tick items off in commits that name the item number.
 4. [x] **Plan lapse** (docs §2.8): `expired|past_due|canceled` → Plan expired
    screen with Choose a plan + Switch/Create buyer account; block
    create/activate. Some `past_due` handling exists (6 files) — verify.
-5. **Account switching**: `POST /api/auth/become-seller`,
+5. [x] **Account switching**: `POST /api/auth/become-seller`,
    `/switch-to-buyer`, `/create-buyer-account`, `GET
    /api/platform-plans/free-trial-eligibility` (hasSellerAccount /
    hasBuyerAccount / trialUsedAt). None used. A seller session cannot use
