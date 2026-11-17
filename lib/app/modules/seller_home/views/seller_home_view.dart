@@ -13,6 +13,7 @@ import 'package:book_store_app/app/modules/seller_home/widgets/seller_verificati
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
+import 'package:book_store_app/app/modules/seller_home/widgets/dashboard_summary_cards.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -89,7 +90,11 @@ class _SellerHomeContent extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
+              DashboardActionsCard(controller: Get.find<SellerHomeController>()),
+              DashboardChecklistCard(controller: Get.find<SellerHomeController>()),
+              DashboardKpisCard(controller: Get.find<SellerHomeController>()),
+              const SizedBox(height: 8),
               _sectionHeader('Quick Actions'),
               const SizedBox(height: 10),
               SellerQuickActions(),

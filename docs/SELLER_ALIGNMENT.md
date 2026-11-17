@@ -38,7 +38,7 @@ by calling the API. Tick items off in commits that name the item number.
    Cancelled / All, ship-by 48 h badges, Free claims card, buyer cancel reason.
 
 ## P2 — features the web has
-10. Dashboard summary endpoint (KPIs, action counts, setup checklist).
+10. [x] Dashboard summary endpoint (KPIs, action counts, setup checklist).
 11. Products list: status tabs with counts (In review / Needs changes),
     inline price/stock edit, Duplicate, bulk activate/deactivate, "Paused –
     plan ended", "Fix now" with admin note.

@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/data/models/seller_dashboard_summary.dart';
 import 'package:book_store_app/app/data/models/common_models/store_model.dart';
 import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/data/models/store/store_announcement_bar_model.dart';
@@ -9,6 +10,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class SellerRepository {
+  /// GET /api/store/:storeId/dashboard-summary. Throws so the Dashboard can
+  /// show error + Retry.
+  Future<DashboardSummary> getDashboardSummary(String storeId) async {
+    final res = await _client.get(ApiConstants.storeDashboardSummary(storeId), requiresAuth: true);
+    return DashboardSummary.fromJson(Map<String, dynamic>.from(res.data as Map));
+  }
+
   final BaseClient _client = BaseClient();
 
   // ─── GET /api/store/my-stores ─────────────────────────────────────────────

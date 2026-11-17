@@ -1,8 +1,8 @@
+import 'package:book_store_app/app/data/models/seller_dashboard_summary.dart';
 import 'package:book_store_app/app/data/models/announcement_model.dart';
 import 'package:book_store_app/app/data/models/messaging/conversation_model.dart';
 import 'package:book_store_app/app/data/repositories/announcements_repository.dart';
 import 'package:book_store_app/app/data/repositories/messaging_repository.dart';
-import 'package:book_store_app/app/data/repositories/seller_analytics_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_orders_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
@@ -18,13 +18,11 @@ class SellerHomeController extends GetxController {
   SellerHomeController({
     SellerOrdersRepository? ordersRepository,
     MessagingRepository? messagingRepository,
-    SellerAnalyticsRepository? analyticsRepository,
     SellerProductRepository? productRepository,
     AnnouncementsRepository? announcementsRepository,
     SellerRepository? sellerRepository,
   }) : _ordersRepo = ordersRepository ?? SellerOrdersRepository(),
        _messagingRepo = messagingRepository ?? MessagingRepository(),
-       _analyticsRepo = analyticsRepository ?? SellerAnalyticsRepository(),
        _productRepo = productRepository ?? SellerProductRepository(),
        _announcementsRepo =
            announcementsRepository ?? AnnouncementsRepository(),
@@ -32,7 +30,6 @@ class SellerHomeController extends GetxController {
 
   final SellerOrdersRepository _ordersRepo;
   final MessagingRepository _messagingRepo;
-  final SellerAnalyticsRepository _analyticsRepo;
   final SellerProductRepository _productRepo;
   final AnnouncementsRepository _announcementsRepo;
   final SellerRepository _sellerRepo;
@@ -49,6 +46,11 @@ class SellerHomeController extends GetxController {
   // No "visitors"/"conversion rate" fields — the backend has no storefront
   // visit-tracking to compute them from, so those stat cells are hidden
   // rather than showing invented numbers (see SellerStatusCard).
+  /// GET dashboard-summary (KPIs, today, action counts, checklist).
+  final Rxn<DashboardSummary> summary = Rxn<DashboardSummary>();
+  final RxBool summaryFailed = false.obs;
+  final RxInt todayFreeClaims = 0.obs;
+
   final RxDouble todayRevenue = 0.0.obs;
   final Rx<double?> revenueChange = Rx<double?>(null);
   final RxInt ordersCount = 0.obs;
@@ -107,7 +109,7 @@ class SellerHomeController extends GetxController {
   Future<void> _loadData() async {
     try {
       await Future.wait([
-        _loadTodaySummary(),
+        loadSummary(),
         _loadRecentOrders(),
         _loadRecentMessages(),
         _loadLowStock(),
@@ -142,17 +144,22 @@ class SellerHomeController extends GetxController {
     }
   }
 
-  Future<void> _loadTodaySummary() async {
+  /// Today block + KPIs + actions + checklist from one endpoint (PKT).
+  Future<void> loadSummary() async {
+    summaryFailed.value = false;
     try {
       final storeId = await AppPreferences.getStoreId();
       if (storeId == null || storeId.isEmpty) return;
-      final summary = await _analyticsRepo.getTodaySummary(storeId);
-      todayRevenue.value = summary.revenue;
-      revenueChange.value = summary.revenueChangePercent;
-      ordersCount.value = summary.ordersCount;
-      avgOrderValue.value = summary.avgOrderValue;
+      final s = await _sellerRepo.getDashboardSummary(storeId);
+      summary.value = s;
+      todayRevenue.value = s.today.revenue.toDouble();
+      revenueChange.value = s.today.revenueChangePercent?.toDouble();
+      ordersCount.value = s.today.ordersCount;
+      avgOrderValue.value = s.today.avgOrderValue.toDouble();
+      todayFreeClaims.value = s.today.freeClaims;
     } catch (e) {
-      debugPrint('❌ _loadTodaySummary error: $e');
+      summaryFailed.value = true;
+      debugPrint('❌ loadSummary error: $e');
     }
   }
 

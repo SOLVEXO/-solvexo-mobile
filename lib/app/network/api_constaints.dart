@@ -269,6 +269,9 @@ class ApiConstants {
   static const String updateStore = "$apiPrefix/store/update-store";
   static const String myStores = "$apiPrefix/store/my-stores";
   static String getStoreById(String id) => "$apiPrefix/store/getStoreById/$id";
+  // KPIs (PKT), today block, action counts, setup checklist (docs 6.2).
+  static String storeDashboardSummary(String storeId) =>
+      "$apiPrefix/store/$storeId/dashboard-summary";
 
 
   // ============ Public Storefront Endpoints ============
