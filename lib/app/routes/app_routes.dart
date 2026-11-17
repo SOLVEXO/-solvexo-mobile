@@ -86,11 +86,8 @@ abstract class Routes {
   static const sellerOrderDetail = '/seller/orders/detail';
   static const sellerReturns = '/seller/returns';
   static const sellerStoreProfile = '/seller/settings/store-profile';
-  static const sellerShipping = '/seller/settings/shipping';
   static const sellerNotifications = '/seller/settings/notifications';
   static const sellerPasswordSecurity = '/seller/settings/password-security';
-  static const sellerTwoFactor = '/seller/settings/two-factor';
-  static const sellerLanguage = '/seller/settings/language';
   static const sellerProducts = '/seller/products';
   static const addSellerProduct = '/seller/products/add';
   static const editSellerProduct = '/seller/products/edit';

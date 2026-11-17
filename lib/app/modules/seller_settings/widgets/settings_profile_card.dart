@@ -42,20 +42,25 @@ class SettingsProfileCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomText(
-                    text: controller.name.value,
-                    fontSize: AppFontSize.small,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.black,
-                  ),
-                  const SizedBox(height: 3),
-                  CustomText(
-                    text: controller.email.value,
-                    fontSize: AppFontSize.verySmall,
-                    color: AppColors.grey,
-                  ),
-                  const SizedBox(height: 6),
-                  _PlanBadge(plan: controller.plan.value),
+                  if (controller.name.value.isNotEmpty)
+                    CustomText(
+                      text: controller.name.value,
+                      fontSize: AppFontSize.small,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.black,
+                    ),
+                  if (controller.email.value.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    CustomText(
+                      text: controller.email.value,
+                      fontSize: AppFontSize.verySmall,
+                      color: AppColors.grey,
+                    ),
+                  ],
+                  if (controller.plan.value.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    _PlanBadge(plan: controller.plan.value),
+                  ],
                 ],
               ),
             ),

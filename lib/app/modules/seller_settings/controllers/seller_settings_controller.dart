@@ -4,6 +4,7 @@ import 'package:book_store_app/app/data/repositories/notifications_repository.da
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
+import 'package:book_store_app/app/modules/seller/utils/plan_lapse.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/app/services/account_switch_prompt.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
@@ -42,11 +43,12 @@ class SellerSettingsController extends GetxController {
   final _authRepository = AuthRepository();
   final RxBool isLoading = false.obs;
 
-  // ── Profile ─────────────────────────────────────────────────────────────────
-  final RxString name = 'Alex Chen'.obs;
+  // ── Profile (real data only; empty = the block is hidden) ──────────────────
+  final RxString name = ''.obs;
   final RxString profileImage = ''.obs;
-  final RxString email = 'alex@myshop.com'.obs;
-  final RxString plan = 'Professional Plan'.obs;
+  final RxString email = ''.obs;
+  /// Platform plan name from GET /api/platform-plans/:storeId.
+  final RxString plan = ''.obs;
 
   // ── Notification toggles (mirror `NotificationPreference.prefs` — 'orders'
   // gates both new-order and low-stock alerts on the backend) ────────────────
@@ -55,12 +57,7 @@ class SellerSettingsController extends GetxController {
   final RxBool lowStockNotif = true.obs;
 
   // ── Store settings ──────────────────────────────────────────────────────────
-  final RxString storeName = 'My Shop'.obs;
-  final RxString shippingZones = '3 zones configured'.obs;
-
-  // ── Account settings ────────────────────────────────────────────────────────
-  final RxBool twoFactorEnabled = true.obs;
-  final RxString language = 'English'.obs;
+  final RxString storeName = ''.obs;
 
   // ── Sections ─────────────────────────────────────────────────────────────────
   List<SettingsSection> get sections => [
@@ -82,12 +79,6 @@ class SellerSettingsController extends GetxController {
           emoji: AppIcons.billsIcon,
           title: 'Finance & Payouts',
           onTap: () => Get.toNamed(Routes.sellerFinance),
-        ),
-        SettingsTile(
-          emoji: AppIcons.truckIcon,
-          title: 'Shipping',
-          trailing: shippingZones.value,
-          onTap: () => Get.toNamed(Routes.sellerShipping),
         ),
         SettingsTile(
           emoji: AppIcons.reportIcon,
@@ -172,18 +163,6 @@ class SellerSettingsController extends GetxController {
           title: 'Password & Security',
           onTap: () => Get.toNamed(Routes.sellerPasswordSecurity),
         ),
-        SettingsTile(
-          emoji: AppIcons.phoneIcon,
-          title: 'Two-Factor Auth',
-          trailing: twoFactorEnabled.value ? 'Enabled' : 'Disabled',
-          onTap: () => Get.toNamed(Routes.sellerTwoFactor),
-        ),
-        SettingsTile(
-          emoji: AppIcons.languageIcon,
-          title: 'Language',
-          trailing: language.value,
-          onTap: () => Get.toNamed(Routes.sellerLanguage),
-        ),
         // Checklist #5: switch-to-buyer (or create-buyer-account).
         SettingsTile(
           emoji: AppIcons.shoppingBag,
@@ -241,10 +220,16 @@ class SellerSettingsController extends GetxController {
     } catch (_) {}
 
     // ── Store data (awaited — ensures sections rebuild with correct name) ──
-    await _loadStoreData();
-    await _loadNotificationPrefs();
-    _applyUser(Get.find<ProfileController>().user.value);
+    await Future.wait([_loadStoreData(), _loadNotificationPrefs(), _loadPlan()]);
+    try {
+      _applyUser(Get.find<ProfileController>().user.value);
+    } catch (_) {}
     isLoading.value = false;
+  }
+
+  Future<void> _loadPlan() async {
+    final check = await PlanGate.check();
+    plan.value = check.planName ?? '';
   }
 
   Future<void> _loadNotificationPrefs() async {
@@ -278,8 +263,7 @@ class SellerSettingsController extends GetxController {
     try {
       _applyUser(Get.find<ProfileController>().user.value);
     } catch (_) {}
-    await _loadStoreData();
-    await _loadNotificationPrefs();
+    await Future.wait([_loadStoreData(), _loadNotificationPrefs(), _loadPlan()]);
     isLoading.value = false;
   }
 

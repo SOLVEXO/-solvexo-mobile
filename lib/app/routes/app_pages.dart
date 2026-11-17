@@ -89,16 +89,10 @@ import '../modules/edit_seller_product/bindings/edit_seller_product_binding.dart
 import '../modules/edit_seller_product/views/edit_seller_product_view.dart';
 import '../modules/seller_store_profile/bindings/seller_store_profile_binding.dart';
 import '../modules/seller_store_profile/views/seller_store_profile_view.dart';
-import '../modules/seller_shipping/bindings/seller_shipping_binding.dart';
-import '../modules/seller_shipping/views/seller_shipping_view.dart';
 import '../modules/seller_notifications/bindings/seller_notifications_binding.dart';
 import '../modules/seller_notifications/views/seller_notifications_view.dart';
 import '../modules/seller_password_security/bindings/seller_password_security_binding.dart';
 import '../modules/seller_password_security/views/seller_password_security_view.dart';
-import '../modules/seller_two_factor/bindings/seller_two_factor_binding.dart';
-import '../modules/seller_two_factor/views/seller_two_factor_view.dart';
-import '../modules/seller_language/bindings/seller_language_binding.dart';
-import '../modules/seller_language/views/seller_language_view.dart';
 import '../modules/ai_studio/bindings/ai_studio_hub_binding.dart';
 import '../modules/ai_studio/views/ai_studio_hub_view.dart';
 import '../modules/ai_studio/bindings/ai_studio_history_binding.dart';
@@ -360,11 +354,6 @@ class AppPages {
       binding: SellerStoreProfileBinding(),
     ),
     GetPage(
-      name: Routes.sellerShipping,
-      page: () => SellerShippingView(),
-      binding: SellerShippingBinding(),
-    ),
-    GetPage(
       name: Routes.sellerNotifications,
       page: () => SellerNotificationsView(),
       binding: SellerNotificationsBinding(),
@@ -373,16 +362,6 @@ class AppPages {
       name: Routes.sellerPasswordSecurity,
       page: () => SellerPasswordSecurityView(),
       binding: SellerPasswordSecurityBinding(),
-    ),
-    GetPage(
-      name: Routes.sellerTwoFactor,
-      page: () => SellerTwoFactorView(),
-      binding: SellerTwoFactorBinding(),
-    ),
-    GetPage(
-      name: Routes.sellerLanguage,
-      page: () => SellerLanguageView(),
-      binding: SellerLanguageBinding(),
     ),
     GetPage(
       name: Routes.library,
