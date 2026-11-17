@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:book_store_app/app/data/models/common_models/auth_response_model.dart';
+import 'package:book_store_app/app/modules/auth/controller/auth_controller.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
+import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -112,6 +114,10 @@ class AccountSwitchService {
 
   /// After a switch: open the side of the app that matches the new role.
   static Future<void> openFor(AuthResponseModel s) async {
+    ProfileController.onSessionChanged(s.user);
+    if (Get.isRegistered<AuthController>()) {
+      Get.find<AuthController>().currentUser.value = s.user;
+    }
     if (s.user.role == 'seller') {
       Get.offAllNamed(Routes.sellerStores);
       return;

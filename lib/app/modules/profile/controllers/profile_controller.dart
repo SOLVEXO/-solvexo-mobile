@@ -253,6 +253,15 @@ class ProfileController extends GetxController {
 
   Future<void> refreshProfile() => loadUserProfile();
 
+  /// After login or a buyer <-> seller switch: show the new account at once
+  /// (Home greeting, Account header), then reload the full profile.
+  static void onSessionChanged(UserModel? sessionUser) {
+    if (!Get.isRegistered<ProfileController>()) return;
+    final c = Get.find<ProfileController>();
+    if (sessionUser != null) c.user.value = sessionUser;
+    c.loadUserProfile();
+  }
+
   /// Load user profile from backend
   Future<void> loadUserProfile() async {
     try {
@@ -267,7 +276,6 @@ class ProfileController extends GetxController {
         return;
       }
 
-      debugPrint('Loading profile with token: ${token.substring(0, 20)}...');
 
       final userData = await _authRepository.getUserProfile(token: token);
 

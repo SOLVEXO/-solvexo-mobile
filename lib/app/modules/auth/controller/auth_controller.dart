@@ -18,6 +18,7 @@ import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -467,6 +468,7 @@ class AuthController extends BaseController {
   // ─────────────────────────────────────────
 
   Future<void> _navigateByRole(String role) async {
+    ProfileController.onSessionChanged(currentUser.value);
     // Buyer login/signup only — a seller account has no guest cart to merge.
     if (role != 'seller') await _mergeGuestCartAndRefresh();
 
