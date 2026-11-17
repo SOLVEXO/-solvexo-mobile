@@ -54,3 +54,43 @@ by calling the API. Tick items off in commits that name the item number.
 
 ## Cleanup
 17. Remove dead store-verification constants in `api_constaints.dart`.
+
+## Backend issues
+
+Found while aligning the app with the live API (api.edudeen.com,
+2026-11-17). The app does not work around any of them.
+
+1. **Refund-request "502" — retracted (not a backend issue).** Reported
+   during P1 (#8 commit message) as `PATCH /api/refund-request/<id>/approve|
+   reject -> 502 upstream error`. That came from my test harness: a shell
+   loop sent the whole "PATCH /api/..." string as the HTTP method with an
+   empty path, which the proxy rejected. Re-tested with clean requests:
+   - `PATCH /api/refund-request/000000000000000000000000/approve` -> 404
+     `Refund request not found`
+   - `PATCH .../reject {}` -> 400 `notes must be longer than or equal to 10
+     characters` (and `<= 500`); `{notes: "<10+ chars>"}` -> 404 `Refund
+     request not found`
+   - `GET /api/refund-request/seller/:storeId` -> 200 `{items:[], total:0,
+     page:1, limit:20}`
+   This matches `edudeen_api/src/refund-request` (controller `@Patch(':id/
+   approve')`, `@Patch(':id/reject')` with `RejectRefundRequestDto.notes`;
+   service throws `NotFoundException('Refund request not found')`). The
+   same harness bug made my first `return-action` / `return-follow-up`
+   probes unreliable; the field rules recorded in the #8 commit come from
+   the later, direct requests and stand.
+2. **A GET creates data.** `GET /api/finance/:storeId/payout-schedule`
+   creates a schedule document when none exists for the asked currency
+   (`finance.service.ts`: `findOne` -> `create`, default currency `USD`).
+   `GET dashboard` then lists a wallet for that currency, so a PKR store
+   shows an empty USD wallet after one USD read (happened to the test store
+   on 2026-11-17). Suggest: return a default without saving, and drop the
+   `USD` default. The app now only reads the schedule in the store's own
+   currency and hides empty wallets in other currencies.
+3. **Empty enum list in a validation message.** `POST /api/finance/:storeId/
+   payout-methods {type:"zzz"}` -> 400 `type must be one of the following
+   values: ` (the allowed values are missing from the text).
+4. **Docs gap, not a bug.** `GET /api/finance/:storeId/earnings-summary`
+   (Available / Clearing + clearingReleaseAt / expected / commissionOwed)
+   and `GET /api/orders/seller-returns-all/:storeId` are live but are not in
+   EDUDEEN_DOCS Part C (it is cut off before the finance and orders
+   modules).
