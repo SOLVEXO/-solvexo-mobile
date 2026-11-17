@@ -1,7 +1,15 @@
-# Edudeen — Buyer app (Flutter)
+# Edudeen — Marketplace app (Flutter)
 
-Buyer-only mobile client for the live Edudeen API (`https://api.edudeen.com`).
-Sellers use the web dashboard; "Sell on Edudeen" opens edudeen.com.
+The full Edudeen marketplace app for the live Edudeen API
+(`https://api.edudeen.com`): one app for **buyers and sellers**.
+
+- **Buyers** (guest or signed in): Home | Browse | Cart | Library | Account.
+  Buyer screens are translated (English / Urdu with RTL).
+- **Sellers** sign in with a seller account and land on the seller panel:
+  Dashboard | Orders | Products | Analytics | More. The seller panel is
+  English only.
+- The login role decides which side opens (login, OTP and splash route by
+  role). "Sell on Edudeen" opens the seller Welcome landing.
 
 ## Run
 
@@ -28,7 +36,10 @@ Release builds print no logs (API bodies contain personal data).
 
 ## Structure
 
-- `lib/app/modules/*` — buyer screens (GetX: binding / controller / view)
+- `lib/app/modules/*` — screens (GetX: binding / controller / view)
+- `lib/app/modules/seller*`, `add_seller_product`, `edit_seller_product`,
+  `welcome` — seller panel (dashboard, orders, returns, products, inventory,
+  finance, analytics, coupons, promotions, SEO, store settings, plans)
 - `lib/app/modules/library` — Files + Courses tab
 - `lib/app/modules/support_chat` — Edudeen Help (backend chatbot)
 - `lib/app/services` — maintenance, platform config, digital downloads
@@ -38,15 +49,23 @@ Release builds print no logs (API bodies contain personal data).
 
 ## Status
 
-Done: buyer-only cleanup, maintenance 503 handling, platform config cache,
-new theme + navigation, Urdu/RTL infrastructure, Library tab, support chat,
-in-app account deletion.
+Done: buyer and seller apps on the new Material 3 theme and navigation,
+maintenance 503 handling, platform config cache, Urdu/RTL infrastructure
+(buyer), Library tab, support chat, in-app account deletion (buyer and
+seller).
+
+Retired and not in the app (docs §11): POS, the `educational` product type,
+live classes, seller verification/KYC, seller direct bank transfer, the
+marketplace page, services & bookings, the client-side Gemini assistant.
+
+Seller ↔ backend gaps are tracked in `docs/SELLER_ALIGNMENT.md` (P0/P1/P2).
 
 Not yet built (next phases, docs §14): native course player + certificates,
 Premium, My children, referrals, wishlist share, structured returns form,
 push deep links on cold start, Urdu strings for older screens (they show
 English until moved to `.tr`).
 
-Unverified (no Flutter SDK / no API access where this was written):
-compile + analyze, response shapes of `/api/courses/mine`,
-`/api/chatbot/conversation`, `/api/platform-config/maintenance`.
+Compiles and passes `flutter analyze` with no errors (Flutter 3.35).
+Not yet verified against the live API: response shapes of
+`/api/courses/mine`, `/api/chatbot/conversation`,
+`/api/platform-config/maintenance`.
