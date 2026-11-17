@@ -469,8 +469,17 @@ class AuthController extends BaseController {
   // ─────────────────────────────────────────
 
   Future<void> _navigateByRole(String role) async {
-    // Buyer login/signup only — a seller account has no guest cart to merge.
-    if (role != 'seller') await _mergeGuestCartAndRefresh();
+    // Buyer-only app. A seller session cannot shop (checkout is buyer-only
+    // on the API), so end it and explain instead of opening a dead end.
+    if (role == 'seller') {
+      await AppPreferences.clearTokens();
+      ToastUtil.showToast(
+        'This is a seller account. Sign in with your buyer account, '
+        'or manage your store on edudeen.com.',
+      );
+      return;
+    }
+    await _mergeGuestCartAndRefresh();
 
     // This login/social-login was opened to resume a protected guest action
     // (wishlist, message seller, ...) — pop back to where the guard was
@@ -479,14 +488,7 @@ class AuthController extends BaseController {
       AuthGateService.instance.resolveSuccess();
       return;
     }
-    switch (role) {
-      case 'seller':
-        // SellerStoresController handles redirect to onboarding if no stores
-        Get.offAllNamed(Routes.sellerStores);
-        break;
-      default:
-        Get.offAllNamed(Routes.mainHome);
-    }
+    Get.offAllNamed(Routes.mainHome);
   }
 
   /// Folds any locally-held guest cart into the now-logged-in buyer's

@@ -47,3 +47,7 @@ app.*.map.json
 android/key.properties
 *.jks
 *.keystore
+
+# Local build config (copy config/example.json)
+config/*.json
+!config/example.json

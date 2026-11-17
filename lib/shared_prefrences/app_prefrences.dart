@@ -177,16 +177,16 @@ class AppPreferences {
     return prefs.getString(_userRoleKey);
   }
 
-  // ── Intent role (selected on Welcome screen before auth) ─────────────────────
+  // ── Intent role ────────────────────────────────────────────────────────────
+  // This is the buyer app: every login/signup/reset is for the `user` role.
+  // Sellers use the web dashboard. Kept as methods so existing call sites
+  // stay unchanged.
   static Future<void> saveIntentRole(String role) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_intentRoleKey, role);
+    await prefs.setString(_intentRoleKey, 'user');
   }
 
-  static Future<String?> getIntentRole() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_intentRoleKey);
-  }
+  static Future<String?> getIntentRole() async => 'user';
 
   static Future<void> clearIntentRole() async {
     final prefs = await SharedPreferences.getInstance();

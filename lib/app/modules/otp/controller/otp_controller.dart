@@ -144,20 +144,15 @@ class OtpController extends BaseController {
       // exist. Never blocks navigation below if it fails.
       await _authController.finishProfileSetupAfterVerification(auth);
 
-      // Buyer signup only — a seller account has no guest cart to merge.
-      if (intentRole != 'seller') {
-        await _cartRepository.mergeGuestCartIntoAccount();
-        if (Get.isRegistered<CartController>()) {
-          await Get.find<CartController>().refreshCart();
-        }
+      await _cartRepository.mergeGuestCartIntoAccount();
+      if (Get.isRegistered<CartController>()) {
+        await Get.find<CartController>().refreshCart();
       }
 
       if (AuthGateService.instance.isAwaitingResume) {
         // This signup was opened to resume a protected guest action — pop
         // back to where the guard fired instead of navigating away.
         AuthGateService.instance.resolveSuccess();
-      } else if (intentRole == 'seller') {
-        Get.offAllNamed(Routes.sellerOnboarding);
       } else {
         Get.offAllNamed(Routes.mainHome);
       }

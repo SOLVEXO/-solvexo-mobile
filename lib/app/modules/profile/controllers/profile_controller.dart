@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:book_store_app/config/feature_flags.dart';
+import 'package:book_store_app/config/app_config.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
@@ -33,17 +34,6 @@ class ProfileController extends GetxController {
             title: 'My Orders',
             onTap: () => Get.toNamed(Routes.myOrdersView),
           ),
-          SettingsTile(
-            icon: AppIcons.cardIcon,
-            title: 'My Memberships',
-            onTap: () => Get.toNamed(Routes.myMemberships),
-          ),
-          if (FeatureFlags.bookings)
-            SettingsTile(
-              icon: AppIcons.calenderIcon,
-              title: 'My Bookings',
-              onTap: () => Get.toNamed(Routes.myBookings),
-            ),
         ],
       ),
     if (isLoggedIn)
@@ -127,10 +117,11 @@ class ProfileController extends GetxController {
       ),
   ];
 
-  /// Entry point into the seller-only landing screen (Welcome, repurposed).
-  /// Available to both guests and logged-in buyers — a buyer account and a
-  /// seller account are separate identities backend-side.
-  void goToSellerLanding() => Get.toNamed(Routes.welcome);
+  /// Selling happens on the web dashboard; this app is buyer-only.
+  Future<void> goToSellerLanding() => launchUrl(
+        Uri.parse(AppConfig.becomeSellerUrl),
+        mode: LaunchMode.externalApplication,
+      );
 
   /// Guest CTA — explicitly tags the intent as buyer so a stale 'seller'
   /// intent left over from a previous "Sell on EduDeen" visit never leaks

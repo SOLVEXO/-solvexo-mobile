@@ -1,0 +1,5 @@
+{
+  "API_BASE_URL": "https://api.edudeen.com",
+  "WEB_BASE_URL": "https://edudeen.com",
+  "STRIPE_PUBLISHABLE_KEY": ""
+}

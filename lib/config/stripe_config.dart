@@ -1,11 +1,9 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:book_store_app/config/app_config.dart';
 
-/// Stripe publishable key — safe to ship in the app (not secret), read from
-/// `.env` (`STRIPE_PUBLISHABLE_KEY`). Same Stripe account as the backend's
-/// `STRIPE_SECRET_KEY`. Left blank until the real key is provisioned —
-/// online card payments stay disabled (Cash on Delivery keeps working)
-/// rather than the app crashing on a missing key.
+/// Stripe publishable key from `--dart-define=STRIPE_PUBLISHABLE_KEY=...`.
+/// Blank = card payments stay hidden (COD / bank transfer keep working).
+/// Cards are USD-only (docs §2.2).
 class StripeConfig {
-  static String get publishableKey => dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
+  static String get publishableKey => AppConfig.stripePublishableKey;
   static bool get isConfigured => publishableKey.isNotEmpty;
 }

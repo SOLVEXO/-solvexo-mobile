@@ -125,14 +125,12 @@ class SplashScreenController extends GetxController
     // up). Never blocks navigation below.
     unawaited(FcmService().init());
 
+    // Buyer-only app: a seller session saved by an older build is ended so
+    // the user lands in guest mode instead of a seller screen that no longer
+    // exists here.
     final role = await AppPreferences.getUserRole();
-    switch (role) {
-      case 'seller':
-        Get.offAllNamed(Routes.sellerStores);
-        break;
-      default:
-        Get.offAllNamed(Routes.mainHome);
-    }
+    if (role == 'seller') await AppPreferences.clearTokens();
+    Get.offAllNamed(Routes.mainHome);
   }
 
   @override

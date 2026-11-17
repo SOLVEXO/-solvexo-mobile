@@ -42,7 +42,6 @@ abstract class Routes {
   static const CHANGE_PASSWORD = '/change-password';
   static const PRIVACY_POLICY = '/privacy-policy';
   static const ABOUT = '/about';
-  static const CHAT = '/chat';
   static const WISHLIST = '/wishlist';
   static const notifications = '/notifications';
   static const notificationPreferences = '/notifications/preferences';
@@ -51,70 +50,24 @@ abstract class Routes {
   static const chatView = '/messages/chat';
 
   // Entry
-  static const welcome = '/welcome';
   static const onboarding = '/onboarding';
 
   // Seller setup
-  static const sellerOnboarding = '/seller/onboarding';
-  static const sellerStores = '/seller/stores';
 
   // Role-based homes
-  static const sellerHome = '/seller/home';
 
   // Seller sub-screens
-  static const sellerMessages = '/seller/messages';
-  static const sellerOrders = '/seller/orders';
-  static const sellerOrderDetail = '/seller/orders/detail';
-  static const sellerReturns = '/seller/returns';
   // Seller settings sub-screens
-  static const sellerStoreProfile = '/seller/settings/store-profile';
-  static const storeVerification = '/seller/store-verification';
-  static const sellerShipping = '/seller/settings/shipping';
-  static const sellerNotifications = '/seller/settings/notifications';
-  static const sellerPasswordSecurity = '/seller/settings/password-security';
-  static const sellerTwoFactor = '/seller/settings/two-factor';
-  static const sellerLanguage = '/seller/settings/language';
-  static const sellerProducts = '/seller/products';
-  static const addSellerProduct = '/seller/products/add';
-  static const editSellerProduct = '/seller/products/edit';
-  static const sellerAnalytics = '/seller/analytics';
-  static const sellerFinance = '/seller/finance';
-  static const sellerEditProfile = '/seller/edit-profile';
-  static const sellerAiStudio = '/seller/ai-studio';
-  static const sellerSettings = '/seller/settings';
-  static const sellerCoupons = '/seller/coupons';
-  static const sellerLoyalty = '/seller/loyalty';
-  static const sellerSubscriptionPlans = '/seller/subscription-plans';
-  static const sellerServices = '/seller/services';
-  static const sellerPlatformPlan = '/seller/platform-plan';
-  static const sellerSeo = '/seller/seo';
-  static const sellerSeoProducts = '/seller/seo/products';
-  static const sellerActivityLog = '/seller/activity-log';
-  static const sellerStoreBanners = '/seller/store-banners';
-  static const sellerPromotions = '/seller/promotions';
 
   // Seller — AI Studio (6 seller-only AI tools + credits/history).
   // `sellerAiStudio` above (already linked from seller-home quick actions) is
   // the hub route — no separate constant for it here to avoid a duplicate path.
-  static const aiStudioHistory = '/seller/ai-studio/history';
-  static const aiStudioGenerationDetail = '/seller/ai-studio/generation-detail';
-  static const aiStudioListingWriter = '/seller/ai-studio/listing-writer';
-  static const aiStudioSeoBooster = '/seller/ai-studio/seo-booster';
-  static const aiStudioEmailCampaigns = '/seller/ai-studio/email-campaigns';
-  static const aiStudioWorksheetBuilder = '/seller/ai-studio/worksheet-builder';
-  static const aiStudioPriceOptimizer = '/seller/ai-studio/price-optimizer';
-  static const aiStudioImageEnhancer = '/seller/ai-studio/image-enhancer';
 
   // Buyer — loyalty & rewards for a specific store
-  static const loyaltyRewards = '/loyalty-rewards';
 
   // Buyer — store memberships (subscriptions)
-  static const myMemberships = '/my-memberships';
 
   // Buyer — store services & bookings
-  static const storeServices = '/store/services';
-  static const storeServiceDetail = '/store/services/detail';
-  static const myBookings = '/my-bookings';
 
   // Buyer/guest — free, unauthenticated AI Worksheet Builder trial
   static const worksheetTrial = '/worksheet-trial';
