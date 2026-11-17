@@ -6,6 +6,7 @@ import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/core/i18n/locale_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 enum ChatAuthor { me, bot, team }
@@ -36,9 +37,16 @@ class ChatChip {
 ///
 /// `POST /api/chatbot/message {audience:'buyer', text, lang}` answers greetings
 /// and FAQs; text it cannot answer is escalated by the server to the admin
-/// inbox. Team replies are read with `GET /api/chatbot/conversation?since=`
-/// (signed-in buyers; polled every 20 s while this screen is open) and also
-/// arrive as a `support_reply` notification.
+/// inbox. A guest is first asked for contact details (`source:
+/// 'needs_contact'`); the same text is then re-sent with `guest {name, email |
+/// phone}` and the reply carries `escalation.guestToken`.
+///
+/// Team replies: `GET /api/chatbot/conversation?since=&guestToken=` ->
+/// `{data: {conversation: null | {id, status, messages: [{id, from, text,
+/// at}]}, serverTime}}` (verified against the live API 2026-11-17). Polled
+/// every 20 s while this screen is open, for signed-in users and for guests
+/// holding a token; `since` is the previous response's `serverTime`, so the
+/// device clock never matters.
 class SupportChatController extends GetxController {
   SupportChatController({BaseClient? client}) : _client = client ?? BaseClient();
 
@@ -50,9 +58,20 @@ class SupportChatController extends GetxController {
   final RxnString notice = RxnString();
   final RxBool signedIn = false.obs;
 
+  /// The guest's question waiting for name + contact (`needs_contact`).
+  final RxnString pendingContactText = RxnString();
+
   final Set<String> _seenTeamIds = {};
-  DateTime? _since;
+  String? _since;
+  String? _guestToken;
   Timer? _poll;
+
+  @visibleForTesting
+  set guestToken(String? v) => _guestToken = v;
+  @visibleForTesting
+  String? get since => _since;
+
+  bool get _canPoll => signedIn.value || _guestToken != null;
 
   @override
   void onInit() {
@@ -66,17 +85,55 @@ class SupportChatController extends GetxController {
 
   Future<void> _start() async {
     signedIn.value = await AppPreferences.isLoggedIn();
-    if (signedIn.value) {
-      await pollTeamReplies();
-      _poll = Timer.periodic(
-          const Duration(seconds: 20), (_) => pollTeamReplies());
+    if (!signedIn.value) {
+      _guestToken = await AppPreferences.getSupportGuestToken();
     }
+    _startPolling();
+  }
+
+  void _startPolling() {
+    if (!_canPoll || _poll != null) return;
+    pollTeamReplies();
+    _poll = Timer.periodic(const Duration(seconds: 20), (_) => pollTeamReplies());
   }
 
   Future<void> send(String raw) async {
     final text = raw.trim();
     if (text.isEmpty || sending.value) return;
     messages.add(ChatEntry(author: ChatAuthor.me, text: text));
+    pendingContactText.value = null;
+    await _ask(text);
+  }
+
+  /// Validates the guest contact form. Returns an error, or null when valid.
+  static String? validateContact(String name, String contact) {
+    if (name.trim().isEmpty || name.trim().length > 80) {
+      return 'Please enter your name.'.tr;
+    }
+    final c = contact.trim();
+    final isEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(c) && c.length <= 200;
+    final digits = c.replaceAll(RegExp(r'[\s\-()]'), '');
+    final isPhone = RegExp(r'^\+?\d{7,15}$').hasMatch(digits) && digits.length <= 20;
+    if (!isEmail && !isPhone) return 'Enter a valid email or phone number.'.tr;
+    return null;
+  }
+
+  /// Re-sends the pending question with the guest's contact details.
+  Future<void> submitContact(String name, String contact) async {
+    final text = pendingContactText.value;
+    if (text == null || validateContact(name, contact) != null) return;
+    final c = contact.trim();
+    final guest = <String, String>{
+      'name': name.trim(),
+      if (c.contains('@')) 'email': c else 'phone': c.replaceAll(RegExp(r'[\s\-()]'), ''),
+    };
+    pendingContactText.value = null;
+    await _ask(text, guest: guest);
+  }
+
+  void cancelContact() => pendingContactText.value = null;
+
+  Future<void> _ask(String text, {Map<String, String>? guest}) async {
     chips.clear();
     sending.value = true;
     try {
@@ -86,6 +143,7 @@ class SupportChatController extends GetxController {
           'audience': 'buyer',
           'text': text,
           'lang': LocaleService.current.languageCode,
+          if (guest != null) 'guest': guest,
         },
         requiresAuth: signedIn.value,
       );
@@ -115,6 +173,17 @@ class SupportChatController extends GetxController {
         chips.assignAll(next);
         final n = data['notice']?.toString();
         if (n != null && n.isNotEmpty) notice.value = n;
+
+        if (data['source'] == 'needs_contact' && !signedIn.value) {
+          pendingContactText.value = text;
+        }
+        final esc = data['escalation'];
+        final token = esc is Map ? esc['guestToken']?.toString() : null;
+        if (token != null && token.isNotEmpty && !signedIn.value) {
+          _guestToken = token;
+          await AppPreferences.saveSupportGuestToken(token);
+        }
+        if (data['source'] == 'escalated') _startPolling();
       }
     } on DioException catch (e) {
       messages.add(ChatEntry(
@@ -127,39 +196,41 @@ class SupportChatController extends GetxController {
     }
   }
 
-  /// Team replies to an escalated question. The body shape was not verified
-  /// from this environment; both a list and `{messages: [...]}` are read.
+  /// Team replies to an escalated question (signed in, or guest with token).
   Future<void> pollTeamReplies() async {
     try {
       final res = await _client.get(
         ApiConstants.chatbotConversation,
         queryParameters: {
-          if (_since != null) 'since': _since!.toUtc().toIso8601String(),
+          if (_since != null) 'since': _since,
+          if (!signedIn.value && _guestToken != null) 'guestToken': _guestToken,
         },
-        requiresAuth: true,
+        requiresAuth: signedIn.value,
       );
       final body = res.data;
-      // Live API: `{data: {conversation: null | {...}, serverTime}}`
-      // (verified 2026-11-17 with no conversation; the fields inside a
-      // populated conversation were not seen yet).
       dynamic data = body is Map ? body['data'] : null;
+      final serverTime = data is Map ? data['serverTime']?.toString() : null;
       if (data is Map && data.containsKey('conversation')) {
         data = data['conversation'];
       }
       if (data is Map) data = data['messages'];
-      if (data is! List) return;
-      for (final m in data) {
-        if (m is! Map) continue;
-        final from = (m['from'] ?? m['sender'] ?? m['role'])?.toString();
-        if (from != 'admin' && from != 'team' && from != 'support') continue;
-        final id = (m['_id'] ?? m['id'])?.toString();
-        if (id != null && !_seenTeamIds.add(id)) continue;
-        final text = (m['text'] ?? m['body'] ?? m['message'])?.toString();
-        if (text == null || text.isEmpty) continue;
-        final at = DateTime.tryParse(m['createdAt']?.toString() ?? '')?.toLocal();
-        messages.add(ChatEntry(author: ChatAuthor.team, text: text, at: at, id: id));
-        if (at != null && (_since == null || at.isAfter(_since!))) _since = at;
+      if (data is List) {
+        for (final m in data) {
+          if (m is! Map) continue;
+          final from = (m['from'] ?? m['sender'] ?? m['role'])?.toString();
+          if (from != 'admin' && from != 'team' && from != 'support') continue;
+          final id = (m['_id'] ?? m['id'])?.toString();
+          if (id != null && !_seenTeamIds.add(id)) continue;
+          final text = (m['text'] ?? m['body'] ?? m['message'])?.toString();
+          if (text == null || text.isEmpty) continue;
+          final at = DateTime.tryParse(
+                  (m['at'] ?? m['createdAt'])?.toString() ?? '')
+              ?.toLocal();
+          messages.add(ChatEntry(author: ChatAuthor.team, text: text, at: at, id: id));
+        }
       }
+      // Advance only after a successful read, using the server's clock.
+      if (serverTime != null && serverTime.isNotEmpty) _since = serverTime;
     } catch (_) {
       // Quiet: polling never interrupts the chat.
     }

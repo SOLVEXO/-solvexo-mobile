@@ -87,6 +87,13 @@ class AppTranslations extends Translations {
     'Send': 'بھیجیں',
     'Edudeen team': 'ایجودین ٹیم',
     'Hi! How can we help you today?': 'السلام علیکم! ہم آپ کی کیا مدد کر سکتے ہیں؟',
+    'So we can reply, share your name and an email or phone number.':
+        'تاکہ ہم جواب دے سکیں، اپنا نام اور ای میل یا فون نمبر بتائیں۔',
+    'Your name': 'آپ کا نام',
+    'Email or phone': 'ای میل یا فون',
+    'Please enter your name.': 'براہ کرم اپنا نام لکھیں۔',
+    'Enter a valid email or phone number.': 'درست ای میل یا فون نمبر لکھیں۔',
+    'Send to Edudeen team': 'ایجودین ٹیم کو بھیجیں',
 
     // Delete account
     'Type DELETE to confirm': 'تصدیق کے لیے DELETE لکھیں',

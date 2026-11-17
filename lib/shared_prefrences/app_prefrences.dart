@@ -139,6 +139,27 @@ class AppPreferences {
     _refreshCache = null;
   }
 
+  // ── Support chat guest token ─────────────────────────────────────────────
+  // `escalation.guestToken` from POST /api/chatbot/message lets a guest read
+  // the team's replies (`GET /api/chatbot/conversation?guestToken=`). It is a
+  // bearer secret for that conversation, so it lives in secure storage.
+  static const String _supportGuestTokenKey = 'support_guest_token';
+
+  static Future<String?> getSupportGuestToken() async {
+    try {
+      final v = await _secure.read(key: _supportGuestTokenKey);
+      return (v == null || v.isEmpty) ? null : v;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> saveSupportGuestToken(String token) async {
+    try {
+      await _secure.write(key: _supportGuestTokenKey, value: token);
+    } catch (_) {}
+  }
+
   // Save user data
   static Future<void> saveUserData({
     required String userId,

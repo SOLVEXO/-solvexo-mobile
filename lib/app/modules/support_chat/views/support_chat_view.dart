@@ -132,6 +132,9 @@ class _SupportChatViewState extends State<SupportChatView> {
                     },
                   ),
                 )),
+          Obx(() => c.pendingContactText.value == null
+              ? const SizedBox.shrink()
+              : _ContactCard(controller: c)),
           SafeArea(
             top: false,
             child: Padding(
@@ -242,6 +245,99 @@ class _Typing extends StatelessWidget {
           height: 24,
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
+      ),
+    );
+  }
+}
+
+/// Guests: name + email/phone once, so the Edudeen team can reply
+/// (`source: 'needs_contact'` from the chatbot).
+class _ContactCard extends StatefulWidget {
+  const _ContactCard({required this.controller});
+  final SupportChatController controller;
+
+  @override
+  State<_ContactCard> createState() => _ContactCardState();
+}
+
+class _ContactCardState extends State<_ContactCard> {
+  final _name = TextEditingController();
+  final _contact = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _contact.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final err = SupportChatController.validateContact(_name.text, _contact.text);
+    setState(() => _error = err);
+    if (err == null) widget.controller.submitContact(_name.text, _contact.text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+          BaseSpacing.md, 0, BaseSpacing.md, BaseSpacing.xs),
+      padding: const EdgeInsets.all(BaseSpacing.sm),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(BaseRadius.lg),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('So we can reply, share your name and an email or phone number.'.tr,
+              style: theme.textTheme.bodyMedium),
+          const SizedBox(height: BaseSpacing.xs),
+          TextField(
+            controller: _name,
+            maxLength: 80,
+            textInputAction: TextInputAction.next,
+            decoration: InputDecoration(labelText: 'Your name'.tr, counterText: ''),
+          ),
+          const SizedBox(height: BaseSpacing.xs),
+          TextField(
+            controller: _contact,
+            maxLength: 200,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.send,
+            onSubmitted: (_) => _submit(),
+            decoration: InputDecoration(
+              labelText: 'Email or phone'.tr,
+              counterText: '',
+              errorText: _error,
+            ),
+          ),
+          const SizedBox(height: BaseSpacing.xs),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                  onPressed: widget.controller.cancelContact,
+                  child: Text('Cancel'.tr),
+                ),
+              ),
+              const SizedBox(width: BaseSpacing.xs),
+              Expanded(
+                flex: 2,
+                child: Obx(() => FilledButton(
+                      style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
+                      onPressed: widget.controller.sending.value ? null : _submit,
+                      child: Text('Send to Edudeen team'.tr),
+                    )),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
