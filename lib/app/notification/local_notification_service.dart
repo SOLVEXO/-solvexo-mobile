@@ -47,10 +47,13 @@ class LocalNotificationService {
     );
 
     ///iOS settings
-    var initializationSettingsDarwin = DarwinInitializationSettings(
-      // onDidReceiveLocalNotification: (id, title, body, payload) {
-      //   debugPrint("onDidReceiveLocalNotification --> iOS");
-      // },
+    // Do NOT ask for iOS permission here: init() is awaited in main() before
+    // runApp(), so the system prompt appeared over a blank launch and the
+    // app waited for the answer. FcmService asks after sign-in instead.
+    const initializationSettingsDarwin = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     ///Init both platform settings
