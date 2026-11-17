@@ -11,6 +11,8 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/app/routes/deep_link_router.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:book_store_app/app/modules/seller/utils/seller_link_router.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class NotificationsController extends GetxController {
@@ -91,7 +93,7 @@ class NotificationsController extends GetxController {
     final isSeller = await AppPreferences.getUserRole() == 'seller';
     if (!isSeller && DeepLinkRouter.open(data['link']?.toString())) return;
     if (isSeller) {
-      await _openForSeller(notification.rawType, data);
+      await _openForSeller(notification.rawType, data, notification);
     } else {
       _openForBuyer(notification.rawType, data);
     }
@@ -134,7 +136,11 @@ class NotificationsController extends GetxController {
     }
   }
 
-  Future<void> _openForSeller(String? type, Map<String, dynamic> data) async {
+  Future<void> _openForSeller(
+    String? type,
+    Map<String, dynamic> data, [
+    NotificationModel? notification,
+  ]) async {
     switch (type) {
       case 'order_placed':
       case 'order_cancelled':
@@ -162,7 +168,35 @@ class NotificationsController extends GetxController {
       case 'listing_fix_requested':
       case 'listing_published':
       case 'listing_in_review':
+      case 'listing_approved':
+      // No "Needs changes" filter or single-product route exists yet
+      // (checklist #11), so these open Products.
+      case 'listing_rejected':
         Get.toNamed(Routes.sellerProducts);
+        break;
+      case 'platform_campaign_live':
+        // link = /store/:id/marketing?tab=platform; the app has no seller
+        // Platform Sales screen yet, so Products (where offers are set).
+        Get.toNamed(Routes.sellerProducts);
+        break;
+      case 'store_deleted':
+        await Get.dialog(AlertDialog(
+          title: Text(notification?.title.isNotEmpty == true
+              ? notification!.title
+              : 'Your store was removed'),
+          content: notification?.body.isNotEmpty == true
+              ? Text(notification!.body)
+              : null,
+          actions: [
+            FilledButton(
+              style: FilledButton.styleFrom(minimumSize: const Size(64, 48)),
+              onPressed: () => Get.back(),
+              child: const Text('OK'),
+            ),
+          ],
+        ));
+        await AppPreferences.clearStoreId();
+        Get.offAllNamed(Routes.sellerStores);
         break;
       case 'payout_update':
       case 'payout_approved':
@@ -180,6 +214,10 @@ class NotificationsController extends GetxController {
         Get.toNamed(Routes.supportChat);
         break;
       default:
+        // Unknown type: follow data.link when it maps to a seller screen;
+        // otherwise stay on the inbox.
+        final route = SellerLinkRouter.routeFor(data['link']?.toString());
+        if (route != null) Get.toNamed(route);
         break;
     }
   }
