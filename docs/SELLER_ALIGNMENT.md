@@ -24,7 +24,7 @@ by calling the API. Tick items off in commits that name the item number.
    buyer checkout (403) → show "Switch to your buyer account".
 
 ## P1 — money and orders
-6. **Finance (new model, §2.1, §6.10)**: platform-fee wording (not
+6. [x] **Finance (new model, §2.1, §6.10)**: platform-fee wording (not
    commission), Available / Clearing / Open-order estimate / Commission owed
    tiles, monthly statement + `earnings-statement/download?format=csv|pdf`,
    `fee-estimate?price&type`, payout method stores full number encrypted

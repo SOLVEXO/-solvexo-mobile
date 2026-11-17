@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/data/models/finance/earnings_models.dart';
 import 'package:book_store_app/app/data/models/finance/finance_dashboard_model.dart';
 import 'package:book_store_app/app/data/models/finance/finance_transaction_model.dart';
 import 'package:book_store_app/app/data/models/finance/payout_method_model.dart';
@@ -16,7 +17,71 @@ import 'package:flutter/material.dart';
 /// method here parses `response.data` as the payload itself (errors still
 /// throw a `DioException` and are handled the usual way).
 class SellerFinanceRepository {
-  final BaseClient _client = BaseClient();
+  SellerFinanceRepository({BaseClient? client}) : _client = client ?? BaseClient();
+
+  final BaseClient _client;
+
+  /// Hero tiles. Throws on failure so the screen can show error + Retry.
+  Future<EarningsSummary> getEarningsSummary(String storeId) async {
+    final res = await _client.get(ApiConstants.financeEarningsSummary(storeId), requiresAuth: true);
+    return EarningsSummary.fromJson(Map<String, dynamic>.from(res.data as Map));
+  }
+
+  /// Monthly statement, `month` = 'YYYY-MM'. Throws on failure.
+  Future<EarningsStatement> getEarningsStatement(String storeId, String month) async {
+    final res = await _client.get(
+      ApiConstants.financeEarningsStatement(storeId),
+      queryParameters: {'month': month},
+      requiresAuth: true,
+    );
+    return EarningsStatement.fromJson(Map<String, dynamic>.from(res.data as Map));
+  }
+
+  /// CSV or PDF bytes + the server's file name
+  /// (`attachment; filename="earnings-2026-11-PKR.csv"`).
+  Future<({List<int> bytes, String fileName})> downloadEarningsStatement(
+    String storeId, {
+    required String month,
+    required String format,
+  }) async {
+    final res = await _client.get(
+      ApiConstants.financeEarningsStatementDownload(storeId),
+      queryParameters: {'format': format, 'month': month},
+      requiresAuth: true,
+      responseType: ResponseType.bytes,
+    );
+    final disposition = res.headers.value('content-disposition') ?? '';
+    final match = RegExp(r'filename="?([^";]+)"?').firstMatch(disposition);
+    return (
+      bytes: (res.data as List).cast<int>(),
+      fileName: match?.group(1) ?? 'earnings-$month.$format',
+    );
+  }
+
+  /// Server-side fee for a price (never computed on the device). Throws.
+  Future<FeeEstimate> getFeeEstimate(String storeId, {required num price, required String type}) async {
+    final res = await _client.get(
+      ApiConstants.financeFeeEstimate(storeId),
+      queryParameters: {'price': price, 'type': type},
+      requiresAuth: true,
+    );
+    return FeeEstimate.fromJson(Map<String, dynamic>.from(res.data as Map));
+  }
+
+  /// Payout history: GET payouts -> {payouts, total, page, limit, pages}.
+  Future<List<PayoutModel>> getPayouts(String storeId, {int page = 1}) async {
+    final res = await _client.get(
+      ApiConstants.financePayouts(storeId),
+      queryParameters: {'page': page},
+      requiresAuth: true,
+    );
+    final body = res.data;
+    final list = body is Map ? body['payouts'] : body;
+    return (list is List ? list : const [])
+        .whereType<Map>()
+        .map((m) => PayoutModel.fromJson(Map<String, dynamic>.from(m)))
+        .toList();
+  }
 
   Future<FinanceDashboardModel> getDashboard(String storeId) async {
     try {

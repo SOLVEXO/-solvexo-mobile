@@ -481,6 +481,15 @@ class ApiConstants {
   // payload (see SellerFinanceRepository for how responses are parsed).
   static String financeDashboard(String storeId) =>
       '$apiPrefix/finance/$storeId/dashboard';
+  // Hero tiles: available / clearing (+ release) / expected / commissionOwed.
+  static String financeEarningsSummary(String storeId) =>
+      '$apiPrefix/finance/$storeId/earnings-summary';
+  static String financeEarningsStatement(String storeId) =>
+      '$apiPrefix/finance/$storeId/earnings-statement';
+  static String financeEarningsStatementDownload(String storeId) =>
+      '$apiPrefix/finance/$storeId/earnings-statement/download';
+  static String financeFeeEstimate(String storeId) =>
+      '$apiPrefix/finance/$storeId/fee-estimate';
   static String financeTransactions(String storeId) =>
       '$apiPrefix/finance/$storeId/transactions';
   static String financeTransactionsExport(String storeId) =>

@@ -115,7 +115,7 @@ class FinanceFeeBreakdown {
 
   factory FinanceFeeBreakdown.fromJson(Map<String, dynamic> json) => FinanceFeeBreakdown(
         marketplaceListingFee: json['marketplaceListingFee'] as String? ?? '—',
-        transactionFee: json['transactionFee'] as String? ?? '—',
+        transactionFee: json['platformFee'] as String? ?? json['transactionFee'] as String? ?? '—',
         paymentProcessing: json['paymentProcessing'] as String? ?? '—',
         digitalDelivery: json['digitalDelivery'] as String? ?? '—',
         aiCredits: json['aiCredits'] as String? ?? '—',
@@ -123,7 +123,7 @@ class FinanceFeeBreakdown {
 
   List<MapEntry<String, String>> get asEntries => [
         MapEntry('Marketplace Listing', marketplaceListingFee),
-        MapEntry('Transaction Fee', transactionFee),
+        MapEntry('Platform fee', transactionFee),
         MapEntry('Payment Processing', paymentProcessing),
         MapEntry('Digital Delivery', digitalDelivery),
         MapEntry('AI Credits', aiCredits),
@@ -196,8 +196,11 @@ class FinanceDashboardModel {
     final wallets = (json['wallets'] as List?)?.cast<Map<String, dynamic>>().map(FinanceWallet.fromJson).toList() ?? const <FinanceWallet>[];
     return FinanceDashboardModel(
       wallets: wallets.isNotEmpty ? wallets : const [FinanceWallet.empty],
-      feeBreakdown: json['feeBreakdown'] != null
-          ? FinanceFeeBreakdown.fromJson(json['feeBreakdown'] as Map<String, dynamic>)
+      // `platformFeeBreakdown` is the platform-fee wording (docs 2.1);
+      // `feeBreakdown` is the older alias.
+      feeBreakdown: (json['platformFeeBreakdown'] ?? json['feeBreakdown']) != null
+          ? FinanceFeeBreakdown.fromJson(
+              (json['platformFeeBreakdown'] ?? json['feeBreakdown']) as Map<String, dynamic>)
           : FinanceFeeBreakdown.empty,
     );
   }

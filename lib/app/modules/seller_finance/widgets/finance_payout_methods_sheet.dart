@@ -292,6 +292,32 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
   late final TextEditingController _routingNumberCtrl;
   late final TextEditingController _externalAccountCtrl;
   bool _setAsDefault = false;
+  String? _error;
+
+  /// Mirrors the API's own checks so the seller sees them before sending.
+  String? _validate() {
+    switch (_type) {
+      case 'bank_transfer':
+        if (_isEdit && _accountNumberCtrl.text.trim().isEmpty) return null;
+        if (_bankNameCtrl.text.trim().isEmpty) return 'Bank name is required.';
+        if (_accountHolderCtrl.text.trim().isEmpty) return 'Account holder name is required.';
+        if (_accountNumberCtrl.text.trim().length < 4) return 'Enter the full account number.';
+        return null;
+      case 'jazzcash':
+      case 'easypaisa':
+        final n = _externalAccountCtrl.text.replaceAll(RegExp(r'[\s-]'), '');
+        if (!RegExp(r'^03\d{9}$').hasMatch(n)) return 'Enter the 11-digit mobile number (03XXXXXXXXX).';
+        return null;
+      case 'paypal':
+        if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(_externalAccountCtrl.text.trim())) {
+          return 'Enter your PayPal email.';
+        }
+        return null;
+      default:
+        if (_externalAccountCtrl.text.trim().isEmpty) return 'This field is required.';
+        return null;
+    }
+  }
 
   bool get _isEdit => widget.existing != null;
   bool get _isMobileWallet => _type == 'jazzcash' || _type == 'easypaisa';
@@ -333,10 +359,21 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
   }
 
   Future<void> _submit() async {
-    // Bank details apply to bank_transfer only; jazzcash/easypaisa/paypal/stripe
-    // all store their single identifying value in externalAccountId (a mobile
-    // number for wallets, an email/account-id for PayPal/Stripe).
+    // Live API (2026-11-17): bank needs bankName/accountHolder/accountNumber
+    // (>= 4 chars); JazzCash/EasyPaisa read the mobile number from
+    // `accountNumber` ("Mobile account number is required" when it is sent as
+    // externalAccountId). The full number is sent; the API stores it
+    // encrypted and only ever returns accountLast4. PayPal/Stripe keep
+    // externalAccountId.
     final isBank = _type == 'bank_transfer';
+    final err = _validate();
+    if (err != null) {
+      setState(() => _error = err);
+      return;
+    }
+    final walletNumber = _isMobileWallet
+        ? _externalAccountCtrl.text.replaceAll(RegExp(r'[\s-]'), '')
+        : null;
     bool ok;
     if (_isEdit) {
       ok = await widget.controller.updatePayoutMethod(
@@ -344,9 +381,9 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
         currency: _currency,
         bankName: isBank ? _bankNameCtrl.text.trim() : null,
         accountHolder: isBank ? _accountHolderCtrl.text.trim() : null,
-        accountNumber: isBank ? _accountNumberCtrl.text.trim() : null,
+        accountNumber: isBank ? _accountNumberCtrl.text.trim() : walletNumber,
         routingNumber: isBank ? _routingNumberCtrl.text.trim() : null,
-        externalAccountId: !isBank ? _externalAccountCtrl.text.trim() : null,
+        externalAccountId: !isBank && !_isMobileWallet ? _externalAccountCtrl.text.trim() : null,
       );
     } else {
       ok = await widget.controller.addPayoutMethod(
@@ -354,9 +391,9 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
         currency: _currency,
         bankName: isBank ? _bankNameCtrl.text.trim() : null,
         accountHolder: isBank ? _accountHolderCtrl.text.trim() : null,
-        accountNumber: isBank ? _accountNumberCtrl.text.trim() : null,
+        accountNumber: isBank ? _accountNumberCtrl.text.trim() : walletNumber,
         routingNumber: isBank ? _routingNumberCtrl.text.trim() : null,
-        externalAccountId: !isBank ? _externalAccountCtrl.text.trim() : null,
+        externalAccountId: !isBank && !_isMobileWallet ? _externalAccountCtrl.text.trim() : null,
         setAsDefault: _setAsDefault,
       );
     }
@@ -443,6 +480,10 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
                       controller: _externalAccountCtrl,
                       isborder: true,
                     ),
+                  if (_error != null) ...[
+                    const SizedBox(height: BaseSpacing.xs),
+                    Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                  ],
                   if (!_isEdit) ...[
                     const SizedBox(height: BaseSpacing.sm),
                     Row(

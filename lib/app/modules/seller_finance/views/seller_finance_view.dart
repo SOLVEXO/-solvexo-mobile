@@ -2,6 +2,7 @@ import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/modules/seller_finance/controllers/seller_finance_controller.dart';
 import 'package:book_store_app/app/modules/seller_finance/widgets/finance_balance_card.dart';
+import 'package:book_store_app/app/modules/seller_finance/widgets/finance_earnings_sections.dart';
 import 'package:book_store_app/app/modules/seller_finance/widgets/finance_payout_schedule.dart';
 import 'package:book_store_app/app/modules/seller_finance/widgets/finance_shimmer.dart';
 import 'package:book_store_app/app/modules/seller_finance/widgets/finance_stats_row.dart';
@@ -32,15 +33,24 @@ class SellerFinanceView extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.only(top: 16, bottom: 30),
                   children: [
+                    // Hero tiles (docs 6.10): Available / Clearing /
+                    // Open-order estimate / Commission owed.
+                    FinanceEarningsTiles(controller: controller),
+                    const SizedBox(height: 12),
+                    // Payout wallet per currency + Request payout.
                     FinanceBalanceCard(controller: controller),
                     const SizedBox(height: 12),
                     FinanceStatsRow(controller: controller),
                     const SizedBox(height: 12),
+                    FinanceStatementCard(controller: controller),
+                    const SizedBox(height: 12),
+                    FinanceFeeEstimateCard(controller: controller),
+                    const SizedBox(height: 12),
                     FinanceTransactionList(controller: controller),
                     const SizedBox(height: 12),
-                    FinancePayoutSchedule(controller: controller),
+                    FinancePayoutHistory(controller: controller),
                     const SizedBox(height: 12),
-                    FinanceFeeBreakdown(controller: controller),
+                    FinancePayoutSchedule(controller: controller),
                     const SizedBox(height: 12),
                     FinanceTaxReports(controller: controller),
                   ],

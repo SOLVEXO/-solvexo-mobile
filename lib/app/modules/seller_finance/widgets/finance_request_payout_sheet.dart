@@ -6,6 +6,7 @@ import 'package:book_store_app/app/modules/seller_finance/widgets/finance_payout
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/money.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -57,8 +58,11 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
 
   Future<void> _submit() async {
     final amount = double.tryParse(_amountCtrl.text.trim());
+    // API: "amount must not be less than 1" (in the wallet's currency).
     if (amount == null || amount < 1) {
-      Get.snackbar('Invalid amount', 'Enter an amount of at least \$1.00', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Invalid amount',
+          'Enter an amount of at least ${Money.format(1, widget.controller.selectedCurrency.value)}',
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
     if (_selectedMethodId == null) {

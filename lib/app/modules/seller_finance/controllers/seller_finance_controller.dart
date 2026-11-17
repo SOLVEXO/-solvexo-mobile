@@ -1,4 +1,6 @@
+import 'package:book_store_app/app/data/models/finance/earnings_models.dart';
 import 'package:book_store_app/app/data/models/finance/finance_dashboard_model.dart';
+import 'package:book_store_app/app/data/models/finance/payout_model.dart';
 import 'package:book_store_app/app/data/models/finance/finance_transaction_model.dart';
 import 'package:book_store_app/app/data/models/finance/payout_method_model.dart';
 import 'package:book_store_app/app/data/models/finance/payout_schedule_model.dart';
@@ -14,7 +16,145 @@ import 'package:share_plus/share_plus.dart';
 export 'package:book_store_app/app/data/models/finance/finance_transaction_model.dart' show FinanceTransactionType, FinanceTransactionTypeX;
 
 class SellerFinanceController extends GetxController {
-  final SellerFinanceRepository _repo = SellerFinanceRepository();
+  SellerFinanceController({SellerFinanceRepository? repository})
+      : _repo = repository ?? SellerFinanceRepository();
+
+  final SellerFinanceRepository _repo;
+
+  // ── Hero tiles: GET earnings-summary (checklist #6) ──────────────────────
+  final Rxn<EarningsSummary> summary = Rxn<EarningsSummary>();
+  final RxBool summaryLoading = false.obs;
+  final RxBool summaryFailed = false.obs;
+
+  Future<void> loadSummary() async {
+    summaryLoading.value = true;
+    summaryFailed.value = false;
+    try {
+      summary.value = await _repo.getEarningsSummary(storeId);
+    } catch (_) {
+      summaryFailed.value = true;
+    } finally {
+      summaryLoading.value = false;
+    }
+  }
+
+  // ── Monthly statement: GET earnings-statement?month= ─────────────────────
+  final Rx<DateTime> statementMonth =
+      DateTime(DateTime.now().year, DateTime.now().month).obs;
+  final Rxn<EarningsStatement> statement = Rxn<EarningsStatement>();
+  final RxBool statementLoading = false.obs;
+  final RxBool statementFailed = false.obs;
+  final RxnString downloading = RxnString(); // 'csv' | 'pdf'
+
+  String get statementMonthKey => DateFormat('yyyy-MM').format(statementMonth.value);
+  String get statementMonthLabel => DateFormat('MMMM yyyy').format(statementMonth.value);
+  bool get canGoNextMonth {
+    final now = DateTime.now();
+    return statementMonth.value.isBefore(DateTime(now.year, now.month));
+  }
+
+  void previousMonth() {
+    final m = statementMonth.value;
+    statementMonth.value = DateTime(m.year, m.month - 1);
+    loadStatement();
+  }
+
+  void nextMonth() {
+    if (!canGoNextMonth) return;
+    final m = statementMonth.value;
+    statementMonth.value = DateTime(m.year, m.month + 1);
+    loadStatement();
+  }
+
+  Future<void> loadStatement() async {
+    statementLoading.value = true;
+    statementFailed.value = false;
+    try {
+      statement.value = await _repo.getEarningsStatement(storeId, statementMonthKey);
+    } catch (_) {
+      statementFailed.value = true;
+    } finally {
+      statementLoading.value = false;
+    }
+  }
+
+  /// format: 'csv' | 'pdf' — the server builds the file; it is shared from
+  /// the device (Files / email / WhatsApp).
+  Future<void> downloadStatement(String format) async {
+    if (downloading.value != null) return;
+    downloading.value = format;
+    try {
+      final file = await _repo.downloadEarningsStatement(
+        storeId,
+        month: statementMonthKey,
+        format: format,
+      );
+      await SharePlus.instance.share(ShareParams(
+        files: [
+          XFile.fromData(
+            Uint8List.fromList(file.bytes),
+            name: file.fileName,
+            mimeType: format == 'pdf' ? 'application/pdf' : 'text/csv',
+          ),
+        ],
+        subject: 'Earnings statement $statementMonthLabel',
+      ));
+    } catch (_) {
+      ToastUtil.showToast('Could not download the statement. Please try again.');
+    } finally {
+      downloading.value = null;
+    }
+  }
+
+  // ── Fee estimate: GET fee-estimate?price&type ─────────────────────────────
+  final RxString feeType = 'digital'.obs; // digital | physical
+  final Rxn<FeeEstimate> feeEstimate = Rxn<FeeEstimate>();
+  final RxBool feeLoading = false.obs;
+  final RxnString feeError = RxnString();
+
+  /// Validation only; the fee itself always comes from the server.
+  static String? validateFeePrice(String raw) {
+    final v = double.tryParse(raw.trim());
+    if (raw.trim().isEmpty || v == null) return 'Enter a price.';
+    if (v <= 0) return 'Price must be more than 0.';
+    if (v > 10000000) return 'Price is too large.';
+    return null;
+  }
+
+  Future<void> estimateFee(String rawPrice) async {
+    final err = validateFeePrice(rawPrice);
+    feeError.value = err;
+    if (err != null) return;
+    feeLoading.value = true;
+    try {
+      feeEstimate.value = await _repo.getFeeEstimate(
+        storeId,
+        price: double.parse(rawPrice.trim()),
+        type: feeType.value,
+      );
+    } catch (_) {
+      feeError.value = 'Could not get the fee. Please try again.';
+    } finally {
+      feeLoading.value = false;
+    }
+  }
+
+  // ── Payout history: GET payouts ──────────────────────────────────────────
+  final RxList<PayoutModel> payouts = <PayoutModel>[].obs;
+  final RxBool payoutsLoading = false.obs;
+  final RxBool payoutsFailed = false.obs;
+
+  Future<void> loadPayouts() async {
+    payoutsLoading.value = true;
+    payoutsFailed.value = false;
+    try {
+      payouts.assignAll(await _repo.getPayouts(storeId));
+    } catch (_) {
+      payoutsFailed.value = true;
+    } finally {
+      payoutsLoading.value = false;
+    }
+  }
 
   String storeId = '';
   final RxBool isLoading = false.obs;
@@ -123,6 +263,9 @@ class SellerFinanceController extends GetxController {
     isLoading.value = true;
     await Future.wait([
       _loadDashboard(),
+      loadSummary(),
+      loadStatement(),
+      loadPayouts(),
       loadTransactions(reset: true),
       loadPayoutMethods(),
       loadPayoutSchedule(),
@@ -215,7 +358,12 @@ class SellerFinanceController extends GetxController {
       final method = payoutMethods.where((m) => m.id == payoutMethodId).firstOrNull;
       final wallet = dashboard.value.walletFor(method?.currency ?? selectedCurrency.value);
       ToastUtil.showToast('Payout of ${wallet.amountLabel(amount)} requested.');
-      await Future.wait([_loadDashboard(), loadTransactions(reset: true)]);
+      await Future.wait([
+        _loadDashboard(),
+        loadSummary(),
+        loadPayouts(),
+        loadTransactions(reset: true),
+      ]);
       return true;
     } finally {
       isRequestingPayout.value = false;
