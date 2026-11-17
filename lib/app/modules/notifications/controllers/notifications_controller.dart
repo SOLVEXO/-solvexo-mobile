@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:book_store_app/app/data/models/common_models/notification_model.dart';
 import 'package:book_store_app/app/data/repositories/notifications_repository.dart';
+import 'package:book_store_app/app/data/repositories/seller_orders_repository.dart';
+import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orders_controller.dart'
+    show SellerOrder;
 import 'package:book_store_app/app/modules/notifications/controllers/notifications_badge_controller.dart';
 import 'package:book_store_app/app/network/notifications_socket_service.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -12,6 +15,7 @@ import 'package:get/get.dart';
 
 class NotificationsController extends GetxController {
   final NotificationsRepository _repository = NotificationsRepository();
+  final SellerOrdersRepository _sellerOrdersRepository = SellerOrdersRepository();
   final NotificationsSocketService _socket = NotificationsSocketService.instance;
   StreamSubscription? _newSub;
   StreamSubscription? _countSub;
@@ -78,14 +82,23 @@ class NotificationsController extends GetxController {
   }
 
   /// Marks the tapped notification read and routes to it. The server's
-  /// `data.link` (a web path such as `/account/orders/<id>`) wins; otherwise
-  /// the buyer-side notification type decides. Unknown types stay on the inbox.
+  /// `data.link` wins when it is a page this app has; otherwise the type
+  /// decides, per role (sellers and buyers get different screens for the
+  /// same type, e.g. `order_placed`). Unknown types stay on the inbox.
   Future<void> openNotification(NotificationModel notification) async {
     markRead(notification.id);
     final data = notification.data ?? const <String, dynamic>{};
-    if (DeepLinkRouter.open(data['link']?.toString())) return;
+    final isSeller = await AppPreferences.getUserRole() == 'seller';
+    if (!isSeller && DeepLinkRouter.open(data['link']?.toString())) return;
+    if (isSeller) {
+      await _openForSeller(notification.rawType, data);
+    } else {
+      _openForBuyer(notification.rawType, data);
+    }
+  }
 
-    switch (notification.rawType) {
+  void _openForBuyer(String? type, Map<String, dynamic> data) {
+    switch (type) {
       case 'order_placed':
       case 'order_cancelled':
       case 'order_shipped':
@@ -98,12 +111,70 @@ class NotificationsController extends GetxController {
             arguments: (orderId == null || orderId.isEmpty) ? null : {'orderId': orderId});
         break;
       case 'new_message':
-        final conversationId = data['conversationId']?.toString();
-        if (conversationId != null && conversationId.isNotEmpty) {
-          Get.toNamed(Routes.chatView, arguments: {'conversationId': conversationId});
-        } else {
-          Get.toNamed(Routes.messagesView);
+        _openConversation(data);
+        break;
+      case 'support_reply':
+        Get.toNamed(Routes.supportChat);
+        break;
+      case 'loyalty_points_earned':
+      case 'loyalty_tier_upgrade':
+        final storeId = data['storeId']?.toString();
+        if (storeId != null && storeId.isNotEmpty) {
+          Get.toNamed(Routes.loyaltyRewards,
+              arguments: {'storeId': storeId, 'storeName': 'Store'});
         }
+        break;
+      case 'subscription_renewal_reminder':
+      case 'subscription_payment_failed':
+      case 'subscription_cancelled':
+        Get.toNamed(Routes.myMemberships);
+        break;
+      default:
+        break;
+    }
+  }
+
+  Future<void> _openForSeller(String? type, Map<String, dynamic> data) async {
+    switch (type) {
+      case 'order_placed':
+      case 'order_cancelled':
+        final orderId = data['orderId']?.toString();
+        if (orderId != null && orderId.isNotEmpty) {
+          await _openSellerOrder(orderId);
+        } else {
+          Get.toNamed(Routes.sellerOrders);
+        }
+        break;
+      case 'return_requested':
+      case 'refund_requested':
+        Get.toNamed(Routes.sellerReturns);
+        break;
+      case 'new_message':
+        _openConversation(data);
+        break;
+      case 'new_follower':
+      case 'store_approved':
+      case 'store_rejected':
+        Get.toNamed(Routes.sellerStoreProfile);
+        break;
+      case 'low_stock':
+      case 'out_of_stock':
+      case 'listing_fix_requested':
+      case 'listing_published':
+      case 'listing_in_review':
+        Get.toNamed(Routes.sellerProducts);
+        break;
+      case 'payout_update':
+      case 'payout_approved':
+      case 'payout_rejected':
+        Get.toNamed(Routes.sellerFinance);
+        break;
+      case 'platform_plan_renewal_reminder':
+      case 'platform_plan_payment_failed':
+      case 'trial_ending':
+      case 'trial_ended':
+      case 'plan_ended':
+        Get.toNamed(Routes.sellerPlatformPlan);
         break;
       case 'support_reply':
         Get.toNamed(Routes.supportChat);
@@ -111,6 +182,37 @@ class NotificationsController extends GetxController {
       default:
         break;
     }
+  }
+
+  void _openConversation(Map<String, dynamic> data) {
+    final conversationId = data['conversationId']?.toString();
+    if (conversationId != null && conversationId.isNotEmpty) {
+      Get.toNamed(Routes.chatView, arguments: {'conversationId': conversationId});
+    } else {
+      Get.toNamed(Routes.messagesView);
+    }
+  }
+
+  /// Finds the order among the seller's recent orders so the tap lands on
+  /// its detail screen (which needs the full [SellerOrder]); falls back to
+  /// the orders list.
+  Future<void> _openSellerOrder(String orderId) async {
+    final storeId = await AppPreferences.getStoreId();
+    if (storeId != null && storeId.isNotEmpty) {
+      final result = await _sellerOrdersRepository.fetchSellerOrders(
+        storeId: storeId,
+        page: 1,
+        limit: 50,
+      );
+      for (final json in result.orders) {
+        final order = SellerOrder.fromApiJson(json);
+        if (order.id == orderId) {
+          Get.toNamed(Routes.sellerOrderDetail, arguments: order);
+          return;
+        }
+      }
+    }
+    Get.toNamed(Routes.sellerOrders);
   }
 
   Future<void> markAllRead() async {

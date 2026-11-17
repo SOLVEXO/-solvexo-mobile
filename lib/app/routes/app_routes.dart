@@ -75,4 +75,47 @@ abstract class Routes {
   // Buyer — library (files + courses) and support chat
   static const library = '/account/library';
   static const supportChat = '/support/chat';
+
+  // ── Seller app (restored) ─────────────────────────────────────────────
+  static const welcome = '/welcome';
+  static const sellerOnboarding = '/seller/onboarding';
+  static const sellerStores = '/seller/stores';
+  static const sellerHome = '/seller/home';
+  static const sellerMessages = '/seller/messages';
+  static const sellerOrders = '/seller/orders';
+  static const sellerOrderDetail = '/seller/orders/detail';
+  static const sellerReturns = '/seller/returns';
+  static const sellerStoreProfile = '/seller/settings/store-profile';
+  static const sellerShipping = '/seller/settings/shipping';
+  static const sellerNotifications = '/seller/settings/notifications';
+  static const sellerPasswordSecurity = '/seller/settings/password-security';
+  static const sellerTwoFactor = '/seller/settings/two-factor';
+  static const sellerLanguage = '/seller/settings/language';
+  static const sellerProducts = '/seller/products';
+  static const addSellerProduct = '/seller/products/add';
+  static const editSellerProduct = '/seller/products/edit';
+  static const sellerAnalytics = '/seller/analytics';
+  static const sellerFinance = '/seller/finance';
+  static const sellerEditProfile = '/seller/edit-profile';
+  static const sellerAiStudio = '/seller/ai-studio';
+  static const sellerSettings = '/seller/settings';
+  static const sellerCoupons = '/seller/coupons';
+  static const sellerLoyalty = '/seller/loyalty';
+  static const sellerSubscriptionPlans = '/seller/subscription-plans';
+  static const sellerPlatformPlan = '/seller/platform-plan';
+  static const sellerSeo = '/seller/seo';
+  static const sellerSeoProducts = '/seller/seo/products';
+  static const sellerActivityLog = '/seller/activity-log';
+  static const sellerStoreBanners = '/seller/store-banners';
+  static const sellerPromotions = '/seller/promotions';
+  static const aiStudioHistory = '/seller/ai-studio/history';
+  static const aiStudioGenerationDetail = '/seller/ai-studio/generation-detail';
+  static const aiStudioListingWriter = '/seller/ai-studio/listing-writer';
+  static const aiStudioSeoBooster = '/seller/ai-studio/seo-booster';
+  static const aiStudioEmailCampaigns = '/seller/ai-studio/email-campaigns';
+  static const aiStudioWorksheetBuilder = '/seller/ai-studio/worksheet-builder';
+  static const aiStudioPriceOptimizer = '/seller/ai-studio/price-optimizer';
+  static const aiStudioImageEnhancer = '/seller/ai-studio/image-enhancer';
+  static const loyaltyRewards = '/loyalty-rewards';
+  static const myMemberships = '/my-memberships';
 }
