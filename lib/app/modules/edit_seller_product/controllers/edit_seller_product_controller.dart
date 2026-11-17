@@ -8,6 +8,7 @@ import 'package:book_store_app/app/data/repositories/seller_product_repository.d
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart'
     show DigitalFileEntry, ProductPublishMode;
+import 'package:book_store_app/app/modules/seller/utils/publish_rules.dart';
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -113,6 +114,42 @@ class EditSellerProductController extends GetxController {
   // Watermarked/trimmed pre-purchase preview, derived server-side from the
   // first uploaded file (see solvexo-api ProductsService.prepareDigitalPreview).
   final RxBool previewEnabled = false.obs;
+  // Publish fields (checklist #1), read from GET get-my-product/:id.
+  final Rxn<String> coverStyle = Rxn<String>();
+  final Rxn<String> classFrom = Rxn<String>();
+  final Rxn<String> classTo = Rxn<String>();
+  final RxnString publishFieldsError = RxnString();
+  final RxBool isLoadingDetails = false.obs;
+  final RxBool detailsLoadFailed = false.obs;
+
+  void setCoverStyle(String v) {
+    coverStyle.value = v;
+    publishFieldsError.value = null;
+  }
+
+  void setClassFrom(String? v) {
+    classFrom.value = v;
+    if (v != null &&
+        classTo.value != null &&
+        PublishRules.classIndex(classTo.value) < PublishRules.classIndex(v)) {
+      classTo.value = null;
+    }
+    publishFieldsError.value = null;
+  }
+
+  void setClassTo(String? v) {
+    classTo.value = v;
+    publishFieldsError.value = null;
+  }
+
+  String? validatePublishFields() => PublishRules.validate(
+        status: publishMode.value.apiStatus,
+        isDigital: !isPhysical,
+        coverStyle: coverStyle.value,
+        classFrom: classFrom.value,
+        classTo: classTo.value,
+      );
+
   // Educational-only
   late final TextEditingController customLevelCtrl;
   final Rxn<String> educationLevel = Rxn<String>();
@@ -205,11 +242,28 @@ class EditSellerProductController extends GetxController {
 
   // ── Variant management (physical products) ─────────────────────────────────
 
-  Future<void> _loadVariants() async {
-    isLoadingVariants.value = true;
+  /// Full product (all types): publish fields, and variants for physical.
+  Future<void> loadDetails() async {
+    isLoadingDetails.value = true;
+    detailsLoadFailed.value = false;
+    if (isPhysical) isLoadingVariants.value = true;
     final result = await _repo.getMyProduct(product.id);
+    isLoadingDetails.value = false;
     isLoadingVariants.value = false;
 
+    final p = result.product;
+    if (p == null) {
+      detailsLoadFailed.value = true;
+      if (isPhysical && variants.isEmpty) {
+        variants.add(VariantEntry()..isDefault.value = true);
+      }
+      return;
+    }
+    coverStyle.value = PublishRules.knownCoverStyle(p['coverStyle'] as String?);
+    classFrom.value = PublishRules.knownClass(p['classFrom'] as String?);
+    classTo.value = PublishRules.knownClass(p['classTo'] as String?);
+
+    if (!isPhysical || variants.isNotEmpty) return;
     for (final v in result.variants) {
       final entry = VariantEntry(price: (v['price'] as num?)?.toString() ?? '');
       entry.compareAtPriceCtrl.text = v['compareAtPrice']?.toString() ?? '';
@@ -341,6 +395,12 @@ class EditSellerProductController extends GetxController {
 
   Future<void> saveChanges() async {
     if (!canSave || isSaving.value) return;
+    final fieldsError = validatePublishFields();
+    publishFieldsError.value = fieldsError;
+    if (fieldsError != null) {
+      ToastUtil.showToast(fieldsError);
+      return;
+    }
     isSaving.value = true;
 
     if (!isPhysical) {
@@ -428,6 +488,9 @@ class EditSellerProductController extends GetxController {
       description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
       tags: tagList,
       images: productImages.toList(),
+      coverStyle: coverStyle.value,
+      classFrom: classFrom.value,
+      classTo: classTo.value,
     );
     if (!productOk) return false;
 
@@ -501,6 +564,9 @@ class EditSellerProductController extends GetxController {
       images: productImages.toList(),
       educationLevel: isEducational ? educationLevel.value : null,
       customLevel: needsCustomLevel ? customLevel.value.trim() : null,
+      coverStyle: coverStyle.value,
+      classFrom: classFrom.value,
+      classTo: classTo.value,
     );
   }
 
@@ -577,7 +643,7 @@ class EditSellerProductController extends GetxController {
       digitalFiles.add(entry);
     }
 
-    if (isPhysical) unawaited(_loadVariants());
+    unawaited(loadDetails());
   }
 
   @override

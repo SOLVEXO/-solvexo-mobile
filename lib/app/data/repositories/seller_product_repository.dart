@@ -7,7 +7,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class SellerProductRepository {
-  final BaseClient _client = BaseClient();
+  SellerProductRepository({BaseClient? client}) : _client = client ?? BaseClient();
+
+  final BaseClient _client;
 
   // ─── GET /api/inventory/low-stock-summary/:storeId ─────────────────────────
   // Store-wide low-stock alert for the seller dashboard — not paginated,
@@ -121,12 +123,18 @@ class SellerProductRepository {
     // Only meaningful when the product's type is 'educational'.
     String? educationLevel,
     String? customLevel,
+    String? coverStyle,
+    String? classFrom,
+    String? classTo,
   }) async {
     try {
       final body = <String, dynamic>{
         'productId': productId,
         'variantId': variantId,
         'name': name,
+        if (coverStyle != null) 'coverStyle': coverStyle,
+        if (classFrom != null) 'classFrom': classFrom,
+        if (classTo != null) 'classTo': classTo,
         'price': price,
         'status': status,
         if (scheduledAt != null) 'scheduledAt': scheduledAt,
@@ -280,11 +288,17 @@ class SellerProductRepository {
     String productType = 'digital',
     String? educationLevel,
     String? customLevel,
+    String? coverStyle,
+    String? classFrom,
+    String? classTo,
   }) async {
     try {
       final body = <String, dynamic>{
         'storeId': storeId,
         'name': name,
+        if (coverStyle != null) 'coverStyle': coverStyle,
+        if (classFrom != null) 'classFrom': classFrom,
+        if (classTo != null) 'classTo': classTo,
         'price': price,
         'status': status,
         if (scheduledAt != null) 'scheduledAt': scheduledAt,
@@ -355,11 +369,17 @@ class SellerProductRepository {
     List<String> images = const [],
     bool isListedOnSolvexo = false,
     String? subCategoryId,
+    String? coverStyle,
+    String? classFrom,
+    String? classTo,
   }) async {
     try {
       final body = <String, dynamic>{
         'storeId': storeId,
         'name': name,
+        if (coverStyle != null) 'coverStyle': coverStyle,
+        if (classFrom != null) 'classFrom': classFrom,
+        if (classTo != null) 'classTo': classTo,
         'status': status,
         'variants': variants,
         if (scheduledAt != null) 'scheduledAt': scheduledAt,
@@ -413,11 +433,17 @@ class SellerProductRepository {
     List<String> tags = const [],
     List<String> images = const [],
     String? subCategoryId,
+    String? coverStyle,
+    String? classFrom,
+    String? classTo,
   }) async {
     try {
       final body = <String, dynamic>{
         'productId': productId,
         'name': name,
+        if (coverStyle != null) 'coverStyle': coverStyle,
+        if (classFrom != null) 'classFrom': classFrom,
+        if (classTo != null) 'classTo': classTo,
         'status': status,
         if (scheduledAt != null) 'scheduledAt': scheduledAt,
         if (description != null && description.isNotEmpty)

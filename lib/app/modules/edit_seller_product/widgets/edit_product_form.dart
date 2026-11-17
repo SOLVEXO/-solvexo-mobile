@@ -7,6 +7,7 @@ import 'package:book_store_app/app/modules/add_seller_product/widgets/variant_ca
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/edit_seller_product/controllers/edit_seller_product_controller.dart';
 import 'package:book_store_app/app/modules/edit_seller_product/widgets/education_level_picker_sheet.dart';
+import 'package:book_store_app/app/modules/seller/widgets/publish_fields_section.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
@@ -67,6 +68,8 @@ class EditProductForm extends StatelessWidget {
             onAdd: controller.pickAndUploadImage,
             onRemove: controller.removeImage,
           ),
+          const SizedBox(height: 16),
+          _PublishFields(controller: controller),
           const SizedBox(height: 16),
           if (!controller.isPhysical) ...[
             FormFieldSection(
@@ -658,3 +661,60 @@ class _FieldHint extends StatelessWidget {
   }
 }
 
+
+/// Card style + class range, loaded from the full product (skeleton while
+/// loading, error + Retry if the product could not be read).
+class _PublishFields extends StatelessWidget {
+  final EditSellerProductController controller;
+  const _PublishFields({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Obx(() {
+      if (controller.isLoadingDetails.value) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final h in const [18.0, 48.0, 18.0, 48.0]) ...[
+              Container(
+                height: h,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ],
+        );
+      }
+      if (controller.detailsLoadFailed.value) {
+        return Row(
+          children: [
+            Expanded(
+              child: Text('Could not load card style and class range.',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: theme.colorScheme.error)),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+              onPressed: controller.loadDetails,
+              child: const Text('Retry'),
+            ),
+          ],
+        );
+      }
+      return PublishFieldsSection(
+        coverStyle: controller.coverStyle.value,
+        classFrom: controller.classFrom.value,
+        classTo: controller.classTo.value,
+        onCoverStyleChanged: controller.setCoverStyle,
+        onClassFromChanged: controller.setClassFrom,
+        onClassToChanged: controller.setClassTo,
+        classRangeRequired: !controller.isPhysical,
+        errorText: controller.publishFieldsError.value,
+      );
+    });
+  }
+}

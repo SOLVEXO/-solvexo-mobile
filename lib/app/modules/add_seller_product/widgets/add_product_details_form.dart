@@ -7,6 +7,7 @@ import 'package:book_store_app/app/modules/add_seller_product/widgets/product_pu
 import 'package:book_store_app/app/modules/add_seller_product/widgets/shared_form_widgets.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/subcategory_picker_sheet.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/variant_card.dart';
+import 'package:book_store_app/app/modules/seller/widgets/publish_fields_section.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -67,6 +68,19 @@ class AddProductDetailsForm extends StatelessWidget {
             onAdd: controller.pickAndUploadImage,
             onRemove: controller.removeImage,
           ),
+          const SizedBox(height: 16),
+
+          // ── Product card style + class range (needed to go live) ────
+          Obx(() => PublishFieldsSection(
+                coverStyle: controller.coverStyle.value,
+                classFrom: controller.classFrom.value,
+                classTo: controller.classTo.value,
+                onCoverStyleChanged: controller.setCoverStyle,
+                onClassFromChanged: controller.setClassFrom,
+                onClassToChanged: controller.setClassTo,
+                classRangeRequired: !controller.isPhysical,
+                errorText: controller.publishFieldsError.value,
+              )),
           const SizedBox(height: 16),
 
           // ── Price (digital/educational only — physical prices live per-variant) ──

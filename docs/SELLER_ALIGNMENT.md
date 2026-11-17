@@ -5,7 +5,7 @@ Source of truth: Edudeen docs Part B §2 (rules), §6 (seller screens), §11
 by calling the API. Tick items off in commits that name the item number.
 
 ## P0 — publishing/selling breaks without these
-1. **Product publish fields.** API requires `coverStyle` (book|flat) to go
+1. [x] **Product publish fields.** API requires `coverStyle` (book|flat) to go
    live and `classFrom/classTo` to publish digital. App sends neither
    (0 references). Add to Add/Edit product + bulk rules.
 2. **Retired `educational` type.** Still in edit product (`isEducational`,

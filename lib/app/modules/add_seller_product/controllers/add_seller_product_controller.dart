@@ -9,6 +9,7 @@ import 'package:book_store_app/app/data/repositories/seller_product_repository.d
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/category/models/category_model.dart';
+import 'package:book_store_app/app/modules/seller/utils/publish_rules.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:book_store_app/utils/upload_rules.dart';
@@ -179,6 +180,43 @@ class AddSellerProductController extends GetxController {
   final RxString price = ''.obs;
   final Rx<ProductPublishMode> publishMode = ProductPublishMode.now.obs;
   final Rxn<DateTime> scheduledAt = Rxn<DateTime>();
+
+  // ── Publish fields (docs Part B 6.3; checklist #1) ────────────────────────
+  // `coverStyle` is required to go live; digital also needs a class range.
+  final Rxn<String> coverStyle = Rxn<String>();
+  final Rxn<String> classFrom = Rxn<String>();
+  final Rxn<String> classTo = Rxn<String>();
+  final RxnString publishFieldsError = RxnString();
+
+  void setCoverStyle(String v) {
+    coverStyle.value = v;
+    publishFieldsError.value = null;
+  }
+
+  void setClassFrom(String? v) {
+    classFrom.value = v;
+    // Keep the range in order: drop a "To" that is now before "From".
+    if (v != null &&
+        classTo.value != null &&
+        PublishRules.classIndex(classTo.value) < PublishRules.classIndex(v)) {
+      classTo.value = null;
+    }
+    publishFieldsError.value = null;
+  }
+
+  void setClassTo(String? v) {
+    classTo.value = v;
+    publishFieldsError.value = null;
+  }
+
+  /// Same rule the API enforces; shown inline + as a toast before any call.
+  String? validatePublishFields() => PublishRules.validate(
+        status: publishMode.value.apiStatus,
+        isDigital: !isPhysical,
+        coverStyle: coverStyle.value,
+        classFrom: classFrom.value,
+        classTo: classTo.value,
+      );
 
   // ── Shared (physical + digital) ───────────────────────────────────────────
   final RxString compareAtPrice = ''.obs;
@@ -498,6 +536,12 @@ class AddSellerProductController extends GetxController {
 
   Future<void> publish() async {
     if (isSaving.value || !canProceed) return;
+    final fieldsError = validatePublishFields();
+    publishFieldsError.value = fieldsError;
+    if (fieldsError != null) {
+      ToastUtil.showToast(fieldsError);
+      return;
+    }
     isSaving.value = true;
 
     final bool success;
@@ -604,6 +648,9 @@ class AddSellerProductController extends GetxController {
       buyerDeliveryMessage: msg.isEmpty ? null : msg,
       previewEnabled: previewEnabled.value,
       productType: isEducational ? 'educational' : 'digital',
+      coverStyle: coverStyle.value,
+      classFrom: classFrom.value,
+      classTo: classTo.value,
       educationLevel: isEducational ? educationLevel.value : null,
       customLevel: needsCustomLevel ? customLevel.value.trim() : null,
     );
@@ -672,6 +719,9 @@ class AddSellerProductController extends GetxController {
       images: productImages.toList(),
       isListedOnSolvexo: isListedOnSolvexo.value,
       subCategoryId: selectedSubCategoryId.value,
+      coverStyle: coverStyle.value,
+      classFrom: classFrom.value,
+      classTo: classTo.value,
     );
   }
 
