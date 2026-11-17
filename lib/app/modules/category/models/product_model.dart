@@ -356,7 +356,11 @@ class ProductModel {
   /// True when there are multiple price points across variants
   bool get hasPriceRange => price != maxPrice;
 
-  bool get isDigital => type.toLowerCase() == 'digital';
+  /// Legacy `educational` products were migrated to Digital (docs Part B 11),
+  /// so they behave as digital everywhere (qty 1, preview, always in stock).
+  bool get isDigital => isEducational || type.toLowerCase() == 'digital';
+
+  /// Only to recognise legacy rows; never offered as a type any more.
   bool get isEducational => type.toLowerCase() == 'educational';
   bool get isOnSale => activeCampaign != null;
 
@@ -369,7 +373,7 @@ class ProductModel {
 
   /// True when at least one active variant is in stock (or product is digital).
   bool get inStock {
-    if (isDigital || isEducational) return true;
+    if (isDigital) return true;
     return variants.any((v) => v.status == 'active' && v.isInStock);
   }
 

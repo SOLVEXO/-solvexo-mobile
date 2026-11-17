@@ -42,9 +42,6 @@ class SellerProduct {
   final String? buyerDeliveryMessage;
   final bool previewEnabled;
   final List<String> images;
-  // Educational-only (type == 'Educational')
-  final String? educationLevel;
-  final String? customLevel;
 
   const SellerProduct({
     required this.id,
@@ -75,8 +72,6 @@ class SellerProduct {
     this.buyerDeliveryMessage,
     this.previewEnabled = false,
     this.images = const [],
-    this.educationLevel,
-    this.customLevel,
   });
 
   bool get isUnlimitedStock => stock == null;
@@ -108,10 +103,12 @@ class SellerProduct {
 
     final rawScheduledAt = json['scheduledAt'] as String?;
 
-    // Type: "digital" → "Digital"
-    final String rawType = json['type'] as String? ?? 'physical';
-    final String type =
-        rawType[0].toUpperCase() + rawType.substring(1).toLowerCase();
+    // Type: "digital" → "Digital". The retired `educational` type was
+    // migrated to Digital (docs Part B 11): legacy rows show as Digital.
+    final String rawType = (json['type'] as String? ?? 'physical').toLowerCase();
+    final String type = rawType == 'educational'
+        ? 'Digital'
+        : rawType[0].toUpperCase() + rawType.substring(1);
 
     final String name = json['name'] as String? ?? '';
 
@@ -153,8 +150,6 @@ class SellerProduct {
       buyerDeliveryMessage: digitalJson?['buyerDeliveryMessage'] as String?,
       previewEnabled:
           (digitalJson?['preview'] as Map?)?['enabled'] as bool? ?? false,
-      educationLevel: json['educationLevel'] as String?,
-      customLevel: json['customLevel'] as String?,
     );
   }
 

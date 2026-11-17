@@ -88,69 +88,36 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Sale + education-level badges — top left, stacked,
-                    // mirrors the heart's top-right placement inside the notch.
-                    if (product.isOnSale ||
-                        (product.isEducational &&
-                            product.educationLevel != null))
+                    // Sale badge — top left, mirrors the heart's top-right
+                    // placement inside the notch. (The education-level badge
+                    // is gone: that taxonomy is retired, docs Part B 11.)
+                    if (product.isOnSale)
                       Positioned(
                         top: BaseSpacing.xxs,
                         left: BaseSpacing.xxs,
                         right: BaseSpacing.xxs + 28, // clear the heart button
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (product.isOnSale)
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: BaseSpacing.xs,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.red,
-                                  borderRadius: BorderRadius.circular(
-                                    BaseRadius.sm,
-                                  ),
-                                ),
-                                child: CustomText(
-                                  text: product.activeCampaign!.badgeLabel,
-                                  color: AppColors.white,
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w700,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: BaseSpacing.xs,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.red,
+                              borderRadius: BorderRadius.circular(
+                                BaseRadius.sm,
                               ),
-                            if (product.isOnSale &&
-                                product.isEducational &&
-                                product.educationLevel != null)
-                              SizedBox(height: BaseSpacing.xxs / 2),
-                            if (product.isEducational &&
-                                product.educationLevel != null)
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: BaseSpacing.xs,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryColor,
-                                  borderRadius: BorderRadius.circular(
-                                    BaseRadius.sm,
-                                  ),
-                                ),
-                                child: CustomText(
-                                  text: educationLevelLabel(
-                                    product.educationLevel,
-                                  ),
-                                  color: AppColors.white,
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w700,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                          ],
+                            ),
+                            child: CustomText(
+                              text: product.activeCampaign!.badgeLabel,
+                              color: AppColors.white,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ),
                       ),
 

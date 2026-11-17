@@ -3,7 +3,6 @@ import 'package:book_store_app/utils/price_rules.dart';
 import 'dart:io';
 
 import 'package:book_store_app/app/data/models/common_models/variant_entry.dart';
-import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart'
@@ -55,16 +54,13 @@ class EditSellerProductController extends GetxController {
   EditSellerProductController({
     SellerProductRepository? repository,
     UploadRepository? uploadRepository,
-    ProductRepository? productRepository,
     SellerProduct? initialProduct,
   }) : _repo = repository ?? SellerProductRepository(),
        _uploadRepo = uploadRepository ?? UploadRepository(),
-       _productRepo = productRepository ?? ProductRepository(),
        _initialProduct = initialProduct;
 
   final SellerProductRepository _repo;
   final UploadRepository _uploadRepo;
-  final ProductRepository _productRepo;
   // Testing seam: `Get.arguments` has no public setter and the previous
   // unchecked `as SellerProduct` cast throws immediately if this route is
   // ever pushed without arguments (or with the wrong type) — accepting an
@@ -150,20 +146,14 @@ class EditSellerProductController extends GetxController {
         classTo: classTo.value,
       );
 
-  // Educational-only
-  late final TextEditingController customLevelCtrl;
-  final Rxn<String> educationLevel = Rxn<String>();
-  final RxString customLevel = ''.obs;
-  final RxList<String> customLevelSuggestions = <String>[].obs;
-  final RxBool isLoadingSuggestions = false.obs;
-  Timer? _suggestDebounce;
 
   // ── Computed ──────────────────────────────────────────────────────────────
 
   bool get isPhysical => product.type == 'Physical';
-  bool get isDigital => product.type == 'Digital';
-  bool get isEducational => product.type == 'Educational';
-  bool get needsCustomLevel => isEducational && educationLevel.value == 'other';
+  /// Legacy `educational` products were migrated to Digital (docs Part B 11)
+  /// and are edited as Digital.
+  bool get isDigital =>
+      product.type == 'Digital' || product.type == 'Educational';
 
   bool get canSave {
     final hasValidPrice = isPhysical
@@ -173,41 +163,7 @@ class EditSellerProductController extends GetxController {
     return name.value.trim().isNotEmpty &&
         hasValidPrice &&
         (publishMode.value != ProductPublishMode.scheduled ||
-            scheduledAt.value != null) &&
-        (!isEducational || educationLevel.value != null) &&
-        (!needsCustomLevel || customLevel.value.trim().isNotEmpty);
-  }
-
-  void selectEducationLevel(String? level) {
-    educationLevel.value = level;
-    if (level != 'other') {
-      customLevel.value = '';
-      customLevelCtrl.clear();
-      customLevelSuggestions.clear();
-    }
-  }
-
-  void onCustomLevelChanged(String value) {
-    customLevel.value = value;
-    _suggestDebounce?.cancel();
-    if (value.trim().isEmpty) {
-      customLevelSuggestions.clear();
-      return;
-    }
-    _suggestDebounce = Timer(const Duration(milliseconds: 350), () async {
-      isLoadingSuggestions.value = true;
-      final results = await _productRepo.getCustomLevelSuggestions(
-        value.trim(),
-      );
-      isLoadingSuggestions.value = false;
-      customLevelSuggestions.assignAll(results);
-    });
-  }
-
-  void selectCustomLevelSuggestion(String value) {
-    customLevel.value = value;
-    customLevelCtrl.text = value;
-    customLevelSuggestions.clear();
+            scheduledAt.value != null);
   }
 
   /// The product's publish mode as it was when the screen opened, derived
@@ -412,19 +368,6 @@ class EditSellerProductController extends GetxController {
         return;
       }
 
-      if (isEducational) {
-        if (educationLevel.value == null) {
-          ToastUtil.showToast('Please select an education level.');
-          isSaving.value = false;
-          return;
-        }
-        if (needsCustomLevel && customLevel.value.trim().isEmpty) {
-          ToastUtil.showToast('Please enter a custom level.');
-          isSaving.value = false;
-          return;
-        }
-      }
-
       final success = await _saveDigital(parsedPrice!);
       isSaving.value = false;
       if (success) {
@@ -562,8 +505,6 @@ class EditSellerProductController extends GetxController {
       buyerDeliveryMessage: msg.isEmpty ? null : msg,
       previewEnabled: previewEnabled.value,
       images: productImages.toList(),
-      educationLevel: isEducational ? educationLevel.value : null,
-      customLevel: needsCustomLevel ? customLevel.value.trim() : null,
       coverStyle: coverStyle.value,
       classFrom: classFrom.value,
       classTo: classTo.value,
@@ -608,7 +549,6 @@ class EditSellerProductController extends GetxController {
     buyerDeliveryMsgCtrl = TextEditingController(
       text: product.buyerDeliveryMessage ?? '',
     );
-    customLevelCtrl = TextEditingController(text: product.customLevel ?? '');
 
     // Reactive values
     name.value = product.name;
@@ -627,8 +567,6 @@ class EditSellerProductController extends GetxController {
     licenseType.value = product.licenseType;
     buyerDeliveryMessage.value = product.buyerDeliveryMessage ?? '';
     previewEnabled.value = product.previewEnabled;
-    educationLevel.value = product.educationLevel;
-    customLevel.value = product.customLevel ?? '';
 
     // Pre-fill digital file entries from existing product data
     for (final f in product.digitalFiles) {
@@ -656,8 +594,6 @@ class EditSellerProductController extends GetxController {
     downloadLimitCountCtrl.dispose();
     linkExpiryDaysCtrl.dispose();
     buyerDeliveryMsgCtrl.dispose();
-    customLevelCtrl.dispose();
-    _suggestDebounce?.cancel();
     for (final f in digitalFiles) {
       f.dispose();
     }

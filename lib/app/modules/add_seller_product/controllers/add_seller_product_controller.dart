@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:book_store_app/app/data/models/common_models/variant_entry.dart';
 import 'package:book_store_app/app/data/repositories/category_repository.dart';
-import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
@@ -20,7 +19,9 @@ import 'package:image_picker/image_picker.dart';
 
 // ── Enums ──────────────────────────────────────────────────────────────────────
 
-enum ProductTypeOption { physical, digital, educational, subscription }
+// `educational` is retired (docs Part B 11; the API answers 400 "Educational
+// products are no longer available. Choose digital.").
+enum ProductTypeOption { physical, digital, subscription }
 
 enum AddProductStep { type, details }
 
@@ -75,12 +76,6 @@ const List<ProductTypeData> kProductTypes = [
     subtitle: 'Files & downloads',
   ),
   ProductTypeData(
-    type: ProductTypeOption.educational,
-    emoji: '📚',
-    name: 'Educational',
-    subtitle: 'Worksheets & courses',
-  ),
-  ProductTypeData(
     type: ProductTypeOption.subscription,
     emoji: '🔄',
     name: 'Subscription',
@@ -133,7 +128,8 @@ class DigitalFileEntry {
 const _kApiToProductType = {
   'physical_products': ProductTypeOption.physical,
   'digital_downloads': ProductTypeOption.digital,
-  'educational_resources': ProductTypeOption.educational,
+  // Legacy store type: educational was migrated to digital.
+  'educational_resources': ProductTypeOption.digital,
   'subscriptions': ProductTypeOption.subscription,
 };
 
@@ -143,18 +139,15 @@ class AddSellerProductController extends GetxController {
     SellerRepository? sellerRepository,
     UploadRepository? uploadRepository,
     CategoryRepository? categoryRepository,
-    ProductRepository? productRepository,
   }) : _repo = repository ?? SellerProductRepository(),
        _sellerRepo = sellerRepository ?? SellerRepository(),
        _uploadRepo = uploadRepository ?? UploadRepository(),
-       _categoryRepo = categoryRepository ?? CategoryRepository(),
-       _productRepo = productRepository ?? ProductRepository();
+       _categoryRepo = categoryRepository ?? CategoryRepository();
 
   final SellerProductRepository _repo;
   final SellerRepository _sellerRepo;
   final UploadRepository _uploadRepo;
   final CategoryRepository _categoryRepo;
-  final ProductRepository _productRepo;
 
   final Rx<AddProductStep> step = AddProductStep.type.obs;
   final Rx<ProductTypeOption?> selectedType = Rx(null);
@@ -245,51 +238,6 @@ class AddSellerProductController extends GetxController {
   // first uploaded file (see solvexo-api ProductsService.prepareDigitalPreview).
   final RxBool previewEnabled = false.obs;
 
-  // ── Educational-only reactive values ──────────────────────────────────────
-  // Educational products are published through the digital endpoint (see
-  // `_publishDigital`), tagged with `productType: 'educational'` plus these.
-  final Rxn<String> educationLevel = Rxn<String>();
-  final RxString customLevel = ''.obs;
-  final RxList<String> customLevelSuggestions = <String>[].obs;
-  final RxBool isLoadingSuggestions = false.obs;
-  Timer? _suggestDebounce;
-  late final TextEditingController customLevelCtrl;
-
-  bool get needsCustomLevel => isEducational && educationLevel.value == 'other';
-
-  void selectEducationLevel(String? level) {
-    educationLevel.value = level;
-    if (level != 'other') {
-      customLevel.value = '';
-      customLevelCtrl.clear();
-      customLevelSuggestions.clear();
-    }
-  }
-
-  /// Debounced autocomplete while the seller types a custom level.
-  void onCustomLevelChanged(String value) {
-    customLevel.value = value;
-    _suggestDebounce?.cancel();
-    if (value.trim().isEmpty) {
-      customLevelSuggestions.clear();
-      return;
-    }
-    _suggestDebounce = Timer(const Duration(milliseconds: 350), () async {
-      isLoadingSuggestions.value = true;
-      final results = await _productRepo.getCustomLevelSuggestions(
-        value.trim(),
-      );
-      isLoadingSuggestions.value = false;
-      customLevelSuggestions.assignAll(results);
-    });
-  }
-
-  void selectCustomLevelSuggestion(String value) {
-    customLevel.value = value;
-    customLevelCtrl.text = value;
-    customLevelSuggestions.clear();
-  }
-
   // ── TextEditingControllers ────────────────────────────────────────────────
   late final TextEditingController nameCtrl;
   late final TextEditingController descCtrl;
@@ -312,7 +260,6 @@ class AddSellerProductController extends GetxController {
 
   bool get isPhysical => selectedType.value == ProductTypeOption.physical;
   bool get isDigital => selectedType.value == ProductTypeOption.digital;
-  bool get isEducational => selectedType.value == ProductTypeOption.educational;
 
   bool get isOnLastStep => step.value == AddProductStep.details;
 
@@ -328,9 +275,7 @@ class AddSellerProductController extends GetxController {
             : price.value.trim().isNotEmpty;
         return productName.value.trim().isNotEmpty &&
             hasValidPrice &&
-            (!needsSchedule || scheduledAt.value != null) &&
-            (!isEducational || educationLevel.value != null) &&
-            (!needsCustomLevel || customLevel.value.trim().isNotEmpty);
+            (!needsSchedule || scheduledAt.value != null);
     }
   }
 
@@ -422,7 +367,6 @@ class AddSellerProductController extends GetxController {
 
   void selectType(ProductTypeOption type) {
     selectedType.value = type;
-    if (type != ProductTypeOption.educational) selectEducationLevel(null);
   }
 
   // ── Product image management ──────────────────────────────────────────────
@@ -548,7 +492,7 @@ class AddSellerProductController extends GetxController {
 
     if (isPhysical) {
       success = await _publishPhysical();
-    } else if (isDigital || isEducational) {
+    } else if (isDigital) {
       success = await _publishDigital();
     } else {
       // Other product types coming soon
@@ -581,17 +525,6 @@ class AddSellerProductController extends GetxController {
     if (priceError != null) {
       ToastUtil.showToast(priceError);
       return false;
-    }
-
-    if (isEducational) {
-      if (educationLevel.value == null) {
-        ToastUtil.showToast('Please select an education level.');
-        return false;
-      }
-      if (needsCustomLevel && customLevel.value.trim().isEmpty) {
-        ToastUtil.showToast('Please enter a custom level.');
-        return false;
-      }
     }
 
     final parsedCompare = double.tryParse(compareAtPriceCtrl.text.trim());
@@ -647,12 +580,10 @@ class AddSellerProductController extends GetxController {
       licenseType: licenseType.value,
       buyerDeliveryMessage: msg.isEmpty ? null : msg,
       previewEnabled: previewEnabled.value,
-      productType: isEducational ? 'educational' : 'digital',
+      productType: 'digital',
       coverStyle: coverStyle.value,
       classFrom: classFrom.value,
       classTo: classTo.value,
-      educationLevel: isEducational ? educationLevel.value : null,
-      customLevel: needsCustomLevel ? customLevel.value.trim() : null,
     );
   }
 
@@ -740,7 +671,6 @@ class AddSellerProductController extends GetxController {
     downloadLimitCountCtrl = TextEditingController();
     linkExpiryDaysCtrl = TextEditingController();
     buyerDeliveryMsgCtrl = TextEditingController();
-    customLevelCtrl = TextEditingController();
   }
 
   @override
@@ -753,8 +683,6 @@ class AddSellerProductController extends GetxController {
     downloadLimitCountCtrl.dispose();
     linkExpiryDaysCtrl.dispose();
     buyerDeliveryMsgCtrl.dispose();
-    customLevelCtrl.dispose();
-    _suggestDebounce?.cancel();
     for (final f in digitalFiles) {
       f.dispose();
     }

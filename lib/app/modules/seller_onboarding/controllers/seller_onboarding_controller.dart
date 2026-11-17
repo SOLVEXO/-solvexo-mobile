@@ -27,12 +27,11 @@ enum SellerTypeOption {
   mixOfAbove,
 }
 
-// Edudeen only sells physical and digital (incl. educational) products —
-// no services/bookings, recurring subscriptions, or in-person selling.
+// Edudeen only sells physical and digital products (docs Part B 1). The old
+// `educational_resources` type is retired (Part B 11) and read as digital.
 enum WhatYouSellOption {
   physicalProducts,
   digitalDownloads,
-  educationalResources,
 }
 
 // ── Data models ────────────────────────────────────────────────────────────────
@@ -141,24 +140,6 @@ const kWhatYouSell = [
       ),
     ],
   ),
-  WhatYouSellData(
-    option: WhatYouSellOption.educationalResources,
-    emoji: '📚',
-    name: 'Educational Resources',
-    description: 'Worksheets, lesson plans',
-    tools: [
-      ActivatedTool(
-        'Edu Resource Tools',
-        AppColors.orange,
-        AppColors.lightCameo,
-      ),
-      ActivatedTool(
-        'AI Worksheet Builder',
-        AppColors.primaryColor,
-        AppColors.languageBg,
-      ),
-    ],
-  ),
 ];
 
 const kStoreCurrencies = ['PKR', 'USD'];
@@ -208,8 +189,6 @@ extension WhatYouSellApi on WhatYouSellOption {
         return 'physical_products';
       case WhatYouSellOption.digitalDownloads:
         return 'digital_downloads';
-      case WhatYouSellOption.educationalResources:
-        return 'educational_resources';
     }
   }
 }
@@ -217,8 +196,9 @@ extension WhatYouSellApi on WhatYouSellOption {
 extension WhatYouSellFromApi on String {
   /// Reverse of [WhatYouSellApi.apiValue] — used to rehydrate a store's saved
   /// `productTypes` (backend strings) back into [WhatYouSellOption]s for edit UIs.
-  WhatYouSellOption? get asWhatYouSellOption =>
-      WhatYouSellOption.values.firstWhereOrNull((o) => o.apiValue == this);
+  WhatYouSellOption? get asWhatYouSellOption => this == 'educational_resources'
+      ? WhatYouSellOption.digitalDownloads
+      : WhatYouSellOption.values.firstWhereOrNull((o) => o.apiValue == this);
 }
 
 // ── Controller ─────────────────────────────────────────────────────────────────

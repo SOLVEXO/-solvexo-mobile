@@ -120,9 +120,6 @@ class SellerProductRepository {
     // first uploaded file (see solvexo-api ProductsService.prepareDigitalPreview).
     bool previewEnabled = false,
     List<String> images = const [],
-    // Only meaningful when the product's type is 'educational'.
-    String? educationLevel,
-    String? customLevel,
     String? coverStyle,
     String? classFrom,
     String? classTo,
@@ -142,8 +139,6 @@ class SellerProductRepository {
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
         if (images.isNotEmpty) 'images': images,
-        if (educationLevel != null) 'educationLevel': educationLevel,
-        if (customLevel != null) 'customLevel': customLevel,
         'digital': {
           'files': files,
           'downloadLimit': downloadLimit,
@@ -282,12 +277,8 @@ class SellerProductRepository {
     // Watermarked/trimmed pre-purchase preview, derived server-side from the
     // first uploaded file (see solvexo-api ProductsService.prepareDigitalPreview).
     bool previewEnabled = false,
-    // Set productType to 'educational' (instead of the default 'digital')
-    // plus educationLevel (required) / customLevel (required when 'other')
-    // to publish an educational resource — same endpoint, no dedicated one.
+    // Only 'digital': the 'educational' type is retired (API answers 400).
     String productType = 'digital',
-    String? educationLevel,
-    String? customLevel,
     String? coverStyle,
     String? classFrom,
     String? classTo,
@@ -310,8 +301,6 @@ class SellerProductRepository {
           'description': description,
         if (compareAtPrice != null) 'compareAtPrice': compareAtPrice,
         if (tags.isNotEmpty) 'tags': tags,
-        if (educationLevel != null) 'educationLevel': educationLevel,
-        if (customLevel != null) 'customLevel': customLevel,
         'digital': {
           'files': files,
           'downloadLimit': downloadLimit,

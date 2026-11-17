@@ -8,7 +8,7 @@ by calling the API. Tick items off in commits that name the item number.
 1. [x] **Product publish fields.** API requires `coverStyle` (book|flat) to go
    live and `classFrom/classTo` to publish digital. App sends neither
    (0 references). Add to Add/Edit product + bulk rules.
-2. **Retired `educational` type.** Still in edit product (`isEducational`,
+2. [x] **Retired `educational` type.** Still in edit product (`isEducational`,
    `educationLevel`), seller products filter, onboarding "Educational
    Resources", buyer product card. Map to Digital; keep reading legacy
    `educational` only for display.

@@ -4,9 +4,7 @@ import 'package:book_store_app/app/modules/add_seller_product/widgets/digital_fi
 import 'package:book_store_app/app/modules/add_seller_product/widgets/product_publish_mode_selector.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/shared_form_widgets.dart';
 import 'package:book_store_app/app/modules/add_seller_product/widgets/variant_card.dart';
-import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/app/modules/edit_seller_product/controllers/edit_seller_product_controller.dart';
-import 'package:book_store_app/app/modules/edit_seller_product/widgets/education_level_picker_sheet.dart';
 import 'package:book_store_app/app/modules/seller/widgets/publish_fields_section.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -107,7 +105,7 @@ class EditProductForm extends StatelessWidget {
               fillColor: AppColors.textfldFillColor,
             ),
           ],
-          if (controller.isDigital || controller.isEducational) ...[
+          if (controller.isDigital) ...[
             const SizedBox(height: 16),
             _DigitalExtraFields(controller: controller),
           ],
@@ -198,28 +196,6 @@ class _DigitalExtraFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Education Level (educational products only)
-        if (controller.isEducational) ...[
-          const _FieldLabel(label: 'Education Level', required: true),
-          const SizedBox(height: 6),
-          _EducationLevelField(controller: controller),
-          const SizedBox(height: 16),
-          Obx(() {
-            if (!controller.needsCustomLevel) return const SizedBox.shrink();
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _FieldLabel(label: 'Custom Level', required: true),
-                const SizedBox(height: 2),
-                const _FieldHint(hint: 'e.g. "Grade 5", "O-Level", "Hifz"'),
-                const SizedBox(height: 6),
-                _CustomLevelField(controller: controller),
-                const SizedBox(height: 16),
-              ],
-            );
-          }),
-        ],
-
         // Compare At Price
         const _FieldLabel(label: 'Compare At Price', optional: true),
         const SizedBox(height: 6),
@@ -514,100 +490,6 @@ class _LicenseChip extends StatelessWidget {
   }
 }
 
-// ── Education level field (educational products only) ────────────────────────
-
-class _EducationLevelField extends StatelessWidget {
-  final EditSellerProductController controller;
-  const _EducationLevelField({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(
-      () => GestureDetector(
-        onTap: () => EditEducationLevelPickerSheet.show(context, controller),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.textfldFillColor,
-            borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-            border: Border.all(color: AppColors.lightGrey, width: 0.3),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: CustomText(
-                  text: controller.educationLevel.value == null
-                      ? 'Select a level'
-                      : educationLevelLabel(controller.educationLevel.value),
-                  fontSize: AppFontSize.verySmall,
-                  color: controller.educationLevel.value == null
-                      ? AppColors.grey
-                      : AppColors.black,
-                ),
-              ),
-              const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: AppColors.grey),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Custom level field + autocomplete (only when level == 'other') ───────────
-
-class _CustomLevelField extends StatelessWidget {
-  final EditSellerProductController controller;
-  const _CustomLevelField({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomTextField(
-          controller: controller.customLevelCtrl,
-          onChanged: controller.onCustomLevelChanged,
-          hintText: 'Enter a custom level',
-          isborder: true,
-          fillColor: AppColors.textfldFillColor,
-        ),
-        Obx(() {
-          if (controller.customLevelSuggestions.isEmpty) return const SizedBox.shrink();
-          return Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: controller.customLevelSuggestions
-                  .map((s) => GestureDetector(
-                        onTap: () => controller.selectCustomLevelSuggestion(s),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryColor.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(AppDimen.borderRadius),
-                            border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
-                          ),
-                          child: CustomText(
-                            text: s,
-                            fontSize: AppFontSize.tiny,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          );
-        }),
-      ],
-    );
-  }
-}
-
-// ── Shared label ──────────────────────────────────────────────────────────────
-
 class _FieldLabel extends StatelessWidget {
   final String label;
   final bool required;
@@ -643,20 +525,6 @@ class _FieldLabel extends StatelessWidget {
             color: AppColors.grey,
           ),
       ],
-    );
-  }
-}
-
-class _FieldHint extends StatelessWidget {
-  final String hint;
-  const _FieldHint({required this.hint});
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomText(
-      text: hint,
-      fontSize: AppFontSize.tiny,
-      color: AppColors.lightGrey5,
     );
   }
 }
