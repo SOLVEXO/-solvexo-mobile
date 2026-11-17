@@ -323,6 +323,12 @@ class ApiConstants {
   static const String sellerReturns = "$apiPrefix/orders/returns";
   static String returnAction(String orderId) =>
       "$apiPrefix/orders/return-action/$orderId";
+  // One list: item returns + refund requests (docs 6.6).
+  static String sellerReturnsAll(String storeId) =>
+      "$apiPrefix/orders/seller-returns-all/$storeId";
+  // PATCH {storeId, itemId, step}: item_received -> replacement_sent.
+  static String returnFollowUp(String orderId) =>
+      "$apiPrefix/orders/return-follow-up/$orderId";
 
   // ============ Activity Log Endpoints (store-wide, seller-only) ============
   static String activityLog(String storeId) =>

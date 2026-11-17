@@ -1,129 +1,165 @@
-import 'package:book_store_app/app/data/models/refund_request_model.dart';
 import 'package:book_store_app/app/data/repositories/refund_request_repository.dart';
+import 'package:book_store_app/app/data/repositories/seller_orders_repository.dart';
+import 'package:book_store_app/app/modules/seller_returns/models/seller_return_item.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-// ── Enums ─────────────────────────────────────────────────────────────────────
+export 'package:book_store_app/app/modules/seller_returns/models/seller_return_item.dart';
 
-/// Client-side display filter over the seller's full loaded list — the
-/// `refund-request/seller/:storeId` endpoint has no `status` query param, so
-/// filtering happens locally rather than by re-querying the backend.
-enum ReturnFilter { all, pending, approved, rejected }
+/// Display filter over the loaded rows (the merged endpoint is read whole).
+enum ReturnFilter { open, approved, rejected, all }
 
-// ── Controller ────────────────────────────────────────────────────────────────
-
+/// Returns & refunds (docs Part B 6.6; checklist #8): ONE list from
+/// seller-returns-all. Item returns are answered with return-action, refund
+/// requests with refund-request approve/reject; follow-up steps are
+/// item_received -> replacement_sent (no money).
 class SellerReturnsController extends GetxController {
-  final _repo = RefundRequestRepository();
+  SellerReturnsController({
+    SellerOrdersRepository? orders,
+    RefundRequestRepository? refunds,
+  })  : _orders = orders ?? SellerOrdersRepository(),
+        _refunds = refunds ?? RefundRequestRepository();
 
-  static const _limit = 20;
+  final SellerOrdersRepository _orders;
+  final RefundRequestRepository _refunds;
+
+  static const minRejectChars = 10;
 
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
-  final Rx<ReturnFilter> selectedFilter = ReturnFilter.all.obs;
-  final RxList<RefundRequestModel> requests = <RefundRequestModel>[].obs;
-  final RxSet<String> _processingIds = <String>{}.obs;
+  final RxBool loadFailed = false.obs;
+  final Rx<ReturnFilter> selectedFilter = ReturnFilter.open.obs;
+  final RxList<SellerReturnItem> items = <SellerReturnItem>[].obs;
+  final Rx<SellerReturnStats> stats = SellerReturnStats.empty.obs;
+  final RxSet<String> _busy = <String>{}.obs;
 
   String? _storeId;
   int _page = 1;
-  int _total = 0;
+  int _totalPages = 1;
 
-  bool get hasMore => requests.length < _total;
+  bool get hasMore => _page < _totalPages;
+  bool isProcessing(SellerReturnItem i) => _busy.contains(_key(i));
+  String _key(SellerReturnItem i) => '${i.kind.name}:${i.id}:${i.itemIds.join(',')}';
 
-  bool isProcessing(String id) => _processingIds.contains(id);
+  List<SellerReturnItem> get filtered => switch (selectedFilter.value) {
+        ReturnFilter.open => items.where((i) => i.isOpen).toList(),
+        ReturnFilter.approved => items.where((i) => i.isApproved).toList(),
+        ReturnFilter.rejected => items.where((i) => i.isRejected).toList(),
+        ReturnFilter.all => items.toList(),
+      };
 
-  /// The currently loaded requests, narrowed to [selectedFilter].
-  List<RefundRequestModel> get filteredRequests {
-    final filter = selectedFilter.value;
-    if (filter == ReturnFilter.all) return requests;
-    return requests.where((r) => r.status == filter.name).toList();
+  int countFor(ReturnFilter f) => switch (f) {
+        ReturnFilter.open => items.where((i) => i.isOpen).length,
+        ReturnFilter.approved => items.where((i) => i.isApproved).length,
+        ReturnFilter.rejected => items.where((i) => i.isRejected).length,
+        ReturnFilter.all => items.length,
+      };
+
+  void setFilter(ReturnFilter f) => selectedFilter.value = f;
+
+  /// Same rule as the API (400 under 10 characters).
+  static String? validateRejectReason(String text) => text.trim().length < minRejectChars
+      ? 'Please explain in at least $minRejectChars characters (the buyer will see it).'
+      : null;
+
+  @override
+  void onInit() {
+    super.onInit();
+    refreshData();
   }
 
-  int get pendingCount => requests.where((r) => r.isPending).length;
-  int get approvedCount => requests.where((r) => r.isApproved).length;
-  int get rejectedCount => requests.where((r) => r.isRejected).length;
-
-  void setFilter(ReturnFilter filter) {
-    if (selectedFilter.value == filter) return;
-    selectedFilter.value = filter;
-  }
-
-  Future<void> refreshData() async {
-    await _load(page: 1);
-  }
+  Future<void> refreshData() => _load(page: 1);
 
   Future<void> loadMore() async {
     if (!hasMore || isLoadingMore.value) return;
     await _load(page: _page + 1);
   }
 
-  Future<void> _load({int page = 1}) async {
+  Future<void> _load({required int page}) async {
     if (page == 1) {
       isLoading.value = true;
+      loadFailed.value = false;
     } else {
       isLoadingMore.value = true;
     }
-
     try {
       _storeId ??= await AppPreferences.getStoreId();
       final storeId = _storeId;
       if (storeId == null || storeId.isEmpty) {
-        debugPrint('⚠️ SellerReturnsController: no storeId in prefs');
+        loadFailed.value = true;
         return;
       }
-
-      final result = await _repo.listForSeller(storeId, page: page, limit: _limit);
-
+      final r = await _orders.getReturnsAll(storeId, page: page);
       if (page == 1) {
-        requests.assignAll(result.items);
+        items.assignAll(r.items);
+        stats.value = r.stats;
       } else {
-        requests.addAll(result.items);
+        items.addAll(r.items);
       }
-      _total = result.total;
       _page = page;
-    } catch (e) {
-      debugPrint('❌ SellerReturnsController._load error: $e');
+      _totalPages = r.totalPages;
+    } catch (_) {
+      if (page == 1) loadFailed.value = true;
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
     }
   }
 
-  Future<void> approve(RefundRequestModel request) => _act(request, action: 'approve');
-
-  Future<void> reject(RefundRequestModel request, String notes) =>
-      _act(request, action: 'reject', notes: notes);
-
-  Future<void> _act(
-    RefundRequestModel request, {
-    required String action,
-    String? notes,
-  }) async {
-    if (_processingIds.contains(request.id)) return;
-    _processingIds.add(request.id);
-    try {
-      final success = action == 'approve'
-          ? await _repo.approve(request.id)
-          : await _repo.reject(request.id, notes!);
-
-      if (success) {
-        ToastUtil.showToast(
-          action == 'approve' ? 'Refund request approved' : 'Refund request rejected',
+  Future<bool> approve(SellerReturnItem i) => _run(i, () async {
+        if (i.kind == ReturnKind.refundRequest) return _refunds.approve(i.id);
+        return _orders.returnAction(
+          orderId: i.orderId,
+          storeId: _storeId ?? '',
+          itemIds: i.itemIds,
+          action: 'approve',
         );
-        // Re-fetch rather than patch locally: approve/reject don't return the
-        // updated refund/debit amounts, only success — the list endpoint is
-        // the single source of truth for those.
-        await refreshData();
-      }
-    } finally {
-      _processingIds.remove(request.id);
-    }
+      }, 'Return approved');
+
+  Future<bool> reject(SellerReturnItem i, String reason) {
+    if (validateRejectReason(reason) != null) return Future.value(false);
+    return _run(i, () async {
+      if (i.kind == ReturnKind.refundRequest) return _refunds.reject(i.id, reason.trim());
+      return _orders.returnAction(
+        orderId: i.orderId,
+        storeId: _storeId ?? '',
+        itemIds: i.itemIds,
+        action: 'reject',
+        rejectReason: reason.trim(),
+      );
+    }, 'Return rejected');
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    _load();
+  Future<bool> followUp(SellerReturnItem i) {
+    final step = i.nextFollowUp;
+    if (step == null || i.itemIds.isEmpty) return Future.value(false);
+    return _run(
+      i,
+      () => _orders.returnFollowUp(
+        orderId: i.orderId,
+        storeId: _storeId ?? '',
+        itemId: i.itemIds.first,
+        step: step,
+      ),
+      step == 'item_received' ? 'Marked as received' : 'Marked replacement sent',
+    );
+  }
+
+  Future<bool> _run(SellerReturnItem i, Future<bool> Function() call, String done) async {
+    final k = _key(i);
+    if (_busy.contains(k)) return false;
+    _busy.add(k);
+    try {
+      final ok = await call();
+      if (ok) {
+        ToastUtil.showToast(done);
+        // Re-read: the list endpoint is the source of truth.
+        await refreshData();
+      }
+      return ok;
+    } finally {
+      _busy.remove(k);
+    }
   }
 }

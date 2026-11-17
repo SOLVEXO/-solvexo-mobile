@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/modules/seller_returns/models/seller_return_item.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -224,7 +225,64 @@ class SellerOrdersRepository {
     }
   }
 
+  // ─── GET /api/orders/seller-returns-all/:storeId ───────────────────────────
+
+  /// Throws on failure so the screen can show error + Retry.
+  Future<({List<SellerReturnItem> items, SellerReturnStats stats, int totalPages})>
+      getReturnsAll(String storeId, {int page = 1, int limit = 20}) async {
+    final res = await _client.get(
+      ApiConstants.sellerReturnsAll(storeId),
+      queryParameters: {'page': page, 'limit': limit},
+      requiresAuth: true,
+    );
+    final data = Map<String, dynamic>.from((res.data as Map)['data'] as Map);
+    final rows = data['items'] is List ? data['items'] as List : const [];
+    final pagination = data['pagination'] is Map ? data['pagination'] as Map : const {};
+    return (
+      items: rows
+          .whereType<Map>()
+          .map((m) => SellerReturnItem.fromJson(Map<String, dynamic>.from(m)))
+          .toList(),
+      stats: data['stats'] is Map
+          ? SellerReturnStats.fromJson(Map<String, dynamic>.from(data['stats'] as Map))
+          : SellerReturnStats.empty,
+      totalPages: (pagination['totalPages'] as num?)?.toInt() ?? 1,
+    );
+  }
+
+  // ─── PATCH /api/orders/return-follow-up/:orderId ───────────────────────────
+  // Verified: 400 "storeId is required", then "itemId is required"; the step
+  // field name could not be seen (the order lookup runs first) - `step`.
+  Future<bool> returnFollowUp({
+    required String orderId,
+    required String storeId,
+    required String itemId,
+    required String step,
+  }) async {
+    try {
+      final response = await _client.patch(
+        ApiConstants.returnFollowUp(orderId),
+        data: {'storeId': storeId, 'itemId': itemId, 'step': step},
+        requiresAuth: true,
+      );
+      if (response.data is Map && response.data['success'] == false) {
+        ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Could not update the return');
+        return false;
+      }
+      return true;
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return false;
+    } catch (_) {
+      ToastUtil.showToast('Could not update the return');
+      return false;
+    }
+  }
+
   // ─── PUT /api/orders/return-action/:orderId ────────────────────────────────
+  // Verified: {storeId, itemIds, action: approve|reject, rejectReason}; a
+  // reject reason under 10 chars -> 400 "Please explain the rejection in at
+  // least 10 characters (the buyer will see it)".
 
   Future<bool> returnAction({
     required String orderId,

@@ -31,7 +31,7 @@ by calling the API. Tick items off in commits that name the item number.
    (seller sees last 4). Seller direct bank transfer must not exist (410).
 7. [x] **COD per package** (§2.3): Mark paid only when `codCollector=='seller'`,
    send `storeId`; order status `partially_paid`.
-8. **Returns (§6.6)**: one list (`seller-returns-all` = item returns +
+8. [x] **Returns (§6.6)**: one list (`seller-returns-all` = item returns +
    refund requests), respond-by 48 h pills, reject reason ≥ 10 chars,
    follow-up `item_received → replacement_sent`. Currently separate calls.
 9. **Orders (§6.5)**: tabs Needs action / Shipped / Delivered / Completed /
