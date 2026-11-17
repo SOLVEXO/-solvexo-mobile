@@ -53,7 +53,7 @@ by calling the API. Tick items off in commits that name the item number.
 18. Bulk upload, docs §6.3; web-only for now.
 
 ## Cleanup
-17. Remove dead store-verification constants in `api_constaints.dart`.
+17. [x] Remove dead store-verification constants in `api_constaints.dart`.
 
 ## Backend issues
 

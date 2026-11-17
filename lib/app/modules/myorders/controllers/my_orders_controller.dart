@@ -5,8 +5,6 @@ import 'package:book_store_app/app/services/digital_download_service.dart';
 import 'package:book_store_app/app/data/repositories/order_repository.dart';
 import 'package:book_store_app/app/modules/myorders/models/my_order_model.dart';
 import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart';
-import 'package:book_store_app/app/modules/myorders/models/order_timeline.dart';
-import 'package:book_store_app/app/data/models/enums/enums.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:get/get.dart';
@@ -19,9 +17,6 @@ class MyOrdersController extends BaseController {
   RxInt selectedTab = 0.obs;
   final RxString searchQuery = ''.obs;
   final TextEditingController searchController = TextEditingController();
-  final Rx<OrderDeliveryStatus> currentStatus = OrderDeliveryStatus.deliver.obs;
-  int get currentStep =>
-      OrderDeliveryStatus.values.indexOf(currentStatus.value);
 
   final OrderRepository _orderRepository;
 
@@ -118,35 +113,10 @@ class MyOrdersController extends BaseController {
     );
   }
 
-  final List<OrderTimeline> timeline = [
-    OrderTimeline(
-      status: OrderDeliveryStatus.process,
-      title: "Package picked up",
-      description: "Your package has left the sorting centre",
-    ),
-    OrderTimeline(
-      status: OrderDeliveryStatus.deliver,
-      title: "Deliver",
-      description: "Preparing for delivery",
-    ),
-    OrderTimeline(
-      status: OrderDeliveryStatus.inTransit,
-      title: "Arrived at delivery hub",
-      description: "Package arrived at logistics hub",
-    ),
-    OrderTimeline(
-      status: OrderDeliveryStatus.delivered,
-      title: "Delivered",
-      description: "Your package has been delivered",
-    ),
-  ];
 
   bool orderCanCancel(OrderModel order) => order.canCancel;
   bool orderIsCompleted(OrderModel order) => order.isCompleted;
 
-  void updateStatus(OrderDeliveryStatus status) {
-    currentStatus.value = status;
-  }
 
   bool _matchesTab(OrderModel e, int tab) {
     switch (tab) {

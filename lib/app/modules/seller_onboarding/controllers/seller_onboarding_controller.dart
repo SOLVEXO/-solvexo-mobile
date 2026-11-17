@@ -102,7 +102,7 @@ const kSellerTypes = [
     type: SellerTypeOption.freelancer,
     emoji: '💻',
     name: 'Freelancer',
-    description: 'Offer services, bookings, or consulting packages',
+    description: 'Tutors and teachers selling their own materials',
   ),
   SellerTypeData(
     type: SellerTypeOption.mixOfAbove,

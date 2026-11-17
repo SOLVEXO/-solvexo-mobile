@@ -137,7 +137,11 @@ class OrderStore {
     this.tracking,
     this.shippedAt,
     this.deliveredAt,
+    this.rawTrackingEvents = const [],
   });
+
+  /// `stores[].trackingEvents` as sent (shape read in OrderStatusHistory).
+  final List<dynamic> rawTrackingEvents;
 
   factory OrderStore.fromJson(Map<String, dynamic> json) {
     final sellerName = json['sellerName'] as String?;
@@ -166,6 +170,7 @@ class OrderStore {
       deliveredAt: json['deliveredAt'] != null
           ? DateTime.tryParse(json['deliveredAt'] as String)
           : null,
+      rawTrackingEvents: json['trackingEvents'] is List ? json['trackingEvents'] as List : const [],
     );
   }
 

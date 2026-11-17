@@ -27,7 +27,6 @@ abstract class Routes {
   static const orderTrackingView = '/profile/myorders/order_tracking';
   static const addressView = '/profile/address';
   static const addAddressView = '/profile/add_address';
-  static const trackerView = '/profile/ordertracker';
   static const refundRequestView = '/profile/refund-request';
   static const reviewsView = '/profile/reviews-view';
   static const helpCenterView = '/profile/help-center';
@@ -67,7 +66,6 @@ abstract class Routes {
 
   // Buyer — store memberships (subscriptions)
 
-  // Buyer — store services & bookings
 
   // Buyer/guest — free, unauthenticated AI Worksheet Builder trial
   static const worksheetTrial = '/worksheet-trial';

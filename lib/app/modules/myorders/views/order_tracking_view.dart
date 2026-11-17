@@ -1,13 +1,12 @@
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/modules/myorders/controllers/my_orders_controller.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/custom_action_buttons.dart';
-import 'package:book_store_app/app/modules/myorders/widgets/delivery_status_bar.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/order_info.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/order_items.dart';
 import 'package:book_store_app/app/modules/myorders/widgets/product_detail_summary.dart';
-import 'package:book_store_app/app/modules/myorders/widgets/status_stepper.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
+import 'package:book_store_app/app/modules/myorders/widgets/order_status_history.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,10 +33,9 @@ class OrderTrackingView extends StatelessWidget {
         padding: EdgeInsets.all(BaseSpacing.md),
         child: Column(
           children: [
-            StatusStepper(),
-            SizedBox(height: BaseSpacing.xs + 2),
-            DeliveryStatusBar(),
-            SizedBox(height: BaseSpacing.xs + 2),
+            // Real status history only (hidden when there is none).
+            OrderStatusHistory(order: controller.filteredOrders[index]),
+            SizedBox(height: BaseSpacing.md),
             OrderInfo(index: index),
             SizedBox(height: BaseSpacing.md),
             OrderItems(index: index),

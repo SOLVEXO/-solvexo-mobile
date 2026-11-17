@@ -69,3 +69,25 @@ Compiles and passes `flutter analyze` with no errors (Flutter 3.35).
 Not yet verified against the live API: response shapes of
 `/api/courses/mine`, `/api/chatbot/conversation`,
 `/api/platform-config/maintenance`.
+
+## Release checklist
+
+Identity is still the old one and is NOT changed in code yet; do these
+together before a store release:
+
+- **Bundle / application ids**: iOS `PRODUCT_BUNDLE_IDENTIFIER` is
+  `com.solvexo.ios` (ios/Runner.xcodeproj); check `applicationId` in
+  android/app/build.gradle. Decide the Edudeen ids first — changing them
+  creates a new app in both stores.
+- **Firebase**: register the new ids in the Firebase project, then replace
+  `ios/Runner/GoogleService-Info.plist`, `android/app/google-services.json`
+  and regenerate `lib/firebase_options.dart` (`flutterfire configure`).
+  Push (FCM) needs the APNs key on the new iOS id.
+- **Google sign-in**: new OAuth client IDs per platform (iOS client + reversed
+  client id URL scheme in Info.plist; Android SHA-1/SHA-256 for release and
+  Play signing keys).
+- **Store records**: App Store Connect app + Play Console app for the new
+  ids, privacy policy URL and the account-deletion URL (`/delete-account`),
+  data-safety / privacy labels, screenshots.
+- **Config**: `config/prod.json` with the production `API_BASE_URL`,
+  `WEB_BASE_URL` and `STRIPE_PUBLISHABLE_KEY`; never commit it.

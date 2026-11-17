@@ -45,8 +45,6 @@ import '../modules/map_picker/views/mappicker_view.dart';
 import '../modules/myorders/bindings/profile_myorders_binding.dart';
 import '../modules/myorders/views/my_orders_view.dart';
 import '../modules/myorders/views/reviews_view.dart';
-import '../modules/ordertracker/bindings/order_tracker_binding.dart';
-import '../modules/ordertracker/views/tracker_order_view.dart';
 import '../modules/otp/binding/otp_binding.dart';
 import '../modules/otp/views/get_notified.dart';
 import '../modules/otp/views/otp_view.dart';
@@ -494,11 +492,6 @@ class AppPages {
       name: Routes.addAddressView,
       page: () => AddAddressView(),
       binding: AddressBinding(),
-    ),
-    GetPage(
-      name: Routes.trackerView,
-      page: () => TrackOrderView(),
-      binding: OrderTrackerBinding(),
     ),
     GetPage(
       name: Routes.refundRequestView,
