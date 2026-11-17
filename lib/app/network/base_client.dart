@@ -14,7 +14,7 @@ class BaseClient {
     ResponseType? responseType,
   }) async {
     final dio = await DioService.getDio();
-    debugPrint("GET → $url");
+    if (kDebugMode) debugPrint("GET → $url");
 
     return dio.get(
       url,
@@ -35,7 +35,7 @@ class BaseClient {
     Map<String, dynamic>? headers,
   }) async {
     final dio = await DioService.getDio();
-    debugPrint("POST → $url");
+    if (kDebugMode) debugPrint("POST → $url");
 
     return dio.post(
       url,
@@ -58,7 +58,7 @@ class BaseClient {
     bool requiresAuth = true,
   }) async {
     final dio = await DioService.getDio();
-    debugPrint("PUT → $url");
+    if (kDebugMode) debugPrint("PUT → $url");
 
     return dio.put(
       url,
@@ -76,7 +76,7 @@ class BaseClient {
     Map<String, dynamic>? headers,
   }) async {
     final dio = await DioService.getDio();
-    debugPrint("PATCH → $url");
+    if (kDebugMode) debugPrint("PATCH → $url");
 
     return dio.patch(
       url,
@@ -97,7 +97,7 @@ class BaseClient {
     bool requiresAuth = true,
   }) async {
     final dio = await DioService.getDio();
-    debugPrint("DELETE → $url");
+    if (kDebugMode) debugPrint("DELETE → $url");
 
     return dio.delete(
       url,

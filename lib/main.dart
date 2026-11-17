@@ -1,13 +1,17 @@
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/notification/fcm_background_handler.dart';
 import 'package:book_store_app/app/notification/local_notification_service.dart';
+import 'package:book_store_app/app/modules/maintenance/views/maintenance_view.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/app/services/maintenance_service.dart';
+import 'package:book_store_app/app/services/platform_config_service.dart';
 import 'package:book_store_app/config/resources/app_theme.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/config/stripe_config.dart';
 import 'package:book_store_app/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
@@ -16,6 +20,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Release builds print nothing: many legacy call sites log API bodies.
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
   ApiConstants.warnIfDebugBuildUsesProduction();
   // Initialize SharedPreferences
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -32,6 +40,10 @@ void main() async {
     Stripe.publishableKey = StripeConfig.publishableKey;
     await Stripe.instance.applySettings();
   }
+  // App-wide services: maintenance state (fed by every 503) and the public
+  // platform config (cached, refreshed quietly). Neither blocks startup.
+  Get.put(MaintenanceService(), permanent: true).check();
+  Get.put(PlatformConfigService(), permanent: true).load();
   runApp(const MyApp());
 }
 
@@ -61,7 +73,7 @@ class MyApp extends StatelessWidget {
                   mq.textScaler.scale(1).clamp(0.9, 1.2),
                 ),
               ),
-              child: child!,
+              child: MaintenanceGate(child: child!),
             );
           },
         );

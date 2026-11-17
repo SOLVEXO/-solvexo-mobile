@@ -64,6 +64,19 @@ class ApiConstants {
   // ============ Onboarding Slides (public) ============
   static const String onboardingSlides = "$apiPrefix/onboarding-slides";
 
+  // ── Platform config (public, never blocked by maintenance) ─────────────
+  static const String platformConfigPublic = "$apiPrefix/platform-config/public";
+  static const String maintenanceStatus = "$apiPrefix/platform-config/maintenance";
+
+  // ── Support chatbot (docs §5.15) ───────────────────────────────────────
+  static const String chatbotMessage = "$apiPrefix/chatbot/message";
+  static const String chatbotConversation = "$apiPrefix/chatbot/conversation";
+  static const String chatbotConversationMessage =
+      "$apiPrefix/chatbot/conversation/message";
+
+  // ── Library / courses (docs §5.9, §5.10) ───────────────────────────────
+  static const String myCourses = "$apiPrefix/courses/mine";
+
   // ============ Category Endpoints ============
   static const String categories = "$apiPrefix/categories/category-tree";
   static const String addCategory = "$apiPrefix/categories/add-category";

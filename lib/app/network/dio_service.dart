@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/network/auth_refresh_interceptor.dart';
+import 'package:book_store_app/app/network/maintenance_interceptor.dart';
 import 'package:book_store_app/app/network/messaging_socket_service.dart';
 import 'package:book_store_app/app/network/notifications_socket_service.dart';
 import 'package:book_store_app/app/network/token_refresher.dart';
@@ -38,16 +39,19 @@ class DioService {
             }
           }
 
-          // ✅ Let Dio manage Content-Type — only log, never override here.
-          debugPrint("➡️ ${options.method} ${options.path}");
-          debugPrint("   Content-Type: ${options.headers['Content-Type']}");
-          debugPrint("   Auth Required: $requiresAuth");
+          // Let Dio manage Content-Type. Logs stay out of release builds:
+          // response bodies hold personal data (addresses, orders).
+          if (kDebugMode) {
+            debugPrint("➡️ ${options.method} ${options.path}");
+          }
 
           handler.next(options);
         },
         onError: (e, handler) async {
-          debugPrint("❌ Dio Error: ${e.response?.statusCode}");
-          debugPrint("❌ Response: ${e.response?.data}");
+          if (kDebugMode) {
+            debugPrint("❌ Dio Error: ${e.response?.statusCode}");
+            debugPrint("❌ Response: ${e.response?.data}");
+          }
 
           // 401 handling (refresh once, retry, end the session) lives in
           // AuthRefreshInterceptor, added below.
@@ -60,6 +64,8 @@ class DioService {
         },
       ),
     );
+
+    dio.interceptors.add(MaintenanceInterceptor());
 
     dio.interceptors.add(
       AuthRefreshInterceptor(
