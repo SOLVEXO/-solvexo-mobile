@@ -6,6 +6,7 @@ import 'package:book_store_app/app/data/models/finance/payout_method_model.dart'
 import 'package:book_store_app/app/data/models/finance/payout_schedule_model.dart';
 import 'package:book_store_app/app/data/models/finance/tax_report_model.dart';
 import 'package:book_store_app/app/data/repositories/seller_finance_repository.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
@@ -165,9 +166,30 @@ class SellerFinanceController extends GetxController {
   // A store can hold a separate wallet per currency (e.g. USD from Stripe
   // sales + PKR from manual bank-transfer sales) — this picks which one the
   // whole finance screen is currently showing.
-  final RxString selectedCurrency = 'USD'.obs;
+  ///
+  /// Payouts debit the wallet of the payout method's currency (API:
+  /// requestPayout uses method.currency). The dashboard lists a wallet for
+  /// every currency with a balance OR a payout-schedule record, and a
+  /// payout-schedule read creates a record - so an empty USD wallet can
+  /// appear for a PKR store just because the schedule was read in USD.
+  /// Empty wallets in other currencies are hidden; the store's own currency
+  /// is always shown. Each wallet stands alone; nothing is converted.
+  final RxString selectedCurrency = ''.obs;
 
-  List<String> get availableCurrencies => dashboard.value.currencies;
+  String get storeCurrency =>
+      StoreCurrency.code.value.isNotEmpty ? StoreCurrency.code.value : (summary.value?.currency ?? '');
+
+  List<String> get availableCurrencies {
+    final base = storeCurrency;
+    final out = <String>[
+      if (base.isNotEmpty) base,
+      for (final w in dashboard.value.wallets)
+        if (w.currency != base &&
+            (w.hasMoney || payoutMethods.any((m) => m.currency == w.currency)))
+          w.currency,
+    ];
+    return out.toSet().toList();
+  }
   FinanceWallet get _wallet => dashboard.value.walletFor(selectedCurrency.value);
 
   void selectCurrency(String currency) {
@@ -261,25 +283,27 @@ class SellerFinanceController extends GetxController {
 
   Future<void> _loadAll() async {
     isLoading.value = true;
+    if (StoreCurrency.code.value.isEmpty) await StoreCurrency.load();
     await Future.wait([
       _loadDashboard(),
       loadSummary(),
       loadStatement(),
       loadPayouts(),
-      loadTransactions(reset: true),
       loadPayoutMethods(),
-      loadPayoutSchedule(),
       loadTaxReports(),
     ]);
+    // Only now is the currency known: never read a schedule in a guessed
+    // currency (that read would create a schedule record for it).
+    final currencies = availableCurrencies;
+    if (!currencies.contains(selectedCurrency.value)) {
+      selectedCurrency.value = currencies.isNotEmpty ? currencies.first : '';
+    }
+    await Future.wait([loadTransactions(reset: true), loadPayoutSchedule()]);
     isLoading.value = false;
   }
 
   Future<void> _loadDashboard() async {
     dashboard.value = await _repo.getDashboard(storeId);
-    final currencies = dashboard.value.currencies;
-    if (!currencies.contains(selectedCurrency.value)) {
-      selectedCurrency.value = currencies.isNotEmpty ? currencies.first : 'USD';
-    }
   }
 
   @override
@@ -469,6 +493,7 @@ class SellerFinanceController extends GetxController {
   // ── Payout schedule ──────────────────────────────────────────────────────
 
   Future<void> loadPayoutSchedule() async {
+    if (selectedCurrency.value.isEmpty) return;
     payoutSchedule.value = await _repo.getPayoutSchedule(storeId, currency: selectedCurrency.value);
   }
 

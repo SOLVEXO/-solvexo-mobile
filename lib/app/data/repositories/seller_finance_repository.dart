@@ -293,7 +293,7 @@ class SellerFinanceRepository {
     }
   }
 
-  Future<PayoutScheduleModel> getPayoutSchedule(String storeId, {String currency = 'USD'}) async {
+  Future<PayoutScheduleModel> getPayoutSchedule(String storeId, {required String currency}) async {
     try {
       final response = await _client.get(
         ApiConstants.financePayoutSchedule(storeId),

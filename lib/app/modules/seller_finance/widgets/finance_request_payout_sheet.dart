@@ -31,6 +31,9 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
   late final TextEditingController _notesCtrl;
   String? _selectedMethodId;
 
+  /// The wallet the payout comes from (payouts debit the method's currency).
+  late String _currency;
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +45,7 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
     // the balance/amount shown on open matches the screen the seller came
     // from; fall back to any default, then any active method.
     final currency = widget.controller.selectedCurrency.value;
+    _currency = currency;
     final currencyDefaults = active.where((m) => m.currency == currency && m.isDefault);
     final anyDefaults = active.where((m) => m.isDefault);
     _selectedMethodId = currencyDefaults.isNotEmpty
@@ -61,7 +65,7 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
     // API: "amount must not be less than 1" (in the wallet's currency).
     if (amount == null || amount < 1) {
       Get.snackbar('Invalid amount',
-          'Enter an amount of at least ${Money.format(1, widget.controller.selectedCurrency.value)}',
+          'Enter an amount of at least ${Money.format(1, _currency)}',
           snackPosition: SnackPosition.BOTTOM);
       return;
     }
@@ -90,15 +94,13 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
             child: SingleChildScrollView(
               child: Obx(() {
                 final methods = widget.controller.payoutMethods;
-                final activeMethods = methods.where((m) => m.isActive).toList();
-                PayoutMethodModel? selectedMethod;
-                for (final m in activeMethods) {
-                  if (m.id == _selectedMethodId) {
-                    selectedMethod = m;
-                    break;
-                  }
+                final wallets = widget.controller.availableCurrencies;
+                final currency = _currency.isNotEmpty ? _currency : (wallets.isNotEmpty ? wallets.first : '');
+                final activeMethods =
+                    methods.where((m) => m.isActive && m.currency == currency).toList();
+                if (!activeMethods.any((m) => m.id == _selectedMethodId)) {
+                  _selectedMethodId = activeMethods.isNotEmpty ? activeMethods.first.id : null;
                 }
-                final currency = selectedMethod?.currency ?? widget.controller.selectedCurrency.value;
                 final wallet = widget.controller.dashboard.value.walletFor(currency);
                 return Column(
                   mainAxisSize: MainAxisSize.min,
@@ -112,6 +114,19 @@ class _FinanceRequestPayoutSheetState extends State<FinanceRequestPayoutSheet> {
                       ),
                     ),
                     CustomText(text: 'Request Payout', color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
+                    if (wallets.length > 1) ...[
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 8, children: [
+                        for (final c in wallets)
+                          ChoiceChip(
+                            key: Key('payoutWallet_$c'),
+                            materialTapTargetSize: MaterialTapTargetSize.padded,
+                            label: Text('$c wallet'),
+                            selected: c == currency,
+                            onSelected: (_) => setState(() => _currency = c),
+                          ),
+                      ]),
+                    ],
                     const SizedBox(height: 4),
                     CustomText(
                       text: 'Available balance: ${wallet.amountLabel(wallet.availableBalance)}',

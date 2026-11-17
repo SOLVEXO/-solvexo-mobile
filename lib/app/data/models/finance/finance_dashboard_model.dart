@@ -166,6 +166,19 @@ class FinanceWallet {
     payoutSchedule: FinanceDashboardScheduleSummary.empty,
   );
 
+  /// A zero wallet for a currency the server has no record of yet.
+  static FinanceWallet emptyFor(String currency) => FinanceWallet(
+        currency: currency,
+        availableBalance: 0,
+        pendingBalance: 0,
+        nextPayout: const FinanceNextPayout(),
+        summary: FinanceSummary.empty,
+        payoutSchedule: FinanceDashboardScheduleSummary.empty,
+      );
+
+  bool get hasMoney =>
+      availableBalance != 0 || pendingBalance != 0 || (nextPayout.pendingAmount ?? 0) != 0;
+
   factory FinanceWallet.fromJson(Map<String, dynamic> json) => FinanceWallet(
         currency: json['currency'] as String? ?? 'USD',
         availableBalance: (json['availableBalance'] as num?)?.toDouble() ?? 0,
@@ -207,6 +220,8 @@ class FinanceDashboardModel {
 
   List<String> get currencies => wallets.map((w) => w.currency).toList();
 
+  /// Never another currency's wallet: a missing one is an empty wallet of
+  /// the asked currency (no conversion on the device).
   FinanceWallet walletFor(String currency) =>
-      wallets.firstWhere((w) => w.currency == currency, orElse: () => wallets.isNotEmpty ? wallets.first : FinanceWallet.empty);
+      wallets.firstWhere((w) => w.currency == currency, orElse: () => FinanceWallet.emptyFor(currency));
 }
