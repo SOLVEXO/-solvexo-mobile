@@ -48,6 +48,31 @@ void main() {
       expect(s.blocksBuyerApp, isFalse);
     });
 
+    test('live status body {data: {state: off}} is off', () {
+      // Real response of GET /api/platform-config/maintenance, 2026-11-17.
+      final s = MaintenanceState.fromJson({
+        'success': true,
+        'data': {'state': 'off'},
+      });
+      expect(s.enabled, isFalse);
+      expect(s.blocksBuyerApp, isFalse);
+    });
+
+    test('state off wins over a stale boolean', () {
+      final s = MaintenanceState.fromJson({
+        'data': {'state': 'off', 'enabled': true},
+      });
+      expect(s.enabled, isFalse);
+    });
+
+    test('state on (assumed shape) blocks the buyer app', () {
+      final s = MaintenanceState.fromJson({
+        'data': {'state': 'on', 'message': 'Back soon'},
+      });
+      expect(s.blocksBuyerApp, isTrue);
+      expect(s.message, 'Back soon');
+    });
+
     test('disabled config is off', () {
       final s = MaintenanceState.fromJson({'data': {'enabled': false}});
       expect(s.enabled, isFalse);

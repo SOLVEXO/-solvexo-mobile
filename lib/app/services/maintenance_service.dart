@@ -61,7 +61,16 @@ class MaintenanceState {
     final json = raw['data'] is Map<String, dynamic>
         ? raw['data'] as Map<String, dynamic>
         : raw;
-    final enabled = json['maintenanceMode'] == true || json['enabled'] == true;
+    // Live status endpoint answers `{data: {state: 'off'}}` (verified
+    // 2026-11-17). Only 'off' was observed; 'on'/'active' are assumed for the
+    // enabled case, any other value falls back to the boolean fields.
+    final state = json['state']?.toString().toLowerCase();
+    final enabled = state == 'off'
+        ? false
+        : state == 'on' ||
+            state == 'active' ||
+            json['maintenanceMode'] == true ||
+            json['enabled'] == true;
     final scopes = <String>[
       if (json['scopes'] is List)
         ...(json['scopes'] as List).map((e) => e.toString()),

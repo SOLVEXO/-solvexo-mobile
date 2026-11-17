@@ -139,7 +139,13 @@ class SupportChatController extends GetxController {
         requiresAuth: true,
       );
       final body = res.data;
+      // Live API: `{data: {conversation: null | {...}, serverTime}}`
+      // (verified 2026-11-17 with no conversation; the fields inside a
+      // populated conversation were not seen yet).
       dynamic data = body is Map ? body['data'] : null;
+      if (data is Map && data.containsKey('conversation')) {
+        data = data['conversation'];
+      }
       if (data is Map) data = data['messages'];
       if (data is! List) return;
       for (final m in data) {
