@@ -123,7 +123,8 @@ class SellerProductRepository {
     String? coverStyle,
     String? classFrom,
     String? classTo,
-  }) async {
+      Map<String, dynamic>? sampleFile,
+}) async {
     try {
       final body = <String, dynamic>{
         'productId': productId,
@@ -148,6 +149,7 @@ class SellerProductRepository {
           if (buyerDeliveryMessage != null && buyerDeliveryMessage.isNotEmpty)
             'buyerDeliveryMessage': buyerDeliveryMessage,
           'preview': {'enabled': previewEnabled},
+          if (sampleFile != null) 'sampleFile': sampleFile,
         },
       };
 
@@ -282,7 +284,8 @@ class SellerProductRepository {
     String? coverStyle,
     String? classFrom,
     String? classTo,
-  }) async {
+      Map<String, dynamic>? sampleFile,
+}) async {
     try {
       final body = <String, dynamic>{
         'storeId': storeId,
@@ -311,6 +314,7 @@ class SellerProductRepository {
               buyerDeliveryMessage.isNotEmpty)
             'buyerDeliveryMessage': buyerDeliveryMessage,
           'preview': {'enabled': previewEnabled},
+          if (sampleFile != null) 'sampleFile': sampleFile,
         },
       };
 

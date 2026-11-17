@@ -101,6 +101,8 @@ class EditSellerProductController extends GetxController {
   final List<String> _pendingVariantDeletions = [];
   // Digital-only
   final RxList<DigitalFileEntry> digitalFiles = <DigitalFileEntry>[].obs;
+  // Free sample: required to publish digital (checklist #3).
+  final DigitalFileEntry sample = DigitalFileEntry();
   final RxBool unlimitedDownload = true.obs;
   final RxString downloadLimitCount = ''.obs;
   final RxString linkExpiryDays = ''.obs;
@@ -144,8 +146,8 @@ class EditSellerProductController extends GetxController {
         coverStyle: coverStyle.value,
         classFrom: classFrom.value,
         classTo: classTo.value,
+        hasSample: sample.isUploaded,
       );
-
 
   // ── Computed ──────────────────────────────────────────────────────────────
 
@@ -218,6 +220,11 @@ class EditSellerProductController extends GetxController {
     coverStyle.value = PublishRules.knownCoverStyle(p['coverStyle'] as String?);
     classFrom.value = PublishRules.knownClass(p['classFrom'] as String?);
     classTo.value = PublishRules.knownClass(p['classTo'] as String?);
+    final digital = p['digital'];
+    final storedSample = digital is Map ? digital['sampleFile'] : null;
+    if (storedSample is Map) {
+      sample.fillFromStored(Map<String, dynamic>.from(storedSample));
+    }
 
     if (!isPhysical || variants.isNotEmpty) return;
     for (final v in result.variants) {
@@ -310,7 +317,18 @@ class EditSellerProductController extends GetxController {
 
   Future<void> pickAndUploadDigitalFile(int index) async {
     if (index >= digitalFiles.length) return;
+    await _pickAndUploadInto(digitalFiles[index]);
+    digitalFiles.refresh();
+  }
 
+  Future<void> pickAndUploadSample() async {
+    await _pickAndUploadInto(sample);
+    if (sample.isUploaded) publishFieldsError.value = null;
+  }
+
+  void removeSample() => sample.clear();
+
+  Future<void> _pickAndUploadInto(DigitalFileEntry entry) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: UploadRules.privateExtensions,
@@ -320,7 +338,6 @@ class EditSellerProductController extends GetxController {
     final picked = result.files.first;
     if (picked.path == null) return;
 
-    final entry = digitalFiles[index];
     entry.isUploading.value = true;
 
     final data = await _uploadRepo.uploadPrivateFile(File(picked.path!));
@@ -338,8 +355,6 @@ class EditSellerProductController extends GetxController {
     if (entry.nameCtrl.text.trim().isEmpty) {
       entry.nameCtrl.text = data['fileName'] as String? ?? picked.name;
     }
-
-    digitalFiles.refresh();
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -508,6 +523,7 @@ class EditSellerProductController extends GetxController {
       coverStyle: coverStyle.value,
       classFrom: classFrom.value,
       classTo: classTo.value,
+      sampleFile: sample.isUploaded ? sample.toSampleJson() : null,
     );
   }
 
@@ -597,6 +613,7 @@ class EditSellerProductController extends GetxController {
     for (final f in digitalFiles) {
       f.dispose();
     }
+    sample.dispose();
     for (final v in variants) {
       v.dispose();
     }

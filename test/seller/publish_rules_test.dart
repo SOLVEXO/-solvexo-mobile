@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
+import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart';
 import 'package:book_store_app/app/modules/seller/utils/publish_rules.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:dio/dio.dart';
@@ -69,8 +70,25 @@ void main() {
           contains('class range'));
       expect(
           PublishRules.validate(
-              status: 'active', isDigital: true, coverStyle: 'book', classFrom: 'class-3', classTo: 'class-5'),
+              status: 'active', isDigital: true, coverStyle: 'book', classFrom: 'class-3', classTo: 'class-5',
+              hasSample: true),
           isNull);
+    });
+
+    test('digital needs a free sample to publish (#3), drafts do not', () {
+      expect(
+          PublishRules.validate(
+              status: 'active', isDigital: true, coverStyle: 'book', classFrom: 'class-3', classTo: 'class-5'),
+          contains('free sample'));
+      expect(
+          PublishRules.validate(
+              status: 'draft', isDigital: true, coverStyle: null, classFrom: null, classTo: null),
+          isNull);
+      expect(
+          PublishRules.validate(
+              status: 'active', isDigital: false, coverStyle: 'book', classFrom: null, classTo: null),
+          isNull,
+          reason: 'physical needs no sample');
     });
 
     test('range must be complete and in order, even for drafts', () {
@@ -85,6 +103,29 @@ void main() {
     });
   });
 
+  test('sampleFile uses the stored shape {url, name, size, mimeType}', () {
+    // GET get-my-product after upload + edit (2026-11-17):
+    // digital.sampleFile = {url: 'r2/private/...-sample-test.pdf',
+    //   name: 'sample-test.pdf', size: 594, mimeType: 'application/pdf', pageCount: null}
+    final e = DigitalFileEntry()
+      ..fillFromStored({
+        'url': 'r2/private/digital-products/x-sample-test.pdf',
+        'name': 'sample-test.pdf',
+        'size': 594,
+        'mimeType': 'application/pdf',
+        'pageCount': null,
+      });
+    expect(e.isUploaded, isTrue);
+    expect(e.toSampleJson(), {
+      'url': 'r2/private/digital-products/x-sample-test.pdf',
+      'name': 'sample-test.pdf',
+      'size': 594,
+      'mimeType': 'application/pdf',
+    });
+    e.clear();
+    expect(e.isUploaded, isFalse);
+  });
+
   test('add-digital-product sends coverStyle and class range', () async {
     final client = _CaptureClient();
     final ok = await SellerProductRepository(client: client).addDigitalProduct(
@@ -95,9 +136,11 @@ void main() {
       coverStyle: 'book',
       classFrom: 'class-3',
       classTo: 'class-5',
+      sampleFile: {'url': 'r2/private/s.pdf', 'name': 's.pdf', 'size': 1, 'mimeType': 'application/pdf'},
     );
     expect(ok, isTrue);
     final body = client.posted.single as Map;
+    expect((body['digital'] as Map)['sampleFile'], containsPair('url', 'r2/private/s.pdf'));
     expect(body['coverStyle'], 'book');
     expect(body['classFrom'], 'class-3');
     expect(body['classTo'], 'class-5');

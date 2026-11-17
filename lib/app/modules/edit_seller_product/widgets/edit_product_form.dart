@@ -263,6 +263,19 @@ class _DigitalExtraFields extends StatelessWidget {
             )),
         const SizedBox(height: 16),
 
+        // Free sample — required to publish digital (docs Part B 2.9)
+        FormFieldSection(
+          label: 'Free sample',
+          required: true,
+          hint: 'Needed to publish. A short part of your file; buyers see a protected preview, not a download.',
+          child: DigitalFileUploadTile(
+            entry: controller.sample,
+            onPickFile: controller.pickAndUploadSample,
+            onRemove: controller.removeSample,
+          ),
+        ),
+        const SizedBox(height: 16),
+
         // Download Limit
         const _FieldLabel(label: 'Download Limit'),
         const SizedBox(height: 6),

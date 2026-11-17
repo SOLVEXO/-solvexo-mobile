@@ -12,7 +12,7 @@ by calling the API. Tick items off in commits that name the item number.
    `educationLevel`), seller products filter, onboarding "Educational
    Resources", buyer product card. Map to Digital; keep reading legacy
    `educational` only for display.
-3. **Free sample required to publish digital** (docs §2.9). Check the add
+3. [x] **Free sample required to publish digital** (docs §2.9). Check the add
    flow uploads `digital.sample`; show the API error otherwise.
 4. **Plan lapse** (docs §2.8): `expired|past_due|canceled` → Plan expired
    screen with Choose a plan + Switch/Create buyer account; block

@@ -113,6 +113,32 @@ class DigitalFileEntry {
     'mimeType': mimeType.value,
   };
 
+  /// `digital.sampleFile` as the API stores it (verified 2026-11-17):
+  /// `{url: <upload publicId>, name, size, mimeType}`.
+  Map<String, dynamic> toSampleJson() => {
+    'url': publicId.value,
+    'name': fileName.value.isEmpty ? nameCtrl.text.trim() : fileName.value,
+    'size': fileSize.value,
+    'mimeType': mimeType.value,
+  };
+
+  /// Fill from a stored `{url, name, size, mimeType}` (sampleFile or files[]).
+  void fillFromStored(Map<String, dynamic> f) {
+    publicId.value = f['publicId'] as String? ?? f['url'] as String? ?? '';
+    fileName.value = f['name'] as String? ?? '';
+    mimeType.value = f['mimeType'] as String? ?? '';
+    fileSize.value = (f['size'] as num?)?.toInt() ?? 0;
+    nameCtrl.text = f['name'] as String? ?? '';
+  }
+
+  void clear() {
+    publicId.value = '';
+    fileName.value = '';
+    fileSize.value = 0;
+    mimeType.value = '';
+    nameCtrl.clear();
+  }
+
   String get displaySize {
     final b = fileSize.value;
     if (b <= 0) return '';
@@ -209,6 +235,7 @@ class AddSellerProductController extends GetxController {
         coverStyle: coverStyle.value,
         classFrom: classFrom.value,
         classTo: classTo.value,
+        hasSample: sample.isUploaded,
       );
 
   // ── Shared (physical + digital) ───────────────────────────────────────────
@@ -227,6 +254,8 @@ class AddSellerProductController extends GetxController {
 
   // ── Digital-only reactive values ──────────────────────────────────────────
   final RxList<DigitalFileEntry> digitalFiles = <DigitalFileEntry>[].obs;
+  // Free sample: required to publish digital (checklist #3).
+  final DigitalFileEntry sample = DigitalFileEntry();
   final RxBool unlimitedDownload = true.obs; // true = "unlimited"
   final RxString downloadLimitCount =
       ''.obs; // used when unlimitedDownload=false
@@ -432,7 +461,18 @@ class AddSellerProductController extends GetxController {
 
   Future<void> pickAndUploadDigitalFile(int index) async {
     if (index >= digitalFiles.length) return;
+    await _pickAndUploadInto(digitalFiles[index]);
+    digitalFiles.refresh();
+  }
 
+  Future<void> pickAndUploadSample() async {
+    await _pickAndUploadInto(sample);
+    if (sample.isUploaded) publishFieldsError.value = null;
+  }
+
+  void removeSample() => sample.clear();
+
+  Future<void> _pickAndUploadInto(DigitalFileEntry entry) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: UploadRules.privateExtensions,
@@ -442,7 +482,6 @@ class AddSellerProductController extends GetxController {
     final picked = result.files.first;
     if (picked.path == null) return;
 
-    final entry = digitalFiles[index];
     entry.isUploading.value = true;
 
     final data = await _uploadRepo.uploadPrivateFile(File(picked.path!));
@@ -460,8 +499,6 @@ class AddSellerProductController extends GetxController {
     if (entry.nameCtrl.text.trim().isEmpty) {
       entry.nameCtrl.text = data['fileName'] as String? ?? picked.name;
     }
-
-    digitalFiles.refresh();
   }
 
   void goNext() {
@@ -581,6 +618,7 @@ class AddSellerProductController extends GetxController {
       buyerDeliveryMessage: msg.isEmpty ? null : msg,
       previewEnabled: previewEnabled.value,
       productType: 'digital',
+      sampleFile: sample.isUploaded ? sample.toSampleJson() : null,
       coverStyle: coverStyle.value,
       classFrom: classFrom.value,
       classTo: classTo.value,
@@ -686,6 +724,7 @@ class AddSellerProductController extends GetxController {
     for (final f in digitalFiles) {
       f.dispose();
     }
+    sample.dispose();
     for (final v in variants) {
       v.dispose();
     }

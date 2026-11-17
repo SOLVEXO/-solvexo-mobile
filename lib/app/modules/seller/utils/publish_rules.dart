@@ -76,6 +76,7 @@ class PublishRules {
     required String? coverStyle,
     required String? classFrom,
     required String? classTo,
+    bool hasSample = false,
   }) {
     final range = classRangeError(classFrom, classTo);
     if (range != null) return range;
@@ -85,6 +86,11 @@ class PublishRules {
     }
     if (isDigital && (classFrom == null || classTo == null)) {
       return 'Choose the class range to publish a digital product.';
+    }
+    // Checklist #3, docs Part B 2.9: a free sample is required to publish
+    // digital (stored as `digital.sampleFile`).
+    if (isDigital && !hasSample) {
+      return 'Add a free sample file to publish a digital product.';
     }
     return null;
   }
