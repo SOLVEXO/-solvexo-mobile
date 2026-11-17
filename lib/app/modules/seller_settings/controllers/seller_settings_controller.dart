@@ -188,7 +188,7 @@ class SellerSettingsController extends GetxController {
           emoji: AppIcons.logoutIcon,
           title: 'Logout',
           isDanger: true,
-          onTap: () => Get.offAllNamed(Routes.sellerStores),
+          onTap: signOut,
         ),
         SettingsTile(
           emoji: AppIcons.deleteIcon,
@@ -282,9 +282,26 @@ class SellerSettingsController extends GetxController {
       rightButtonName: 'Logout',
       onLeftButtonTap: () => Get.back(),
       onRightButtonTap: () async {
-        await Get.find<AuthController>().logout();
+        Get.back();
+        await logout();
       },
     );
+  }
+
+  /// Real sign-out (same as the buyer's): FCM sign-out, POST logout, clear
+  /// tokens + session prefs, close sockets; then the Login screen on top of
+  /// guest Home. The old tile only went back to the store list.
+  Future<void> logout() async {
+    await _authRepository.logout();
+    if (Get.isRegistered<AuthController>()) {
+      Get.find<AuthController>().currentUser.value = null;
+    }
+    if (Get.isRegistered<ProfileController>()) {
+      Get.find<ProfileController>().user.value = null;
+    }
+    Get.offAllNamed(Routes.mainHome);
+    Get.toNamed(Routes.authTabView);
+    ToastUtil.showToast('Logged out successfully');
   }
 
   /// Delete account — also suspends all stores owned by this seller
