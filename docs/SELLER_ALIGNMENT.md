@@ -50,6 +50,7 @@ by calling the API. Tick items off in commits that name the item number.
 15. Store settings: `codEnabled`, `deliverySettings`, `giftWrap`,
     `deliveryDays`, `shipFrom`, `returnPolicy {note, digitalNote}`.
 16. Analytics plan-gating: locked card on 403 instead of an error.
+18. Bulk upload, docs §6.3; web-only for now.
 
 ## Cleanup
 17. Remove dead store-verification constants in `api_constaints.dart`.
