@@ -3,7 +3,7 @@ import 'package:book_store_app/app/network/dio_service.dart';
 import 'package:dio/dio.dart';
 import 'package:book_store_app/utils/upload_rules.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 class BaseClient {
   Future<Response> get(

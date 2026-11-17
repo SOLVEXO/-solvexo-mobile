@@ -323,13 +323,14 @@ class SellerSettingsController extends GetxController {
         return;
       }
 
-      final success = await _authRepository.deleteAccount(token: token);
+      final result = await _authRepository.deleteAccount();
 
-      if (success) {
+      if (result.ok) {
         ToastUtil.showToast('Account deleted successfully');
         await Get.find<AuthController>().logout();
       } else {
-        ToastUtil.showToast('Failed to delete account');
+        // Server's own reason, e.g. 409 while orders are open.
+        ToastUtil.showToast(result.message ?? 'Failed to delete account');
       }
     } catch (e) {
       debugPrint('Error deleting account: $e');
