@@ -90,6 +90,7 @@ class AppTranslations extends Translations {
     'So we can reply, share your name and an email or phone number.':
         'تاکہ ہم جواب دے سکیں، اپنا نام اور ای میل یا فون نمبر بتائیں۔',
     'Your name': 'آپ کا نام',
+    'Access ended': 'رسائی ختم ہو گئی',
     'Email or phone': 'ای میل یا فون',
     'Please enter your name.': 'براہ کرم اپنا نام لکھیں۔',
     'Enter a valid email or phone number.': 'درست ای میل یا فون نمبر لکھیں۔',

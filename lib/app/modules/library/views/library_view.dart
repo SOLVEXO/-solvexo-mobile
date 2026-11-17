@@ -430,7 +430,9 @@ class _CourseCard extends StatelessWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(BaseRadius.lg),
-        onTap: course.slug == null ? null : () => _openCourse(course),
+        onTap: course.slug == null || course.accessExpired
+            ? null
+            : () => _openCourse(course),
         child: Padding(
           padding: const EdgeInsets.all(BaseSpacing.sm),
           child: Row(
@@ -445,7 +447,12 @@ class _CourseCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall),
-                    if (course.progress != null) ...[
+                    if (course.accessExpired) ...[
+                      const SizedBox(height: BaseSpacing.xs),
+                      Text('Access ended'.tr,
+                          style: theme.textTheme.labelSmall
+                              ?.copyWith(color: theme.colorScheme.error)),
+                    ] else if (course.progress != null) ...[
                       const SizedBox(height: BaseSpacing.xs),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(BaseRadius.pill),
@@ -461,7 +468,9 @@ class _CourseCard extends StatelessWidget {
               ),
               const SizedBox(width: BaseSpacing.xs),
               Icon(
-                course.started
+                course.accessExpired
+                    ? Icons.lock_clock_outlined
+                    : course.started
                     ? Icons.play_circle_fill_rounded
                     : Icons.play_circle_outline_rounded,
                 size: 32,

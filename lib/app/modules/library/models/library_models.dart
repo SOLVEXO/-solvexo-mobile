@@ -15,9 +15,11 @@ class LibraryFile {
   DateTime get purchasedAt => order.paidAt ?? order.createdAt;
 }
 
-/// One row of `GET /api/courses/mine`. The response shape was not verified
-/// from this environment, so every field is read defensively and blocks are
-/// hidden when a value is missing.
+/// One row of `GET /api/courses/mine`. Live shape (verified 2026-11-17):
+/// `{productId, name, slug, image, deliveryFormat, lessons, completed,
+/// completedAt, certificateCode, percent, lastLessonId, accessExpiresAt,
+/// accessExpired, isPublished}`. Older/nested shapes are still read; blocks
+/// are hidden when a value is missing.
 class LibraryCourse {
   LibraryCourse({
     required this.id,
@@ -28,6 +30,7 @@ class LibraryCourse {
     this.lessonsTotal,
     this.lessonsDone,
     this.isPublished = true,
+    this.accessExpired = false,
   });
 
   final String id;
@@ -40,6 +43,9 @@ class LibraryCourse {
   final int? lessonsTotal;
   final int? lessonsDone;
   final bool isPublished;
+
+  /// The buyer's access window (purchase date + accessDays) has ended.
+  final bool accessExpired;
 
   bool get started => (progress ?? 0) > 0 || (lessonsDone ?? 0) > 0;
 
@@ -61,7 +67,8 @@ class LibraryCourse {
     String? pick(String key) =>
         _str(json[key]) ?? _str(course[key]) ?? _str(product[key]);
 
-    final id = pick('_id') ?? pick('id') ?? pick('courseId');
+    final id =
+        pick('productId') ?? pick('_id') ?? pick('id') ?? pick('courseId');
     final title = pick('title') ?? pick('name');
     if (id == null || title == null) return null;
 
@@ -72,7 +79,7 @@ class LibraryCourse {
       image = first is Map ? _str(first['url']) : _str(first);
     }
 
-    final p = json['progress'] ?? json['progressPercent'];
+    final p = json['percent'] ?? json['progress'] ?? json['progressPercent'];
     double? progress;
     if (p is num) {
       progress = p.toDouble();
@@ -81,7 +88,7 @@ class LibraryCourse {
     }
 
     int? asInt(dynamic v) => v is num ? v.toInt() : null;
-    final done = json['completedLessons'];
+    final done = json['completed'] ?? json['completedLessons'];
 
     return LibraryCourse(
       id: id,
@@ -89,9 +96,11 @@ class LibraryCourse {
       slug: pick('slug'),
       image: image,
       progress: progress?.clamp(0, 100).toDouble(),
-      lessonsTotal: asInt(json['totalLessons'] ?? json['lessonsCount']),
+      lessonsTotal:
+          asInt(json['lessons'] ?? json['totalLessons'] ?? json['lessonsCount']),
       lessonsDone: done is List ? done.length : asInt(done),
       isPublished: json['isPublished'] != false,
+      accessExpired: json['accessExpired'] == true,
     );
   }
 }
