@@ -136,6 +136,8 @@ import '../modules/seller_subscriptions/bindings/seller_subscriptions_binding.da
 import '../modules/seller_subscriptions/views/seller_subscriptions_view.dart';
 import '../modules/seller_platform_plans/bindings/seller_platform_plans_binding.dart';
 import '../modules/seller_platform_plans/views/seller_platform_plans_view.dart';
+import '../modules/seller_plan_expired/bindings/seller_plan_expired_binding.dart';
+import '../modules/seller_plan_expired/views/seller_plan_expired_view.dart';
 import '../modules/seller_seo/bindings/seller_seo_binding.dart';
 import '../modules/seller_seo/views/seller_seo_view.dart';
 import '../modules/seller_seo_products/bindings/seller_seo_products_binding.dart';
@@ -256,6 +258,11 @@ class AppPages {
       name: Routes.sellerPlatformPlan,
       page: () => const SellerPlatformPlansView(),
       binding: SellerPlatformPlansBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerPlanExpired,
+      page: () => const SellerPlanExpiredView(),
+      binding: SellerPlanExpiredBinding(),
     ),
     GetPage(
       name: Routes.sellerSeo,

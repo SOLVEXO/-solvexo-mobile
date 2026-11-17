@@ -7,6 +7,8 @@ import 'package:book_store_app/app/data/repositories/seller_orders_repository.da
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orders_controller.dart';
+import 'package:book_store_app/app/modules/seller/utils/plan_lapse.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -75,6 +77,24 @@ class SellerHomeController extends GetxController {
   void onInit() {
     super.onInit();
     _loadData();
+  }
+
+  /// Shown once per app session when the plan has lapsed (checklist #4);
+  /// the dashboard stays usable (view only) for existing orders.
+  static bool _planNoticeShown = false;
+
+  @override
+  void onReady() {
+    super.onReady();
+    _checkPlanLapse();
+  }
+
+  Future<void> _checkPlanLapse() async {
+    if (_planNoticeShown) return;
+    final plan = await PlanGate.check(force: true);
+    if (!plan.lapsed) return;
+    _planNoticeShown = true;
+    Get.toNamed(Routes.sellerPlanExpired, arguments: {'status': plan.status});
   }
 
   Future<void> refreshData() async {

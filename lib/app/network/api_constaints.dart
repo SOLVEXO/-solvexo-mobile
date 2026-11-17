@@ -43,6 +43,13 @@ class ApiConstants {
   static const String login = "$apiPrefix/auth/login";
   static const String refreshToken = "$apiPrefix/auth/refresh";
   static const String getMe = "$apiPrefix/auth/getprofile";
+  // Account switching (docs Part B 5.1 #6). Each returns a full session for
+  // the other role: {success, message, data:{user, token}} (verified live).
+  static const String becomeSeller = "$apiPrefix/auth/become-seller";
+  static const String switchToBuyer = "$apiPrefix/auth/switch-to-buyer";
+  static const String createBuyerAccount = "$apiPrefix/auth/create-buyer-account";
+  static const String freeTrialEligibility =
+      "$apiPrefix/platform-plans/free-trial-eligibility";
   static const String logout = "$apiPrefix/auth/logout";
   // static const String verifyEmail = "$apiPrefix/auth/verify-email";
   // static const String resendVerification =

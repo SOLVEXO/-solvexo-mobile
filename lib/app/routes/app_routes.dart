@@ -103,6 +103,7 @@ abstract class Routes {
   static const sellerLoyalty = '/seller/loyalty';
   static const sellerSubscriptionPlans = '/seller/subscription-plans';
   static const sellerPlatformPlan = '/seller/platform-plan';
+  static const sellerPlanExpired = '/seller/plan-expired';
   static const sellerSeo = '/seller/seo';
   static const sellerSeoProducts = '/seller/seo/products';
   static const sellerActivityLog = '/seller/activity-log';

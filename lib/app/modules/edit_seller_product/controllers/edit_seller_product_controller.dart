@@ -7,7 +7,9 @@ import 'package:book_store_app/app/data/repositories/seller_product_repository.d
 import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/add_seller_product/controllers/add_seller_product_controller.dart'
     show DigitalFileEntry, ProductPublishMode;
+import 'package:book_store_app/app/modules/seller/utils/plan_lapse.dart';
 import 'package:book_store_app/app/modules/seller/utils/publish_rules.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -371,6 +373,15 @@ class EditSellerProductController extends GetxController {
     if (fieldsError != null) {
       ToastUtil.showToast(fieldsError);
       return;
+    }
+    // Plan lapse (checklist #4): no activating; drafts can still be saved.
+    if (publishMode.value != ProductPublishMode.draft) {
+      final plan = await PlanGate.check();
+      if (plan.lapsed) {
+        ToastUtil.showToast('Your plan is not active. Save as draft or choose a plan.');
+        Get.toNamed(Routes.sellerPlanExpired, arguments: {'status': plan.status});
+        return;
+      }
     }
     isSaving.value = true;
 

@@ -14,7 +14,7 @@ by calling the API. Tick items off in commits that name the item number.
    `educational` only for display.
 3. [x] **Free sample required to publish digital** (docs §2.9). Check the add
    flow uploads `digital.sample`; show the API error otherwise.
-4. **Plan lapse** (docs §2.8): `expired|past_due|canceled` → Plan expired
+4. [x] **Plan lapse** (docs §2.8): `expired|past_due|canceled` → Plan expired
    screen with Choose a plan + Switch/Create buyer account; block
    create/activate. Some `past_due` handling exists (6 files) — verify.
 5. **Account switching**: `POST /api/auth/become-seller`,

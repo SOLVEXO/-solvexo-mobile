@@ -8,7 +8,7 @@ class PlatformSubscriptionModel {
   final String storeId;
   final String billingInterval; // 'monthly' | 'yearly'
   final double amountUSD;
-  final String status; // 'trialing' | 'active' | 'past_due' | 'canceled'
+  final String status; // 'trialing' | 'active' | 'past_due' | 'canceled' | 'expired'
   final DateTime? trialEndsAt;
   final DateTime? currentPeriodEnd;
   final DateTime? nextBillingDate;
