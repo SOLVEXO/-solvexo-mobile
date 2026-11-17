@@ -10,6 +10,7 @@ import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/money.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -124,8 +125,8 @@ class _PlanCard extends StatelessWidget {
               ],
             ),
             CustomText(
-              text: '\$${plan.displayMonthlyPrice.toStringAsFixed(2)} ${plan.displayCurrency}/mo'
-              '${plan.yearlyPriceUSD != null ? ' · \$${plan.yearlyPriceUSD!.toStringAsFixed(2)}/yr' : ''}',
+              text: '${Money.format(plan.displayMonthlyPrice, plan.displayCurrency)}/mo'
+              '${plan.yearlyPriceUSD != null ? ' · ${Money.usd(plan.yearlyPriceUSD)}/yr' : ''}',
               color: AppColors.primaryColor,
               fontSize: AppFontSize.tiny,
               fontWeight: FontWeight.w700,

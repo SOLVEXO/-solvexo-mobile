@@ -4,6 +4,8 @@ import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
+import 'package:book_store_app/utils/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -343,6 +345,13 @@ class _PriceOptimizerOutput extends StatelessWidget {
     final sampleSize = output['comparableListingsSampleSize'];
     final lowConfidence = output['lowConfidence'] == true;
     final externalNote = output['externalMarketNote'] as String?;
+    // Display only: the API's own currency when it sends one, else the store's.
+    final cur = output['currency']?.toString();
+    String money(dynamic v) {
+      final n = v is num ? v : num.tryParse('$v');
+      if (n == null) return '$v';
+      return cur != null && cur.isNotEmpty ? Money.format(n, cur) : StoreCurrency.format(n);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,14 +362,14 @@ class _PriceOptimizerOutput extends StatelessWidget {
             child: Column(
               children: [
                 CustomText(
-                  text: '\$$suggested',
+                  text: money(suggested),
                   color: AppColors.primaryColor,
                   fontSize: AppFontSize.veryLarge3,
                   fontWeight: FontWeight.w800,
                 ),
                 if (min != null && max != null)
                   CustomText(
-                    text: 'Range: \$$min – \$$max',
+                    text: 'Range: ${money(min)} – ${money(max)}',
                     color: AppColors.gray600,
                     fontSize: AppFontSize.tiny,
                   ),

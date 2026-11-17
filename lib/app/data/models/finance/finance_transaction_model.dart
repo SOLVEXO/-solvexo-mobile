@@ -1,3 +1,4 @@
+import 'package:book_store_app/utils/money.dart';
 enum FinanceTransactionType { sale, payout, fee, refund, adjustment }
 
 FinanceTransactionType financeTransactionTypeFromString(String? value) {
@@ -78,7 +79,7 @@ class FinanceTransactionModel {
 
   bool get isCredit => amount >= 0;
 
-  String _amountLabel(double v) => currency == 'PKR' ? 'PKR ${v.toStringAsFixed(2)}' : '\$${v.toStringAsFixed(2)}';
+  String _amountLabel(double v) => Money.format(v, currency);
 
   String get formattedAmount {
     final sign = isCredit ? '+' : '-';

@@ -1,3 +1,4 @@
+import 'package:book_store_app/utils/money.dart';
 class TaxReportModel {
   final String id;
   final String period; // q1 | q2 | q3 | q4 | annual
@@ -51,7 +52,7 @@ class TaxReportModel {
         generatedAt: json['generatedAt'] != null ? DateTime.tryParse(json['generatedAt'] as String) : null,
       );
 
-  String amountLabel(double v) => currency == 'PKR' ? 'PKR ${v.toStringAsFixed(2)}' : '\$${v.toStringAsFixed(2)}';
+  String amountLabel(double v) => Money.format(v, currency);
 
   String get periodLabel {
     switch (period) {

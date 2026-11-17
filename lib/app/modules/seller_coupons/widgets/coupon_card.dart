@@ -6,6 +6,7 @@ import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -89,7 +90,7 @@ class CouponCard extends StatelessWidget {
                 if (coupon.minOrderAmount != null)
                   _InfoChip(
                     icon: Icons.shopping_bag_outlined,
-                    label: 'Min \$${coupon.minOrderAmount!.toStringAsFixed(0)}',
+                    label: 'Min ${StoreCurrency.format(coupon.minOrderAmount)}',
                   ),
                 if (coupon.expiresAt != null)
                   _InfoChip(

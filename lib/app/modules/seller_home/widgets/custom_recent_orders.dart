@@ -4,6 +4,7 @@ import 'package:book_store_app/app/modules/seller_home/controllers/seller_home_c
 import 'package:book_store_app/app/modules/seller_orders/controllers/seller_orders_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -134,7 +135,7 @@ class _OrderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 CustomText(
-                  text: '\$${order.amount.toStringAsFixed(2)}',
+                  text: StoreCurrency.format(order.amount),
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),

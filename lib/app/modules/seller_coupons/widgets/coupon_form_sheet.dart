@@ -7,6 +7,7 @@ import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -170,7 +171,7 @@ class _CouponFormSheetState extends State<CouponFormSheet> {
                   ),
                   SizedBox(height: BaseSpacing.sm),
                   CustomTextField(
-                    label: _discountType == 'percentage' ? 'Discount (%)' : 'Discount Amount (\$)',
+                    label: _discountType == 'percentage' ? 'Discount (%)' : 'Discount Amount (${StoreCurrency.symbol})',
                     hintText: _discountType == 'percentage' ? 'e.g. 20' : 'e.g. 10',
                     controller: _valueCtrl,
                     isborder: true,

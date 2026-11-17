@@ -12,6 +12,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -186,7 +187,7 @@ class _ItemsCard extends StatelessWidget {
                 color: AppColors.black2,
               ),
               CustomText(
-                text: '\$${order.amount.toStringAsFixed(2)}',
+                text: StoreCurrency.format(order.amount),
                 fontSize: AppFontSize.small,
                 fontWeight: FontWeight.bold,
                 color: AppColors.black,
@@ -238,7 +239,7 @@ class _ItemRow extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               CustomText(
-                text: '\$${item.totalPrice.toStringAsFixed(2)}',
+                text: StoreCurrency.format(item.totalPrice),
                 fontSize: AppFontSize.verySmall,
                 fontWeight: FontWeight.w600,
                 color: AppColors.black,

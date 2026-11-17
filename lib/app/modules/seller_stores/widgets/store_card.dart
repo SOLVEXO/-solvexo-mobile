@@ -6,6 +6,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/utils/money.dart';
 import 'package:flutter/material.dart';
 
 class StoreCard extends StatelessWidget {
@@ -84,7 +85,7 @@ class StoreCard extends StatelessWidget {
                 const SizedBox(width: 20),
                 _StatItem(
                   icon: Icons.trending_up_rounded,
-                  value: '\$${store.totalSales.toStringAsFixed(0)}',
+                  value: Money.usd(store.totalSales, decimals: 0),
                   label: 'Sales',
                 ),
                 const Spacer(),

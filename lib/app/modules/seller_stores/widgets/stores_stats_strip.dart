@@ -30,11 +30,6 @@ class StoresStatsStrip extends StatelessWidget {
                 value: '${controller.totalProducts}',
                 label: 'Products',
               ),
-              _VertLine(),
-              _StatCell(
-                value: '\$${_fmtRevenue(controller.totalRevenue)}',
-                label: 'Revenue',
-              ),
             ],
           ),
         ),
@@ -43,11 +38,6 @@ class StoresStatsStrip extends StatelessWidget {
   }
 }
 
-/// Compact money label: 999.5 → "999.50", 12,340 → "12.3k".
-String _fmtRevenue(double n) {
-  if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}k';
-  return n == n.roundToDouble() ? n.toStringAsFixed(0) : n.toStringAsFixed(2);
-}
 
 class _StatCell extends StatelessWidget {
   final String value;

@@ -7,6 +7,7 @@ import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -138,8 +139,8 @@ class _ProductInfo extends StatelessWidget {
           children: [
             CustomText(
               text: product.hasPriceRange
-                  ? '\$${product.minPrice!.toStringAsFixed(2)} - \$${product.maxPrice!.toStringAsFixed(2)}'
-                  : '\$${product.price.toStringAsFixed(2)}',
+                  ? '${StoreCurrency.format(product.minPrice)} - ${StoreCurrency.format(product.maxPrice)}'
+                  : StoreCurrency.format(product.price),
               fontSize: AppFontSize.small2,
               fontWeight: FontWeight.bold,
               color: AppColors.primaryColor,

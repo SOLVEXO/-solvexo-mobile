@@ -7,6 +7,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,7 +40,7 @@ class LoyaltyOverviewTab extends StatelessWidget {
                 _StatCard(icon: Icons.groups_rounded, label: 'Members', value: '${o.programMembers}', color: AppColors.primaryColor),
                 _StatCard(icon: Icons.bolt_rounded, label: 'Points Issued (30d)', value: _fmt(o.pointsIssuedLast30Days), color: AppColors.accentColor),
                 _StatCard(icon: Icons.redeem_rounded, label: 'Points Redeemed', value: _fmt(o.pointsRedeemedTotal), color: AppColors.seaGreen),
-                _StatCard(icon: Icons.attach_money_rounded, label: 'Revenue (30d)', value: '\$${o.revenueFromMembersLast30Days.toStringAsFixed(0)}', color: AppColors.darkGreen),
+                _StatCard(icon: Icons.attach_money_rounded, label: 'Revenue (30d)', value: StoreCurrency.format(o.revenueFromMembersLast30Days), color: AppColors.darkGreen),
               ],
             ),
             if (o.memberDistribution.isNotEmpty) ...[

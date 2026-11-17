@@ -4,6 +4,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -77,7 +78,7 @@ class _RevenueSection extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             CustomText(
-              text: '\$${controller.todayRevenue.value.toStringAsFixed(2)}',
+              text: StoreCurrency.format(controller.todayRevenue.value),
               fontSize: AppFontSize.veryLarge2,
               fontWeight: FontWeight.bold,
               color: AppColors.white,
@@ -199,7 +200,7 @@ class _StatsRow extends StatelessWidget {
               _Divider(),
               _StatCell(
                 label: 'Avg Order',
-                value: '\$${controller.avgOrderValue.value.toStringAsFixed(2)}',
+                value: StoreCurrency.format(controller.avgOrderValue.value),
               ),
             ],
           ),

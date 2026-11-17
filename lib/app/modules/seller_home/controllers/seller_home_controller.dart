@@ -11,6 +11,7 @@ import 'package:book_store_app/app/modules/seller/utils/plan_lapse.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:get/get.dart';
 
 class SellerHomeController extends GetxController {
@@ -76,6 +77,7 @@ class SellerHomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    StoreCurrency.load();
     _loadData();
   }
 

@@ -10,6 +10,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/app/modules/seller/widgets/store_currency_prefix.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -80,15 +81,7 @@ class EditProductForm extends StatelessWidget {
                 isborder: true,
                 fillColor: AppColors.textfldFillColor,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                prefixIcon: const Padding(
-                  padding: EdgeInsets.only(left: 14, right: 6),
-                  child: CustomText(
-                    text: '\$',
-                    fontSize: AppFontSize.small2,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.grey,
-                  ),
-                ),
+                prefixIcon: const StoreCurrencyPrefix(),
               ),
             ),
           ],
@@ -206,15 +199,7 @@ class _DigitalExtraFields extends StatelessWidget {
           isborder: true,
           fillColor: AppColors.textfldFillColor,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          prefixIcon: const Padding(
-            padding: EdgeInsets.only(left: 14, right: 6),
-            child: CustomText(
-              text: '\$',
-              fontSize: AppFontSize.small2,
-              fontWeight: FontWeight.w600,
-              color: AppColors.grey,
-            ),
-          ),
+          prefixIcon: const StoreCurrencyPrefix(),
         ),
         const SizedBox(height: 16),
 

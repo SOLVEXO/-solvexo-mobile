@@ -5,6 +5,7 @@ import 'package:book_store_app/app/modules/seller_store_profile/controllers/sell
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -239,7 +240,7 @@ class _ProductRow extends StatelessWidget {
               children: [
                 CustomText(text: name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, maxLines: 1, overflow: TextOverflow.ellipsis),
                 if (price != null)
-                  CustomText(text: '\$${price!.toStringAsFixed(2)}', color: AppColors.gray600, fontSize: 10.5, fontWeight: FontWeight.w600),
+                  CustomText(text: StoreCurrency.format(price), color: AppColors.gray600, fontSize: 10.5, fontWeight: FontWeight.w600),
               ],
             ),
           ),

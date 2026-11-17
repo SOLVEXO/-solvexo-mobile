@@ -12,6 +12,7 @@ import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:get/get.dart';
 
 class SettingsTile {
@@ -293,6 +294,7 @@ class SellerSettingsController extends GetxController {
   /// guest Home. The old tile only went back to the store list.
   Future<void> logout() async {
     await _authRepository.logout();
+    StoreCurrency.code.value = '';
     if (Get.isRegistered<AuthController>()) {
       Get.find<AuthController>().currentUser.value = null;
     }

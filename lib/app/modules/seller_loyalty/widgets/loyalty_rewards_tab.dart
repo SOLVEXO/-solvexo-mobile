@@ -10,6 +10,7 @@ import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -270,7 +271,7 @@ class _RewardFormSheetState extends State<_RewardFormSheet> {
                   ),
                   SizedBox(height: BaseSpacing.sm),
                   if (_type == 'fixed_discount')
-                    CustomTextField(label: 'Discount Value (\$)', controller: _discountCtrl, isborder: true, keyboardType: const TextInputType.numberWithOptions(decimal: true))
+                    CustomTextField(label: 'Discount Value (${StoreCurrency.symbol})', controller: _discountCtrl, isborder: true, keyboardType: const TextInputType.numberWithOptions(decimal: true))
                   else
                     CustomTextField(label: 'Product ID', hintText: 'ID of the free product', controller: _productIdCtrl, isborder: true),
                   SizedBox(height: BaseSpacing.sm),

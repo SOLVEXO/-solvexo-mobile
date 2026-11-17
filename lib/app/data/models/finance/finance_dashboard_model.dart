@@ -1,3 +1,4 @@
+import 'package:book_store_app/utils/money.dart';
 class FinanceNextPayoutMethod {
   final String type;
   final String? bankName;
@@ -180,7 +181,7 @@ class FinanceWallet {
         flaggedReason: json['flaggedReason'] as String?,
       );
 
-  String amountLabel(double v) => currency == 'PKR' ? 'PKR ${v.toStringAsFixed(2)}' : '\$${v.toStringAsFixed(2)}';
+  String amountLabel(double v) => Money.format(v, currency);
 }
 
 class FinanceDashboardModel {

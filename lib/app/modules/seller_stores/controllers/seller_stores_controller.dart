@@ -3,6 +3,7 @@ import 'package:book_store_app/app/data/repositories/seller_repository.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:get/get.dart';
 
 // ── Display model (consumed by StoreCard widget) ───────────────────────────────
@@ -66,7 +67,6 @@ class SellerStoresController extends GetxController {
 
   int get storeCount => stores.length;
   int get totalProducts => stores.fold(0, (sum, s) => sum + s.productCount);
-  double get totalRevenue => stores.fold(0.0, (sum, s) => sum + s.totalSales);
 
   @override
   void onInit() {
@@ -128,6 +128,7 @@ class SellerStoresController extends GetxController {
       final only = models.first;
       await AppPreferences.saveStoreId(only.id);
       await AppPreferences.saveStoreName(only.name);
+      await StoreCurrency.set(only.baseCurrency);
       isLoading.value = false;
       Get.offAllNamed(Routes.sellerHome);
       return;
@@ -164,6 +165,7 @@ class SellerStoresController extends GetxController {
   Future<void> openStore(SellerStore store) async {
     await AppPreferences.saveStoreId(store.id);
     await AppPreferences.saveStoreName(store.name);
+    await StoreCurrency.load();
     Get.offAllNamed(Routes.sellerHome);
   }
 
