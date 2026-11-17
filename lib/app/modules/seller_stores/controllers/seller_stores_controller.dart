@@ -122,6 +122,17 @@ class SellerStoresController extends GetxController {
       return;
     }
 
+    // One store per seller (docs Part B 1): open its Dashboard directly.
+    // The picker stays only for legacy sellers with more than one store.
+    if (models.length == 1) {
+      final only = models.first;
+      await AppPreferences.saveStoreId(only.id);
+      await AppPreferences.saveStoreName(only.name);
+      isLoading.value = false;
+      Get.offAllNamed(Routes.sellerHome);
+      return;
+    }
+
     stores.assignAll(models.map(SellerStore.fromModel));
 
     // Enrich profile display from API if prefs were empty
