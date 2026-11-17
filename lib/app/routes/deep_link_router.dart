@@ -70,7 +70,7 @@ class DeepLinkRouter {
                   arguments: seg.length > 2 ? {'orderId': seg[2]} : null);
               return true;
             case 'downloads':
-              Get.toNamed(Routes.myOrdersView);
+              Get.toNamed(Routes.library);
               return true;
             case 'wishlist':
               Get.toNamed(Routes.WISHLIST);
@@ -80,7 +80,7 @@ class DeepLinkRouter {
               return true;
             default:
               if (q['openChat'] == '1') {
-                Get.toNamed(Routes.helpCenterView);
+                Get.toNamed(Routes.supportChat);
               } else {
                 Get.toNamed(Routes.profileView);
               }

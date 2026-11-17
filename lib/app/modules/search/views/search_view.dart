@@ -13,7 +13,7 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
-import 'package:book_store_app/core/widgets/wave_bottom_nav_bar.dart';
+import 'package:book_store_app/app/bottom_bar/widget/app_nav_bar.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -210,7 +210,7 @@ class SearchView extends StatelessWidget {
     return Obx(() {
       if (c.searchTab.value == 1) {
         return ListView.builder(
-          padding: EdgeInsets.only(bottom: WaveBottomNavBar.totalHeight),
+          padding: EdgeInsets.only(bottom: AppNavBar.contentBottomInset),
           itemCount: c.storeResults.length,
           itemBuilder: (_, i) => Padding(
             padding: EdgeInsets.only(bottom: BaseSpacing.sm),
@@ -227,7 +227,7 @@ class SearchView extends StatelessWidget {
               ),
             )
           : ListView.builder(
-              padding: EdgeInsets.only(bottom: WaveBottomNavBar.totalHeight),
+              padding: EdgeInsets.only(bottom: AppNavBar.contentBottomInset),
               itemCount: c.filteredProducts.length,
               itemBuilder: (_, i) {
                 final prod = c.filteredProducts[i];

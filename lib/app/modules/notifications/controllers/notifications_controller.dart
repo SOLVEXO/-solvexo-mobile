@@ -106,7 +106,7 @@ class NotificationsController extends GetxController {
         }
         break;
       case 'support_reply':
-        Get.toNamed(Routes.helpCenterView);
+        Get.toNamed(Routes.supportChat);
         break;
       default:
         break;

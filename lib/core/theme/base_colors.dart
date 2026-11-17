@@ -17,25 +17,32 @@ class BaseColors {
   static const Color accent = AppColors.accentColor;
   static const Color secondary = AppColors.secondryColor;
 
+  /// Deep brand navy for headings, hero panels and the selected nav pill.
+  static const Color ink = Color(0xFF0F2742);
+
+  /// Warm brand gold (minaret/crescent) for highlights and sale accents.
+  static const Color gold = Color(0xFFE9B23C);
+
   static const Gradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primary, accent],
+    colors: [primary, Color(0xFF1F4F86)],
   );
 
+  /// Brand hero (was a coral gradient left over from the old template).
   static const Gradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFE8846A), primary, Color(0xFFB85C3F)],
+    colors: [Color(0xFF1F4F86), primary, Color(0xFF4C8FD3)],
   );
 
   // ── Semantic (light) ───────────────────────────────────────────────────────
   static const Color surfaceLight = AppColors.white;
-  static const Color surfaceVariantLight = Color(0xFFF7F5F3);
-  static const Color backgroundLight = AppColors.background;
-  static const Color onSurfaceLight = Color(0xFF1A1A1A);
-  static const Color onSurfaceMutedLight = AppColors.gray600;
-  static const Color borderLight = AppColors.lightGrey2;
+  static const Color surfaceVariantLight = Color(0xFFF1F5FA);
+  static const Color backgroundLight = Color(0xFFF6F8FB);
+  static const Color onSurfaceLight = Color(0xFF14202E);
+  static const Color onSurfaceMutedLight = Color(0xFF5B6B7F);
+  static const Color borderLight = Color(0xFFE2E8F0);
   static const Color dividerLight = AppColors.dividerColor;
 
   // ── Semantic (dark) ─────────────────────────────────────────────────────────

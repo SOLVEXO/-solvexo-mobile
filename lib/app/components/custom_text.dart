@@ -53,6 +53,8 @@ class CustomText extends StatelessWidget {
         // fontSize: fontSize,
         letterSpacing: letterSpacing ?? 0.0,
         fontFamily: fontFamily,
+        // Inter has no Urdu glyphs; Urdu text falls back to Nastaliq.
+        fontFamilyFallback: const ['NotoNastaliqUrdu'],
         fontWeight: fontWeight,
         fontStyle: fontStyle,
         decoration: textDecoration,

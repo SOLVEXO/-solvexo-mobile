@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:book_store_app/app/bottom_bar/widget/dashboard_bottom_nav.dart';
+import 'package:book_store_app/app/bottom_bar/widget/app_nav_bar.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/main_app_bar.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -172,9 +172,7 @@ class BaseViewScreen extends StatelessWidget {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 500),
                       opacity: 1.0,
-                      child: DashboardBottomNav(
-                        showShadow: bottomBarShadow ?? true,
-                      ),
+                      child: AppNavBar(),
                     ),
                   ),
             ),

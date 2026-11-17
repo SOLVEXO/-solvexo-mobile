@@ -509,19 +509,34 @@ class AuthRepository {
   }
 
   /// Delete user account
-  Future<bool> deleteAccount({required String token}) async {
+  /// DELETE /api/users/profile {confirm:'DELETE', password?}.
+  /// Returns the server's own message on refusal (e.g. 409
+  /// ACCOUNT_DELETE_BLOCKED while orders are open or Premium is active).
+  Future<({bool ok, String? message})> deleteAccount({String? password}) async {
     try {
-      final response = await _baseClient.delete(ApiConstants.deleteUserAccount);
-
-      debugPrint("Delete Account Response --> ${response.data}");
-
-      return response.statusCode == 200 && response.data['success'] == true;
+      final response = await _baseClient.delete(
+        ApiConstants.deleteUserAccount,
+        data: {
+          'confirm': 'DELETE',
+          if (password != null && password.isNotEmpty) 'password': password,
+        },
+        requiresAuth: true,
+      );
+      final ok = (response.statusCode == 200 || response.statusCode == 204) &&
+          (response.data is! Map || response.data['success'] != false);
+      return (ok: ok, message: ok ? null : ApiError.fromBody(response.data));
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
-      return false;
-    } catch (e) {
-      debugPrint("Delete Account error --> $e");
-      return false;
+      return (
+        ok: false,
+        message: ApiError.fromBody(e.response?.data) ??
+            'Could not delete the account. Please try again.',
+      );
+    } catch (_) {
+      return (
+        ok: false,
+        message: 'Could not delete the account. Please try again.',
+      );
     }
   }
+
 }

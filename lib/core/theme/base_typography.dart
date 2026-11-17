@@ -10,8 +10,13 @@ class BaseTypography {
 
   static const String fontFamily = AppTextStyles.fontFamily;
 
+  /// Urdu font (docs §3: Noto Nastaliq). Used as the main family when the
+  /// app language is Urdu and as a fallback for Urdu glyphs otherwise.
+  static const String urduFontFamily = 'NotoNastaliqUrdu';
+
   static TextStyle _s(double size, FontWeight weight, {double? height, Color? color}) => TextStyle(
         fontFamily: fontFamily,
+        fontFamilyFallback: const [urduFontFamily],
         fontSize: size,
         fontWeight: weight,
         height: height,
@@ -38,9 +43,9 @@ class BaseTypography {
   static TextStyle labelMedium({Color? color}) => _s(12, FontWeight.w600, height: 1.2, color: color);
   static TextStyle labelSmall({Color? color}) => _s(11, FontWeight.w600, height: 1.2, color: color);
 
-  static TextTheme textTheme(Brightness brightness) {
+  static TextTheme textTheme(Brightness brightness, {bool urdu = false}) {
     final onSurface = brightness == Brightness.dark ? BaseColors.onSurfaceDark : BaseColors.onSurfaceLight;
-    return TextTheme(
+    final theme = TextTheme(
       displayLarge: displayLarge(color: onSurface),
       displayMedium: displayMedium(color: onSurface),
       headlineLarge: headlineLarge(color: onSurface),
@@ -55,6 +60,28 @@ class BaseTypography {
       labelLarge: labelLarge(color: onSurface),
       labelMedium: labelMedium(color: onSurface),
       labelSmall: labelSmall(color: onSurface),
+    );
+    // Nastaliq sits tall: give it the main family and more line height.
+    if (!urdu) return theme;
+    TextStyle? u(TextStyle? t) => t?.copyWith(
+          fontFamily: urduFontFamily,
+          height: (t.height ?? 1.3) * 1.3,
+        );
+    return theme.copyWith(
+      displayLarge: u(theme.displayLarge),
+      displayMedium: u(theme.displayMedium),
+      headlineLarge: u(theme.headlineLarge),
+      headlineMedium: u(theme.headlineMedium),
+      headlineSmall: u(theme.headlineSmall),
+      titleLarge: u(theme.titleLarge),
+      titleMedium: u(theme.titleMedium),
+      titleSmall: u(theme.titleSmall),
+      bodyLarge: u(theme.bodyLarge),
+      bodyMedium: u(theme.bodyMedium),
+      bodySmall: u(theme.bodySmall),
+      labelLarge: u(theme.labelLarge),
+      labelMedium: u(theme.labelMedium),
+      labelSmall: u(theme.labelSmall),
     );
   }
 }

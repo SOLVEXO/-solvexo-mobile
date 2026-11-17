@@ -8,7 +8,7 @@ import 'package:book_store_app/app/modules/settings/widgets/settings_section_wid
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/widgets/wave_bottom_nav_bar.dart';
+import 'package:book_store_app/app/bottom_bar/widget/app_nav_bar.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -74,7 +74,7 @@ class ProfileView extends BaseView<ProfileController> {
                             child: SettingsSectionWidget(section: s),
                           ),
                         ),
-                        SizedBox(height: WaveBottomNavBar.totalHeight),
+                        SizedBox(height: AppNavBar.contentBottomInset),
                       ],
                     ),
                   ),

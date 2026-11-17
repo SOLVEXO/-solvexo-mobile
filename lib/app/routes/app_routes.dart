@@ -71,4 +71,8 @@ abstract class Routes {
 
   // Buyer/guest — free, unauthenticated AI Worksheet Builder trial
   static const worksheetTrial = '/worksheet-trial';
+
+  // Buyer — library (files + courses) and support chat
+  static const library = '/account/library';
+  static const supportChat = '/support/chat';
 }

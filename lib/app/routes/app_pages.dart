@@ -80,12 +80,23 @@ import '../modules/sub_category/views/sub_category_view.dart';
 import '../modules/wishlist/bindings/wishlist_binding.dart';
 import '../modules/wishlist/views/wishlist_view.dart';
 
+import '../modules/library/views/library_view.dart';
+import '../modules/support_chat/views/support_chat_view.dart';
+
 part 'app_routes.dart';
 
 class AppPages {
   static const initialRoute = Routes.splashScreen;
 
   static final routes = [
+    GetPage(
+      name: Routes.library,
+      page: () => const LibraryView(),
+    ),
+    GetPage(
+      name: Routes.supportChat,
+      page: () => const SupportChatView(),
+    ),
     GetPage(
       name: Routes.mainHome,
       page: () => MainView(),

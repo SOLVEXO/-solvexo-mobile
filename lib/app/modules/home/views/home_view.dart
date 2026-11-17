@@ -27,7 +27,7 @@ import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
-import 'package:book_store_app/core/widgets/wave_bottom_nav_bar.dart';
+import 'package:book_store_app/app/bottom_bar/widget/app_nav_bar.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
@@ -230,7 +230,7 @@ class HomeView extends BaseView<HomeController> {
 
                   // Lets the last card scroll fully clear of the floating
                   // nav bar instead of resting permanently tucked behind it.
-                  SizedBox(height: WaveBottomNavBar.totalHeight),
+                  SizedBox(height: AppNavBar.contentBottomInset),
                 ],
               ),
             ),

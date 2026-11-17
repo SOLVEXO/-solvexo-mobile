@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:book_store_app/config/app_config.dart';
+import 'package:book_store_app/core/i18n/locale_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -31,8 +32,18 @@ class ProfileController extends GetxController {
         tiles: [
           SettingsTile(
             icon: AppIcons.billsIcon,
-            title: 'My Orders',
+            title: 'My Orders'.tr,
             onTap: () => Get.toNamed(Routes.myOrdersView),
+          ),
+          SettingsTile(
+            icon: AppIcons.downloadIcon,
+            title: 'My Library'.tr,
+            onTap: () => Get.toNamed(Routes.library),
+          ),
+          SettingsTile(
+            icon: AppIcons.heartIcon,
+            title: 'Wishlist'.tr,
+            onTap: () => Get.toNamed(Routes.WISHLIST),
           ),
         ],
       ),
@@ -42,22 +53,22 @@ class ProfileController extends GetxController {
         tiles: [
           SettingsTile(
             icon: AppIcons.editIcon,
-            title: 'Edit Profile',
+            title: 'Edit Profile'.tr,
             onTap: () => Get.toNamed(Routes.editProfileView),
           ),
           SettingsTile(
             icon: AppIcons.locationIcon,
-            title: 'My Addresses',
+            title: 'My Addresses'.tr,
             onTap: () => Get.toNamed(Routes.addressView),
           ),
           SettingsTile(
             icon: AppIcons.changePassword,
-            title: 'Change Password',
+            title: 'Change Password'.tr,
             onTap: () => Get.toNamed(Routes.CHANGE_PASSWORD),
           ),
           SettingsTile(
             icon: AppIcons.notificationIcon,
-            title: 'Notification Preferences',
+            title: 'Notification Preferences'.tr,
             onTap: () => Get.toNamed(Routes.notificationPreferences),
           ),
         ],
@@ -67,7 +78,7 @@ class ProfileController extends GetxController {
       tiles: [
         SettingsTile(
           icon: AppIcons.cashIcon,
-          title: 'Sell on EduDeen',
+          title: 'Sell on Edudeen'.tr,
           onTap: goToSellerLanding,
         ),
       ],
@@ -76,23 +87,34 @@ class ProfileController extends GetxController {
       header: 'SUPPORT',
       tiles: [
         SettingsTile(
+          icon: AppIcons.languageIcon,
+          title: 'Language'.tr,
+          trailing: LocaleService.isUrdu ? 'اردو' : 'English',
+          onTap: chooseLanguage,
+        ),
+        SettingsTile(
+          icon: AppIcons.messageIcon,
+          title: 'Chat with Edudeen'.tr,
+          onTap: () => Get.toNamed(Routes.supportChat),
+        ),
+        SettingsTile(
           icon: AppIcons.phoneIcon,
-          title: 'Help Center',
+          title: 'Help Center'.tr,
           onTap: () => Get.toNamed(Routes.helpCenterView),
         ),
         SettingsTile(
           icon: AppIcons.emailIcon,
-          title: 'Contact Us',
+          title: 'Contact Us'.tr,
           onTap: () => Get.toNamed(Routes.contactUsView),
         ),
         SettingsTile(
           icon: AppIcons.privacy,
-          title: 'Privacy Policy',
+          title: 'Privacy Policy'.tr,
           onTap: () => Get.toNamed(Routes.PRIVACY_POLICY),
         ),
         SettingsTile(
           icon: AppIcons.aboutIcon,
-          title: 'About App',
+          title: 'About App'.tr,
           onTap: () => Get.toNamed(Routes.ABOUT),
         ),
       ],
@@ -103,19 +125,49 @@ class ProfileController extends GetxController {
         tiles: [
           SettingsTile(
             icon: AppIcons.logoutIcon,
-            title: 'Logout',
+            title: 'Logout'.tr,
             isDanger: true,
             onTap: logout,
           ),
-          // SettingsTile(
-          //   icon: AppIcons.deleteIcon,
-          //   title: 'Delete Account',
-          //   isDanger: true,
-          //   onTap: deleteAccount,
-          // ),
+          // Store compliance (docs §5.11): in-app deletion.
+          SettingsTile(
+            icon: AppIcons.deleteIcon,
+            title: 'Delete Account'.tr,
+            isDanger: true,
+            onTap: deleteAccount,
+          ),
         ],
       ),
   ];
+
+  /// English / Urdu. Urdu flips the app to RTL and the Nastaliq font.
+  void chooseLanguage() {
+    Widget option(String label, bool urdu) => ListTile(
+          title: Text(label),
+          trailing: LocaleService.isUrdu == urdu
+              ? Icon(Icons.check_rounded, color: Get.theme.colorScheme.primary)
+              : null,
+          onTap: () {
+            Get.back();
+            LocaleService.setUrdu(urdu);
+          },
+        );
+    Get.bottomSheet(
+      SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Text('Language'.tr, style: Get.textTheme.titleMedium),
+            option('English', false),
+            option('اردو', true),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+      backgroundColor: Get.theme.colorScheme.surface,
+    );
+  }
 
   /// Selling happens on the web dashboard; this app is buyer-only.
   Future<void> goToSellerLanding() => launchUrl(
@@ -636,55 +688,81 @@ class ProfileController extends GetxController {
     );
   }
 
-  /// Delete account
+  /// Delete account (docs §5.11): `DELETE /api/users/profile
+  /// {confirm:'DELETE', password?}`. The server refuses with 409
+  /// `ACCOUNT_DELETE_BLOCKED` while orders are open or Premium is active;
+  /// its message is shown as-is.
   Future<void> deleteAccount() async {
-    Get.dialog(
+    final confirmCtrl = TextEditingController();
+    final passwordCtrl = TextEditingController();
+    final busy = false.obs;
+    final error = RxnString();
+    await Get.dialog(
       AlertDialog(
-        title: CustomText(text: 'Delete Account'),
-        content: CustomText(
-          text:
-              'Are you sure you want to delete your account? This action cannot be undone.',
+        title: Text('Delete Account'.tr),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('This permanently deletes your Edudeen account. Orders that are still open must be finished first.'.tr),
+              const SizedBox(height: 16),
+              TextField(
+                controller: confirmCtrl,
+                autocorrect: false,
+                textCapitalization: TextCapitalization.characters,
+                decoration: InputDecoration(labelText: 'Type DELETE to confirm'.tr),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passwordCtrl,
+                obscureText: true,
+                decoration: InputDecoration(
+                    labelText: 'Password (if your account has one)'.tr),
+              ),
+              Obx(() => error.value == null
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(error.value!,
+                          style: TextStyle(color: Get.theme.colorScheme.error)),
+                    )),
+            ],
+          ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: CustomText(text: 'Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Get.back();
-              await _performDeleteAccount();
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
-            child: CustomText(text: 'Delete'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: Text('Cancel'.tr)),
+          Obx(() => FilledButton(
+                style: FilledButton.styleFrom(
+                    backgroundColor: Get.theme.colorScheme.error),
+                onPressed: busy.value
+                    ? null
+                    : () async {
+                        if (confirmCtrl.text.trim() != 'DELETE') {
+                          error.value = 'Type DELETE to confirm'.tr;
+                          return;
+                        }
+                        busy.value = true;
+                        error.value = null;
+                        final result = await _authRepository.deleteAccount(
+                          password: passwordCtrl.text,
+                        );
+                        busy.value = false;
+                        if (result.ok) {
+                          Get.back();
+                          ToastUtil.showToast('Account deleted successfully');
+                          await _authController.logout();
+                        } else {
+                          error.value = result.message;
+                        }
+                      },
+                child: Text('Delete'.tr),
+              )),
         ],
       ),
     );
-  }
-
-  /// Perform account deletion
-  Future<void> _performDeleteAccount() async {
-    try {
-      final token = await AppPreferences.getAccessTokenAsync();
-
-      if (token == null || token.isEmpty) {
-        ToastUtil.showToast('Session expired');
-        return;
-      }
-
-      final success = await _authRepository.deleteAccount(token: token);
-
-      if (success) {
-        ToastUtil.showToast('Account deleted successfully');
-        await _authController.logout();
-      } else {
-        ToastUtil.showToast('Failed to delete account');
-      }
-    } catch (e) {
-      debugPrint('Error deleting account: $e');
-      ToastUtil.showToast('Failed to delete account');
-    }
+    confirmCtrl.dispose();
+    passwordCtrl.dispose();
   }
 
   // Validation methods

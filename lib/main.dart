@@ -6,6 +6,8 @@ import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/app/services/maintenance_service.dart';
 import 'package:book_store_app/app/services/platform_config_service.dart';
 import 'package:book_store_app/config/resources/app_theme.dart';
+import 'package:book_store_app/core/i18n/app_translations.dart';
+import 'package:book_store_app/core/i18n/locale_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/config/stripe_config.dart';
 import 'package:book_store_app/firebase_options.dart';
@@ -13,6 +15,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -36,6 +39,7 @@ void main() async {
   await LocalNotificationService().init();
   await SharedPreferences.getInstance();
   await AppPreferences.initSecureStorage();
+  await LocaleService.init();
   if (StripeConfig.isConfigured) {
     Stripe.publishableKey = StripeConfig.publishableKey;
     await Stripe.instance.applySettings();
@@ -59,7 +63,17 @@ class MyApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
           debugShowCheckedModeBanner: false,
-          title: "EduDeen",
+          title: "Edudeen",
+          // English + Urdu (RTL). Material widgets mirror automatically.
+          translations: AppTranslations(),
+          locale: LocaleService.current,
+          fallbackLocale: LocaleService.english,
+          supportedLocales: LocaleService.supported,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           initialRoute: AppPages.initialRoute,
           getPages: AppPages.routes,
           // Clamp OS accessibility text scaling so extreme settings can't

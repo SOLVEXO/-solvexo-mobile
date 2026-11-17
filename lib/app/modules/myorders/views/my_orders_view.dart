@@ -14,7 +14,7 @@ import 'package:book_store_app/core/theme/base_animations.dart';
 import 'package:book_store_app/core/theme/base_shadows.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_empty_view.dart';
-import 'package:book_store_app/core/widgets/wave_bottom_nav_bar.dart';
+import 'package:book_store_app/app/bottom_bar/widget/app_nav_bar.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
@@ -254,7 +254,7 @@ class MyOrdersView extends StatelessWidget {
                       AppDimen.allPadding,
                       BaseSpacing.sm,
                       AppDimen.allPadding,
-                      WaveBottomNavBar.totalHeight,
+                      AppNavBar.contentBottomInset,
                     ),
                     physics: const AlwaysScrollableScrollPhysics(
                       parent: ClampingScrollPhysics(),
