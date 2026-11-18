@@ -10,6 +10,7 @@ import 'package:book_store_app/app/modules/seller_store_banners/widgets/store_ba
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -77,13 +78,22 @@ class SellerStoreBannersView extends StatelessWidget {
           Positioned(
             right: BaseSpacing.md,
             bottom: BaseSpacing.md,
-            child: FloatingActionButton.extended(
-              heroTag: 'add_store_banner_fab',
-              onPressed: () => StoreBannerFormSheet.show(context, c),
-              backgroundColor: AppColors.primaryColor,
-              icon: const Icon(Icons.add_rounded, color: AppColors.white),
-              label: CustomText(text: 'New Banner', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
-            ),
+            child: Obx(() => FloatingActionButton.extended(
+                  key: const Key('newBanner'),
+                  heroTag: 'add_store_banner_fab',
+                  // 4 active/scheduled slides max (backend 5adba44).
+                  onPressed: c.slotsFull
+                      ? () => ToastUtil.showToast('${c.slotsUsed} of ${SellerStoreBannersController.maxSlides} slides are live. '
+                          'Pause or delete one to add another.')
+                      : () => StoreBannerFormSheet.show(context, c),
+                  backgroundColor: c.slotsFull ? AppColors.grey : AppColors.primaryColor,
+                  icon: const Icon(Icons.add_rounded, color: AppColors.white),
+                  label: CustomText(
+                      text: 'New Banner (${c.slotsUsed}/${SellerStoreBannersController.maxSlides})',
+                      color: AppColors.white,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w700),
+                )),
           ),
         ],
       ),

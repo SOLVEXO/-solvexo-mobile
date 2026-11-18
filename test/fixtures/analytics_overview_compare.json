@@ -1,0 +1,49 @@
+{
+ "success": true,
+ "data": {
+  "period": {
+   "from": "2026-10-19T19:00:00.000Z",
+   "to": "2026-11-18T18:59:59.999Z"
+  },
+  "timezone": "Asia/Karachi",
+  "storeCount": 1,
+  "currency": "PKR",
+  "bookedValue": 0,
+  "collected": 0,
+  "grossRevenue": 0,
+  "totalRevenue": 0,
+  "totalOrders": 0,
+  "freeClaims": 0,
+  "avgOrderValue": 0,
+  "repeatBuyerPercent": 0,
+  "totalRefunds": 0,
+  "refundRatePercent": 0,
+  "cancelledOrders": 0,
+  "newCustomersCount": 0,
+  "returningCustomersCount": 0,
+  "repeatBuyerTrend": "flat",
+  "bookedValueChangePercent": 0,
+  "collectedChangePercent": 0,
+  "totalOrdersChange": 0,
+  "freeClaimsChange": 0,
+  "avgOrderValueChangePercent": 0,
+  "previousPeriod": {
+   "period": {
+    "from": "2026-09-19T19:00:00.000Z",
+    "to": "2026-10-19T18:59:59.999Z"
+   },
+   "bookedValue": 0,
+   "collected": 0,
+   "grossRevenue": 0,
+   "totalRevenue": 0,
+   "totalOrders": 0,
+   "freeClaims": 0,
+   "avgOrderValue": 0,
+   "repeatBuyerPercent": 0,
+   "totalRefunds": 0,
+   "cancelledOrders": 0,
+   "newCustomersCount": 0,
+   "returningCustomersCount": 0
+  }
+ }
+}

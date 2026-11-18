@@ -99,7 +99,9 @@ class SellerAnalyticsRepository {
     try {
       final response = await _client.get(
         ApiConstants.analyticsOverview,
-        queryParameters: _rangeParams(storeId, range, from: from, to: to),
+        // Backend 5adba44 sends the *ChangePercent / *Change fields only
+        // with compareToPreviousPeriod=true.
+        queryParameters: _rangeParams(storeId, range, from: from, to: to, compare: true),
         requiresAuth: true,
       );
       if (response.data['success'] == true) {

@@ -23,17 +23,21 @@ class AnalyticsKpiGrid extends StatelessWidget {
       mainAxisSpacing: BaseSpacing.sm,
       childAspectRatio: 1.55,
       children: [
+        // Booked value is what the server compares with the previous
+        // period (bookedValueChangePercent); collected is shown under it.
         _KpiCard(
-          label: 'Total Revenue',
-          value: CurrencyFormatter.compact(data.totalRevenue, data.currency),
-          changeText: _percentLabel(data.totalRevenueChangePercent, suffix: 'vs last period'),
-          isPositive: (data.totalRevenueChangePercent ?? 0) >= 0,
+          label: 'Booked value',
+          value: CurrencyFormatter.compact(data.bookedValue, data.currency),
+          changeText: _percentLabel(data.bookedValueChangePercent, suffix: 'vs last period'),
+          isPositive: (data.bookedValueChangePercent ?? 0) >= 0,
         ),
         _KpiCard(
           label: 'Total Orders',
           value: '${data.totalOrders}',
-          changeText: '${data.totalOrdersChange >= 0 ? '+' : ''}${data.totalOrdersChange} vs last period',
-          isPositive: data.totalOrdersChange >= 0,
+          changeText: data.totalOrdersChange == null
+              ? 'No prior data'
+              : '${data.totalOrdersChange! >= 0 ? '+' : ''}${data.totalOrdersChange} vs last period',
+          isPositive: (data.totalOrdersChange ?? 0) >= 0,
         ),
         _KpiCard(
           label: 'Avg Order Value',

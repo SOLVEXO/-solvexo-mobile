@@ -440,6 +440,7 @@ class SellerFinanceController extends GetxController {
 
   Future<bool> updatePayoutMethod(
     String methodId, {
+    required String type,
     String? currency,
     String? bankName,
     String? accountHolder,
@@ -452,6 +453,7 @@ class SellerFinanceController extends GetxController {
       final method = await _repo.updatePayoutMethod(
         storeId,
         methodId,
+        type: type,
         currency: currency,
         bankName: bankName,
         accountHolder: accountHolder,

@@ -1,14 +1,10 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/app/modules/seller_stores/controllers/seller_stores_controller.dart';
 import 'package:book_store_app/app/modules/seller_stores/widgets/stores_hero_header.dart';
 import 'package:book_store_app/app/modules/seller_stores/widgets/stores_list.dart';
 import 'package:book_store_app/app/modules/seller_stores/widgets/stores_section_header.dart';
 import 'package:book_store_app/app/modules/seller_stores/widgets/stores_shimmer.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,24 +15,10 @@ class SellerStoresView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
+    // One store per seller (backend 5adba44: a second create-store -> 409
+    // "You already have a store — each seller account can run one store").
+    // This picker only lists legacy stores; there is no "Create New Store".
     return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.fromLTRB(
-          AppDimen.allPadding,
-          12,
-          AppDimen.allPadding,
-          12 + bottomInset,
-        ),
-        child: AppButton(
-          onPressed: controller.createNewStore,
-          label: 'Create New Store',
-          iconWidget: SvgIcon(
-            assetName: AppIcons.addIcon,
-            color: AppColors.white,
-          ),
-        ),
-      ),
       backgroundColor: AppColors.textfldFillColor,
       body: Obx(() {
         if (controller.isLoading.value) return const StoresShimmer();

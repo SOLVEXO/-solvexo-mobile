@@ -16,7 +16,11 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 const List<String> kBannerTypes = ['hero', 'promotion', 'season', 'collection', 'video'];
-const List<String> kBannerLinkTypes = ['external', 'product', 'category', 'collection'];
+/// Backend 5adba44: a slide links to nothing, or to one of the store's own
+/// live products / active collections by id. External, category and slug
+/// links are refused (400).
+const List<String> kBannerLinkTypes = ['none', 'product', 'collection'];
+final _hex24 = RegExp(r'^[a-f0-9]{24}$', caseSensitive: false);
 
 /// Create/edit bottom sheet for a store banner — reused for both flows;
 /// when [existing] is null this is "Create Banner". Editing is JSON-only
@@ -42,12 +46,17 @@ class StoreBannerFormSheet extends StatefulWidget {
 
 class _StoreBannerFormSheetState extends State<StoreBannerFormSheet> {
   late final TextEditingController _ctaLabelCtrl;
-  late final TextEditingController _linkTargetCtrl;
   late final TextEditingController _orderCtrl;
   late final TextEditingController _priorityCtrl;
 
   String _type = 'hero';
-  String _linkType = 'external';
+  String _linkType = 'none';
+  String? _linkTargetId;
+  String? _linkTargetName;
+
+  /// An older slide whose link the API no longer accepts (external,
+  /// category or a slug): shown so the seller replaces or clears it.
+  String? _legacyLink;
   DateTime? _startAt;
   DateTime? _endAt;
 
@@ -61,19 +70,57 @@ class _StoreBannerFormSheetState extends State<StoreBannerFormSheet> {
     super.initState();
     final e = widget.existing;
     _ctaLabelCtrl = TextEditingController(text: e?.ctaLabel ?? '');
-    _linkTargetCtrl = TextEditingController(text: e?.linkTarget ?? '');
     _orderCtrl = TextEditingController(text: e?.order.toString() ?? '');
     _priorityCtrl = TextEditingController(text: e?.priority.toString() ?? '');
     _type = e?.type ?? 'hero';
-    _linkType = e?.linkType ?? 'external';
+    final lt = e?.linkType;
+    final target = e?.linkTarget ?? '';
+    if ((lt == 'product' || lt == 'collection') && _hex24.hasMatch(target)) {
+      _linkType = lt!;
+      _linkTargetId = target;
+      _linkTargetName = 'Current ${lt == 'product' ? 'product' : 'collection'}';
+    } else if (target.isNotEmpty) {
+      _legacyLink = '$lt: $target';
+    }
     _startAt = e?.startAt;
     _endAt = e?.endAt;
+  }
+
+  /// Own live products / active collections only (the API checks it too).
+  Future<void> _pickTarget() async {
+    final isProduct = _linkType == 'product';
+    List<({String id, String name})> items;
+    try {
+      items = isProduct ? await widget.controller.liveProducts() : await widget.controller.activeCollections();
+    } catch (_) {
+      ToastUtil.showToast('Could not load your ${isProduct ? 'products' : 'collections'}. Please try again.');
+      return;
+    }
+    if (items.isEmpty) {
+      ToastUtil.showToast(isProduct ? 'You have no live products to link to yet.' : 'You have no active collections yet.');
+      return;
+    }
+    final picked = await Get.bottomSheet<({String id, String name})>(
+      SafeArea(
+        child: ListView(shrinkWrap: true, children: [
+          for (final i in items)
+            ListTile(minTileHeight: 48, title: Text(i.name, maxLines: 2), onTap: () => Get.back(result: i)),
+        ]),
+      ),
+      backgroundColor: Get.theme.colorScheme.surface,
+      isScrollControlled: true,
+    );
+    if (picked != null) {
+      setState(() {
+        _linkTargetId = picked.id;
+        _linkTargetName = picked.name;
+      });
+    }
   }
 
   @override
   void dispose() {
     _ctaLabelCtrl.dispose();
-    _linkTargetCtrl.dispose();
     _orderCtrl.dispose();
     _priorityCtrl.dispose();
     super.dispose();
@@ -103,8 +150,19 @@ class _StoreBannerFormSheetState extends State<StoreBannerFormSheet> {
       return;
     }
 
+    if (_linkType != 'none' && _linkTargetId == null) {
+      ToastUtil.showToast('Choose the ${_linkType == 'product' ? 'product' : 'collection'} to link to, or pick "No link".');
+      return;
+    }
+    // A new slide is active or scheduled, and both take a slot.
+    if (!_isEdit && widget.controller.slotsFull) {
+      ToastUtil.showToast('A store can show at most ${SellerStoreBannersController.maxSlides} banner slides at once. '
+          'Pause or delete one first.');
+      return;
+    }
     final ctaLabel = _ctaLabelCtrl.text.trim();
-    final linkTarget = _linkTargetCtrl.text.trim();
+    // '' clears a link on update; on create no target = no link.
+    final linkTarget = _linkType == 'none' ? '' : _linkTargetId!;
     final order = int.tryParse(_orderCtrl.text.trim());
     final priority = int.tryParse(_priorityCtrl.text.trim());
 
@@ -114,8 +172,8 @@ class _StoreBannerFormSheetState extends State<StoreBannerFormSheet> {
         widget.existing!,
         type: _type,
         ctaLabel: ctaLabel.isEmpty ? null : ctaLabel,
-        linkType: _linkType,
-        linkTarget: linkTarget.isEmpty ? null : linkTarget,
+        linkType: _linkType == 'none' ? null : _linkType,
+        linkTarget: linkTarget,
         order: order,
         priority: priority,
         startAt: _startAt,
@@ -127,7 +185,7 @@ class _StoreBannerFormSheetState extends State<StoreBannerFormSheet> {
         mobileFile: _mobileFile,
         type: _type,
         ctaLabel: ctaLabel.isEmpty ? null : ctaLabel,
-        linkType: _linkType,
+        linkType: _linkType == 'none' ? 'product' : _linkType,
         linkTarget: linkTarget.isEmpty ? null : linkTarget,
         order: order,
         priority: priority,
@@ -223,18 +281,31 @@ class _StoreBannerFormSheetState extends State<StoreBannerFormSheet> {
                   CustomTextField(label: 'CTA Label (optional)', hintText: 'e.g. Shop Now', controller: _ctaLabelCtrl, isborder: true),
                   SizedBox(height: BaseSpacing.sm),
                   _LabeledDropdown(
-                    label: 'Link Type',
+                    label: 'Links to',
                     value: _linkType,
                     items: kBannerLinkTypes,
-                    onChanged: (v) => setState(() => _linkType = v),
+                    onChanged: (v) => setState(() {
+                      _linkType = v;
+                      _linkTargetId = null;
+                      _linkTargetName = null;
+                    }),
                   ),
-                  SizedBox(height: BaseSpacing.sm),
-                  CustomTextField(
-                    label: 'Link Target (optional)',
-                    hintText: _linkType == 'external' ? 'https://...' : 'ID or slug',
-                    controller: _linkTargetCtrl,
-                    isborder: true,
-                  ),
+                  if (_legacyLink != null && _linkType == 'none') ...[
+                    SizedBox(height: BaseSpacing.xs),
+                    Text('Old link ($_legacyLink) is no longer allowed. Saving removes it unless you choose a product or collection.',
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.error)),
+                  ],
+                  if (_linkType != 'none') ...[
+                    SizedBox(height: BaseSpacing.sm),
+                    OutlinedButton.icon(
+                      key: const Key('pickLinkTarget'),
+                      style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                      onPressed: _pickTarget,
+                      icon: Icon(_linkType == 'product' ? Icons.inventory_2_outlined : Icons.collections_bookmark_outlined),
+                      label: Text(_linkTargetName ?? 'Choose a ${_linkType == 'product' ? 'live product' : 'collection'}',
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
                   SizedBox(height: BaseSpacing.sm),
                   Row(
                     children: [

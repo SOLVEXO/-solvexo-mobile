@@ -168,6 +168,4 @@ class SellerStoresController extends GetxController {
     await StoreCurrency.load();
     Get.offAllNamed(Routes.sellerHome);
   }
-
-  void createNewStore() => Get.toNamed(Routes.sellerOnboarding);
 }

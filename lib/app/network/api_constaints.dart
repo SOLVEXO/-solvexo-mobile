@@ -646,6 +646,8 @@ class ApiConstants {
   static const String promotionTrackClick = '$apiPrefix/promotions/track/click';
 
   // ============ Store Banner Endpoints — seller (free storefront hero) ========
+  // Seller's own collections (store banner link picker).
+  static String sellerCollections(String storeId) => '$apiPrefix/collections/$storeId';
   static String storeBanners(String storeId) =>
       '$apiPrefix/store-banner/$storeId';
   static String storeBannerById(String storeId, String bannerId) =>

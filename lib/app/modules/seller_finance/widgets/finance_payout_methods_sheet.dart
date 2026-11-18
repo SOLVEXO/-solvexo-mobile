@@ -378,6 +378,7 @@ class _FinancePayoutMethodFormSheetState extends State<FinancePayoutMethodFormSh
     if (_isEdit) {
       ok = await widget.controller.updatePayoutMethod(
         widget.existing!.id,
+        type: widget.existing!.type,
         currency: _currency,
         bankName: isBank ? _bankNameCtrl.text.trim() : null,
         accountHolder: isBank ? _accountHolderCtrl.text.trim() : null,

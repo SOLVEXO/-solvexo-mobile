@@ -197,4 +197,17 @@ class StoreBannerRepository {
       return const [];
     }
   }
+
+  // ─── Link targets (backend 5adba44 store-banner-rules.util.ts) ────────────
+  /// A slide may link only to one of the store's own LIVE products or
+  /// ACTIVE collections, by id. GET /api/collections/:storeId ->
+  /// {success, data:[{_id, name, status: active|draft, ...}]}. Throws.
+  Future<List<({String id, String name})>> activeCollections(String storeId) async {
+    final res = await _client.get(ApiConstants.sellerCollections(storeId), requiresAuth: true);
+    final list = (res.data as Map)['data'];
+    return [
+      for (final c in (list is List ? list : const []).whereType<Map>())
+        if (c['status'] == 'active') (id: '${c['_id']}', name: '${c['name'] ?? 'Collection'}'),
+    ];
+  }
 }

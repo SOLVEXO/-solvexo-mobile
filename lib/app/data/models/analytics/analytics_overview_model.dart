@@ -1,9 +1,22 @@
+// GET /api/seller/analytics/overview?compareToPreviousPeriod=true
+// (backend 5adba44 analytics.service.ts getOverview). Live, test store
+// 2026-11-18: {..., bookedValue, collected, grossRevenue, totalRevenue,
+// totalOrders, freeClaims, avgOrderValue, repeatBuyerPercent, ...,
+// repeatBuyerTrend, bookedValueChangePercent, collectedChangePercent,
+// totalOrdersChange, freeClaimsChange, avgOrderValueChangePercent,
+// previousPeriod:{...}}. Change fields are absent without the compare flag;
+// a percent is null when the previous period was 0 and this one is not.
 class AnalyticsOverviewModel {
   final double grossRevenue;
   final double totalRevenue; // net of refunds
-  final double? totalRevenueChangePercent;
+  /// Booked value (docs: "booked vs collected"); grossRevenue is its alias.
+  final double bookedValue;
+  final double collected;
+  final double? bookedValueChangePercent;
+  final double? collectedChangePercent;
   final int totalOrders;
-  final int totalOrdersChange;
+  /// Absolute change vs the previous period; null = no comparison sent.
+  final int? totalOrdersChange;
   final double avgOrderValue;
   final double? avgOrderValueChangePercent;
   final double repeatBuyerPercent;
@@ -20,9 +33,12 @@ class AnalyticsOverviewModel {
   const AnalyticsOverviewModel({
     required this.grossRevenue,
     required this.totalRevenue,
-    this.totalRevenueChangePercent,
+    this.bookedValue = 0,
+    this.collected = 0,
+    this.bookedValueChangePercent,
+    this.collectedChangePercent,
     required this.totalOrders,
-    required this.totalOrdersChange,
+    this.totalOrdersChange,
     required this.avgOrderValue,
     this.avgOrderValueChangePercent,
     required this.repeatBuyerPercent,
@@ -39,7 +55,6 @@ class AnalyticsOverviewModel {
     grossRevenue: 0,
     totalRevenue: 0,
     totalOrders: 0,
-    totalOrdersChange: 0,
     avgOrderValue: 0,
     repeatBuyerPercent: 0,
     repeatBuyerTrend: 'flat',
@@ -54,9 +69,12 @@ class AnalyticsOverviewModel {
     return AnalyticsOverviewModel(
       grossRevenue: (json['grossRevenue'] as num?)?.toDouble() ?? 0,
       totalRevenue: (json['totalRevenue'] as num?)?.toDouble() ?? 0,
-      totalRevenueChangePercent: (json['totalRevenueChangePercent'] as num?)?.toDouble(),
-      totalOrders: json['totalOrders'] as int? ?? 0,
-      totalOrdersChange: json['totalOrdersChange'] as int? ?? 0,
+      bookedValue: ((json['bookedValue'] ?? json['grossRevenue']) as num?)?.toDouble() ?? 0,
+      collected: (json['collected'] as num?)?.toDouble() ?? 0,
+      bookedValueChangePercent: (json['bookedValueChangePercent'] as num?)?.toDouble(),
+      collectedChangePercent: (json['collectedChangePercent'] as num?)?.toDouble(),
+      totalOrders: (json['totalOrders'] as num?)?.toInt() ?? 0,
+      totalOrdersChange: (json['totalOrdersChange'] as num?)?.toInt(),
       avgOrderValue: (json['avgOrderValue'] as num?)?.toDouble() ?? 0,
       avgOrderValueChangePercent: (json['avgOrderValueChangePercent'] as num?)?.toDouble(),
       repeatBuyerPercent: (json['repeatBuyerPercent'] as num?)?.toDouble() ?? 0,

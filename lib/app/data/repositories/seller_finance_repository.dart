@@ -234,6 +234,7 @@ class SellerFinanceRepository {
   Future<PayoutMethodModel?> updatePayoutMethod(
     String storeId,
     String methodId, {
+    required String type,
     String? currency,
     String? bankName,
     String? accountHolder,
@@ -244,7 +245,11 @@ class SellerFinanceRepository {
     try {
       final response = await _client.patch(
         ApiConstants.financePayoutMethodById(storeId, methodId),
+        // Backend 5adba44 validates this PATCH with the full add DTO, so
+        // `type` is required (400 "type must be one of the following
+        // values: ") even though the service keeps the method's own type.
         data: {
+          'type': type,
           if (currency != null) 'currency': currency,
           if (bankName != null) 'bankName': bankName,
           if (accountHolder != null) 'accountHolder': accountHolder,

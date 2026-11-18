@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:book_store_app/app/data/models/activity_log/activity_log_model.dart';
 import 'package:book_store_app/app/data/models/store_banner/store_banner_model.dart';
+import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
 import 'package:book_store_app/app/data/repositories/store_banner_repository.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
@@ -39,6 +40,22 @@ class SellerStoreBannersController extends GetxController {
     banners.assignAll(await _repo.list(storeId));
     isLoading.value = false;
   }
+
+  // ── Slots and link targets (backend 5adba44) ──────────────────────────────
+
+  /// At most this many slides are active or scheduled at once.
+  static const maxSlides = 4;
+  int get slotsUsed => banners.where((b) => b.status == 'active' || b.status == 'scheduled').length;
+  bool get slotsFull => slotsUsed >= maxSlides;
+
+  /// The store's live products (first 100) for the link picker.
+  Future<List<({String id, String name})>> liveProducts() async {
+    final r = await SellerProductRepository().fetchStoreInventory(storeId: storeId, limit: 100, status: 'active');
+    if (r.failed) throw Exception('products');
+    return [for (final p in r.products) (id: '${p['productId']}', name: '${p['name'] ?? ''}')];
+  }
+
+  Future<List<({String id, String name})>> activeCollections() => _repo.activeCollections(storeId);
 
   // ── Create ────────────────────────────────────────────────────────────────
 
