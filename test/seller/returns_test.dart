@@ -54,6 +54,12 @@ class _Refunds extends RefundRequestRepository {
     calls.add('reject $id $notes');
     return true;
   }
+
+  @override
+  Future<bool> followUp(String id, String step, {String? note}) async {
+    calls.add('follow-up $id $step');
+    return true;
+  }
 }
 
 void main() {
@@ -71,37 +77,52 @@ void main() {
     expect(s.returnRatePct, isNull, reason: 'shown as "Not enough data"');
   });
 
-  test('rows: item return vs refund request, digital downloaded flag', () {
-    final ret = SellerReturnItem.fromJson({
-      'kind': 'return',
-      'orderId': 'o1',
-      'orderNumber': 'ORD-1',
-      'itemId': 'i1',
-      'productName': 'English vocabulary Book',
-      'productType': 'physical',
-      'reason': 'damaged',
-      'status': 'requested',
-      'requestedAt': '2026-11-17T08:00:00.000Z',
-    });
-    expect(ret.kind, ReturnKind.itemReturn);
+  // Rows exactly as the backend builds them (5adba44,
+  // orders.service.ts getSellerReturnsAll -> ReturnsListRow).
+  const returnRow = {
+    'source': 'return', 'requestId': 'o1:i1', 'itemIds': ['i1'], 'orderId': 'o1', 'orderNumber': 'ORD-1',
+    'storeId': 's1', 'item': 'English vocabulary Book', 'buyer': 'Test Buyer', 'type': 'Return',
+    'reason': 'damaged', 'status': 'open', 'requestedAt': '2026-11-17T08:00:00.000Z',
+    'respondBy': '2026-11-19T08:00:00.000Z', 'isOverdue': false, 'amount': 200, 'followUp': null,
+    'reasonLabel': 'Damaged',
+  };
+  const refundRow = {
+    'source': 'refund', 'requestId': 'r1', 'itemIds': ['i2'], 'orderId': 'o2', 'orderNumber': 'ORD-2',
+    'storeId': 's1', 'item': 'Maths worksheets', 'buyer': 'Test Buyer', 'type': 'Refund only',
+    'reason': 'File does not open', 'status': 'open', 'requestedAt': '2026-11-17T09:00:00.000Z',
+    'respondBy': '2026-11-19T09:00:00.000Z', 'isOverdue': false, 'amount': 650,
+    'note': 'The PDF says it is damaged', 'evidenceImages': ['https://example.com/e1.jpg'], 'followUp': null,
+    'reasonLabel': 'Digital file not working',
+  };
+
+  test('rows: real keys (source, requestId, item, evidenceImages)', () {
+    final ret = SellerReturnItem.fromJson(returnRow);
+    expect((ret.kind, ret.source, ret.requestId), (ReturnKind.itemReturn, 'return', 'o1:i1'));
     expect(ret.itemIds, ['i1']);
+    expect(ret.productName, 'English vocabulary Book');
+    expect(ret.reasonLabel, 'Damaged');
     expect(ret.isOpen, isTrue);
     expect(ret.respondBy, DateTime.parse('2026-11-19T08:00:00.000Z').toLocal());
 
-    final refund = SellerReturnItem.fromJson({
-      'kind': 'refund_request',
-      '_id': 'r1',
-      'orderId': 'o2',
-      'itemIds': ['i2'],
-      'productType': 'digital',
-      'downloaded': false,
-      'status': 'pending',
-      'respondBy': '2026-11-18T10:00:00.000Z',
+    final refund = SellerReturnItem.fromJson(refundRow);
+    expect((refund.kind, refund.source, refund.requestId), (ReturnKind.refundRequest, 'refund', 'r1'));
+    expect(refund.photos, ['https://example.com/e1.jpg']);
+    expect(refund.note, 'The PDF says it is damaged');
+    expect(refund.orderId, 'o2', reason: 'never used as the refund id');
+  });
+
+  test('detail: items, downloads and server actions', () {
+    final d = SellerReturnDetail.fromJson({
+      'source': 'refund', 'requestId': 'r1', 'status': 'approved', 'followUp': null, 'currency': 'PKR',
+      'items': [
+        {'id': 'i2', 'name': 'Maths worksheets', 'type': 'digital', 'quantity': 1, 'totalPrice': 650, 'refundedAmount': 650, 'downloadCount': 0},
+      ],
+      'rejectReason': null,
+      'actions': {'canReview': false, 'canMarkReceived': false, 'canMarkReplacementSent': true},
     });
-    expect(refund.kind, ReturnKind.refundRequest);
-    expect(refund.id, 'r1');
-    expect(refund.downloaded, isFalse);
-    expect(refund.respondBy, DateTime.parse('2026-11-18T10:00:00.000Z').toLocal());
+    expect(d.items.single.type, 'digital');
+    expect(d.items.single.downloadCount, 0);
+    expect((d.canMarkReceived, d.canMarkReplacementSent), (false, true));
   });
 
   test('respond-by pill levels', () {
@@ -117,38 +138,27 @@ void main() {
     expect(SellerReturnsController.validateRejectReason('Item was not damaged'), isNull);
   });
 
-  test('actions go to the right endpoint per kind; follow-up order', () async {
-    final ret = SellerReturnItem.fromJson({
-      'kind': 'return', 'orderId': 'o1', 'itemId': 'i1', 'productType': 'physical', 'status': 'requested',
-    });
-    final refund = SellerReturnItem.fromJson({
-      'kind': 'refund_request', '_id': 'r1', 'orderId': 'o2', 'itemIds': ['i2'], 'status': 'pending',
-    });
-    final approvedReturn = SellerReturnItem.fromJson({
-      'kind': 'return', 'orderId': 'o3', 'itemId': 'i3', 'productType': 'physical', 'status': 'approved',
-    });
-    final orders = _Orders([ret, refund, approvedReturn]);
+  test('actions use requestId per source', () async {
+    final ret = SellerReturnItem.fromJson(returnRow);
+    final refund = SellerReturnItem.fromJson(refundRow);
+    final approvedReturn = SellerReturnItem.fromJson({...returnRow, 'requestId': 'o3:i3', 'orderId': 'o3', 'itemIds': ['i3'], 'status': 'approved'});
+    final approvedRefund = SellerReturnItem.fromJson({...refundRow, 'requestId': 'r9', 'status': 'approved'});
+    final orders = _Orders([ret, refund, approvedReturn, approvedRefund]);
     final refunds = _Refunds();
     final c = SellerReturnsController(orders: orders, refunds: refunds);
     await c.refreshData();
 
     await c.approve(ret);
+    await c.approve(refund);
     await c.reject(refund, 'Buyer downloaded the file already');
     expect(await c.reject(ret, 'no'), isFalse, reason: 'too short: nothing sent');
-    await c.followUp(approvedReturn);
+    await c.followUp(approvedReturn, 'item_received');
+    await c.followUp(approvedRefund, 'replacement_sent');
 
     expect(orders.calls, [
       'return-action o1 s1 [i1] approve ',
       'follow-up o3 i3 item_received',
     ]);
-    expect(refunds.calls, ['reject r1 Buyer downloaded the file already']);
-    expect(approvedReturn.nextFollowUp, 'item_received');
-    expect(
-      SellerReturnItem.fromJson({
-        'kind': 'return', 'orderId': 'o3', 'itemId': 'i3', 'productType': 'physical',
-        'status': 'approved', 'followUp': {'step': 'item_received'},
-      }).nextFollowUp,
-      'replacement_sent',
-    );
+    expect(refunds.calls, ['approve r1', 'reject r1 Buyer downloaded the file already', 'follow-up r9 replacement_sent']);
   });
 }

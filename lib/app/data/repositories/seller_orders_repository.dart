@@ -286,9 +286,17 @@ class SellerOrdersRepository {
     );
   }
 
+  // ─── GET /api/orders/seller-returns-all/:storeId/:source/:requestId ─────────
+  /// One row in full: item types, download counts, reject reason and the
+  /// server's follow-up `actions`. Throws on failure.
+  Future<SellerReturnDetail> getReturnDetail(String storeId, String source, String requestId) async {
+    final res = await _client.get(ApiConstants.sellerReturnDetail(storeId, source, requestId), requiresAuth: true);
+    return SellerReturnDetail.fromJson(Map<String, dynamic>.from((res.data as Map)['data'] as Map));
+  }
+
   // ─── PATCH /api/orders/return-follow-up/:orderId ───────────────────────────
-  // Verified: 400 "storeId is required", then "itemId is required"; the step
-  // field name could not be seen (the order lookup runs first) - `step`.
+  // Backend 5adba44 (orders.service.ts ~1961): body {storeId, itemId, step,
+  // note?}; only an approved return; item_received is physical only.
   Future<bool> returnFollowUp({
     required String orderId,
     required String storeId,

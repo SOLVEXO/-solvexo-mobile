@@ -1,13 +1,13 @@
-// One row of GET /api/orders/seller-returns-all/:storeId (docs Part B 6.6):
-// item returns + item refund requests in ONE list.
+// One row of GET /api/orders/seller-returns-all/:storeId (docs 6.6): item
+// returns + item refund requests in ONE list.
 //
-// Live response for the test store (2026-11-17):
-//   {success, data:{stats:{open, overdue, returnRate30d:{pct, returns,
-//    orders}, refunded30d}, pagination:{page, limit, total, totalPages},
-//    items:[]}}
-// The store had no returns, so the row keys could not be seen; they are read
-// defensively (several names per field) and a field that is missing hides
-// its block.
+// Row shape from the backend (5adba44, src/orders/seller-returns-all.util.ts
+// ReturnsListRow, built in orders.service.ts):
+//   {source: 'return'|'refund', requestId, itemIds, orderId, orderNumber,
+//    storeId, item, buyer, type: 'Return'|'Refund only', reason, reasonLabel,
+//    status: 'open'|'approved'|'rejected', requestedAt, respondBy, isOverdue,
+//    amount, note?, evidenceImages?, followUp: null|item_received|replacement_sent}
+// requestId: refund = the RefundRequest _id; return = "<orderId>:<itemId>".
 
 String? _s(dynamic v) {
   if (v == null || v is Map || v is List) return null;
@@ -21,104 +21,125 @@ enum ReturnKind { itemReturn, refundRequest }
 
 class SellerReturnItem {
   const SellerReturnItem({
-    required this.id,
+    required this.requestId,
     required this.kind,
     required this.orderId,
     required this.orderNumber,
     required this.itemIds,
     required this.productName,
-    required this.productType,
+    required this.buyer,
     required this.reason,
+    required this.reasonLabel,
     required this.note,
     required this.photos,
     required this.status,
     required this.requestedAt,
     required this.respondBy,
-    required this.downloaded,
+    required this.isOverdue,
+    required this.amount,
     required this.followUpStep,
-    required this.rejectReason,
   });
 
-  /// Refund-request id (refund rows) or the order id (item returns).
-  final String id;
+  /// Refund: the RefundRequest _id. Return: `"<orderId>:<itemId>"`.
+  final String requestId;
   final ReturnKind kind;
   final String orderId;
   final String orderNumber;
   final List<String> itemIds;
   final String productName;
-  final String productType; // physical | digital
+  final String buyer;
   final String reason;
+  final String reasonLabel;
   final String? note;
   final List<String> photos;
 
-  /// requested | pending | approved | rejected | refunded | ...
+  /// open | approved | rejected
   final String status;
   final DateTime? requestedAt;
 
-  /// Server deadline when sent; otherwise requestedAt + 48 h (display only,
-  /// docs Part B 2.7: nothing is auto-approved).
+  /// Server display deadline (requestedAt + 48 h; nothing is auto-approved).
   final DateTime? respondBy;
-
-  /// Digital rows: whether the buyer downloaded the file (null = unknown).
-  final bool? downloaded;
+  final bool isOverdue;
+  final num amount;
 
   /// Follow-up tracking: null | item_received | replacement_sent.
   final String? followUpStep;
-  final String? rejectReason;
 
-  bool get isOpen => status == 'requested' || status == 'pending' || status == 'open';
+  /// `source` path segment for the detail route.
+  String get source => kind == ReturnKind.refundRequest ? 'refund' : 'return';
+
+  bool get isOpen => status == 'open';
   bool get isApproved => status == 'approved';
   bool get isRejected => status == 'rejected';
-  bool get isDigital => productType == 'digital';
-
-  /// Next follow-up step (item_received -> replacement_sent; no money).
-  String? get nextFollowUp {
-    if (!isApproved || kind != ReturnKind.itemReturn || isDigital) return null;
-    if (followUpStep == null || followUpStep!.isEmpty) return 'item_received';
-    if (followUpStep == 'item_received') return 'replacement_sent';
-    return null;
-  }
-
-  static ReturnKind _kind(Map<String, dynamic> j) {
-    final k = (_s(j['kind']) ?? _s(j['source']) ?? _s(j['type']) ?? '').toLowerCase();
-    if (k.contains('refund')) return ReturnKind.refundRequest;
-    if (k.contains('return')) return ReturnKind.itemReturn;
-    // A refund-request document carries itemIds + its own _id and orderId.
-    return j['refundRequestId'] != null || (j['itemIds'] is List && j['_id'] != null && j['orderId'] != null)
-        ? ReturnKind.refundRequest
-        : ReturnKind.itemReturn;
-  }
 
   factory SellerReturnItem.fromJson(Map<String, dynamic> j) {
-    final kind = _kind(j);
-    final product = j['product'] is Map ? Map<String, dynamic>.from(j['product'] as Map) : const <String, dynamic>{};
-    final itemIds = <String>[
-      if (j['itemIds'] is List) ...(j['itemIds'] as List).map((e) => '$e'),
-      if (j['itemIds'] is! List && _s(j['itemId']) != null) _s(j['itemId'])!,
-    ];
-    final requestedAt = _t(j['requestedAt'] ?? j['returnRequestedAt'] ?? j['createdAt']);
-    final respondBy = _t(j['respondBy'] ?? j['respondByAt'] ?? j['dueAt']) ??
-        requestedAt?.add(const Duration(hours: 48));
-    final followUp = j['followUp'];
-    final photos = j['photos'] ?? j['images'] ?? j['returnPhotos'];
-    final dl = j['downloaded'] ?? j['isDownloaded'] ?? j['digitalDownloaded'];
+    final ev = j['evidenceImages'];
     return SellerReturnItem(
-      id: _s(j['refundRequestId']) ?? _s(j['_id']) ?? _s(j['id']) ?? _s(j['orderId']) ?? '',
-      kind: kind,
+      requestId: _s(j['requestId']) ?? '',
+      kind: _s(j['source']) == 'refund' ? ReturnKind.refundRequest : ReturnKind.itemReturn,
       orderId: _s(j['orderId']) ?? '',
       orderNumber: _s(j['orderNumber']) ?? '',
-      itemIds: itemIds,
-      productName: _s(j['productName']) ?? _s(j['name']) ?? _s(product['name']) ?? '',
-      productType: (_s(j['productType']) ?? _s(j['itemType']) ?? _s(product['type']) ?? '').toLowerCase(),
-      reason: _s(j['reason']) ?? _s(j['returnReason']) ?? '',
-      note: _s(j['note']) ?? _s(j['details']) ?? _s(j['returnNote']),
-      photos: photos is List ? photos.map((e) => e is Map ? '${e['url']}' : '$e').toList() : const [],
-      status: (_s(j['status']) ?? _s(j['returnStatus']) ?? '').toLowerCase(),
-      requestedAt: requestedAt,
-      respondBy: respondBy,
-      downloaded: dl is bool ? dl : null,
-      followUpStep: followUp is Map ? _s(followUp['step']) : _s(followUp) ?? _s(j['followUpStep']),
-      rejectReason: _s(j['rejectReason']) ?? _s(j['returnRejectReason']) ?? _s(j['resolutionNotes']),
+      itemIds: j['itemIds'] is List ? (j['itemIds'] as List).map((e) => '$e').toList() : const [],
+      productName: _s(j['item']) ?? '',
+      buyer: _s(j['buyer']) ?? '',
+      reason: _s(j['reason']) ?? '',
+      reasonLabel: _s(j['reasonLabel']) ?? _s(j['reason']) ?? '',
+      note: _s(j['note']),
+      photos: ev is List ? ev.map((e) => e is Map ? '${e['url']}' : '$e').where((u) => u.isNotEmpty).toList() : const [],
+      status: (_s(j['status']) ?? '').toLowerCase(),
+      requestedAt: _t(j['requestedAt']),
+      respondBy: _t(j['respondBy']),
+      isOverdue: j['isOverdue'] == true,
+      amount: j['amount'] is num ? j['amount'] as num : 0,
+      followUpStep: _s(j['followUp']),
+    );
+  }
+}
+
+/// GET /api/orders/seller-returns-all/:storeId/:source/:requestId
+/// (src/orders/return-detail.util.ts buildReturnDetail). The follow-up
+/// buttons come from the server's `actions`, never decided on the device.
+class SellerReturnDetail {
+  const SellerReturnDetail({
+    required this.items,
+    required this.rejectReason,
+    required this.followUp,
+    required this.followUpNote,
+    required this.canReview,
+    required this.canMarkReceived,
+    required this.canMarkReplacementSent,
+    required this.currency,
+  });
+
+  final List<({String id, String name, String type, int quantity, int? downloadCount})> items;
+  final String? rejectReason;
+  final String? followUp;
+  final String? followUpNote;
+  final bool canReview;
+  final bool canMarkReceived;
+  final bool canMarkReplacementSent;
+  final String currency;
+
+  factory SellerReturnDetail.fromJson(Map<String, dynamic> j) {
+    final a = j['actions'] is Map ? j['actions'] as Map : const {};
+    return SellerReturnDetail(
+      items: [
+        for (final i in (j['items'] as List? ?? const []).whereType<Map>())
+          (
+            id: '${i['id'] ?? ''}',
+            name: '${i['name'] ?? ''}',
+            type: '${i['type'] ?? 'physical'}',
+            quantity: (i['quantity'] as num?)?.toInt() ?? 1,
+            downloadCount: (i['downloadCount'] as num?)?.toInt(),
+          ),
+      ],
+      rejectReason: _s(j['rejectReason']),
+      followUp: _s(j['followUp']),
+      followUpNote: _s(j['followUpNote']),
+      canReview: a['canReview'] == true,
+      canMarkReceived: a['canMarkReceived'] == true,
+      canMarkReplacementSent: a['canMarkReplacementSent'] == true,
+      currency: _s(j['currency']) ?? '',
     );
   }
 }

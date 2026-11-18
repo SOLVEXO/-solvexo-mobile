@@ -184,18 +184,18 @@ class ReturnCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(item.productName, style: theme.textTheme.titleSmall),
             ],
-            if (item.reason.isNotEmpty) ...[
+            if (item.buyer.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text('Buyer: ${item.buyer}', style: muted),
+            ],
+            if (item.reason.isNotEmpty || item.reasonLabel.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text('Reason: ${_reasonLabel(item.reason)}', style: theme.textTheme.bodyMedium),
+              Text('Reason: ${item.reasonLabel.isNotEmpty ? item.reasonLabel : _reasonLabel(item.reason)}',
+                  style: theme.textTheme.bodyMedium),
             ],
             if (item.note != null) ...[
               const SizedBox(height: 4),
               Text(item.note!, style: theme.textTheme.bodyMedium),
-            ],
-            if (item.isDigital && item.downloaded != null) ...[
-              const SizedBox(height: 4),
-              Text('Downloaded: ${item.downloaded! ? 'Yes' : 'No'}',
-                  key: const Key('downloaded'), style: theme.textTheme.bodyMedium),
             ],
             if (item.photos.isNotEmpty) ...[
               const SizedBox(height: 8),
@@ -216,10 +216,6 @@ class ReturnCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text('Requested ${DateFormat('d MMM, h:mm a').format(item.requestedAt!)}', style: muted),
             ],
-            if (item.isRejected && item.rejectReason != null) ...[
-              const SizedBox(height: 4),
-              Text('Your reason: ${item.rejectReason}', style: muted),
-            ],
             if (item.followUpStep != null) ...[
               const SizedBox(height: 4),
               Text('Follow-up: ${_stepLabel(item.followUpStep!)}', style: muted),
@@ -232,7 +228,6 @@ class ReturnCard extends StatelessWidget {
                   child: LinearProgressIndicator(),
                 );
               }
-              final next = item.nextFollowUp;
               if (item.isOpen) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 12),
@@ -255,20 +250,20 @@ class ReturnCard extends StatelessWidget {
                   ]),
                 );
               }
-              if (next != null) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(minimumSize: _tap),
-                      onPressed: () => controller.followUp(item),
-                      child: Text(next == 'item_received' ? 'Mark item received' : 'Mark replacement sent'),
-                    ),
+              // Approved / rejected: details (items, downloads, your reason)
+              // and the follow-up steps the server allows.
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton(
+                    key: Key('details_${item.requestId}'),
+                    style: TextButton.styleFrom(minimumSize: _tap),
+                    onPressed: () => ReturnDetailSheet.show(item, controller),
+                    child: Text(item.isApproved ? 'Details and next step' : 'Details'),
                   ),
-                );
-              }
-              return const SizedBox.shrink();
+                ),
+              );
             }),
           ],
         ),
@@ -393,6 +388,108 @@ class _RejectReturnSheetState extends State<RejectReturnSheet> {
                 child: const Text('Reject return'),
               )),
         ],
+      ),
+    );
+  }
+}
+
+/// One return / refund in full, from the detail route. Follow-up buttons
+/// appear only when the server's `actions` allow them.
+class ReturnDetailSheet extends StatefulWidget {
+  const ReturnDetailSheet({super.key, required this.item, required this.controller});
+  final SellerReturnItem item;
+  final SellerReturnsController controller;
+
+  static Future<void> show(SellerReturnItem item, SellerReturnsController controller) => Get.bottomSheet(
+        ReturnDetailSheet(item: item, controller: controller),
+        isScrollControlled: true,
+        backgroundColor: Get.theme.colorScheme.surface,
+      );
+
+  @override
+  State<ReturnDetailSheet> createState() => _ReturnDetailSheetState();
+}
+
+class _ReturnDetailSheetState extends State<ReturnDetailSheet> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.loadDetail(widget.item);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = widget.controller;
+    final item = widget.item;
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Obx(() {
+          final d = c.detailFor(item);
+          if (d == null && c.detailLoadFailed(item)) {
+            return ReturnsMessage(
+              icon: Icons.cloud_off_rounded,
+              title: 'Could not load the details',
+              body: 'Check your connection and try again.',
+              action: FilledButton.tonal(
+                style: FilledButton.styleFrom(minimumSize: _tap),
+                onPressed: () => c.loadDetail(item),
+                child: const Text('Retry'),
+              ),
+            );
+          }
+          if (d == null) return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
+          final busy = c.isProcessing(item);
+          return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(item.orderNumber.isEmpty ? 'Return' : '#${item.orderNumber}', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (final i in d.items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text([
+                  '${i.name} × ${i.quantity}',
+                  i.type == 'digital' ? 'Digital' : 'Physical',
+                  if (i.downloadCount != null) 'Downloaded: ${i.downloadCount! > 0 ? 'Yes (${i.downloadCount})' : 'No'}',
+                ].join(' · ')),
+              ),
+            if (d.rejectReason != null) ...[
+              const SizedBox(height: 6),
+              Text('Your reason: ${d.rejectReason}'),
+            ],
+            if (d.followUp != null) ...[
+              const SizedBox(height: 6),
+              Text('Follow-up: ${d.followUp == 'item_received' ? 'Item received' : 'Replacement sent'}'
+                  '${d.followUpNote == null ? '' : ' – ${d.followUpNote}'}'),
+            ],
+            const SizedBox(height: 12),
+            if (busy) const LinearProgressIndicator(),
+            if (!busy && d.canMarkReceived)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: const Key('markReceived'),
+                  style: OutlinedButton.styleFrom(minimumSize: _tap),
+                  onPressed: () async {
+                    if (await c.followUp(item, 'item_received')) Get.back();
+                  },
+                  child: const Text('Mark item received'),
+                ),
+              ),
+            if (!busy && d.canMarkReplacementSent)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: const Key('markReplacement'),
+                  style: OutlinedButton.styleFrom(minimumSize: _tap),
+                  onPressed: () async {
+                    if (await c.followUp(item, 'replacement_sent')) Get.back();
+                  },
+                  child: const Text('Mark replacement sent'),
+                ),
+              ),
+          ]);
+        }),
       ),
     );
   }

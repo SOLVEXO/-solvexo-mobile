@@ -172,4 +172,22 @@ class RefundRequestRepository {
       return false;
     }
   }
+
+  /// PATCH /api/refund-request/:id/follow-up {step, note?} (FollowUpDto).
+  /// step: item_received | replacement_sent; only on an approved request.
+  Future<bool> followUp(String id, String step, {String? note}) async {
+    try {
+      final response = await _client.patch(
+        ApiConstants.refundRequestFollowUp(id),
+        data: {'step': step, if (note != null && note.trim().isNotEmpty) 'note': note.trim()},
+        requiresAuth: true,
+      );
+      if (response.data is Map && response.data['success'] == true) return true;
+      ToastUtil.showToast(ApiError.msg(response.data is Map ? response.data['message'] : null) ?? 'Could not update the request.');
+      return false;
+    } on DioException catch (e) {
+      ToastUtil.showToast(ApiError.fromDio(e) ?? 'Could not update the request.');
+      return false;
+    }
+  }
 }

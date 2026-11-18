@@ -11,9 +11,10 @@ export 'package:book_store_app/app/modules/seller_returns/models/seller_return_i
 enum ReturnFilter { open, approved, rejected, all }
 
 /// Returns & refunds (docs Part B 6.6; checklist #8): ONE list from
-/// seller-returns-all. Item returns are answered with return-action, refund
-/// requests with refund-request approve/reject; follow-up steps are
-/// item_received -> replacement_sent (no money).
+/// seller-returns-all, keyed by `source` + `requestId` (backend 5adba44).
+/// source=return -> PUT return-action / PATCH return-follow-up on the order;
+/// source=refund -> PATCH refund-request/:requestId/approve|reject|follow-up.
+/// Follow-up buttons follow the detail route's server `actions`.
 class SellerReturnsController extends GetxController {
   SellerReturnsController({
     SellerOrdersRepository? orders,
@@ -40,7 +41,25 @@ class SellerReturnsController extends GetxController {
 
   bool get hasMore => _page < _totalPages;
   bool isProcessing(SellerReturnItem i) => _busy.contains(_key(i));
-  String _key(SellerReturnItem i) => '${i.kind.name}:${i.id}:${i.itemIds.join(',')}';
+  String _key(SellerReturnItem i) => '${i.source}:${i.requestId}';
+
+  /// Detail per row (loaded on demand for the Details sheet).
+  final RxMap<String, SellerReturnDetail> details = <String, SellerReturnDetail>{}.obs;
+  final RxSet<String> detailFailed = <String>{}.obs;
+
+  Future<void> loadDetail(SellerReturnItem i) async {
+    final k = _key(i);
+    detailFailed.remove(k);
+    try {
+      _storeId ??= await AppPreferences.getStoreId();
+      details[k] = await _orders.getReturnDetail(_storeId ?? '', i.source, i.requestId);
+    } catch (_) {
+      detailFailed.add(k);
+    }
+  }
+
+  SellerReturnDetail? detailFor(SellerReturnItem i) => details[_key(i)];
+  bool detailLoadFailed(SellerReturnItem i) => detailFailed.contains(_key(i));
 
   List<SellerReturnItem> get filtered => switch (selectedFilter.value) {
         ReturnFilter.open => items.where((i) => i.isOpen).toList(),
@@ -108,7 +127,7 @@ class SellerReturnsController extends GetxController {
   }
 
   Future<bool> approve(SellerReturnItem i) => _run(i, () async {
-        if (i.kind == ReturnKind.refundRequest) return _refunds.approve(i.id);
+        if (i.kind == ReturnKind.refundRequest) return _refunds.approve(i.requestId);
         return _orders.returnAction(
           orderId: i.orderId,
           storeId: _storeId ?? '',
@@ -120,7 +139,7 @@ class SellerReturnsController extends GetxController {
   Future<bool> reject(SellerReturnItem i, String reason) {
     if (validateRejectReason(reason) != null) return Future.value(false);
     return _run(i, () async {
-      if (i.kind == ReturnKind.refundRequest) return _refunds.reject(i.id, reason.trim());
+      if (i.kind == ReturnKind.refundRequest) return _refunds.reject(i.requestId, reason.trim());
       return _orders.returnAction(
         orderId: i.orderId,
         storeId: _storeId ?? '',
@@ -131,17 +150,17 @@ class SellerReturnsController extends GetxController {
     }, 'Return rejected');
   }
 
-  Future<bool> followUp(SellerReturnItem i) {
-    final step = i.nextFollowUp;
-    if (step == null || i.itemIds.isEmpty) return Future.value(false);
+  /// [step]: item_received | replacement_sent (offer only what the detail's
+  /// `actions` allow; the server re-checks).
+  Future<bool> followUp(SellerReturnItem i, String step) {
+    if (i.requestId.isEmpty) return Future.value(false);
     return _run(
       i,
-      () => _orders.returnFollowUp(
-        orderId: i.orderId,
-        storeId: _storeId ?? '',
-        itemId: i.itemIds.first,
-        step: step,
-      ),
+      () async {
+        if (i.kind == ReturnKind.refundRequest) return _refunds.followUp(i.requestId, step);
+        if (i.itemIds.isEmpty) return false;
+        return _orders.returnFollowUp(orderId: i.orderId, storeId: _storeId ?? '', itemId: i.itemIds.first, step: step);
+      },
       step == 'item_received' ? 'Marked as received' : 'Marked replacement sent',
     );
   }
@@ -154,6 +173,7 @@ class SellerReturnsController extends GetxController {
       final ok = await call();
       if (ok) {
         ToastUtil.showToast(done);
+        details.remove(k);
         // Re-read: the list endpoint is the source of truth.
         await refreshData();
       }

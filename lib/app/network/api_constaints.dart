@@ -327,6 +327,11 @@ class ApiConstants {
   // One list: item returns + refund requests (docs 6.6).
   static String sellerReturnsAll(String storeId) =>
       "$apiPrefix/orders/seller-returns-all/$storeId";
+  // One return/refund with server actions (requestId of a return is
+  // "<orderId>:<itemId>", so it is URL-encoded).
+  static String sellerReturnDetail(String storeId, String source, String requestId) =>
+      "$apiPrefix/orders/seller-returns-all/$storeId/$source/${Uri.encodeComponent(requestId)}";
+  static String refundRequestFollowUp(String id) => "$apiPrefix/refund-request/$id/follow-up";
   // PATCH {storeId, itemId, step}: item_received -> replacement_sent.
   static String returnFollowUp(String orderId) =>
       "$apiPrefix/orders/return-follow-up/$orderId";
