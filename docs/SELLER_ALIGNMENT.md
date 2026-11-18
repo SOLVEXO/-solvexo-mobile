@@ -60,6 +60,21 @@ by calling the API. Tick items off in commits that name the item number.
 Found while aligning the app with the live API (api.edudeen.com,
 2026-11-17). The app does not work around any of them.
 
+**Status against backend `main` 5adba44 (2026-11-17), checked in the
+source on 2026-11-18** (details: `docs/BACKEND_DIFF_REPORT.md` 3.2):
+
+| # | Issue | Status | Evidence in 5adba44 |
+|---|---|---|---|
+| 1 | Refund-request "502" | Not a backend issue (retracted) | – |
+| 2 | GET payout-schedule creates a record (USD default) | **Open** | `finance.service.ts:209-224` find -> create; `finance.controller.ts:190` defaults to USD |
+| 3 | Empty enum list in "type must be one of the following values: " | **Open** | `add-payout-method.dto.ts:7` `@IsEnum([...])` with an array (same in coupon, plan, loyalty, discount DTOs); `@IsIn` fixes it. Seen again live 2026-11-18 on PATCH payout-methods without `type` |
+| 4 | Docs gap: earnings-summary, seller-returns-all not in EDUDEEN_DOCS Part C | **Open (docs)** | covered by `docs/DOCS_ERRATA.md` E15 |
+| 5 | fee-estimate ignores Premium input | **Open** | `finance.controller.ts:52-64`, `finance.service.ts:1363-1384` |
+| 6 | update-store accepts an empty `productTypes` | **Open** | `store.service.ts:690-698, 844-847` |
+| 7 | update-store coerces `codEnabled`, loose `shipFrom` | **Open** | `store.service.ts:720` (`!!value`); `:813-821` (drops keys, stringifies a numeric province; no city -> shipFrom null) |
+| 8 | 500 on bad ids in course routes; silent title cutting | **Partly fixed** | roster routes now 400 "Invalid id"; builder / students / PUT still 500 on a bad storeId (`classroom.controllers.ts:281-298` -> `store-ownership.util.ts:27`); titles still cut at 120/150 (`course.util.ts:6,187,191`) |
+| 9 | Seller manual-payments controller still registered | **Open (new)** | see 9 below |
+
 1. **Refund-request "502" — retracted (not a backend issue).** Reported
    during P1 (#8 commit message) as `PATCH /api/refund-request/<id>/approve|
    reject -> 502 upstream error`. That came from my test harness: a shell
@@ -116,3 +131,15 @@ Found while aligning the app with the live API (api.edudeen.com,
    path part is read as a store id). Suggest: validate the ids and return
    400. Also, the course PUT cuts section titles to 120 and lesson titles
    to 150 characters without an error; the app limits them itself.
+9. **Retired seller direct bank transfer is still routed.**
+   `SellerManualPaymentsController` (`src/manual-payments/
+   seller-manual-payments.controller.ts`, `@Controller('api/seller/
+   manual-payments/:storeId')`: settings GET/PUT, proofs list / url /
+   approve / reject) is still in `manual-payments.module.ts:17`, although
+   the docs say seller direct bank transfer is retired (§2.1, §11). Every
+   method answers 410 Gone ("Bank transfers are now paid to Edudeen and
+   confirmed by the Edudeen team — sellers no longer set up or confirm
+   direct payments.", `manual-payments.service.ts:512-527`), so the routes
+   only add surface. Suggest: drop the controller from the module. The app
+   must not call these routes; it has no constant or call for them
+   (checked in `api_constaints.dart` on 2026-11-18).
