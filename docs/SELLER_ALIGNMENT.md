@@ -47,7 +47,7 @@ by calling the API. Tick items off in commits that name the item number.
 13. [x] Inventory: `PATCH /api/products/stock/bulk`, low-stock limit, history.
 14. Course builder (video-only lessons, accessDays, certificate design) and
     Students roster.
-15. Store settings: `codEnabled`, `deliverySettings`, `giftWrap`,
+15. [x] Store settings: `codEnabled`, `deliverySettings`, `giftWrap`,
     `deliveryDays`, `shipFrom`, `returnPolicy {note, digitalNote}`.
 16. Analytics plan-gating: locked card on 403 instead of an error.
 18. Bulk upload, docs §6.3; web-only for now.
@@ -101,3 +101,12 @@ Found while aligning the app with the live API (api.edudeen.com,
    normal price only and does not work out the member price on the device.
    Suggest: accept `premiumPercent` (or `productId`) and return the member
    price, fee and net.
+6. **update-store accepts an empty `productTypes`.** `POST /api/store/
+   update-store {storeId, productTypes: []}` -> 201 and the store then sells
+   nothing (happened to the test store on 2026-11-18; put back at once to
+   `["physical_products","digital_downloads"]`). The app requires at least
+   one. Suggest: reject an empty list.
+7. **update-store coerces loose values.** `codEnabled: "x"` is saved as
+   `true` (`!!value`), and `shipFrom` takes any keys and numbers
+   (`{province: 5}` -> `"5"`). Suggest: require a boolean and a known
+   province list.

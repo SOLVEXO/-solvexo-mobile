@@ -138,6 +138,9 @@ import '../modules/seller_activity_log/bindings/seller_activity_log_binding.dart
 import '../modules/seller_activity_log/views/seller_activity_log_view.dart';
 import '../modules/seller_store_banners/bindings/seller_store_banners_binding.dart';
 import '../modules/seller_store_banners/views/seller_store_banners_view.dart';
+import '../modules/seller_store_settings/bindings/seller_store_settings_binding.dart';
+import '../modules/seller_store_settings/views/seller_shipping_view.dart';
+import '../modules/seller_store_settings/views/seller_store_settings_view.dart';
 import '../modules/seller_inventory/bindings/seller_inventory_binding.dart';
 import '../modules/seller_inventory/views/seller_inventory_view.dart';
 import '../modules/seller_platform_sales/bindings/seller_platform_sales_binding.dart';
@@ -279,6 +282,16 @@ class AppPages {
       name: Routes.sellerStoreBanners,
       page: () => SellerStoreBannersView(),
       binding: SellerStoreBannersBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerStoreSettings,
+      page: () => const SellerStoreSettingsView(),
+      binding: SellerStoreSettingsBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerShipping,
+      page: () => const SellerShippingView(),
+      binding: SellerShippingBinding(),
     ),
     GetPage(
       name: Routes.sellerInventory,

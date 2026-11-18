@@ -9,6 +9,7 @@ class SellerLinkRouter {
   static const Map<String, String> _areas = {
     'products': Routes.sellerProducts,
     'inventory': Routes.sellerInventory,
+    'shipping': Routes.sellerShipping,
     'orders': Routes.sellerOrders,
     'returns': Routes.sellerReturns,
     'finance': Routes.sellerFinance,

@@ -1,0 +1,44 @@
+{
+ "_id": "6af44c0893ccfa01f3f8c75b",
+ "name": "Uzair Book Center",
+ "baseCurrency": "PKR",
+ "codEnabled": true,
+ "productTypes": [
+  "physical_products",
+  "digital_downloads"
+ ],
+ "deliverySettings": {
+  "enabled": true,
+  "fee": 150,
+  "freeOverAmount": 3000
+ },
+ "giftWrap": {
+  "enabled": true,
+  "fee": 100
+ },
+ "deliveryDays": {
+  "sameCity": {
+   "min": 1,
+   "max": 2
+  },
+  "sameProvince": {
+   "min": 2,
+   "max": 4
+  },
+  "national": {
+   "min": 3,
+   "max": 6
+  }
+ },
+ "dispatchDays": 2,
+ "shipFrom": {
+  "city": "Lahore",
+  "province": "Punjab"
+ },
+ "returnPolicy": {
+  "returnsAccepted": true,
+  "windowDays": 7,
+  "note": "Returns within 7 days if damaged.",
+  "digitalNote": "Digital files cannot be returned."
+ }
+}

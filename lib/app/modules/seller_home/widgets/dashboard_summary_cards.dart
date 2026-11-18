@@ -151,8 +151,9 @@ class DashboardChecklistCard extends StatelessWidget {
         'finance' => () => Get.toNamed(Routes.sellerFinance),
         'products/add' => openAddProductOrRequireVerification,
         'products' => () => _goTab(2),
-        // No delivery-settings screen yet (checklist #15).
-        'shipping' => null,
+        // Delivery settings live in Store settings (#15).
+        'shipping' => () => Get.toNamed(Routes.sellerStoreSettings),
+        'inventory' => () => Get.toNamed(Routes.sellerInventory),
         _ => null,
       };
 
