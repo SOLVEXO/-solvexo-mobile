@@ -165,14 +165,15 @@ class NotificationsController extends GetxController {
         break;
       case 'low_stock':
       case 'out_of_stock':
-      case 'listing_fix_requested':
       case 'listing_published':
       case 'listing_in_review':
       case 'listing_approved':
-      // No "Needs changes" filter or single-product route exists yet
-      // (checklist #11), so these open Products.
-      case 'listing_rejected':
         Get.toNamed(Routes.sellerProducts);
+        break;
+      // Sent back by Edudeen: open the "Needs changes" tab (checklist #11).
+      case 'listing_fix_requested':
+      case 'listing_rejected':
+        Get.toNamed(Routes.sellerProducts, arguments: {'tab': 'rejected'});
         break;
       case 'platform_campaign_live':
         // link = /store/:id/marketing?tab=platform; the app has no seller

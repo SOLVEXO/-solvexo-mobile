@@ -39,7 +39,7 @@ by calling the API. Tick items off in commits that name the item number.
 
 ## P2 — features the web has
 10. [x] Dashboard summary endpoint (KPIs, action counts, setup checklist).
-11. Products list: status tabs with counts (In review / Needs changes),
+11. [x] Products list: status tabs with counts (In review / Needs changes),
     inline price/stock edit, Duplicate, bulk activate/deactivate, "Paused –
     plan ended", "Fix now" with admin note.
 12. Offers: Premium % vs platform sale (either/or), `PATCH

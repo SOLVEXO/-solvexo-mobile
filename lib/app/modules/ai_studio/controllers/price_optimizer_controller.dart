@@ -47,12 +47,11 @@ class PriceOptimizerController extends GetxController with AiGenerateHandlingMix
   Future<void> _init() async {
     storeId = await AppPreferences.getStoreId() ?? '';
     if (storeId.isEmpty) return;
-    final results = await Future.wait([
-      _productRepo.fetchStoreInventory(storeId: storeId, limit: 100),
-      _categoryRepo.getAllCategoriesFlat(),
-    ]);
-    products.assignAll((results[0] as ({List<Map<String, dynamic>> products, int totalProducts, bool hasMore})).products);
-    categories.assignAll(results[1] as List<CategoryModel>);
+    // Started together; awaited by name (no cast to the record's exact type).
+    final inventory = _productRepo.fetchStoreInventory(storeId: storeId, limit: 100);
+    final cats = _categoryRepo.getAllCategoriesFlat();
+    products.assignAll((await inventory).products);
+    categories.assignAll(await cats);
   }
 
   void setMode(bool useProduct) {

@@ -46,16 +46,32 @@ class SellerProductRepository {
 
   // ─── GET /api/inventory/getStoreInventory/:storeId ────────────────────────
 
-  Future<({List<Map<String, dynamic>> products, int totalProducts, bool hasMore})>
-      fetchStoreInventory({
+  Future<
+      ({
+        List<Map<String, dynamic>> products,
+        int totalProducts,
+        bool hasMore,
+        Map<String, int> statusCounts,
+        bool failed,
+      })> fetchStoreInventory({
     required String storeId,
     int page = 1,
     int limit = 20,
+    // Raw product status (verified: draft filters to drafts, active to
+    // live): active | pending_review | rejected | draft | inactive | scheduled.
+    String? status,
+    // Server search is `q` (verified; `search` is ignored).
+    String? query,
   }) async {
     try {
       final response = await _client.get(
         ApiConstants.getStoreInventory(storeId),
-        queryParameters: {'page': page, 'limit': limit},
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+          if (status != null) 'status': status,
+          if (query != null && query.trim().isNotEmpty) 'q': query.trim(),
+        },
         requiresAuth: true,
       );
 
@@ -66,17 +82,26 @@ class SellerProductRepository {
             (data['products'] as List).cast<Map<String, dynamic>>();
         final totalProducts = pagination['totalProducts'] as int? ?? 0;
         final totalPages = pagination['totalPages'] as int? ?? 1;
+        final stats = data['stats'] is Map ? data['stats'] as Map : const {};
+        final rawCounts = stats['statusCounts'] is Map ? stats['statusCounts'] as Map : const {};
         return (
           products: products,
-          totalProducts: totalProducts,
+          totalProducts: (stats['totalProducts'] as num?)?.toInt() ?? totalProducts,
           hasMore: page < totalPages,
+          statusCounts: <String, int>{
+            for (final e in rawCounts.entries)
+              if (e.value is num) '${e.key}': (e.value as num).toInt(),
+          },
+          failed: false,
         );
       }
 
       return (
         products: <Map<String, dynamic>>[],
         totalProducts: 0,
-        hasMore: false
+        hasMore: false,
+        statusCounts: <String, int>{},
+        failed: true,
       );
     } on DioException catch (e) {
       debugPrint(
@@ -86,7 +111,9 @@ class SellerProductRepository {
       return (
         products: <Map<String, dynamic>>[],
         totalProducts: 0,
-        hasMore: false
+        hasMore: false,
+        statusCounts: <String, int>{},
+        failed: true,
       );
     } catch (e) {
       debugPrint('❌ fetchStoreInventory error: $e');
@@ -94,8 +121,100 @@ class SellerProductRepository {
       return (
         products: <Map<String, dynamic>>[],
         totalProducts: 0,
-        hasMore: false
+        hasMore: false,
+        statusCounts: <String, int>{},
+        failed: true,
       );
+    }
+  }
+
+  // ─── Products list actions (checklist #11; verified on test drafts) ────────
+
+  /// POST /api/products/duplicate/:id -> 201 "Draft copy created",
+  /// data {productId, slug, name, status:'draft'}.
+  Future<({bool ok, String? message})> duplicateProduct(String productId) async {
+    try {
+      final res = await _client.post(ApiConstants.duplicateProduct(productId), data: const {}, requiresAuth: true);
+      final body = res.data;
+      final ok = body is Map && body['success'] == true;
+      return (ok: ok, message: body is Map ? ApiError.msg(body['message']) : null);
+    } on DioException catch (e) {
+      return (ok: false, message: ApiError.fromDio(e) ?? 'Could not duplicate the product.');
+    }
+  }
+
+  /// PATCH /api/products/bulk-status {ids, active} -> {updated:[...],
+  /// skipped:[{id, name, reason}], changedMeanwhile}. A draft is skipped with
+  /// "Only a live or scheduled product can be deactivated."
+  Future<({int updated, List<String> skipped, String? message})> setProductsActive(
+    List<String> ids, {
+    required bool active,
+  }) async {
+    try {
+      final res = await _client.patch(
+        ApiConstants.productsBulkStatus,
+        data: {'ids': ids, 'active': active},
+        requiresAuth: true,
+      );
+      final body = res.data is Map ? res.data as Map : const {};
+      final data = body['data'] is Map ? body['data'] as Map : const {};
+      final updated = data['updated'];
+      final skipped = data['skipped'] is List ? data['skipped'] as List : const [];
+      return (
+        updated: updated is List ? updated.length : (updated is num ? updated.toInt() : 0),
+        skipped: [
+          for (final s in skipped)
+            if (s is Map) '${s['name'] ?? s['id']}: ${s['reason'] ?? 'skipped'}',
+        ],
+        message: ApiError.msg(body['message']),
+      );
+    } on DioException catch (e) {
+      return (updated: 0, skipped: const <String>[], message: ApiError.fromDio(e) ?? 'Could not change the products.');
+    }
+  }
+
+  /// Digital inline price: POST edit-product {productId, price} (no status
+  /// -> the status stays as it is; verified on a draft).
+  Future<({bool ok, String? message})> setDigitalPrice(String productId, double price) async {
+    try {
+      final res = await _client.post(ApiConstants.editProduct, data: {'productId': productId, 'price': price}, requiresAuth: true);
+      final body = res.data;
+      return (ok: body is Map && body['success'] == true, message: body is Map ? ApiError.msg(body['message']) : null);
+    } on DioException catch (e) {
+      return (ok: false, message: ApiError.fromDio(e) ?? 'Could not change the price.');
+    }
+  }
+
+  /// Physical inline price: PATCH /api/products/:id/variants/:variantId
+  /// {price} (digital -> 400 "Only physical products support variants").
+  Future<({bool ok, String? message})> setVariantPrice(String productId, String variantId, double price) async {
+    try {
+      final res = await _client.patch(ApiConstants.productVariant(productId, variantId), data: {'price': price}, requiresAuth: true);
+      final body = res.data;
+      return (ok: body is Map && body['success'] == true, message: body is Map ? ApiError.msg(body['message']) : null);
+    } on DioException catch (e) {
+      return (ok: false, message: ApiError.fromDio(e) ?? 'Could not change the price.');
+    }
+  }
+
+  /// PATCH /api/products/stock/bulk {storeId, updates:[{variantId, stock}]}
+  /// -> {updated: 1, skipped: []}; stock 0..1,000,000 whole numbers.
+  Future<({bool ok, String? message})> setVariantStock(String storeId, String variantId, int stock) async {
+    try {
+      final res = await _client.patch(
+        ApiConstants.productsStockBulk,
+        data: {
+          'storeId': storeId,
+          'updates': [
+            {'variantId': variantId, 'stock': stock},
+          ],
+        },
+        requiresAuth: true,
+      );
+      final body = res.data;
+      return (ok: body is Map && body['success'] == true, message: body is Map ? ApiError.msg(body['message']) : null);
+    } on DioException catch (e) {
+      return (ok: false, message: ApiError.fromDio(e) ?? 'Could not change the stock.');
     }
   }
 

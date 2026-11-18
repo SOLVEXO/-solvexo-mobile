@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:book_store_app/app/data/repositories/seller_product_repository.dart';
+import 'package:book_store_app/utils/price_rules.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +47,18 @@ class SellerProduct {
   final bool previewEnabled;
   final List<String> images;
 
+  /// Raw API status: draft | pending_review | active | scheduled | inactive |
+  /// rejected (docs Part B 4).
+  final String rawStatus;
+
+  /// Hidden because the platform plan ended (docs 2.8).
+  final bool pausedByPlan;
+
+  /// Admin note for a listing sent back ("Fix now").
+  final String? adminNote;
+  final String? defaultVariantId;
+  final List<String> qualityMissing;
+
   const SellerProduct({
     required this.id,
     required this.name,
@@ -72,7 +88,18 @@ class SellerProduct {
     this.buyerDeliveryMessage,
     this.previewEnabled = false,
     this.images = const [],
+    this.rawStatus = 'active',
+    this.pausedByPlan = false,
+    this.adminNote,
+    this.defaultVariantId,
+    this.qualityMissing = const [],
   });
+
+  bool get needsChanges => rawStatus == 'rejected';
+  bool get inReview => rawStatus == 'pending_review';
+  bool get isLive => rawStatus == 'active' || rawStatus == 'scheduled';
+  bool get canActivate => rawStatus == 'inactive';
+  bool get isPhysical => type == 'Physical';
 
   bool get isUnlimitedStock => stock == null;
   String get stockLabel => isUnlimitedStock ? '∞' : '$stock';
@@ -112,6 +139,13 @@ class SellerProduct {
 
     final String name = json['name'] as String? ?? '';
 
+    String? note(dynamic v) {
+      if (v == null) return null;
+      if (v is Map) return (v['note'] ?? v['reason'] ?? v['message'])?.toString();
+      final s = v.toString().trim();
+      return s.isEmpty ? null : s;
+    }
+
     // Digital config is nested under `digital` (null for physical products).
     final digitalJson = json['digital'] as Map<String, dynamic>?;
 
@@ -150,6 +184,11 @@ class SellerProduct {
       buyerDeliveryMessage: digitalJson?['buyerDeliveryMessage'] as String?,
       previewEnabled:
           (digitalJson?['preview'] as Map?)?['enabled'] as bool? ?? false,
+      rawStatus: apiStatus,
+      pausedByPlan: json['pausedByPlan'] == true,
+      adminNote: note(json['reviewNote']) ?? note(json['editRejection']) ?? note(json['reviewReason']),
+      defaultVariantId: json['defaultVariantId'] as String?,
+      qualityMissing: (json['qualityMissing'] as List?)?.map((e) => '$e').toList() ?? const [],
     );
   }
 
@@ -195,15 +234,33 @@ class SellerProduct {
 
 // ── Controller ────────────────────────────────────────────────────────────────
 
+/// Products tabs (docs Part B 6.3) = raw API status filters.
+enum ProductsTab {
+  all(null, 'All'),
+  active('active', 'Active'),
+  inReview('pending_review', 'In review'),
+  needsChanges('rejected', 'Needs changes'),
+  draft('draft', 'Draft'),
+  inactive('inactive', 'Inactive');
+
+  const ProductsTab(this.api, this.label);
+  final String? api;
+  final String label;
+
+  static ProductsTab fromApi(String? s) =>
+      ProductsTab.values.firstWhere((t) => t.api == s, orElse: () => ProductsTab.all);
+}
+
 class SellerProductsController extends GetxController {
   SellerProductsController({SellerProductRepository? repository})
-    : _repo = repository ?? SellerProductRepository();
+      : _repo = repository ?? SellerProductRepository();
 
   final SellerProductRepository _repo;
 
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
-  final Rx<ProductStatus> selectedFilter = ProductStatus.all.obs;
+  final RxBool loadFailed = false.obs;
+  final Rx<ProductsTab> selectedTab = ProductsTab.all.obs;
   final RxString searchQuery = ''.obs;
   final RxString errorMessage = ''.obs;
   final TextEditingController searchController = TextEditingController();
@@ -211,43 +268,61 @@ class SellerProductsController extends GetxController {
   final RxList<SellerProduct> _allProducts = <SellerProduct>[].obs;
   final RxInt totalProducts = 0.obs;
 
+  /// Server counts per raw status (stats.statusCounts, e.g. {draft: 2}).
+  final RxMap<String, int> statusCounts = <String, int>{}.obs;
+
+  /// Multi-select for bulk activate / deactivate.
+  final RxSet<String> selectedIds = <String>{}.obs;
+  final RxSet<String> busyIds = <String>{}.obs;
+
   int _page = 1;
   bool _hasMore = false;
   static const int _pageSize = 20;
+  Timer? _searchDebounce;
 
   // ── Computed ──────────────────────────────────────────────────────────────
 
-  List<SellerProduct> get filteredProducts {
-    var list = selectedFilter.value == ProductStatus.all
-        ? List<SellerProduct>.from(_allProducts)
-        : _allProducts.where((p) => p.status == selectedFilter.value).toList();
-
-    final q = searchQuery.value.trim().toLowerCase();
-    if (q.isNotEmpty) {
-      list = list.where((p) => p.name.toLowerCase().contains(q)).toList();
-    }
-    return list;
-  }
+  /// Rows of the selected tab / search (filtered by the server).
+  List<SellerProduct> get filteredProducts => List<SellerProduct>.from(_allProducts);
 
   bool get hasMore => _hasMore;
+  bool get selecting => selectedIds.isNotEmpty;
 
-  int countFor(ProductStatus status) {
-    if (status == ProductStatus.all) return totalProducts.value;
-    return _allProducts.where((p) => p.status == status).length;
+  int countForTab(ProductsTab t) {
+    if (t == ProductsTab.all) {
+      return statusCounts.values.fold(0, (a, b) => a + b);
+    }
+    return statusCounts[t.api] ?? 0;
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  void setFilter(ProductStatus status) => selectedFilter.value = status;
+  void setTab(ProductsTab t) {
+    if (selectedTab.value == t) return;
+    selectedTab.value = t;
+    selectedIds.clear();
+    refreshData();
+  }
 
-  void onSearch(String query) => searchQuery.value = query;
+  void onSearch(String query) {
+    searchQuery.value = query;
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 400), refreshData);
+  }
 
-  void clearSearch() => searchQuery.value = '';
+  void clearSearch() {
+    searchQuery.value = '';
+    refreshData();
+  }
+
+  void toggleSelect(String id) =>
+      selectedIds.contains(id) ? selectedIds.remove(id) : selectedIds.add(id);
+
+  void clearSelection() => selectedIds.clear();
 
   Future<void> refreshData() async {
     _page = 1;
     _hasMore = false;
-    _allProducts.clear();
     isLoading.value = true;
     await _load(isRefresh: true);
   }
@@ -255,6 +330,77 @@ class SellerProductsController extends GetxController {
   Future<void> loadMore() async {
     if (!_hasMore || isLoadingMore.value) return;
     await _load(page: _page + 1);
+  }
+
+  /// Validation for inline edits (same rules as the API / PriceRules).
+  static String? validatePrice(String raw) {
+    final v = double.tryParse(raw.trim());
+    if (v == null) return 'Enter a price.';
+    return PriceRules.validate(v);
+  }
+
+  static String? validateStock(String raw) {
+    final v = int.tryParse(raw.trim());
+    if (v == null || v < 0 || v > 1000000) return 'Stock must be a whole number from 0 to 1,000,000.';
+    return null;
+  }
+
+  Future<bool> setPrice(SellerProduct p, String raw) async {
+    if (validatePrice(raw) != null) return false;
+    final price = double.parse(raw.trim());
+    return _act(p.id, () async {
+      final r = p.isPhysical && p.defaultVariantId != null
+          ? await _repo.setVariantPrice(p.id, p.defaultVariantId!, price)
+          : await _repo.setDigitalPrice(p.id, price);
+      return (r.ok, r.ok ? 'Price updated' : (r.message ?? 'Could not change the price.'));
+    });
+  }
+
+  Future<bool> setStock(SellerProduct p, String raw) async {
+    if (validateStock(raw) != null || p.defaultVariantId == null) return false;
+    final storeId = await AppPreferences.getStoreId() ?? '';
+    return _act(p.id, () async {
+      final r = await _repo.setVariantStock(storeId, p.defaultVariantId!, int.parse(raw.trim()));
+      return (r.ok, r.ok ? 'Stock updated' : (r.message ?? 'Could not change the stock.'));
+    });
+  }
+
+  Future<bool> duplicate(SellerProduct p) => _act(p.id, () async {
+        final r = await _repo.duplicateProduct(p.id);
+        return (r.ok, r.ok ? 'Draft copy created' : (r.message ?? 'Could not duplicate.'));
+      });
+
+  /// Single or bulk activate/deactivate. Returns the server's skipped
+  /// reasons (e.g. "Only a live or scheduled product can be deactivated.").
+  Future<List<String>> setActive(List<String> ids, {required bool active}) async {
+    if (ids.isEmpty) return const [];
+    busyIds.addAll(ids);
+    try {
+      final r = await _repo.setProductsActive(ids, active: active);
+      if (r.updated > 0) {
+        ToastUtil.showToast('${r.updated} product${r.updated == 1 ? '' : 's'} ${active ? 'activated' : 'deactivated'}');
+      } else if (r.skipped.isEmpty && r.message != null) {
+        ToastUtil.showToast(r.message!);
+      }
+      selectedIds.clear();
+      await refreshData();
+      return r.skipped;
+    } finally {
+      busyIds.removeAll(ids);
+    }
+  }
+
+  Future<bool> _act(String id, Future<(bool, String)> Function() call) async {
+    if (busyIds.contains(id)) return false;
+    busyIds.add(id);
+    try {
+      final (ok, message) = await call();
+      ToastUtil.showToast(message);
+      if (ok) await refreshData();
+      return ok;
+    } finally {
+      busyIds.remove(id);
+    }
   }
 
   // ── Data fetching ─────────────────────────────────────────────────────────
@@ -270,9 +416,7 @@ class SellerProductsController extends GetxController {
     try {
       final storeId = await AppPreferences.getStoreId();
       if (storeId == null || storeId.isEmpty) {
-        debugPrint('⚠️ SellerProductsController: no storeId in prefs');
-        isLoading.value = false;
-        isLoadingMore.value = false;
+        loadFailed.value = true;
         return;
       }
 
@@ -280,27 +424,35 @@ class SellerProductsController extends GetxController {
         storeId: storeId,
         page: page,
         limit: _pageSize,
+        status: selectedTab.value.api,
+        query: searchQuery.value,
       );
+      if (result.failed && page == 1) {
+        loadFailed.value = true;
+        _allProducts.clear();
+        errorMessage.value = 'Failed to load products.';
+        return;
+      }
+      loadFailed.value = false;
 
-      final parsed = result.products
-          .map((json) => SellerProduct.fromApiJson(json))
-          .toList();
-
+      final parsed = result.products.map((json) => SellerProduct.fromApiJson(json)).toList();
       if (page == 1) {
         _allProducts.assignAll(parsed);
+        // Counts are store-wide only when the list is not narrowed by search.
+        if (searchQuery.value.trim().isEmpty && selectedTab.value == ProductsTab.all) {
+          statusCounts.assignAll(result.statusCounts);
+        } else if (statusCounts.isEmpty) {
+          statusCounts.assignAll(result.statusCounts);
+        }
       } else {
         _allProducts.addAll(parsed);
       }
-
       totalProducts.value = result.totalProducts;
       _hasMore = result.hasMore;
       _page = page;
-
-      debugPrint(
-        '✅ Loaded ${parsed.length} products (page $page, total ${result.totalProducts})',
-      );
     } catch (e) {
       debugPrint('❌ _load error: $e');
+      loadFailed.value = true;
       errorMessage.value = 'Failed to load products.';
     } finally {
       isLoading.value = false;
@@ -313,11 +465,17 @@ class SellerProductsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // `listing_rejected` notifications open the "Needs changes" tab.
+    final arg = Get.arguments;
+    if (arg is Map && arg['tab'] is String) {
+      selectedTab.value = ProductsTab.fromApi(arg['tab'] as String);
+    }
     _load();
   }
 
   @override
   void onClose() {
+    _searchDebounce?.cancel();
     searchController.dispose();
     super.onClose();
   }

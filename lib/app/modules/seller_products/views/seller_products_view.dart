@@ -5,7 +5,7 @@ import 'package:book_store_app/app/modules/seller/utils/seller_store_gate.dart';
 import 'package:book_store_app/app/modules/seller/widgets/seller_app_bar.dart';
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/product_card.dart';
-import 'package:book_store_app/app/modules/seller_products/widgets/product_filter_bar.dart';
+import 'package:book_store_app/app/modules/seller_products/widgets/product_list_actions.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/products_empty_state.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/products_search_bar.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/products_shimmer.dart';
@@ -27,6 +27,7 @@ class SellerProductsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      bottomNavigationBar: ProductsSelectionBar(controller: controller),
       // floatingActionButton: FloatingActionButton.extended(
       //   onPressed: openAddProductOrRequireVerification,
       //   backgroundColor: AppColors.primaryColor,
@@ -43,7 +44,7 @@ class SellerProductsView extends StatelessWidget {
         children: [
           SellerAppBar(title: 'Products'),
           ProductsSearchBar(),
-          ProductFilterBar(controller: controller),
+          ProductsTabsBar(controller: controller),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppDimen.allPadding,
@@ -63,6 +64,22 @@ class SellerProductsView extends StatelessWidget {
               child: Obx(() {
                 if (controller.isLoading.value) return const ProductsShimmer();
 
+                if (controller.loadFailed.value) {
+                  return ListView(children: [
+                    const SizedBox(height: 80),
+                    const Icon(Icons.cloud_off_rounded, size: 56),
+                    const SizedBox(height: 12),
+                    const Text('Could not load products', textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(minimumSize: const Size(160, 48)),
+                        onPressed: controller.refreshData,
+                        child: const Text('Retry'),
+                      ),
+                    ),
+                  ]);
+                }
                 final products = controller.filteredProducts;
                 final isSearch = controller.searchQuery.value.isNotEmpty;
 
@@ -81,6 +98,7 @@ class SellerProductsView extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (_, i) => ProductCard(
                     product: products[i],
+                    controller: controller,
                     onEdit: () async {
                       final result = await Get.toNamed(
                         Routes.editSellerProduct,

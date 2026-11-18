@@ -1,6 +1,8 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
+import 'package:book_store_app/app/modules/seller_products/widgets/product_list_actions.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/product_status_badge.dart';
+import 'package:get/get.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/product_type_badge.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -14,16 +16,33 @@ import 'package:intl/intl.dart';
 class ProductCard extends StatelessWidget {
   final SellerProduct product;
   final VoidCallback? onEdit;
+  final SellerProductsController? controller;
 
-  const ProductCard({super.key, required this.product, this.onEdit});
+  const ProductCard({super.key, required this.product, this.onEdit, this.controller});
 
   @override
   Widget build(BuildContext context) {
+    final c = controller;
+    if (c == null) return _card(context, false);
+    return Obx(() {
+      final selected = c.selectedIds.contains(product.id);
+      return GestureDetector(
+        onLongPress: () => c.toggleSelect(product.id),
+        onTap: c.selecting ? () => c.toggleSelect(product.id) : null,
+        child: _card(context, selected),
+      );
+    });
+  }
+
+  Widget _card(BuildContext context, bool selected) {
+    final c = controller;
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(AppDimen.allPadding),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(AppDimen.serviceCountTileRadius),
+        border: selected ? Border.all(color: scheme.primary, width: 2) : null,
         boxShadow: [
           BoxShadow(
             color: AppColors.black.withOpacity(0.04),
@@ -32,21 +51,104 @@ class ProductCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ProductImage(
-            emoji: product.emoji,
-            images: product.images,
-            imageFallback: product.image,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (selected) ...[
+                Icon(Icons.check_circle_rounded, color: scheme.primary),
+                const SizedBox(width: 8),
+              ],
+              _ProductImage(
+                emoji: product.emoji,
+                images: product.images,
+                imageFallback: product.image,
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: _ProductInfo(product: product)),
+              const SizedBox(width: 4),
+              if (c == null)
+                _EditButton(onTap: onEdit ?? () {})
+              else
+                _RowMenu(product: product, controller: c, onEdit: onEdit),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(child: _ProductInfo(product: product)),
-          const SizedBox(width: 10),
-          _EditButton(onTap: onEdit ?? () {}),
+          // "Fix now" for listings sent back by Edudeen, with its note.
+          if (product.needsChanges) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+              decoration: BoxDecoration(
+                color: scheme.errorContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(children: [
+                Expanded(
+                  child: Text(
+                    product.adminNote == null ? 'Edudeen asked for changes.' : 'Edudeen: ${product.adminNote}',
+                    style: TextStyle(color: scheme.onErrorContainer),
+                  ),
+                ),
+                TextButton(
+                  key: const Key('fixNow'),
+                  style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                  onPressed: onEdit,
+                  child: const Text('Fix now'),
+                ),
+              ]),
+            ),
+          ],
         ],
       ),
     );
+  }
+}
+
+class _RowMenu extends StatelessWidget {
+  const _RowMenu({required this.product, required this.controller, this.onEdit});
+  final SellerProduct product;
+  final SellerProductsController controller;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.busyIds.contains(product.id)) {
+        return const SizedBox(width: 48, height: 48, child: Padding(padding: EdgeInsets.all(14), child: CircularProgressIndicator(strokeWidth: 2)));
+      }
+      return PopupMenuButton<String>(
+        key: Key('menu_${product.id}'),
+        tooltip: 'Actions',
+        style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
+        onSelected: (v) async {
+          switch (v) {
+            case 'edit':
+              onEdit?.call();
+            case 'price':
+              await InlineEditSheet.price(controller, product);
+            case 'stock':
+              await InlineEditSheet.stock(controller, product);
+            case 'duplicate':
+              await controller.duplicate(product);
+            case 'activate':
+            case 'deactivate':
+              final skipped = await controller.setActive([product.id], active: v == 'activate');
+              if (skipped.isNotEmpty) await showSkipped(skipped);
+          }
+        },
+        itemBuilder: (_) => [
+          const PopupMenuItem(value: 'edit', child: Text('Edit')),
+          const PopupMenuItem(value: 'price', child: Text('Edit price')),
+          if (product.isPhysical && product.defaultVariantId != null && product.variantCount == 1)
+            const PopupMenuItem(value: 'stock', child: Text('Edit stock')),
+          const PopupMenuItem(value: 'duplicate', child: Text('Duplicate as draft')),
+          if (product.canActivate) const PopupMenuItem(value: 'activate', child: Text('Activate')),
+          if (product.isLive) const PopupMenuItem(value: 'deactivate', child: Text('Deactivate')),
+        ],
+      );
+    });
   }
 }
 
@@ -149,7 +251,15 @@ class _ProductInfo extends StatelessWidget {
             const SizedBox(width: 8),
             ProductTypeBadge(type: product.type),
             const SizedBox(width: 6),
-            ProductStatusBadge(status: product.status),
+            Builder(builder: (context) {
+              final raw = rawStatusLabel(product, Theme.of(context).colorScheme);
+              if (raw == null) return ProductStatusBadge(status: product.status);
+              return Flexible(
+                child: Text(raw.$1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: raw.$2, fontSize: 11, fontWeight: FontWeight.w700)),
+              );
+            }),
             if (product.variantCount > 1) ...[
               const SizedBox(width: 6),
               _VariantCountBadge(count: product.variantCount),

@@ -299,6 +299,10 @@ class ApiConstants {
   static const String addDigitalProduct =
       "$apiPrefix/products/add-digital-product";
   static const String editProduct = "$apiPrefix/products/edit-product";
+  static String duplicateProduct(String productId) =>
+      "$apiPrefix/products/duplicate/$productId";
+  static const String productsBulkStatus = "$apiPrefix/products/bulk-status";
+  static const String productsStockBulk = "$apiPrefix/products/stock/bulk";
   static String deleteProduct(String productId) =>
       "$apiPrefix/products/delete-product/$productId";
   static String getMyProduct(String productId) =>
