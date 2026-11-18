@@ -123,6 +123,11 @@ class SellerSettingsController extends GetxController {
         ),
         SettingsTile(
           emoji: AppIcons.dashboardIcon,
+          title: 'Students',
+          onTap: () => Get.toNamed(Routes.sellerStudents),
+        ),
+        SettingsTile(
+          emoji: AppIcons.dashboardIcon,
           title: 'Inventory',
           onTap: () => Get.toNamed(Routes.sellerInventory),
         ),

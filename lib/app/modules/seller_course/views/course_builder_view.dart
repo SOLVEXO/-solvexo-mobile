@@ -3,6 +3,7 @@ import 'package:book_store_app/app/data/repositories/upload_repository.dart';
 import 'package:book_store_app/app/modules/seller/widgets/screen_states.dart';
 import 'package:book_store_app/app/modules/seller_course/controllers/course_builder_controller.dart';
 import 'package:book_store_app/app/modules/seller_course/widgets/lesson_editor_sheet.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,6 +27,15 @@ class CourseBuilderView extends GetView<CourseBuilderController> {
           child: Scaffold(
             appBar: AppBar(
               title: Text(controller.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+              actions: [
+                IconButton(
+                  key: const Key('openStudents'),
+                  tooltip: 'Students',
+                  style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
+                  onPressed: () => Get.toNamed(Routes.sellerStudents, arguments: {'productId': controller.productId}),
+                  icon: const Icon(Icons.people_alt_outlined),
+                ),
+              ],
             ),
             body: controller.isLoading.value
                 ? const ListSkeleton(rows: 5, rowHeight: 88)

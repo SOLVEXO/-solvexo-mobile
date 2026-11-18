@@ -140,6 +140,7 @@ import '../modules/seller_store_banners/bindings/seller_store_banners_binding.da
 import '../modules/seller_store_banners/views/seller_store_banners_view.dart';
 import '../modules/seller_course/bindings/seller_course_binding.dart';
 import '../modules/seller_course/views/course_builder_view.dart';
+import '../modules/seller_course/views/students_view.dart';
 import '../modules/seller_store_settings/bindings/seller_store_settings_binding.dart';
 import '../modules/seller_store_settings/views/seller_shipping_view.dart';
 import '../modules/seller_store_settings/views/seller_store_settings_view.dart';
@@ -284,6 +285,11 @@ class AppPages {
       name: Routes.sellerStoreBanners,
       page: () => SellerStoreBannersView(),
       binding: SellerStoreBannersBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerStudents,
+      page: () => const StudentsView(),
+      binding: StudentsBinding(),
     ),
     GetPage(
       name: Routes.sellerCourseBuilder,

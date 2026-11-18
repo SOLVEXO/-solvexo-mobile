@@ -45,7 +45,7 @@ by calling the API. Tick items off in commits that name the item number.
 12. [x] Offers: Premium % vs platform sale (either/or), `PATCH
     /api/products/bulk-offers`, "Your earnings" calculator.
 13. [x] Inventory: `PATCH /api/products/stock/bulk`, low-stock limit, history.
-14. Course builder (video-only lessons, accessDays, certificate design) and
+14. [x] Course builder (video-only lessons, accessDays, certificate design) and
     Students roster.
 15. [x] Store settings: `codEnabled`, `deliverySettings`, `giftWrap`,
     `deliveryDays`, `shipFrom`, `returnPolicy {note, digitalNote}`.
@@ -110,3 +110,9 @@ Found while aligning the app with the live API (api.edudeen.com,
    `true` (`!!value`), and `shipFrom` takes any keys and numbers
    (`{province: 5}` -> `"5"`). Suggest: require a boolean and a known
    province list.
+8. **500 instead of 400/404 on a bad id in course routes.** `GET /api/
+   courses/seller/product/<id>`, `/seller/roster/<storeId>` and
+   `/seller/students/<storeId>` -> 500 "Internal server error" (the first
+   path part is read as a store id). Suggest: validate the ids and return
+   400. Also, the course PUT cuts section titles to 120 and lesson titles
+   to 150 characters without an error; the app limits them itself.

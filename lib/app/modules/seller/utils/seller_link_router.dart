@@ -10,6 +10,7 @@ class SellerLinkRouter {
     'products': Routes.sellerProducts,
     'inventory': Routes.sellerInventory,
     'shipping': Routes.sellerShipping,
+    'students': Routes.sellerStudents,
     'orders': Routes.sellerOrders,
     'returns': Routes.sellerReturns,
     'finance': Routes.sellerFinance,
