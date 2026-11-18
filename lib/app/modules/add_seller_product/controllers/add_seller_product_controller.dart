@@ -198,6 +198,26 @@ class AddSellerProductController extends GetxController {
   // ── Core form reactive values ─────────────────────────────────────────────
   final RxString productName = ''.obs;
   final RxString description = ''.obs;
+
+  /// Inline errors (ListingRules), checked before every save incl. drafts.
+  final RxnString titleError = RxnString();
+  final RxnString descriptionError = RxnString();
+
+  /// Title, description and (physical) weights as the API checks them on
+  /// create. Returns the first error (also set inline), or null.
+  String? validateListing() {
+    titleError.value = ListingRules.validateTitle(nameCtrl.text);
+    descriptionError.value = ListingRules.validateDescription(descCtrl.text);
+    String? weight;
+    if (isPhysical) {
+      for (var i = 0; i < variants.length; i++) {
+        final e = ListingRules.validateWeight(variants[i].shippingWeightCtrl.text);
+        variants[i].weightError.value = e;
+        weight ??= e == null ? null : 'Variant ${i + 1}: $e';
+      }
+    }
+    return titleError.value ?? descriptionError.value ?? weight;
+  }
   final RxString price = ''.obs;
   final Rx<ProductPublishMode> publishMode = ProductPublishMode.now.obs;
   final Rxn<DateTime> scheduledAt = Rxn<DateTime>();
@@ -519,6 +539,11 @@ class AddSellerProductController extends GetxController {
 
   Future<void> publish() async {
     if (isSaving.value || !canProceed) return;
+    final listingError = validateListing();
+    if (listingError != null) {
+      ToastUtil.showToast(listingError);
+      return;
+    }
     final fieldsError = validatePublishFields();
     publishFieldsError.value = fieldsError;
     if (fieldsError != null) {

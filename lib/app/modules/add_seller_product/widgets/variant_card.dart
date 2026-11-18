@@ -135,16 +135,19 @@ class VariantCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // ── Shipping Weight ───────────────────────────────────────────
-          FormFieldSection(
-            label: 'Shipping Weight',
-            hint: 'e.g. 0.3kg',
-            child: CustomTextField(
-              controller: entry.shippingWeightCtrl,
-              hintText: 'e.g. 0.3kg',
-              isborder: true,
-              fillColor: AppColors.textfldFillColor,
-            ),
-          ),
+          Obx(() => FormFieldSection(
+                label: 'Shipping Weight',
+                required: true,
+                hint: '1 g to 50 kg, e.g. 0.5 kg or 500 g',
+                error: entry.weightError.value,
+                child: CustomTextField(
+                  controller: entry.shippingWeightCtrl,
+                  hintText: 'e.g. 0.5 kg',
+                  onChanged: (_) => entry.weightError.value = null,
+                  isborder: true,
+                  fillColor: AppColors.textfldFillColor,
+                ),
+              )),
           const SizedBox(height: 12),
 
           // ── Variant images ────────────────────────────────────────────

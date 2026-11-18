@@ -30,6 +30,9 @@ class VariantEntry {
   final RxBool isUploadingImage = false.obs;
   final RxList<VariantOptionEntry> options = <VariantOptionEntry>[].obs;
 
+  /// Inline shipping-weight error (physical; checked before any save).
+  final RxnString weightError = RxnString();
+
   // Set once this variant has been created server-side (Edit Product flow
   // only) — null means it only exists locally and needs a POST on save.
   String? remoteId;

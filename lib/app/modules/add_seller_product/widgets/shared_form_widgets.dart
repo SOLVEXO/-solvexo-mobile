@@ -14,12 +14,16 @@ class FormFieldSection extends StatelessWidget {
   final Widget child;
   final bool required;
 
+  /// Inline validation message under the field (null = none).
+  final String? error;
+
   const FormFieldSection({
     super.key,
     required this.label,
     required this.child,
     this.hint,
     this.required = false,
+    this.error,
   });
 
   @override
@@ -54,6 +58,10 @@ class FormFieldSection extends StatelessWidget {
         ],
         const SizedBox(height: 6),
         child,
+        if (error != null) ...[
+          const SizedBox(height: 4),
+          Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
+        ],
       ],
     );
   }

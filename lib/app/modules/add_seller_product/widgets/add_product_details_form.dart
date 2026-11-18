@@ -31,31 +31,42 @@ class AddProductDetailsForm extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ── Product Name ────────────────────────────────────────────
-          FormFieldSection(
-            label: 'Product Name',
-            required: true,
-            child: CustomTextField(
-              controller: controller.nameCtrl,
-              onChanged: (v) => controller.productName.value = v,
-              hintText: 'e.g. Cotton T-Shirt',
-              isborder: true,
-              fillColor: AppColors.textfldFillColor,
-            ),
-          ),
+          Obx(() => FormFieldSection(
+                label: 'Product Name',
+                required: true,
+                hint: 'At least 10 characters, e.g. Grade 5 Complete Course Book Set - Publisher Name',
+                error: controller.titleError.value,
+                child: CustomTextField(
+                  controller: controller.nameCtrl,
+                  onChanged: (v) {
+                    controller.productName.value = v;
+                    controller.titleError.value = null;
+                  },
+                  hintText: 'e.g. Grade 5 English Workbook - Oxford',
+                  isborder: true,
+                  fillColor: AppColors.textfldFillColor,
+                ),
+              )),
           const SizedBox(height: 16),
 
           // ── Description ─────────────────────────────────────────────
-          FormFieldSection(
-            label: 'Description',
-            child: CustomTextField(
-              controller: controller.descCtrl,
-              onChanged: (v) => controller.description.value = v,
-              hintText: 'Describe your product...',
-              isborder: true,
-              fillColor: AppColors.textfldFillColor,
-              maxLines: 4,
-            ),
-          ),
+          Obx(() => FormFieldSection(
+                label: 'Description',
+                required: true,
+                hint: 'At least 20 characters',
+                error: controller.descriptionError.value,
+                child: CustomTextField(
+                  controller: controller.descCtrl,
+                  onChanged: (v) {
+                    controller.description.value = v;
+                    controller.descriptionError.value = null;
+                  },
+                  hintText: 'Describe your product...',
+                  isborder: true,
+                  fillColor: AppColors.textfldFillColor,
+                  maxLines: 4,
+                ),
+              )),
           const SizedBox(height: 16),
 
           // ── Product Images ──────────────────────────────────────────

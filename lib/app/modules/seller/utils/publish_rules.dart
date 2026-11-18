@@ -95,3 +95,56 @@ class PublishRules {
     return null;
   }
 }
+
+/// Listing text and weight rules the API enforces on create, drafts
+/// included (backend 5adba44):
+/// - title: tags stripped, spaces collapsed, then >= 10 characters
+///   (product-quality.util.ts normalizeTitle / assertTitleRule)
+/// - description: required, >= 20 characters (price-rules.util.ts
+///   assertDescriptionRule)
+/// - physical variant shippingWeight: required, `"<number> [kg|g]"`, 1 g to
+///   50 kg (price-rules.util.ts parseWeightKg / cleanShippingWeight).
+class ListingRules {
+  ListingRules._();
+
+  static const minTitle = 10;
+  static const minDescription = 20;
+  static const minWeightKg = 0.001;
+  static const maxWeightKg = 50.0;
+
+  static String normalizeTitle(String raw) =>
+      raw.replaceAll(RegExp(r'<[^>]*>'), ' ').replaceAll(RegExp('[<>]'), '').replaceAll(RegExp(r'\s+'), ' ').trim();
+
+  static String? validateTitle(String raw) {
+    final len = normalizeTitle(raw).length;
+    if (len == 0) return 'Add a product name.';
+    if (len < minTitle) return 'Use at least $minTitle characters so buyers know what it is (now $len).';
+    return null;
+  }
+
+  static String? validateDescription(String raw) {
+    final len = raw.trim().length;
+    if (len == 0) return 'Add a description.';
+    if (len < minDescription) return 'Use at least $minDescription characters (now $len).';
+    return null;
+  }
+
+  /// kg, or null when the text is not `"<number> [kg|g]"`.
+  static double? parseWeightKg(String raw) {
+    final m = RegExp(r'^\s*(\d+(?:\.\d+)?)\s*(kg|g)?\s*$', caseSensitive: false).firstMatch(raw);
+    if (m == null) return null;
+    final n = double.parse(m.group(1)!);
+    return (m.group(2) ?? 'kg').toLowerCase() == 'g' ? n / 1000 : n;
+  }
+
+  static String? validateWeight(String raw) {
+    final t = raw.trim();
+    if (t.isEmpty) return 'Shipping weight is required.';
+    if (RegExp(r'^\s*-\s*\d').hasMatch(t)) return "Shipping weight can't be negative.";
+    final kg = parseWeightKg(t);
+    if (kg == null) return 'Use a number, e.g. 0.5 kg or 500 g.';
+    if (kg < minWeightKg - 1e-12) return 'Minimum weight is 1 g.';
+    if (kg > maxWeightKg) return "Shipping weight can't be more than 50 kg.";
+    return null;
+  }
+}
