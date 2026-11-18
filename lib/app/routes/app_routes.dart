@@ -108,6 +108,7 @@ abstract class Routes {
   static const sellerInventory = '/seller/inventory';
   static const sellerStoreSettings = '/seller/store-settings';
   static const sellerShipping = '/seller/shipping';
+  static const sellerCourseBuilder = '/seller/course-builder';
   static const aiStudioHistory = '/seller/ai-studio/history';
   static const aiStudioGenerationDetail = '/seller/ai-studio/generation-detail';
   static const aiStudioListingWriter = '/seller/ai-studio/listing-writer';

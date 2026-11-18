@@ -1,0 +1,60 @@
+{
+ "sections": [
+  {
+   "_id": "956cc9252265",
+   "title": "S renamed",
+   "lessons": [
+    {
+     "_id": "38820db42282",
+     "title": "Uploaded renamed",
+     "type": "video",
+     "file": {
+      "url": "r2/private/digital-products/b1846d05-fde3-46a8-ba7d-4283146646ae-test-lesson.mp4",
+      "name": "test-lesson.mp4",
+      "size": 2239,
+      "mimeType": "video/mp4"
+     },
+     "videoUrl": null,
+     "text": "",
+     "quiz": null,
+     "durationMinutes": null,
+     "isPreview": false
+    },
+    {
+     "_id": "fa2e6fe713ac",
+     "title": "Link",
+     "type": "video",
+     "file": null,
+     "videoUrl": "https://vimeo.com/76979871",
+     "text": "",
+     "quiz": null,
+     "durationMinutes": null,
+     "isPreview": false
+    }
+   ]
+  }
+ ],
+ "certificateEnabled": true,
+ "outcomes": [],
+ "instructor": {
+  "name": "",
+  "bio": ""
+ },
+ "accessDays": null,
+ "certificateConfig": {
+  "watermarkText": null,
+  "watermarkImageUrl": null,
+  "stampImageUrl": null,
+  "signatureName": null,
+  "signatureTitle": "zzz",
+  "issuerName": null
+ },
+ "product": {
+  "_id": "6afc4ff81f2e13faea3e651c",
+  "name": "TEST DRAFT P2 products check - do not publish",
+  "slug": "test-draft-p2-products-check-do-not-publish",
+  "status": "draft",
+  "deliveryFormat": "download"
+ },
+ "learners": 0
+}

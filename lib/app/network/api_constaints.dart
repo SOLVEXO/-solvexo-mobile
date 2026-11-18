@@ -83,6 +83,16 @@ class ApiConstants {
 
   // ── Library / courses (docs §5.9, §5.10) ───────────────────────────────
   static const String myCourses = "$apiPrefix/courses/mine";
+  // Seller course builder + students (docs 6.3 / 6.9; checklist #14).
+  static String sellerCourse(String storeId, String productId) =>
+      "$apiPrefix/courses/seller/$storeId/$productId";
+  static String sellerCourseStudents(String storeId, String productId) =>
+      "$apiPrefix/courses/seller/$storeId/$productId/students";
+  static String sellerStudentsRoster(String storeId) =>
+      "$apiPrefix/courses/seller/$storeId/roster";
+  static String sellerStudentsExport(String storeId) =>
+      "$apiPrefix/courses/seller/$storeId/roster/export";
+  static const String sellerStartConversation = "$apiPrefix/messaging/seller/start";
 
   // ============ Category Endpoints ============
   static const String categories = "$apiPrefix/categories/category-tree";

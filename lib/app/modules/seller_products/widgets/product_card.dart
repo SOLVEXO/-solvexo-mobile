@@ -144,10 +144,13 @@ class _RowMenu extends StatelessWidget {
               if (skipped.isNotEmpty) await showSkipped(skipped);
             case 'sale':
               await Get.toNamed(Routes.sellerPlatformSales);
+            case 'course':
+              await Get.toNamed(Routes.sellerCourseBuilder, arguments: {'productId': product.id, 'name': product.name});
           }
         },
         itemBuilder: (_) => [
           const PopupMenuItem(value: 'edit', child: Text('Edit')),
+          if (product.isCourse) const PopupMenuItem(value: 'course', child: Text('Course content')),
           const PopupMenuItem(value: 'price', child: Text('Edit price')),
           if (product.isPhysical && product.defaultVariantId != null && product.variantCount == 1)
             const PopupMenuItem(value: 'stock', child: Text('Edit stock')),

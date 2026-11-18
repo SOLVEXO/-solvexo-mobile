@@ -69,6 +69,9 @@ class SellerProduct {
   final int lowStockThreshold;
   final bool hasCustomThreshold;
 
+  /// Digital: download | course (docs 1, Product.deliveryFormat).
+  final String deliveryFormat;
+
   const SellerProduct({
     required this.id,
     required this.name,
@@ -108,7 +111,10 @@ class SellerProduct {
     this.campaignIds = const [],
     this.lowStockThreshold = 10,
     this.hasCustomThreshold = false,
+    this.deliveryFormat = 'download',
   });
+
+  bool get isCourse => !isPhysical && deliveryFormat == 'course';
 
   bool get inPremium => (premiumPercent ?? 0) > 0;
   bool get inPlatformSale => campaignIds.isNotEmpty;
@@ -212,6 +218,7 @@ class SellerProduct {
       campaignIds: (json['campaignIds'] as List?)?.map((e) => '$e').toList() ?? const [],
       lowStockThreshold: (json['lowStockThreshold'] as num?)?.toInt() ?? 10,
       hasCustomThreshold: json['hasCustomThreshold'] == true,
+      deliveryFormat: json['deliveryFormat'] as String? ?? 'download',
     );
   }
 
