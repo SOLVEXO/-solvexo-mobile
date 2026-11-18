@@ -15,6 +15,20 @@ class IncDicrQuantityWidget extends StatelessWidget {
   final controller = Get.find<CartController>();
   @override
   Widget build(BuildContext context) {
+    // Digital items are always quantity 1: no +/- (and no update call).
+    if (item.isDigital) {
+      return Container(
+        key: Key('digitalQty_${item.productVariantId}'),
+        constraints: const BoxConstraints(minHeight: 44),
+        alignment: Alignment.center,
+        child: CustomText(
+          text: 'Qty 1 · Digital'.tr,
+          color: AppColors.grey,
+          fontSize: AppFontSize.verySmall,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    }
     return Container(
       padding: EdgeInsets.symmetric(vertical: BaseSpacing.xxs, horizontal: BaseSpacing.xxs + 1),
       decoration: BoxDecoration(

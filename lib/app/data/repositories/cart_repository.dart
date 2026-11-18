@@ -14,11 +14,13 @@ class CartRepository {
   Future<CartResponseModel?> getCart() async {
     try {
       debugPrint('═══════════════════════════════════');
-      debugPrint('🛒 GETTING CART — ${ApiConstants.getCart}');
+      // GET /api/cart/unified: every store's lines (each with storeId and
+      // type). get-cart without ?storeId returns an EMPTY cart (5adba44).
+      debugPrint('🛒 GETTING CART — ${ApiConstants.cartUnified}');
       debugPrint('═══════════════════════════════════');
 
       final response = await _baseClient.get(
-        ApiConstants.getCart,
+        ApiConstants.cartUnified,
         requiresAuth: true,
       );
 
@@ -116,9 +118,10 @@ class CartRepository {
 
   // ─── Update cart quantity ──────────────────────────────────────────────────
   // POST /api/cart/update-cart-quantity
-  // Body: { productId, productVariantId, action: "increase" | "decrease" }
+  // Body: { storeId, productId, productVariantId, action: "increase" | "decrease" }
 
   Future<CartItem?> updateCartItem({
+    required String? storeId,
     required String productId,
     required String productVariantId,
     required String action,
@@ -129,6 +132,7 @@ class CartRepository {
       final response = await _baseClient.post(
         ApiConstants.updateCartQuantity,
         data: {
+          if (storeId != null) 'storeId': storeId,
           'productId': productId,
           'productVariantId': productVariantId,
           'action': action,
@@ -150,19 +154,24 @@ class CartRepository {
     }
   }
   // ─── Remove cart item ──────────────────────────────────────────────────────
-  // DELETE /api/cart/remove-cart-item
-  // Body: { productId, productVariantId }
+  // POST /api/cart/remove-cart-item
+  // Body: { storeId, productId, productVariantId }
 
   Future<List<CartItem>?> removeFromCart(
     String productId,
-    String productVariantId,
-  ) async {
+    String productVariantId, {
+    String? storeId,
+  }) async {
     try {
       debugPrint('🛒 removeFromCart: $productId | $productVariantId');
 
       final response = await _baseClient.post(
         ApiConstants.removeCartItem,
-        data: {'productId': productId, 'productVariantId': productVariantId},
+        data: {
+          if (storeId != null) 'storeId': storeId,
+          'productId': productId,
+          'productVariantId': productVariantId,
+        },
       );
 
       debugPrint('✅ Remove cart response: ${response.data}');
@@ -215,12 +224,13 @@ class CartRepository {
   }
 
   // ─── Clear cart ────────────────────────────────────────────────────────────
-  // DELETE /api/cart
+  // POST /api/cart/clear-all (every store's cart). clear-cart needs a
+  // storeId (400 without one).
 
   Future<bool> clearCart() async {
     try {
       debugPrint('🛒 Clearing cart');
-      final response = await _baseClient.post(ApiConstants.clearCart);
+      final response = await _baseClient.post(ApiConstants.clearAllCarts);
       debugPrint('✅ Clear cart response: ${response.data}');
       return response.statusCode == 201;
     } catch (e) {

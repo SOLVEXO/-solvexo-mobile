@@ -174,6 +174,9 @@ class CartController extends BaseController {
       (i) => i.productId == productId && i.productVariantId == productVariantId,
     );
     if (line != null) {
+      // Digital = always 1 (backend 400 "Digital items are limited to one
+      // per order"): never send an update for it.
+      if (line.isDigital) return;
       if (action == 'increase' && !CartLimits.canIncrease(line.quantity)) {
         ToastUtil.showToast('Maximum quantity per item is ${CartLimits.maxQuantity}');
         return;
@@ -199,6 +202,7 @@ class CartController extends BaseController {
       isLoading.value = true;
 
       final updatedItem = await _cartRepository.updateCartItem(
+        storeId: line?.storeId,
         productId: productId,
         productVariantId: productVariantId,
         action: action,
@@ -258,17 +262,21 @@ class CartController extends BaseController {
     try {
       isLoading.value = true;
 
+      final line = cartItems.firstWhereOrNull(
+        (i) => i.productId == productId && i.productVariantId == productVariantId,
+      );
       final remainingItems = await _cartRepository.removeFromCart(
         productId,
         productVariantId,
+        storeId: line?.storeId,
       );
 
       if (remainingItems != null) {
-        // Replace cartItems with the remaining items from the response
-        cartItems.assignAll(remainingItems);
-        updateSelectAll();
-        calculateTotal();
+        // The response lists only that store's cart; re-read the full
+        // multi-store cart instead of replacing every line with it.
         ToastUtil.showToast('Item removed');
+        isLoading.value = false;
+        await fetchCart();
       }
     } catch (e) {
       ToastUtil.showToast('Failed to remove item');

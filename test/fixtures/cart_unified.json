@@ -1,0 +1,88 @@
+{
+ "message": "Unified cart fetched successfully",
+ "data": {
+  "displayCurrency": "PKR",
+  "conversionAvailable": true,
+  "items": [
+   {
+    "productId": "6ae823abe50942ecf3395888",
+    "productVariantId": "6ae823abe50942ecf3395889",
+    "name": "Book Basic",
+    "sellerName": "M.Publishers",
+    "sellerVerified": true,
+    "image": [
+     "https://res.cloudinary.com/riaqwfoz/image/upload/v1793598270/uploads/images/kt9rkzmi4pwz8jigfhqe.jpg"
+    ],
+    "options": [],
+    "currency": "PKR",
+    "type": "physical",
+    "deliveryFormat": "download",
+    "unitPrice": 200,
+    "quantity": 1,
+    "itemTotal": 200,
+    "onCampaign": false,
+    "holidayBlocked": false,
+    "holidayText": null,
+    "storeId": "6ad09d1e9d4a719f081652f4",
+    "store": {
+     "storeId": "6ad09d1e9d4a719f081652f4",
+     "name": "M.Publishers",
+     "slug": "mpublishers",
+     "logo": "https://res.cloudinary.com/riaqwfoz/image/upload/v1792144581/uploads/images/buw2aov2qyro9keyhheg.jpg",
+     "isActive": true,
+     "holiday": null
+    },
+    "displayUnitPrice": 200,
+    "displayItemTotal": 200
+   },
+   {
+    "productId": "6ae58daee50942ecf3395870",
+    "productVariantId": "6ae58dafe50942ecf3395871",
+    "name": "Book D Islam G-2",
+    "sellerName": "M.Publishers",
+    "sellerVerified": true,
+    "image": [
+     "https://res.cloudinary.com/riaqwfoz/image/upload/v1793428624/uploads/images/imlhymdbmsjlakllwtcn.jpg"
+    ],
+    "options": [],
+    "currency": "PKR",
+    "type": "digital",
+    "deliveryFormat": "download",
+    "unitPrice": 650,
+    "quantity": 1,
+    "itemTotal": 650,
+    "onCampaign": false,
+    "premiumPercent": 18.4,
+    "premiumSellerPercent": 15.4,
+    "premiumPlatformPercent": 3,
+    "holidayBlocked": false,
+    "holidayText": null,
+    "storeId": "6ad09d1e9d4a719f081652f4",
+    "store": {
+     "storeId": "6ad09d1e9d4a719f081652f4",
+     "name": "M.Publishers",
+     "slug": "mpublishers",
+     "logo": "https://res.cloudinary.com/riaqwfoz/image/upload/v1792144581/uploads/images/buw2aov2qyro9keyhheg.jpg",
+     "isActive": true,
+     "holiday": null
+    },
+    "displayUnitPrice": 650,
+    "displayItemTotal": 650
+   }
+  ],
+  "stores": [
+   {
+    "storeId": "6ad09d1e9d4a719f081652f4",
+    "name": "M.Publishers",
+    "slug": "mpublishers",
+    "logo": "https://res.cloudinary.com/riaqwfoz/image/upload/v1792144581/uploads/images/buw2aov2qyro9keyhheg.jpg",
+    "isActive": true,
+    "holiday": null,
+    "totalItems": 2,
+    "subtotal": 850
+   }
+  ],
+  "totalItems": 2,
+  "grandTotal": 850
+ }
+}

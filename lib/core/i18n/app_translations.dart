@@ -122,6 +122,7 @@ class AppTranslations extends Translations {
 
     // Checkout delivery (backend 5adba44)
     'Choose a delivery option': 'ڈیلیوری کا طریقہ منتخب کریں',
+    'Qty 1 · Digital': 'تعداد 1 · ڈیجیٹل',
     'Could not load delivery options. Please try again.':
         'ڈیلیوری کے طریقے لوڈ نہیں ہو سکے۔ براہ کرم دوبارہ کوشش کریں۔',
   };

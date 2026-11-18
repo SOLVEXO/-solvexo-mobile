@@ -36,7 +36,8 @@ class CartResponseModel {
             )
             .toList(),
         totalItems: (json['totalItems'] as num?)?.toInt() ?? 0,
-        totalPrice: (json['totalPrice'] as num?)?.toDouble() ?? 0.0,
+        // get-cart: totalPrice; unified (multi-store) cart: grandTotal.
+        totalPrice: ((json['totalPrice'] ?? json['grandTotal']) as num?)?.toDouble() ?? 0.0,
         status: json['status'] as String?,
         createdAt: json['createdAt'] != null
             ? DateTime.tryParse(json['createdAt'] as String)
@@ -107,6 +108,10 @@ class CartItem {
   final List<String> images;
   final String productType; // 'physical' or 'digital'
   final List<VariantOption> options;
+
+  /// Owning store. update-cart-quantity / remove-cart-item look the cart up
+  /// by it (backend 5adba44: "Cart not found" without it).
+  final String? storeId;
   // Display-only snapshot of the owning store's currency at add-to-cart
   // time — checkout re-derives the authoritative currency server-side.
   final String? currency;
@@ -127,7 +132,12 @@ class CartItem {
     this.options = const [],
     this.currency,
     this.isSelected = true,
+    this.storeId,
   });
+
+  /// Digital items are always quantity 1 (backend: "Digital items are
+  /// limited to one per order").
+  bool get isDigital => productType == 'digital';
 
   factory CartItem.fromBackendJson(Map<String, dynamic> json) {
     try {
@@ -161,12 +171,14 @@ class CartItem {
           (json['productSnapshot'] as Map<String, dynamic>?)?['images'] ??
           (json['productSnapshot'] as Map<String, dynamic>?)?['image'],
         ),
-        productType: (json['productType'] as String? ?? 'physical').toLowerCase(),
+        // unified cart sends `type`; older shapes `productType`.
+        productType: ((json['productType'] ?? json['type']) as String? ?? 'physical').toLowerCase(),
         options: (json['options'] as List? ?? [])
             .map((o) => VariantOption.fromJson(o as Map<String, dynamic>))
             .toList(),
         currency: json['currency'] as String?,
         isSelected: true,
+        storeId: (json['storeId'] ?? (json['store'] is Map ? json['store']['storeId'] : null)) as String?,
       );
     } catch (e) {
       debugPrint('❌ CartItem.fromBackendJson error: $e');
@@ -203,6 +215,7 @@ class CartItem {
     'productType': productType,
     'options': options.map((o) => o.toJson()).toList(),
     'currency': currency,
+    'storeId': storeId,
   };
 
   factory CartItem.fromLocalJson(Map<String, dynamic> json) => CartItem(
@@ -220,6 +233,7 @@ class CartItem {
         .toList(),
     currency: json['currency'] as String?,
     isSelected: true,
+    storeId: json['storeId'] as String?,
   );
 
   CartItem copyWith({
@@ -235,6 +249,7 @@ class CartItem {
     List<VariantOption>? options,
     String? currency,
     bool? isSelected,
+    String? storeId,
   }) => CartItem(
     productId: productId ?? this.productId,
     productVariantId: productVariantId ?? this.productVariantId,
@@ -248,6 +263,7 @@ class CartItem {
     options: options ?? this.options,
     currency: currency ?? this.currency,
     isSelected: isSelected ?? this.isSelected,
+    storeId: storeId ?? this.storeId,
   );
 
   @override
