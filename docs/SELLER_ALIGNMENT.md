@@ -42,7 +42,7 @@ by calling the API. Tick items off in commits that name the item number.
 11. [x] Products list: status tabs with counts (In review / Needs changes),
     inline price/stock edit, Duplicate, bulk activate/deactivate, "Paused –
     plan ended", "Fix now" with admin note.
-12. Offers: Premium % vs platform sale (either/or), `PATCH
+12. [x] Offers: Premium % vs platform sale (either/or), `PATCH
     /api/products/bulk-offers`, "Your earnings" calculator.
 13. Inventory: `PATCH /api/products/stock/bulk`, low-stock limit, history.
 14. Course builder (video-only lessons, accessDays, certificate design) and
@@ -94,3 +94,10 @@ Found while aligning the app with the live API (api.edudeen.com,
    and `GET /api/orders/seller-returns-all/:storeId` are live but are not in
    EDUDEEN_DOCS Part C (it is cut off before the finance and orders
    modules).
+5. **No server figure for member-price earnings.** `GET /api/finance/:storeId/
+   fee-estimate?price&type` ignores any Premium input (`premiumPercent`,
+   `premiumDiscountPercent`, `percent`, `productId` all return the same
+   `{fee, net}` for the list price). The app shows "Your earnings" for the
+   normal price only and does not work out the member price on the device.
+   Suggest: accept `premiumPercent` (or `productId`) and return the member
+   price, fee and net.

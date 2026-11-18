@@ -3,6 +3,7 @@ import 'package:book_store_app/app/modules/seller_products/controllers/seller_pr
 import 'package:book_store_app/app/modules/seller_products/widgets/product_list_actions.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/product_status_badge.dart';
 import 'package:get/get.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/app/modules/seller_products/widgets/product_type_badge.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -136,6 +137,13 @@ class _RowMenu extends StatelessWidget {
             case 'deactivate':
               final skipped = await controller.setActive([product.id], active: v == 'activate');
               if (skipped.isNotEmpty) await showSkipped(skipped);
+            case 'premium':
+              await PremiumOfferSheet.open(controller, product);
+            case 'premium_off':
+              final skipped = await controller.setOffer([product.id], 'premium_off');
+              if (skipped.isNotEmpty) await showSkipped(skipped);
+            case 'sale':
+              await Get.toNamed(Routes.sellerPlatformSales);
           }
         },
         itemBuilder: (_) => [
@@ -146,6 +154,9 @@ class _RowMenu extends StatelessWidget {
           const PopupMenuItem(value: 'duplicate', child: Text('Duplicate as draft')),
           if (product.canActivate) const PopupMenuItem(value: 'activate', child: Text('Activate')),
           if (product.isLive) const PopupMenuItem(value: 'deactivate', child: Text('Deactivate')),
+          PopupMenuItem(value: 'premium', child: Text(product.inPremium ? 'Premium offer (${product.premiumPercent}%)' : 'Add to Premium')),
+          if (product.inPremium) const PopupMenuItem(value: 'premium_off', child: Text('Remove from Premium')),
+          const PopupMenuItem(value: 'sale', child: Text('Platform sales')),
         ],
       );
     });

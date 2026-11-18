@@ -138,6 +138,8 @@ import '../modules/seller_activity_log/bindings/seller_activity_log_binding.dart
 import '../modules/seller_activity_log/views/seller_activity_log_view.dart';
 import '../modules/seller_store_banners/bindings/seller_store_banners_binding.dart';
 import '../modules/seller_store_banners/views/seller_store_banners_view.dart';
+import '../modules/seller_platform_sales/bindings/seller_platform_sales_binding.dart';
+import '../modules/seller_platform_sales/views/seller_platform_sales_view.dart';
 import '../modules/seller_promotions/bindings/seller_promotions_binding.dart';
 import '../modules/seller_promotions/views/seller_promotions_view.dart';
 import '../modules/loyalty_rewards/bindings/loyalty_rewards_binding.dart';
@@ -275,6 +277,11 @@ class AppPages {
       name: Routes.sellerStoreBanners,
       page: () => SellerStoreBannersView(),
       binding: SellerStoreBannersBinding(),
+    ),
+    GetPage(
+      name: Routes.sellerPlatformSales,
+      page: () => const SellerPlatformSalesView(),
+      binding: SellerPlatformSalesBinding(),
     ),
     GetPage(
       name: Routes.sellerPromotions,

@@ -1,4 +1,9 @@
+import 'package:book_store_app/app/components/skeleton.dart';
+import 'package:book_store_app/app/data/models/finance/earnings_models.dart';
+import 'package:book_store_app/app/data/repositories/seller_finance_repository.dart';
 import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
+import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/utils/money.dart';
 import 'package:book_store_app/app/modules/seller_products/controllers/seller_products_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -209,4 +214,140 @@ class _InlineEditSheetState extends State<InlineEditSheet> {
     'inactive' => ('Inactive', c.outline),
     _ => null,
   };
+}
+
+/// Premium offer for one product (docs 2.5): members get [percent] % off,
+/// 1-50. "Your earnings" is the server's fee estimate for the normal price
+/// (GET finance/:storeId/fee-estimate); the app does no money maths.
+class PremiumOfferSheet extends StatefulWidget {
+  const PremiumOfferSheet({super.key, required this.controller, required this.product, this.finance});
+  final SellerProductsController controller;
+  final SellerProduct product;
+  final SellerFinanceRepository? finance;
+
+  static Future<void> open(SellerProductsController c, SellerProduct p) => Get.bottomSheet(
+        PremiumOfferSheet(controller: c, product: p),
+        isScrollControlled: true,
+        backgroundColor: Get.theme.colorScheme.surface,
+      );
+
+  @override
+  State<PremiumOfferSheet> createState() => _PremiumOfferSheetState();
+}
+
+class _PremiumOfferSheetState extends State<PremiumOfferSheet> {
+  late final TextEditingController _c = TextEditingController(text: widget.product.premiumPercent?.toString() ?? '');
+  String? _error;
+  bool _busy = false;
+  FeeEstimate? _estimate;
+  bool _estimateFailed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEstimate();
+  }
+
+  Future<void> _loadEstimate() async {
+    setState(() => _estimateFailed = false);
+    try {
+      final storeId = await AppPreferences.getStoreId() ?? '';
+      final e = await (widget.finance ?? SellerFinanceRepository())
+          .getFeeEstimate(storeId, price: widget.product.price, type: widget.product.isPhysical ? 'physical' : 'digital');
+      if (mounted) setState(() => _estimate = e);
+    } catch (_) {
+      if (mounted) setState(() => _estimateFailed = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final err = SellerProductsController.validatePremium(_c.text);
+    setState(() => _error = err);
+    if (err != null) return;
+    setState(() => _busy = true);
+    final skipped = await widget.controller.setOffer([widget.product.id], 'premium_on', percent: int.parse(_c.text.trim()));
+    if (!mounted) return;
+    setState(() => _busy = false);
+    Get.back();
+    if (skipped.isNotEmpty) await showSkipped(skipped);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    final e = _estimate;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 16),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text('Premium offer', style: t.textTheme.titleMedium),
+        const SizedBox(height: 4),
+        Text('Edudeen Premium members get this discount on top of the platform\'s member discount. '
+            'A product is in Premium or in a platform sale, not both.',
+            style: t.textTheme.bodySmall),
+        if (widget.product.inPlatformSale) ...[
+          const SizedBox(height: 8),
+          Text('This product is in a platform sale.', style: TextStyle(color: t.colorScheme.error)),
+        ],
+        const SizedBox(height: 12),
+        TextField(
+          key: const Key('premiumPercent'),
+          controller: _c,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          onSubmitted: (_) => _save(),
+          decoration: InputDecoration(
+            labelText: 'Member discount',
+            suffixText: '%',
+            helperText: '1 to 50',
+            errorText: _error,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: e != null
+                ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Your earnings', style: t.textTheme.titleSmall),
+                    const SizedBox(height: 4),
+                    Text('At ${Money.format(e.price, e.currency)}: platform fee ${Money.format(e.fee, e.currency)}, '
+                        'you get ${Money.format(e.net, e.currency)}.',
+                        key: const Key('earningsLine')),
+                    if (e.reason != null) Text(e.reason!, style: t.textTheme.bodySmall),
+                    const SizedBox(height: 4),
+                    Text('Member orders are paid at the member price; each order shows what you earn.',
+                        style: t.textTheme.bodySmall),
+                  ])
+                : _estimateFailed
+                    ? Row(children: [
+                        const Expanded(child: Text('Could not load your earnings.')),
+                        TextButton(
+                          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+                          onPressed: _loadEstimate,
+                          child: const Text('Retry'),
+                        ),
+                      ])
+                    : const Skeleton(height: 48, width: double.infinity, cornerRadius: 8),
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton(
+          key: const Key('savePremium'),
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+          onPressed: _busy ? null : _save,
+          child: _busy
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Text('Save'),
+        ),
+      ]),
+    );
+  }
 }

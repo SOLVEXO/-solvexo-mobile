@@ -113,6 +113,11 @@ class SellerSettingsController extends GetxController {
         ),
         SettingsTile(
           emoji: AppIcons.anylaticsIcon,
+          title: 'Platform sales',
+          onTap: () => Get.toNamed(Routes.sellerPlatformSales),
+        ),
+        SettingsTile(
+          emoji: AppIcons.anylaticsIcon,
           title: 'Promotions',
           onTap: () => Get.toNamed(Routes.sellerPromotions),
         ),

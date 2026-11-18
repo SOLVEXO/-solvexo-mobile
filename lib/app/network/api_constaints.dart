@@ -302,6 +302,7 @@ class ApiConstants {
   static String duplicateProduct(String productId) =>
       "$apiPrefix/products/duplicate/$productId";
   static const String productsBulkStatus = "$apiPrefix/products/bulk-status";
+  static const String productsBulkOffers = '$apiPrefix/products/bulk-offers';
   static const String productsStockBulk = "$apiPrefix/products/stock/bulk";
   static String deleteProduct(String productId) =>
       "$apiPrefix/products/delete-product/$productId";

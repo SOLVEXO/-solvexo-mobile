@@ -176,9 +176,8 @@ class NotificationsController extends GetxController {
         Get.toNamed(Routes.sellerProducts, arguments: {'tab': 'rejected'});
         break;
       case 'platform_campaign_live':
-        // link = /store/:id/marketing?tab=platform; the app has no seller
-        // Platform Sales screen yet, so Products (where offers are set).
-        Get.toNamed(Routes.sellerProducts);
+        // link = /store/:id/marketing?tab=platform -> Platform Sales.
+        Get.toNamed(Routes.sellerPlatformSales);
         break;
       case 'store_deleted':
         await Get.dialog(AlertDialog(

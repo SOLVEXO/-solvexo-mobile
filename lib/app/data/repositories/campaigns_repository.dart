@@ -8,7 +8,27 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class CampaignsRepository {
-  final BaseClient _client = BaseClient();
+  CampaignsRepository({BaseClient? client}) : _client = client ?? BaseClient();
+
+  final BaseClient _client;
+
+  /// Platform Sales screen: same list, but tells a failed load apart from
+  /// an empty one (live 2026-11-18: {success: true, data: []}).
+  Future<({List<CampaignModel> items, bool failed})> fetchCampaigns({required String storeId}) async {
+    try {
+      final response = await _client.get(ApiConstants.joinableCampaigns(storeId), requiresAuth: true);
+      final body = response.data;
+      final list = body is Map && body['data'] is List ? body['data'] as List : null;
+      if (list == null) return (items: <CampaignModel>[], failed: true);
+      return (
+        items: list.whereType<Map>().map((m) => CampaignModel.fromJson(Map<String, dynamic>.from(m))).toList(),
+        failed: false,
+      );
+    } on DioException catch (e) {
+      debugPrint('❌ fetchCampaigns: ${e.response?.statusCode}');
+      return (items: <CampaignModel>[], failed: true);
+    }
+  }
 
   // ─── GET /api/marketing/:storeId/campaigns ────────────────────────────────
 

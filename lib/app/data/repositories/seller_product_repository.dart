@@ -173,6 +173,47 @@ class SellerProductRepository {
     }
   }
 
+  /// Offers (docs 2.5/2.6): PATCH /api/products/bulk-offers
+  /// {storeId, productIds, action, percent?, campaignId?}.
+  /// action = premium_on (percent 1-50) | premium_off | campaign_add |
+  /// campaign_remove (campaignId). Real response: {success, data: {updated:
+  /// [ids], skipped: []}}. premium_off also sets premiumOptOut=true.
+  Future<({int updated, List<String> skipped, String? message})> setOffers({
+    required String storeId,
+    required List<String> productIds,
+    required String action,
+    int? percent,
+    String? campaignId,
+  }) async {
+    try {
+      final res = await _client.patch(
+        ApiConstants.productsBulkOffers,
+        data: {
+          'storeId': storeId,
+          'productIds': productIds,
+          'action': action,
+          if (percent != null) 'percent': percent,
+          if (campaignId != null) 'campaignId': campaignId,
+        },
+        requiresAuth: true,
+      );
+      final body = res.data is Map ? res.data as Map : const {};
+      final data = body['data'] is Map ? body['data'] as Map : const {};
+      final updated = data['updated'];
+      final skipped = data['skipped'] is List ? data['skipped'] as List : const [];
+      return (
+        updated: updated is List ? updated.length : (updated is num ? updated.toInt() : 0),
+        skipped: [
+          for (final s in skipped)
+            if (s is Map) '${s['name'] ?? s['id']}: ${s['reason'] ?? 'skipped'}' else '$s',
+        ],
+        message: ApiError.msg(body['message']),
+      );
+    } on DioException catch (e) {
+      return (updated: 0, skipped: const <String>[], message: ApiError.fromDio(e) ?? 'Could not change the offer.');
+    }
+  }
+
   /// Digital inline price: POST edit-product {productId, price} (no status
   /// -> the status stays as it is; verified on a draft).
   Future<({bool ok, String? message})> setDigitalPrice(String productId, double price) async {

@@ -11,10 +11,15 @@ void main() {
         Routes.sellerOrders);
   });
 
-  test('links without a matching seller screen stay on the inbox', () {
-    // platform_campaign_live: no Platform Sales screen in the app yet.
+  test('platform_campaign_live opens Platform Sales (#12)', () {
     expect(SellerLinkRouter.routeFor('/store/6abb8ddb6ae49762491d5302/marketing?tab=platform'),
-        isNull);
+        Routes.sellerPlatformSales);
+    expect(SellerLinkRouter.routeFor('/store/6abb8ddb6ae49762491d5302/marketing/sale/6abc'),
+        Routes.sellerPlatformSales);
+  });
+
+  test('links without a matching seller screen stay on the inbox', () {
+    expect(SellerLinkRouter.routeFor('/store/6abb8ddb6ae49762491d5302/marketing'), isNull);
     expect(SellerLinkRouter.routeFor('/account/orders/123'), isNull, reason: 'buyer link');
     expect(SellerLinkRouter.routeFor(null), isNull);
     expect(SellerLinkRouter.routeFor(''), isNull);

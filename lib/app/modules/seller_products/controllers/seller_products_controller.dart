@@ -59,6 +59,12 @@ class SellerProduct {
   final String? defaultVariantId;
   final List<String> qualityMissing;
 
+  /// Offers (docs 2.5): Premium member % (1-50) or platform sales
+  /// (campaignIds) - one or the other per product.
+  final int? premiumPercent;
+  final bool premiumOptOut;
+  final List<String> campaignIds;
+
   const SellerProduct({
     required this.id,
     required this.name,
@@ -93,7 +99,13 @@ class SellerProduct {
     this.adminNote,
     this.defaultVariantId,
     this.qualityMissing = const [],
+    this.premiumPercent,
+    this.premiumOptOut = false,
+    this.campaignIds = const [],
   });
+
+  bool get inPremium => (premiumPercent ?? 0) > 0;
+  bool get inPlatformSale => campaignIds.isNotEmpty;
 
   bool get needsChanges => rawStatus == 'rejected';
   bool get inReview => rawStatus == 'pending_review';
@@ -189,6 +201,9 @@ class SellerProduct {
       adminNote: note(json['reviewNote']) ?? note(json['editRejection']) ?? note(json['reviewReason']),
       defaultVariantId: json['defaultVariantId'] as String?,
       qualityMissing: (json['qualityMissing'] as List?)?.map((e) => '$e').toList() ?? const [],
+      premiumPercent: (json['premiumDiscountPercent'] as num?)?.toInt(),
+      premiumOptOut: json['premiumOptOut'] == true,
+      campaignIds: (json['campaignIds'] as List?)?.map((e) => '$e').toList() ?? const [],
     );
   }
 
@@ -384,6 +399,38 @@ class SellerProductsController extends GetxController {
       }
       selectedIds.clear();
       await refreshData();
+      return r.skipped;
+    } finally {
+      busyIds.removeAll(ids);
+    }
+  }
+
+  static String? validatePremium(String raw) {
+    final v = int.tryParse(raw.trim());
+    if (v == null || v < 1 || v > 50) return 'Enter a whole number from 1 to 50.';
+    return null;
+  }
+
+  /// Premium on/off and platform-sale add/remove (PATCH bulk-offers).
+  /// Returns the server's skipped reasons.
+  Future<List<String>> setOffer(List<String> ids, String action, {int? percent, String? campaignId}) async {
+    if (ids.isEmpty) return const [];
+    final storeId = await AppPreferences.getStoreId() ?? '';
+    busyIds.addAll(ids);
+    try {
+      final r = await _repo.setOffers(
+          storeId: storeId, productIds: ids, action: action, percent: percent, campaignId: campaignId);
+      if (r.updated > 0) {
+        ToastUtil.showToast(switch (action) {
+          'premium_on' => 'Premium offer saved',
+          'premium_off' => 'Removed from Premium',
+          'campaign_add' => 'Added to the platform sale',
+          _ => 'Removed from the platform sale',
+        });
+        await refreshData();
+      } else if (r.skipped.isEmpty) {
+        ToastUtil.showToast(r.message ?? 'Nothing changed.');
+      }
       return r.skipped;
     } finally {
       busyIds.removeAll(ids);
