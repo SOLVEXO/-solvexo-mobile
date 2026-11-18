@@ -30,9 +30,13 @@ class CustomTextField extends StatelessWidget {
   final double borderBorderradius;
   final EdgeInsetsGeometry? contentPadding;
 
+  /// Shown but not editable (e.g. the login email).
+  final bool readOnly;
+
   const CustomTextField({
     super.key,
     this.borderBorderradius = AppDimen.borderRadius,
+    this.readOnly = false,
     this.label,
     this.hintText,
     this.prefixIcon,
@@ -74,7 +78,8 @@ class CustomTextField extends StatelessWidget {
             )
           : null,
       child: TextFormField(
-        style: TextStyle(color: textColor),
+        readOnly: readOnly,
+        style: TextStyle(color: readOnly ? AppColors.grey : textColor),
         onFieldSubmitted: onFieldSubmitted,
         maxLength: maxLength,
         maxLines: maxLines,

@@ -1,7 +1,10 @@
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/repositories/address_repository.dart';
+import 'package:book_store_app/app/modules/address/utils/address_rules.dart';
 import 'package:book_store_app/app/modules/map_picker/models/picked_address_model.dart';
+import 'package:book_store_app/app/network/api_error.dart';
+import 'package:dio/dio.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +24,19 @@ class AddressController extends GetxController {
   // ─── Form state ───────────────────────────────────────────────────────────
   final RxString selectedLabel = 'Home'.obs;
   final RxBool makeDefault = false.obs;
+
+  /// Inline errors by API field name (phoneNumber, zipCode, city,
+  /// addressLine1, addressLine2, state, recipientName, country).
+  final RxMap<String, String> fieldErrors = <String, String>{}.obs;
+
+  /// Selected province (one of AddressRules.provinces).
+  final RxString province = ''.obs;
+
+  void setProvince(String p) {
+    province.value = p;
+    stateCtrl.text = p;
+    fieldErrors.remove('state');
+  }
 
   // ─── Form controllers ─────────────────────────────────────────────────────
   final nameCtrl = TextEditingController();
@@ -69,7 +85,10 @@ class AddressController extends GetxController {
     addressCtrl1.text = picked.addressLine1;
     addressCtrl2.text = picked.addressLine2 ?? '';
     cityCtrl.text = picked.city;
-    stateCtrl.text = picked.state;
+    // Only an exact province name is accepted by the API.
+    final match = AddressRules.matchProvince(picked.state);
+    stateCtrl.text = match ?? '';
+    province.value = match ?? '';
     zipCtrl.text = picked.zipCode;
     countryCtrl.text = picked.countryCode ?? '';
     _isApplyingPickedAddress = false;
@@ -169,9 +188,19 @@ class AddressController extends GetxController {
 
       // Go back to address list
       Get.back();
+    } on DioException catch (e) {
+      // 400 {message, errors: {field: message}}: show each under its field
+      // and the server's message as the toast.
+      final data = e.response?.data;
+      if (data is Map && data['errors'] is Map) {
+        fieldErrors.assignAll({
+          for (final en in (data['errors'] as Map).entries) '${en.key}': '${en.value}',
+        });
+      }
+      ToastUtil.showToast(ApiError.fromDio(e) ?? 'Failed to save address'.tr);
     } catch (e) {
       debugPrint('❌ saveAddress error: $e');
-      ToastUtil.showToast('Failed to save address');
+      ToastUtil.showToast('Failed to save address'.tr);
     } finally {
       isSaving.value = false;
     }
@@ -205,6 +234,9 @@ class AddressController extends GetxController {
     addressCtrl2.text = address.addressLine2 ?? '';
     cityCtrl.text = address.city;
     stateCtrl.text = address.state;
+    // An address saved before the province list may need a new choice.
+    province.value = AddressRules.provinces.contains(address.state) ? address.state : '';
+    fieldErrors.clear();
     zipCtrl.text = address.zipCode;
     countryCtrl.text = address.country ?? '';
     makeDefault.value = address.isDefault;
@@ -262,6 +294,8 @@ class AddressController extends GetxController {
     addressCtrl1.clear();
     addressCtrl2.clear();
     stateCtrl.clear();
+    province.value = '';
+    fieldErrors.clear();
     cityCtrl.clear();
     zipCtrl.clear();
     countryCtrl.clear();
@@ -271,32 +305,23 @@ class AddressController extends GetxController {
     _pickedLongitude = null;
   }
 
+  /// The API's Pakistani address rules (AddressRules); errors inline,
+  /// the first one also as a toast.
   bool _validateForm() {
-    if (nameCtrl.text.trim().isEmpty) {
-      ToastUtil.showToast('Recipient name is required');
-      return false;
-    }
-    if (phoneCtrl.text.trim().isEmpty) {
-      ToastUtil.showToast('Phone number is required');
-      return false;
-    }
-    if (addressCtrl1.text.trim().isEmpty) {
-      ToastUtil.showToast('Address line 1 is required');
-      return false;
-    }
-    if (cityCtrl.text.trim().isEmpty) {
-      ToastUtil.showToast('City is required');
-      return false;
-    }
-    if (stateCtrl.text.trim().isEmpty) {
-      ToastUtil.showToast('State is required');
-      return false;
-    }
-    if (zipCtrl.text.trim().isEmpty) {
-      ToastUtil.showToast('Zip code is required');
-      return false;
-    }
-    return true;
+    final e = <String, String?>{
+      'recipientName': AddressRules.recipient(nameCtrl.text),
+      'phoneNumber': AddressRules.phone(phoneCtrl.text),
+      'addressLine1': AddressRules.line1(addressCtrl1.text),
+      'addressLine2': AddressRules.line2(addressCtrl2.text),
+      'state': AddressRules.state(stateCtrl.text),
+      'city': AddressRules.city(cityCtrl.text),
+      'zipCode': AddressRules.zip(zipCtrl.text),
+      'country': AddressRules.country(countryCtrl.text),
+    }..removeWhere((_, v) => v == null);
+    fieldErrors.assignAll(e.cast<String, String>());
+    if (e.isEmpty) return true;
+    ToastUtil.showToast(e.values.first!);
+    return false;
   }
 
   // ─── Label bottom sheet ───────────────────────────────────────────────────

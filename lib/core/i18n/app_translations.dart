@@ -123,6 +123,35 @@ class AppTranslations extends Translations {
     // Checkout delivery (backend 5adba44)
     'Choose a delivery option': 'ڈیلیوری کا طریقہ منتخب کریں',
     'Qty 1 · Digital': 'تعداد 1 · ڈیجیٹل',
+
+    // Address form (Pakistani rules, backend 5adba44)
+    "Recipient's Name": 'وصول کنندہ کا نام',
+    'Input Recipient Name': 'وصول کنندہ کا نام لکھیں',
+    'Mobile number': 'موبائل نمبر',
+    'Address': 'پتہ',
+    'House, street and area': 'مکان، گلی اور علاقہ',
+    'Province': 'صوبہ',
+    'Select province': 'صوبہ منتخب کریں',
+    'City': 'شہر',
+    'Input city': 'شہر لکھیں',
+    'Postal code': 'پوسٹل کوڈ',
+    '5-digit postal code': '5 ہندسوں کا پوسٹل کوڈ',
+    'Failed to save address': 'پتہ محفوظ نہیں ہو سکا',
+    'Recipient name is required': 'وصول کنندہ کا نام ضروری ہے',
+    'Phone number is required': 'فون نمبر ضروری ہے',
+    'Enter a valid Pakistani mobile number (03XXXXXXXXX or +923XXXXXXXXX)':
+        'درست پاکستانی موبائل نمبر لکھیں (03XXXXXXXXX یا +923XXXXXXXXX)',
+    'Address is required': 'پتہ ضروری ہے',
+    'Address must be at least 5 characters': 'پتہ کم از کم 5 حروف کا ہونا چاہیے',
+    'City is required': 'شہر ضروری ہے',
+    'City must be letters and spaces, at least 2 characters': 'شہر میں صرف حروف اور خالی جگہ ہو، کم از کم 2 حروف',
+    'Select a province': 'صوبہ منتخب کریں',
+    'Select a valid province': 'درست صوبہ منتخب کریں',
+    'Postal code is required': 'پوسٹل کوڈ ضروری ہے',
+    'Postal code must be exactly 5 digits': 'پوسٹل کوڈ بالکل 5 ہندسوں کا ہونا چاہیے',
+    'Use at most 200 characters.': 'زیادہ سے زیادہ 200 حروف استعمال کریں۔',
+    'Email': 'ای میل',
+    'To change your login email, contact support.': 'لاگ اِن ای میل تبدیل کرنے کے لیے سپورٹ سے رابطہ کریں۔',
     'Could not load delivery options. Please try again.':
         'ڈیلیوری کے طریقے لوڈ نہیں ہو سکے۔ براہ کرم دوبارہ کوشش کریں۔',
   };

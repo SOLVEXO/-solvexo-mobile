@@ -216,10 +216,11 @@ class _FormCard extends StatelessWidget {
                 color: AppColors.grey,
               ),
             ),
+            // Read-only: the API never changes the login email here.
             CustomTextField(
               hintText: 'Email Address',
               controller: controller.emailController,
-              validator: controller.validateEmail,
+              readOnly: true,
               keyboardType: TextInputType.emailAddress,
               ispadding: true,
               prefixIcon: const SvgIcon(

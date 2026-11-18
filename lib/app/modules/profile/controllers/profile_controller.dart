@@ -461,7 +461,7 @@ class ProfileController extends GetxController {
       final updatedUser = await _authRepository.updateProfile(
         token: token,
         name: nameController.text.trim(),
-        email: emailController.text.trim(),
+        // email is never sent: it cannot be changed here (backend 400).
         phone: phoneController.text.trim().isEmpty
             ? null
             : phoneController.text.trim(),

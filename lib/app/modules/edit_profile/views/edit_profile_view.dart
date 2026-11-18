@@ -66,12 +66,23 @@ class EditProfileView extends StatelessWidget {
                     controller: controller.nameController,
                     validator: controller.validateName,
                   ),
+                  // Login email is read-only: the backend refuses a change
+                  // here ("Email cannot be changed from here. Contact
+                  // support…"), and there is no change-email endpoint.
                   CustomTextField(
-                    hintText: "Email",
+                    hintText: "Email".tr,
                     ispadding: true,
+                    readOnly: true,
                     controller: controller.emailController,
-                    validator: controller.validateEmail,
                     keyboardType: TextInputType.emailAddress,
+                    suffixIcon: const Icon(Icons.lock_outline_rounded, size: 18),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+                    child: Text(
+                      'To change your login email, contact support.'.tr,
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
                   ),
                   CustomTextField(
                     hintText: "Phone Number",

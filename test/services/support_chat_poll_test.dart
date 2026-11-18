@@ -152,6 +152,21 @@ void main() {
     c.onClose();
   });
 
+  test('a guest always sends the guestToken with the next question', () async {
+    final client = _FakeClient(
+      getBody: _liveConversation(withTeamReply: false),
+      postBodies: [
+        {'success': true, 'data': {'reply': 'Your message was added.', 'source': 'escalated'}},
+      ],
+    );
+    final c = SupportChatController(client: client)..guestToken = 'tok-123';
+    await c.send('Any update on my question?');
+    final sent = client.postData.last as Map;
+    expect(sent['guestToken'], 'tok-123');
+    expect(sent.containsKey('guest'), isFalse);
+    c.onClose();
+  });
+
   test('contact validation', () {
     expect(SupportChatController.validateContact('', 'a@b.co'), isNotNull);
     expect(SupportChatController.validateContact('Ali', 'nope'), isNotNull);

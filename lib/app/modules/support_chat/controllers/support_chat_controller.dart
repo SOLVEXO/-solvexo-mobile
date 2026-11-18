@@ -144,6 +144,10 @@ class SupportChatController extends GetxController {
           'text': text,
           'lang': LocaleService.current.languageCode,
           if (guest != null) 'guest': guest,
+          // Backend 5adba44 finds a guest's conversation only by this
+          // token (ChatMessageDto.guestToken): without it a follow-up asks
+          // for contact details again or opens a new thread.
+          if (!signedIn.value && _guestToken != null) 'guestToken': _guestToken,
         },
         requiresAuth: signedIn.value,
       );

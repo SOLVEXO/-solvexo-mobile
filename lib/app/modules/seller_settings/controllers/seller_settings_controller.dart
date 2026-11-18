@@ -11,7 +11,7 @@ import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
 import 'package:get/get.dart';
 
@@ -326,45 +326,85 @@ class SellerSettingsController extends GetxController {
     ToastUtil.showToast('Logged out successfully');
   }
 
-  /// Delete account — also suspends all stores owned by this seller
-  /// (backend: DELETE api/users/profile, branches on req.user.role).
-  void deleteAccount() {
-    showCustomDialog(
-      title: 'Delete Account',
-      content:
-          'Are you sure you want to delete your account? This will also '
-          'suspend your store(s). This action cannot be undone.',
-      leftButtonName: 'Cancel',
-      rightButtonName: 'Delete',
-      requireDeleteConfirmation: true,
-      onLeftButtonTap: () => Get.back(),
-      onRightButtonTap: () async {
-        await _performDeleteAccount();
-      },
+  /// Delete account (DELETE /api/users/profile {confirm:'DELETE', password?}).
+  /// Backend 5adba44: an account with a password must send it (400 "Enter
+  /// your password to delete your account."); open orders, pending payouts
+  /// or a wallet balance -> 409 with the server's message, shown as-is.
+  /// Same dialog as the buyer one, English (seller panel).
+  Future<void> deleteAccount() async {
+    final confirmCtrl = TextEditingController();
+    final passwordCtrl = TextEditingController();
+    final busy = false.obs;
+    final error = RxnString();
+    await Get.dialog(
+      AlertDialog(
+        title: const Text('Delete Account'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('This permanently deletes your account and suspends your store. '
+                  'Open orders, pending payouts and any wallet balance must be settled first.'),
+              const SizedBox(height: 16),
+              TextField(
+                key: const Key('deleteConfirm'),
+                controller: confirmCtrl,
+                autocorrect: false,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(labelText: 'Type DELETE to confirm'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                key: const Key('deletePassword'),
+                controller: passwordCtrl,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Password (if your account has one)'),
+              ),
+              Obx(() => error.value == null
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(error.value!, key: const Key('deleteError'), style: TextStyle(color: Get.theme.colorScheme.error)),
+                    )),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            key: const Key('deleteCancel'),
+            style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+            onPressed: () => Get.back(),
+            child: const Text('Cancel'),
+          ),
+          Obx(() => FilledButton(
+                key: const Key('deleteSubmit'),
+                style: FilledButton.styleFrom(backgroundColor: Get.theme.colorScheme.error, minimumSize: const Size(64, 48)),
+                onPressed: busy.value
+                    ? null
+                    : () async {
+                        if (confirmCtrl.text.trim() != 'DELETE') {
+                          error.value = 'Type DELETE to confirm';
+                          return;
+                        }
+                        busy.value = true;
+                        error.value = null;
+                        final result = await _authRepository.deleteAccount(password: passwordCtrl.text);
+                        busy.value = false;
+                        if (result.ok) {
+                          Get.back();
+                          ToastUtil.showToast('Account deleted successfully');
+                          await Get.find<AuthController>().logout();
+                        } else {
+                          error.value = result.message ?? 'Failed to delete account';
+                        }
+                      },
+                child: const Text('Delete'),
+              )),
+        ],
+      ),
     );
-  }
-
-  Future<void> _performDeleteAccount() async {
-    try {
-      final token = await AppPreferences.getAccessTokenAsync();
-
-      if (token == null || token.isEmpty) {
-        ToastUtil.showToast('Session expired');
-        return;
-      }
-
-      final result = await _authRepository.deleteAccount();
-
-      if (result.ok) {
-        ToastUtil.showToast('Account deleted successfully');
-        await Get.find<AuthController>().logout();
-      } else {
-        // Server's own reason, e.g. 409 while orders are open.
-        ToastUtil.showToast(result.message ?? 'Failed to delete account');
-      }
-    } catch (e) {
-      debugPrint('Error deleting account: $e');
-      ToastUtil.showToast('Failed to delete account');
-    }
+    confirmCtrl.dispose();
+    passwordCtrl.dispose();
   }
 }
