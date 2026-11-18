@@ -74,7 +74,7 @@ class LibraryController extends GetxController {
 
   Future<void> download(LibraryFile f) => downloads.download(
         busyKey: f.key,
-        orderId: f.order.orderId,
-        productId: f.item.productId,
+        orderId: f.orderId,
+        productId: f.productId,
       );
 }

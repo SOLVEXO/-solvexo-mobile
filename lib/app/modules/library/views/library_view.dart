@@ -228,26 +228,26 @@ class _FileCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(BaseRadius.lg),
         onTap: () => Get.toNamed(Routes.productDetailsView,
-            arguments: {'productId': file.item.productId}),
+            arguments: {'productId': file.productId}),
         child: Padding(
           padding: const EdgeInsets.all(BaseSpacing.sm),
           child: Row(
             children: [
-              _thumb(context, file.item.image, Icons.description_outlined),
+              _thumb(context, file.image, Icons.description_outlined),
               const SizedBox(width: BaseSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(file.item.name,
+                    Text(file.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall),
                     const SizedBox(height: 4),
                     Text(
                       [
-                        if ((file.item.sellerName ?? '').isNotEmpty)
-                          file.item.sellerName!,
+                        if ((file.storeName ?? '').isNotEmpty)
+                          file.storeName!,
                         date,
                       ].join(' · '),
                       maxLines: 1,
@@ -255,7 +255,7 @@ class _FileCard extends StatelessWidget {
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     ),
-                    Text('#${file.order.orderNumber}',
+                    Text('#${file.orderNumber}',
                         style: theme.textTheme.labelSmall
                             ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                   ],
@@ -276,6 +276,8 @@ class _FileCard extends StatelessWidget {
                     label: Text(busy ? 'Preparing…'.tr : 'Download'.tr),
                   );
                 })
+              else if (file.unavailable == 'expired')
+                Chip(label: Text('Download period ended'.tr))
               else if (!file.available)
                 Chip(label: Text('No longer available'.tr))
               else

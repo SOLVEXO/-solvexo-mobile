@@ -151,6 +151,7 @@ class AppTranslations extends Translations {
     'Postal code must be exactly 5 digits': 'پوسٹل کوڈ بالکل 5 ہندسوں کا ہونا چاہیے',
     'Use at most 200 characters.': 'زیادہ سے زیادہ 200 حروف استعمال کریں۔',
     'Email': 'ای میل',
+    'Download period ended': 'ڈاؤن لوڈ کی مدت ختم ہو گئی',
     'To change your login email, contact support.': 'لاگ اِن ای میل تبدیل کرنے کے لیے سپورٹ سے رابطہ کریں۔',
     'Could not load delivery options. Please try again.':
         'ڈیلیوری کے طریقے لوڈ نہیں ہو سکے۔ براہ کرم دوبارہ کوشش کریں۔',

@@ -83,6 +83,8 @@ class ApiConstants {
 
   // ── Library / courses (docs §5.9, §5.10) ───────────────────────────────
   static const String myCourses = "$apiPrefix/courses/mine";
+  // Every purchased digital item, one row per product (backend 5adba44).
+  static const String myLibrary = "$apiPrefix/orders/my-library";
   // Seller course builder + students (docs 6.3 / 6.9; checklist #14).
   static String sellerCourse(String storeId, String productId) =>
       "$apiPrefix/courses/seller/$storeId/$productId";
