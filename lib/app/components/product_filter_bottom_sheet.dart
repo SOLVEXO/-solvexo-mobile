@@ -1,6 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
@@ -20,16 +19,11 @@ class ProductFilterResult {
   final double maxPrice;
   final double rating;
   final String sort;
-  final String? educationLevel;
-  final String? normalizedCustomLevel;
-
   const ProductFilterResult({
     required this.minPrice,
     required this.maxPrice,
     required this.rating,
     required this.sort,
-    this.educationLevel,
-    this.normalizedCustomLevel,
   });
 }
 
@@ -58,11 +52,6 @@ class ProductFilterBottomSheet extends StatefulWidget {
   final double initialRating;
   final String initialSort;
 
-  /// Null hides the "Education Level" section entirely (e.g. on Home).
-  final EducationFacetsResult? educationFacets;
-  final String? initialEducationLevel;
-  final String? initialNormalizedCustomLevel;
-
   final ValueChanged<ProductFilterResult> onApply;
   final VoidCallback onReset;
 
@@ -74,9 +63,6 @@ class ProductFilterBottomSheet extends StatefulWidget {
     required this.initialMaxPrice,
     required this.initialRating,
     required this.initialSort,
-    this.educationFacets,
-    this.initialEducationLevel,
-    this.initialNormalizedCustomLevel,
     required this.onApply,
     required this.onReset,
   });
@@ -90,8 +76,6 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
   late double _maxPrice;
   late double _rating;
   late String _sort;
-  String? _educationLevel;
-  String? _normalizedCustomLevel;
 
   static const List<double> _ratings = [1, 2, 3, 4, 5];
 
@@ -102,15 +86,12 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
     _maxPrice = widget.initialMaxPrice;
     _rating = widget.initialRating;
     _sort = widget.initialSort;
-    _educationLevel = widget.initialEducationLevel;
-    _normalizedCustomLevel = widget.initialNormalizedCustomLevel;
   }
 
   int get _activeCount {
     int count = 0;
     if (_rating > 0) count++;
     if (_minPrice > widget.minBound || _maxPrice < widget.maxBound) count++;
-    if (_educationLevel != null) count++;
     return count;
   }
 
@@ -126,8 +107,6 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
         maxPrice: _maxPrice,
         rating: _rating,
         sort: _sort,
-        educationLevel: _educationLevel,
-        normalizedCustomLevel: _normalizedCustomLevel,
       ),
     );
     Get.back();
@@ -135,12 +114,6 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    // Callers gate this by passing `null` when their current result set has
-    // no educational products at all (e.g. Home, or a non-educational
-    // subcategory) — facet counts are global, not scoped to the category.
-    final facets = widget.educationFacets;
-    final showEducationSection = facets != null;
-
     return Container(
       // Max 85% of screen height — scrollable when content overflows
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
@@ -273,55 +246,6 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
                     ],
                   ),
 
-                  // ── Education Level ──────────────────────────────
-                  if (showEducationSection) ...[
-                    SizedBox(height: BaseSpacing.xl),
-                    _SectionTitle(title: 'Education Level'),
-                    SizedBox(height: BaseSpacing.sm),
-                    Wrap(
-                      spacing: BaseSpacing.xs,
-                      runSpacing: BaseSpacing.xs,
-                      children: [
-                        _SelectableChip(
-                          label: 'All',
-                          isSelected: _educationLevel == null,
-                          onTap: () => setState(() {
-                            _educationLevel = null;
-                            _normalizedCustomLevel = null;
-                          }),
-                        ),
-                        for (final level in kEducationLevels)
-                          if (level.value == 'other' || facets.levels.any((l) => l.level == level.value))
-                            _SelectableChip(
-                              label: level.value == 'other'
-                                  ? 'Other'
-                                  : '${level.label} (${facets.levels.firstWhere((l) => l.level == level.value).count})',
-                              isSelected: _educationLevel == level.value,
-                              onTap: () => setState(() {
-                                _educationLevel = level.value;
-                                if (level.value != 'other') _normalizedCustomLevel = null;
-                              }),
-                            ),
-                      ],
-                    ),
-                    if (_educationLevel == 'other' && facets.otherLevels.isNotEmpty) ...[
-                      SizedBox(height: BaseSpacing.sm),
-                      Wrap(
-                        spacing: BaseSpacing.xs,
-                        runSpacing: BaseSpacing.xs,
-                        children: facets.otherLevels
-                            .map(
-                              (o) => _SelectableChip(
-                                label: '${o.displayName} (${o.count})',
-                                isSelected: _normalizedCustomLevel == o.slug,
-                                onTap: () => setState(() => _normalizedCustomLevel = o.slug),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ],
-                  ],
-
                   SizedBox(height: BaseSpacing.xl),
                 ],
               ),
@@ -448,7 +372,7 @@ class _RatingChip extends StatelessWidget {
   }
 }
 
-// ─── Selectable Chip (Sort / Education Level) ───────────────────────────────
+// ─── Selectable Chip (Sort) ───────────────────────────────────────────────
 
 class _SelectableChip extends StatelessWidget {
   final String label;

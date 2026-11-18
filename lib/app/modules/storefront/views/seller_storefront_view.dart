@@ -11,7 +11,6 @@ import 'package:book_store_app/app/modules/storefront/widgets/storefront_shimmer
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_text_styles.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
-import 'package:book_store_app/app/modules/storefront/widgets/storefront_plans_teaser.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -54,11 +53,6 @@ class SellerStorefrontView extends StatelessWidget {
               // active hero banners.
               SliverToBoxAdapter(
                 child: StoreBannerCarousel(banners: c.storeBanners),
-              ),
-              // Hidden entirely (renders nothing) when the store has no
-              // active membership plans.
-              SliverToBoxAdapter(
-                child: StorefrontPlansTeaser(storeId: store.storeId, storeName: store.name),
               ),
               // ── Merchandising rows — handpicked pinned products read as
               // "curated by the seller", so they lead; the rest follow in a

@@ -126,11 +126,6 @@ class NotificationsController extends GetxController {
               arguments: {'storeId': storeId, 'storeName': 'Store'});
         }
         break;
-      case 'subscription_renewal_reminder':
-      case 'subscription_payment_failed':
-      case 'subscription_cancelled':
-        Get.toNamed(Routes.myMemberships);
-        break;
       default:
         break;
     }

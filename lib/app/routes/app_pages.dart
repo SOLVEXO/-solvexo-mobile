@@ -124,8 +124,6 @@ import '../modules/seller_coupons/bindings/seller_coupons_binding.dart';
 import '../modules/seller_coupons/views/seller_coupons_view.dart';
 import '../modules/seller_loyalty/bindings/seller_loyalty_binding.dart';
 import '../modules/seller_loyalty/views/seller_loyalty_view.dart';
-import '../modules/seller_subscriptions/bindings/seller_subscriptions_binding.dart';
-import '../modules/seller_subscriptions/views/seller_subscriptions_view.dart';
 import '../modules/seller_platform_plans/bindings/seller_platform_plans_binding.dart';
 import '../modules/seller_platform_plans/views/seller_platform_plans_view.dart';
 import '../modules/seller_plan_expired/bindings/seller_plan_expired_binding.dart';
@@ -152,8 +150,6 @@ import '../modules/seller_promotions/bindings/seller_promotions_binding.dart';
 import '../modules/seller_promotions/views/seller_promotions_view.dart';
 import '../modules/loyalty_rewards/bindings/loyalty_rewards_binding.dart';
 import '../modules/loyalty_rewards/views/loyalty_rewards_view.dart';
-import '../modules/my_memberships/bindings/my_memberships_binding.dart';
-import '../modules/my_memberships/views/my_memberships_view.dart';
 import '../modules/seller_edit_profile/bindings/seller_edit_profile_binding.dart';
 import '../modules/seller_edit_profile/views/seller_edit_profile_view.dart';
 import '../modules/seller/bindings/seller_binding.dart';
@@ -252,11 +248,6 @@ class AppPages {
       binding: SellerLoyaltyBinding(),
     ),
     GetPage(
-      name: Routes.sellerSubscriptionPlans,
-      page: () => SellerSubscriptionsView(),
-      binding: SellerSubscriptionsBinding(),
-    ),
-    GetPage(
       name: Routes.sellerPlatformPlan,
       page: () => const SellerPlatformPlansView(),
       binding: SellerPlatformPlansBinding(),
@@ -325,11 +316,6 @@ class AppPages {
       name: Routes.loyaltyRewards,
       page: () => LoyaltyRewardsView(),
       binding: LoyaltyRewardsBinding(),
-    ),
-    GetPage(
-      name: Routes.myMemberships,
-      page: () => MyMembershipsView(),
-      binding: MyMembershipsBinding(),
     ),
     GetPage(
       name: Routes.sellerEditProfile,

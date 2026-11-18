@@ -16,8 +16,6 @@ class ProductRepository {
     int page = 1,
     int limit = 10,
     String? productType,
-    String? educationLevel,
-    String? normalizedCustomLevel,
     double? minPrice,
     double? maxPrice,
     double? minRating,
@@ -29,8 +27,6 @@ class ProductRepository {
         page: page,
         limit: limit,
         productType: productType,
-        educationLevel: educationLevel,
-        normalizedCustomLevel: normalizedCustomLevel,
         minPrice: minPrice,
         maxPrice: maxPrice,
         minRating: minRating,
@@ -44,41 +40,6 @@ class ProductRepository {
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
       return null;
-    }
-  }
-
-  /// Buyer-facing, unauthenticated facet counts backing the education-level
-  /// filter chips on category/sub-category browsing.
-  Future<EducationFacetsResult> getEducationFacets() async {
-    try {
-      final response = await _baseClient.get(ApiConstants.educationFacets);
-      if (response.data['success'] == true) {
-        return EducationFacetsResult.fromJson(
-          response.data['data'] as Map<String, dynamic>,
-        );
-      }
-      return const EducationFacetsResult(levels: [], otherLevels: []);
-    } catch (e) {
-      debugPrint("Get Education Facets error --> $e");
-      return const EducationFacetsResult(levels: [], otherLevels: []);
-    }
-  }
-
-  /// Seller-only autocomplete while typing a custom education level.
-  Future<List<String>> getCustomLevelSuggestions(String q) async {
-    if (q.trim().isEmpty) return [];
-    try {
-      final response = await _baseClient.get(
-        ApiConstants.educationCustomLevelSuggestions(q),
-        requiresAuth: true,
-      );
-      if (response.data['success'] == true) {
-        return (response.data['data'] as List? ?? []).cast<String>();
-      }
-      return [];
-    } catch (e) {
-      debugPrint("Get Custom Level Suggestions error --> $e");
-      return [];
     }
   }
 

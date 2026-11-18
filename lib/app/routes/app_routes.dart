@@ -64,8 +64,6 @@ abstract class Routes {
 
   // Buyer — loyalty & rewards for a specific store
 
-  // Buyer — store memberships (subscriptions)
-
 
   // Buyer/guest — free, unauthenticated AI Worksheet Builder trial
   static const worksheetTrial = '/worksheet-trial';
@@ -96,7 +94,6 @@ abstract class Routes {
   static const sellerSettings = '/seller/settings';
   static const sellerCoupons = '/seller/coupons';
   static const sellerLoyalty = '/seller/loyalty';
-  static const sellerSubscriptionPlans = '/seller/subscription-plans';
   static const sellerPlatformPlan = '/seller/platform-plan';
   static const sellerPlanExpired = '/seller/plan-expired';
   static const sellerSeo = '/seller/seo';
@@ -119,5 +116,4 @@ abstract class Routes {
   static const aiStudioPriceOptimizer = '/seller/ai-studio/price-optimizer';
   static const aiStudioImageEnhancer = '/seller/ai-studio/image-enhancer';
   static const loyaltyRewards = '/loyalty-rewards';
-  static const myMemberships = '/my-memberships';
 }

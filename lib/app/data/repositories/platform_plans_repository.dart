@@ -13,9 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 /// The seller's OWN platform plan (paid to the marketplace) via the
-/// DB-managed `/api/platform-plans` system — distinct from
-/// `subscription_plans_repository.dart`, which is the seller selling plans
-/// TO their own buyers.
+/// DB-managed `/api/platform-plans` system.
 class PlatformPlansRepository {
   final BaseClient _client = BaseClient();
   static const _uuid = Uuid();

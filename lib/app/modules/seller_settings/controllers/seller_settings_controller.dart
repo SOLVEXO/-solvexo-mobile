@@ -102,11 +102,6 @@ class SellerSettingsController extends GetxController {
           onTap: () => Get.toNamed(Routes.sellerLoyalty),
         ),
         SettingsTile(
-          emoji: AppIcons.cardIcon,
-          title: 'Subscription Plans',
-          onTap: () => Get.toNamed(Routes.sellerSubscriptionPlans),
-        ),
-        SettingsTile(
           emoji: AppIcons.dashboardIcon,
           title: 'Storefront Banners',
           onTap: () => Get.toNamed(Routes.sellerStoreBanners),

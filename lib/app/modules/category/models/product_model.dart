@@ -174,13 +174,8 @@ class ProductModel {
   final CategoryModel? category;
   final List<String> images;
   final List<ProductVariant> variants;
-  final String type; // 'physical' | 'digital' | 'educational'
+  final String type; // 'physical' | 'digital' (legacy 'educational' shows as digital)
 
-  // Only set when type == 'educational'. See EducationLevel enum values in
-  // the backend (`src/products/schemas/product.schema.ts`).
-  final String? educationLevel;
-  final String? customLevel; // raw seller text, only when educationLevel == 'other'
-  final String? normalizedCustomLevel; // server-derived, grouping/filtering only
 
   // digital.previewAvailable — server-derived, only meaningful when isDigital
   final bool previewAvailable;
@@ -222,9 +217,6 @@ class ProductModel {
     required this.images,
     required this.variants,
     this.type = 'physical',
-    this.educationLevel,
-    this.customLevel,
-    this.normalizedCustomLevel,
     this.previewAvailable = false,
     required this.viewCount,
     required this.wishlistCount,
@@ -271,9 +263,6 @@ class ProductModel {
           .map((v) => ProductVariant.fromJson(v as Map<String, dynamic>))
           .toList(),
       type: json['type'] as String? ?? 'physical',
-      educationLevel: json['educationLevel'] as String?,
-      customLevel: json['customLevel'] as String?,
-      normalizedCustomLevel: json['normalizedCustomLevel'] as String?,
       previewAvailable: json['digital'] is Map
           ? (json['digital']['previewAvailable'] == true)
           : false,
@@ -398,88 +387,6 @@ class ProductModel {
       (v) =>
           selections.length == v.options.length &&
           selections.entries.every((e) => v.optionValue(e.key) == e.value),
-    );
-  }
-}
-
-// ─── Education level taxonomy (Tier-1, shared by seller forms + buyer filters) ─
-// Mirrors the backend's `EducationLevel` enum exactly
-// (`src/products/schemas/product.schema.ts`).
-class EducationLevelOption {
-  final String value;
-  final String label;
-  const EducationLevelOption(this.value, this.label);
-}
-
-const List<EducationLevelOption> kEducationLevels = [
-  EducationLevelOption('preschool', 'Preschool'),
-  EducationLevelOption('primary_school', 'Primary School'),
-  EducationLevelOption('middle_school', 'Middle School'),
-  EducationLevelOption('secondary_school', 'Secondary School'),
-  EducationLevelOption('college', 'College'),
-  EducationLevelOption('university', 'University'),
-  EducationLevelOption('professional_courses', 'Professional Courses'),
-  EducationLevelOption('islamic_education', 'Islamic Education'),
-  EducationLevelOption('other', 'Other'),
-];
-
-String educationLevelLabel(String? value) {
-  if (value == null) return '';
-  return kEducationLevels
-      .firstWhereOrNull((e) => e.value == value)
-      ?.label ??
-      value;
-}
-
-// ─── Education-level facets (buyer filter chips) ──────────────────────────────
-class EducationLevelFacet {
-  final String level;
-  final int count;
-
-  const EducationLevelFacet({required this.level, required this.count});
-
-  factory EducationLevelFacet.fromJson(Map<String, dynamic> json) {
-    return EducationLevelFacet(
-      level: json['level'] as String? ?? '',
-      count: json['count'] as int? ?? 0,
-    );
-  }
-}
-
-class EducationOtherLevelFacet {
-  final String slug;
-  final String displayName;
-  final int count;
-
-  const EducationOtherLevelFacet({
-    required this.slug,
-    required this.displayName,
-    required this.count,
-  });
-
-  factory EducationOtherLevelFacet.fromJson(Map<String, dynamic> json) {
-    return EducationOtherLevelFacet(
-      slug: json['slug'] as String? ?? '',
-      displayName: json['displayName'] as String? ?? '',
-      count: json['count'] as int? ?? 0,
-    );
-  }
-}
-
-class EducationFacetsResult {
-  final List<EducationLevelFacet> levels;
-  final List<EducationOtherLevelFacet> otherLevels;
-
-  const EducationFacetsResult({required this.levels, required this.otherLevels});
-
-  factory EducationFacetsResult.fromJson(Map<String, dynamic> json) {
-    return EducationFacetsResult(
-      levels: (json['levels'] as List? ?? [])
-          .map((e) => EducationLevelFacet.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      otherLevels: (json['otherLevels'] as List? ?? [])
-          .map((e) => EducationOtherLevelFacet.fromJson(e as Map<String, dynamic>))
-          .toList(),
     );
   }
 }

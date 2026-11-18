@@ -121,8 +121,6 @@ class ApiConstants {
     int page = 1,
     int limit = 10,
     String? productType,
-    String? educationLevel,
-    String? normalizedCustomLevel,
     double? minPrice,
     double? maxPrice,
     double? minRating,
@@ -139,12 +137,6 @@ class ApiConstants {
     if (productType != null && productType.isNotEmpty) {
       queryParams.add('productType=$productType');
     }
-    if (educationLevel != null && educationLevel.isNotEmpty) {
-      queryParams.add('educationLevel=$educationLevel');
-    }
-    if (normalizedCustomLevel != null && normalizedCustomLevel.isNotEmpty) {
-      queryParams.add('normalizedCustomLevel=$normalizedCustomLevel');
-    }
     if (minPrice != null) {
       queryParams.add('minPrice=$minPrice');
     }
@@ -160,14 +152,6 @@ class ApiConstants {
 
     return '$url?${queryParams.join('&')}';
   }
-
-  // Buyer-facing, unauthenticated facet counts backing the education-level
-  // filter chips (Tier-1 `levels` + Tier-2 `otherLevels`).
-  static const String educationFacets = '$apiPrefix/products/education/facets';
-
-  // Seller-only autocomplete while typing a custom level on product creation.
-  static String educationCustomLevelSuggestions(String q) =>
-      '$apiPrefix/products/education/custom-level-suggestions?q=${Uri.encodeQueryComponent(q)}';
 
   // ============ Address Endpoints ============
   static const String addAdresses = "$baseUrl/address/add-address";
@@ -450,31 +434,9 @@ class ApiConstants {
   static String loyaltyRedeem(String storeId) =>
       '$apiPrefix/loyalty/$storeId/redeem';
 
-  // ============ Subscription Plans Endpoints — seller (store-scoped) ============
-  static String subscriptionPlans(String storeId) =>
-      '$apiPrefix/subscriptions/$storeId/plans';
-  static String subscriptionPlanById(String storeId, String id) =>
-      '$apiPrefix/subscriptions/$storeId/plans/$id';
-  static String subscriptionsDashboard(String storeId) =>
-      '$apiPrefix/subscriptions/$storeId/dashboard';
-  static String subscriptionsList(String storeId) =>
-      '$apiPrefix/subscriptions/$storeId/subscribers';
-  static String subscriptionById(String storeId, String id) =>
-      '$apiPrefix/subscriptions/$storeId/subscribers/$id';
-  static String subscriptionPause(String storeId, String id) =>
-      '$apiPrefix/subscriptions/$storeId/subscribers/$id/pause';
-  static String subscriptionResume(String storeId, String id) =>
-      '$apiPrefix/subscriptions/$storeId/subscribers/$id/resume';
-  static String subscriptionCancel(
-    String storeId,
-    String id, {
-    bool atPeriodEnd = false,
-  }) =>
-      '$apiPrefix/subscriptions/$storeId/subscribers/$id/cancel?atPeriodEnd=$atPeriodEnd';
-
   // ============ Seller Analytics Endpoints ============
   // All GET, storeId/range/from/to passed as query params via BaseClient's
-  // `queryParameters` (same convention as coupons/loyalty/subscriptions).
+  // `queryParameters` (same convention as coupons/loyalty).
   static const String analyticsToday = '$apiPrefix/seller/analytics/today';
   static const String analyticsOverview =
       '$apiPrefix/seller/analytics/overview';
@@ -655,27 +617,6 @@ class ApiConstants {
 
     return url;
   }
-
-  // ============ Buyer membership endpoints ============
-  // Buyer side of store memberships (`src/subscriptions`) — browse a store's
-  // public plans, subscribe, and self-manage subscriptions/credits.
-  static String buyerStorePlans(String storeId) =>
-      '$apiPrefix/subscriptions/public/$storeId/plans';
-  static const String buyerMembershipSubscribe =
-      '$apiPrefix/subscriptions/subscribe';
-  static const String buyerMyMemberships = '$apiPrefix/subscriptions/my';
-  static String buyerMyMembershipById(String id) =>
-      '$apiPrefix/subscriptions/my/$id';
-  static String buyerMembershipPause(String id) =>
-      '$apiPrefix/subscriptions/my/$id/pause';
-  static String buyerMembershipResume(String id) =>
-      '$apiPrefix/subscriptions/my/$id/resume';
-  static String buyerMembershipCancel(String id, {bool atPeriodEnd = false}) =>
-      '$apiPrefix/subscriptions/my/$id/cancel?atPeriodEnd=$atPeriodEnd';
-  static String buyerMembershipBenefits(String storeId) =>
-      '$apiPrefix/subscriptions/my/benefits/$storeId';
-  static const String buyerMembershipCredits =
-      '$apiPrefix/subscriptions/my/credits';
 
   // ============ Promotions Endpoints — seller (paid ad placements) ============
   static const String promotionsPreviewPrice =

@@ -45,20 +45,6 @@ class SubCategoryController extends GetxController {
   final RxDouble selectedRating = 0.0.obs;
   final RxString selectedSort = 'newest'.obs;
 
-  // Education-level facets (Tier-1 + Tier-2 "other" drill-down). Facet counts
-  // are global (not scoped to this category), but the filter section itself
-  // is only shown once any educational products actually appear here — see
-  // [hasEducationalProducts].
-  final Rx<EducationFacetsResult> educationFacets = Rx(
-    const EducationFacetsResult(levels: [], otherLevels: []),
-  );
-  final Rxn<String> selectedEducationLevel = Rxn<String>();
-  final Rxn<String> selectedNormalizedCustomLevel = Rxn<String>();
-
-  bool get hasEducationalProducts =>
-      products.any((p) => p.isEducational) ||
-      selectedEducationLevel.value != null;
-
   // ─── Currently selected sub-category ID ──────────────────────────────────
   String? get _activeSubCategoryId {
     if (selectedSubCategoryIndex.value == 0) return null; // All
@@ -73,16 +59,11 @@ class SubCategoryController extends GetxController {
   void onInit() {
     super.onInit();
     _readArguments();
-    // Run in parallel — sub-categories chip strip + initial products + facets
+    // Run in parallel — sub-categories chip strip + initial products
     Future.wait([
       fetchSubCategories(),
       fetchProducts(),
-      fetchEducationFacets(),
     ]);
-  }
-
-  Future<void> fetchEducationFacets() async {
-    educationFacets.value = await _productRepository.getEducationFacets();
   }
 
   void _readArguments() {
@@ -167,8 +148,6 @@ class SubCategoryController extends GetxController {
         categoryId: effectiveCategoryId.isNotEmpty ? effectiveCategoryId : null,
         page: currentPage.value,
         limit: 20,
-        educationLevel: selectedEducationLevel.value,
-        normalizedCustomLevel: selectedNormalizedCustomLevel.value,
         minPrice: currentMinFilter.value > priceBoundMin ? currentMinFilter.value : null,
         maxPrice: currentMaxFilter.value < priceBoundMax ? currentMaxFilter.value : null,
         minRating: selectedRating.value > 0 ? selectedRating.value : null,
@@ -217,8 +196,6 @@ class SubCategoryController extends GetxController {
     currentMaxFilter.value = filters.maxPrice;
     selectedRating.value = filters.rating;
     selectedSort.value = filters.sort;
-    selectedEducationLevel.value = filters.educationLevel;
-    selectedNormalizedCustomLevel.value = filters.normalizedCustomLevel;
     fetchProducts();
   }
 
@@ -227,8 +204,6 @@ class SubCategoryController extends GetxController {
     currentMaxFilter.value = priceBoundMax;
     selectedRating.value = 0;
     selectedSort.value = 'newest';
-    selectedEducationLevel.value = null;
-    selectedNormalizedCustomLevel.value = null;
     fetchProducts();
   }
 
@@ -241,9 +216,6 @@ class SubCategoryController extends GetxController {
         initialMaxPrice: currentMaxFilter.value,
         initialRating: selectedRating.value,
         initialSort: selectedSort.value,
-        educationFacets: hasEducationalProducts ? educationFacets.value : null,
-        initialEducationLevel: selectedEducationLevel.value,
-        initialNormalizedCustomLevel: selectedNormalizedCustomLevel.value,
         onApply: applyFilters,
         onReset: resetFilters,
       ),
