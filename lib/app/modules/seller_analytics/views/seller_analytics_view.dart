@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_text.dart';
+import 'package:book_store_app/app/modules/seller/widgets/plan_locked_card.dart';
 import 'package:book_store_app/app/modules/seller/widgets/seller_app_bar.dart';
 import 'package:book_store_app/app/modules/seller_analytics/controllers/seller_analytics_controller.dart';
 import 'package:book_store_app/app/modules/seller_analytics/widgets/analytics_export_button.dart';
@@ -62,6 +63,10 @@ class SellerAnalyticsView extends StatelessWidget {
           ),
           Expanded(
             child: Obx(() {
+              final lock = controller.lockFor(controller.tab.value);
+              if (lock != null) {
+                return PlanLockedCard(title: 'Advanced analytics', message: lock);
+              }
               return switch (controller.tab.value) {
                 AnalyticsTab.overview => OverviewTab(controller: controller),
                 AnalyticsTab.products => ProductsTab(controller: controller),

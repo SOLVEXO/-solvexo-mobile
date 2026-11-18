@@ -9,6 +9,7 @@ import 'package:book_store_app/app/data/models/analytics/revenue_point_model.dar
 import 'package:book_store_app/app/data/models/analytics/top_product_analytics_model.dart';
 import 'package:book_store_app/app/data/models/analytics/traffic_source_model.dart';
 import 'package:book_store_app/app/data/repositories/seller_analytics_repository.dart';
+import 'package:book_store_app/app/modules/seller/widgets/plan_locked_card.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -25,7 +26,32 @@ const kAnalyticsRangeLabels = {
 };
 
 class SellerAnalyticsController extends GetxController {
-  final SellerAnalyticsRepository _repo = SellerAnalyticsRepository();
+  SellerAnalyticsController({SellerAnalyticsRepository? repository})
+      : _repo = repository ?? SellerAnalyticsRepository();
+
+  final SellerAnalyticsRepository _repo;
+
+  /// Sections the plan does not include (403), with the server's message.
+  /// Keys: traffic, payments, breakdown, products, customers, inventory, export.
+  final RxMap<String, String> locked = <String, String>{}.obs;
+
+  Future<T> _gate<T>(String key, Future<T> call, T empty) async {
+    try {
+      final v = await call;
+      locked.remove(key);
+      return v;
+    } on PlanLockedException catch (e) {
+      locked[key] = e.message;
+      return empty;
+    }
+  }
+
+  String? lockFor(AnalyticsTab t) => switch (t) {
+        AnalyticsTab.overview => null,
+        AnalyticsTab.products => locked['products'],
+        AnalyticsTab.customers => locked['customers'],
+        AnalyticsTab.inventory => locked['inventory'],
+      };
 
   String storeId = '';
   final Rx<AnalyticsTab> tab = AnalyticsTab.overview.obs;
@@ -109,13 +135,13 @@ class SellerAnalyticsController extends GetxController {
     isLoadingOverview.value = true;
     final r = range.value;
     final results = await Future.wait([
-      _repo.getOverview(storeId, r),
-      _repo.getRevenueOverTime(storeId, r),
-      _repo.getOrdersOverTime(storeId, r),
-      _repo.getTrafficSources(storeId, r),
-      _repo.getTopProducts(storeId, r, limit: 5),
-      _repo.getPaymentMethods(storeId, r),
-      _repo.getRevenueBreakdown(storeId, r),
+      _gate('overview', _repo.getOverview(storeId, r), AnalyticsOverviewModel.empty),
+      _gate('revenue', _repo.getRevenueOverTime(storeId, r), (granularity: 'day', series: <RevenuePointModel>[])),
+      _gate('orders', _repo.getOrdersOverTime(storeId, r), (granularity: 'day', series: <OrderPointModel>[])),
+      _gate('traffic', _repo.getTrafficSources(storeId, r), <TrafficSourceModel>[]),
+      _gate('top', _repo.getTopProducts(storeId, r, limit: 5), <TopProductAnalyticsModel>[]),
+      _gate('payments', _repo.getPaymentMethods(storeId, r), <PaymentMethodBreakdownModel>[]),
+      _gate('breakdown', _repo.getRevenueBreakdown(storeId, r), RevenueBreakdownModel.empty),
     ]);
 
     overview.value = results[0] as AnalyticsOverviewModel;
@@ -136,7 +162,8 @@ class SellerAnalyticsController extends GetxController {
     if (storeId.isEmpty) return;
     isLoadingProducts.value = true;
     final page = loadMore ? productsPage.value + 1 : 1;
-    final result = await _repo.getProductPerformance(storeId, range.value, page: page);
+    final result = await _gate('products', _repo.getProductPerformance(storeId, range.value, page: page),
+        (products: <ProductPerformanceModel>[], total: 0, totalPages: 1));
     if (loadMore) {
       products.addAll(result.products);
     } else {
@@ -151,7 +178,7 @@ class SellerAnalyticsController extends GetxController {
   Future<void> loadCustomers() async {
     if (storeId.isEmpty) return;
     isLoadingCustomers.value = true;
-    customers.value = await _repo.getCustomerAnalytics(storeId, range.value);
+    customers.value = await _gate('customers', _repo.getCustomerAnalytics(storeId, range.value), CustomerAnalyticsModel.empty);
     _customersLoaded = true;
     isLoadingCustomers.value = false;
   }
@@ -159,7 +186,7 @@ class SellerAnalyticsController extends GetxController {
   Future<void> loadInventory() async {
     if (storeId.isEmpty) return;
     isLoadingInventory.value = true;
-    inventory.value = await _repo.getInventoryInsights(storeId);
+    inventory.value = await _gate('inventory', _repo.getInventoryInsights(storeId), InventoryInsightsModel.empty);
     _inventoryLoaded = true;
     isLoadingInventory.value = false;
   }
@@ -188,7 +215,8 @@ class SellerAnalyticsController extends GetxController {
     if (isExporting.value) return;
     isExporting.value = true;
     try {
-      final bytes = await _repo.exportPdf(storeId, range.value);
+      final bytes = await _gate('export', _repo.exportPdf(storeId, range.value), null);
+      if (locked['export'] != null) return showPlanLocked(locked['export']!);
       if (bytes == null) return;
       final file = XFile.fromData(
         Uint8List.fromList(bytes),
@@ -205,7 +233,8 @@ class SellerAnalyticsController extends GetxController {
     if (isExporting.value) return;
     isExporting.value = true;
     try {
-      final csv = await _repo.exportCsv(storeId, range.value, section: section);
+      final csv = await _gate('export', _repo.exportCsv(storeId, range.value, section: section), null);
+      if (locked['export'] != null) return showPlanLocked(locked['export']!);
       if (csv == null) return;
       final file = XFile.fromData(
         Uint8List.fromList(utf8.encode(csv)),

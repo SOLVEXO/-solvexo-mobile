@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
+import 'package:book_store_app/app/modules/seller/widgets/plan_locked_card.dart';
 import 'package:book_store_app/app/modules/seller_analytics/controllers/seller_analytics_controller.dart';
 import 'package:book_store_app/app/modules/seller_analytics/widgets/analytics_kpi_grid.dart';
 import 'package:book_store_app/app/modules/seller_analytics/widgets/analytics_orders_chart.dart';
@@ -33,10 +34,13 @@ class OverviewTab extends StatelessWidget {
           children: [
             AnalyticsKpiGrid(data: controller.overview.value),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsRevenueBreakdownCard(
-              data: controller.revenueBreakdown.value,
-              currency: controller.currency,
-            ),
+            if (controller.locked['breakdown'] != null)
+              PlanLockedCard(title: 'Revenue breakdown', message: controller.locked['breakdown']!, compact: true)
+            else
+              AnalyticsRevenueBreakdownCard(
+                data: controller.revenueBreakdown.value,
+                currency: controller.currency,
+              ),
             if (controller.revenueBreakdown.value.recurringSubscriptionRevenue >
                 0)
               SizedBox(height: BaseSpacing.sm),
@@ -51,17 +55,23 @@ class OverviewTab extends StatelessWidget {
               granularity: controller.chartGranularity.value,
             ),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsTrafficDonut(sources: controller.trafficSources),
+            if (controller.locked['traffic'] != null)
+              PlanLockedCard(title: 'Traffic sources', message: controller.locked['traffic']!, compact: true)
+            else
+              AnalyticsTrafficDonut(sources: controller.trafficSources),
             SizedBox(height: BaseSpacing.sm),
             AnalyticsTopProductsCard(
               products: controller.topProducts,
               currency: controller.currency,
             ),
             SizedBox(height: BaseSpacing.sm),
-            AnalyticsPaymentMethodsCard(
-              methods: controller.paymentMethods,
-              currency: controller.currency,
-            ),
+            if (controller.locked['payments'] != null)
+              PlanLockedCard(title: 'Payment methods', message: controller.locked['payments']!, compact: true)
+            else
+              AnalyticsPaymentMethodsCard(
+                methods: controller.paymentMethods,
+                currency: controller.currency,
+              ),
             SizedBox(height: BaseSpacing.lg),
           ],
         ),

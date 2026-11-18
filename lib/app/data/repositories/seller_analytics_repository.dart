@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:book_store_app/app/data/models/analytics/analytics_overview_model.dart';
 import 'package:book_store_app/app/data/models/analytics/customer_analytics_model.dart';
 import 'package:book_store_app/app/data/models/analytics/inventory_insights_model.dart';
@@ -7,14 +9,47 @@ import 'package:book_store_app/app/data/models/analytics/revenue_point_model.dar
 import 'package:book_store_app/app/data/models/analytics/top_product_analytics_model.dart';
 import 'package:book_store_app/app/data/models/analytics/traffic_source_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
+import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
 import 'package:book_store_app/app/network/dio_exception_handler.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+/// A 403 from an advanced-analytics route (docs 2.7 / #16). Real message:
+/// 'Advanced analytics is not included in your current platform plan —
+/// available starting with the "Pro" plan.'
+class PlanLockedException implements Exception {
+  const PlanLockedException(this.message);
+  final String message;
+
+  static const fallback = 'This is not included in your current plan.';
+
+  static PlanLockedException? from(DioException e) {
+    if (e.response?.statusCode != 403) return null;
+    var data = e.response?.data;
+    if (data is List<int>) {
+      try {
+        data = jsonDecode(utf8.decode(data));
+      } catch (_) {}
+    }
+    return PlanLockedException(ApiError.msg(data is Map ? data['message'] : null) ?? fallback);
+  }
+
+  @override
+  String toString() => message;
+}
+
 class SellerAnalyticsRepository {
-  final BaseClient _client = BaseClient();
+  SellerAnalyticsRepository({BaseClient? client}) : _client = client ?? BaseClient();
+  final BaseClient _client;
+
+  /// 403 -> [PlanLockedException] (no toast); anything else as before.
+  void _handle(DioException e) {
+    final lock = PlanLockedException.from(e);
+    if (lock != null) throw lock;
+    DioExceptionHandler.handleDioException(e);
+  }
 
   Map<String, dynamic> _rangeParams(String storeId, String range, {String? from, String? to, bool compare = false}) {
     return {
@@ -72,7 +107,7 @@ class SellerAnalyticsRepository {
       }
       return AnalyticsOverviewModel.empty;
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return AnalyticsOverviewModel.empty;
     } catch (e) {
       debugPrint('❌ getOverview error: $e');
@@ -97,7 +132,7 @@ class SellerAnalyticsRepository {
       }
       return (granularity: 'day', series: <RevenuePointModel>[]);
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return (granularity: 'day', series: <RevenuePointModel>[]);
     } catch (e) {
       debugPrint('❌ getRevenueOverTime error: $e');
@@ -121,7 +156,7 @@ class SellerAnalyticsRepository {
       }
       return (granularity: 'day', series: <OrderPointModel>[]);
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return (granularity: 'day', series: <OrderPointModel>[]);
     } catch (e) {
       debugPrint('❌ getOrdersOverTime error: $e');
@@ -142,7 +177,7 @@ class SellerAnalyticsRepository {
       }
       return [];
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return [];
     } catch (e) {
       debugPrint('❌ getTrafficSources error: $e');
@@ -164,7 +199,7 @@ class SellerAnalyticsRepository {
       }
       return [];
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return [];
     } catch (e) {
       debugPrint('❌ getTopProducts error: $e');
@@ -184,7 +219,7 @@ class SellerAnalyticsRepository {
       }
       return CustomerAnalyticsModel.empty;
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return CustomerAnalyticsModel.empty;
     } catch (e) {
       debugPrint('❌ getCustomerAnalytics error: $e');
@@ -209,7 +244,7 @@ class SellerAnalyticsRepository {
       }
       return (products: <ProductPerformanceModel>[], total: 0, totalPages: 1);
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return (products: <ProductPerformanceModel>[], total: 0, totalPages: 1);
     } catch (e) {
       debugPrint('❌ getProductPerformance error: $e');
@@ -229,7 +264,7 @@ class SellerAnalyticsRepository {
       }
       return InventoryInsightsModel.empty;
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return InventoryInsightsModel.empty;
     } catch (e) {
       debugPrint('❌ getInventoryInsights error: $e');
@@ -249,7 +284,7 @@ class SellerAnalyticsRepository {
       }
       return [];
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return [];
     } catch (e) {
       debugPrint('❌ getPaymentMethods error: $e');
@@ -269,7 +304,7 @@ class SellerAnalyticsRepository {
       }
       return RevenueBreakdownModel.empty;
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return RevenueBreakdownModel.empty;
     } catch (e) {
       debugPrint('❌ getRevenueBreakdown error: $e');
@@ -287,7 +322,7 @@ class SellerAnalyticsRepository {
       );
       return response.data.toString();
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return null;
     } catch (e) {
       debugPrint('❌ exportCsv error: $e');
@@ -307,7 +342,7 @@ class SellerAnalyticsRepository {
       );
       return response.data as List<int>;
     } on DioException catch (e) {
-      DioExceptionHandler.handleDioException(e);
+      _handle(e);
       return null;
     } catch (e) {
       debugPrint('❌ exportPdf error: $e');
