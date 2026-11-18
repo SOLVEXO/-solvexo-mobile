@@ -316,6 +316,10 @@ class ApiConstants {
       "$apiPrefix/inventory/getStoreInventory/$storeId";
   static String lowStockSummary(String storeId) =>
       "$apiPrefix/inventory/low-stock-summary/$storeId";
+  static String lowStockThreshold(String storeId, String productId) =>
+      "$apiPrefix/inventory/low-stock-threshold/$storeId/$productId";
+  static String stockHistory(String storeId, String productId) =>
+      "$apiPrefix/inventory/stock-history/$storeId/$productId";
   static String sellerOrders(String storeId) =>
       "$apiPrefix/orders/seller-orders/$storeId";
   static String sellerFreeClaims(String storeId) =>

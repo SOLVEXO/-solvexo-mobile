@@ -44,7 +44,7 @@ by calling the API. Tick items off in commits that name the item number.
     plan ended", "Fix now" with admin note.
 12. [x] Offers: Premium % vs platform sale (either/or), `PATCH
     /api/products/bulk-offers`, "Your earnings" calculator.
-13. Inventory: `PATCH /api/products/stock/bulk`, low-stock limit, history.
+13. [x] Inventory: `PATCH /api/products/stock/bulk`, low-stock limit, history.
 14. Course builder (video-only lessons, accessDays, certificate design) and
     Students roster.
 15. Store settings: `codEnabled`, `deliverySettings`, `giftWrap`,

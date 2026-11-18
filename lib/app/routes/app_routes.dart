@@ -105,6 +105,7 @@ abstract class Routes {
   static const sellerStoreBanners = '/seller/store-banners';
   static const sellerPromotions = '/seller/promotions';
   static const sellerPlatformSales = '/seller/platform-sales';
+  static const sellerInventory = '/seller/inventory';
   static const aiStudioHistory = '/seller/ai-studio/history';
   static const aiStudioGenerationDetail = '/seller/ai-studio/generation-detail';
   static const aiStudioListingWriter = '/seller/ai-studio/listing-writer';

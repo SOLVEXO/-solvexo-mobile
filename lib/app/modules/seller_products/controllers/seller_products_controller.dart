@@ -65,6 +65,10 @@ class SellerProduct {
   final bool premiumOptOut;
   final List<String> campaignIds;
 
+  /// Inventory (docs 6.4): per-product low-stock limit (default 10).
+  final int lowStockThreshold;
+  final bool hasCustomThreshold;
+
   const SellerProduct({
     required this.id,
     required this.name,
@@ -102,6 +106,8 @@ class SellerProduct {
     this.premiumPercent,
     this.premiumOptOut = false,
     this.campaignIds = const [],
+    this.lowStockThreshold = 10,
+    this.hasCustomThreshold = false,
   });
 
   bool get inPremium => (premiumPercent ?? 0) > 0;
@@ -204,6 +210,8 @@ class SellerProduct {
       premiumPercent: (json['premiumDiscountPercent'] as num?)?.toInt(),
       premiumOptOut: json['premiumOptOut'] == true,
       campaignIds: (json['campaignIds'] as List?)?.map((e) => '$e').toList() ?? const [],
+      lowStockThreshold: (json['lowStockThreshold'] as num?)?.toInt() ?? 10,
+      hasCustomThreshold: json['hasCustomThreshold'] == true,
     );
   }
 
