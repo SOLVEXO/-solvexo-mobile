@@ -74,6 +74,7 @@ source on 2026-11-18** (details: `docs/BACKEND_DIFF_REPORT.md` 3.2):
 | 7 | update-store coerces `codEnabled`, loose `shipFrom` | **Open** | `store.service.ts:720` (`!!value`); `:813-821` (drops keys, stringifies a numeric province; no city -> shipFrom null) |
 | 8 | 500 on bad ids in course routes; silent title cutting | **Partly fixed** | roster routes now 400 "Invalid id"; builder / students / PUT still 500 on a bad storeId (`classroom.controllers.ts:281-298` -> `store-ownership.util.ts:27`); titles still cut at 120/150 (`course.util.ts:6,187,191`) |
 | 9 | Seller manual-payments controller still registered | **Open (new)** | see 9 below |
+| 10 | Server does not require a free sample to publish digital products | **Open (new)** | see 10 below |
 
 1. **Refund-request "502" — retracted (not a backend issue).** Reported
    during P1 (#8 commit message) as `PATCH /api/refund-request/<id>/approve|
@@ -143,3 +144,13 @@ source on 2026-11-18** (details: `docs/BACKEND_DIFF_REPORT.md` 3.2):
    only add surface. Suggest: drop the controller from the module. The app
    must not call these routes; it has no constant or call for them
    (checked in `api_constaints.dart` on 2026-11-18).
+10. **Server does not require a free sample to publish digital products,
+    although the web and the docs do.** In backend 5adba44 a free sample
+    (or an enabled buyer preview) only adds to the listing's quality score
+    (`src/products/product-quality.util.ts:139,177`, "Add a free sample or
+    preview"); `products.service.ts` has no publish check for
+    `digital.sample`. EDUDEEN_DOCS.md §3 (line 153) and the web require one.
+    Decision (owner, 2026-11-18): the app KEEPS the requirement (checklist
+    #3), matching the web and the product rule. Suggest: enforce it on the
+    server when a digital listing goes live. DOCS_ERRATA.md E5 records the
+    server behaviour only; it does not change the app rule.
