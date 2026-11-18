@@ -18,7 +18,10 @@ void main() {
         .toList();
     expect(titles, isNot(contains('Two-Factor Auth')));
     expect(titles, isNot(contains('Language')));
-    expect(titles, isNot(contains('Shipping')));
+    // The old mock Shipping screen was removed in P0.5; since #15 the
+    // Shipping tile opens the real screen (zones + delivery days from the API).
+    expect(titles, contains('Shipping'));
+    expect(titles, contains('Store settings'));
     expect(titles, contains('Switch to buyer account'));
   });
 }
