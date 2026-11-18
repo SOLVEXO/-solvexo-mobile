@@ -15,17 +15,17 @@ class CheckoutRepository {
   /// without it the backend checks out the ENTIRE cart, ignoring the
   /// selection checkboxes in the cart UI.
   ///
-  /// The backend resolves the buyer's delivery address itself (falling back
-  /// to — and promoting — any saved address if none is explicitly flagged
-  /// default) and only rejects the request when the buyer has NO saved
-  /// address at all. [addressRequired] surfaces that specific case so the
-  /// caller can prompt the buyer to add one instead of showing a generic
-  /// error toast.
+  /// Physical items (backend 5adba44): [addressId] is the chosen address
+  /// (else the server uses the default, and rejects only when the buyer has
+  /// none: [addressRequired]); [shippingZoneId] is required once any active
+  /// zone exists ("Choose a delivery option for your address").
   Future<({bool success, CreateCheckoutResponse? data, bool addressRequired, String? message})> createCheckout({
     List<Map<String, String>>? items,
     String? attributedBannerId,
     String? attributedStoreBannerId,
     String? currencyPreference,
+    String? addressId,
+    String? shippingZoneId,
   }) async {
     try {
       final response = await _client.post(
@@ -35,6 +35,8 @@ class CheckoutRepository {
           if (attributedBannerId != null) 'attributedBannerId': attributedBannerId,
           if (attributedStoreBannerId != null) 'attributedStoreBannerId': attributedStoreBannerId,
           if (currencyPreference != null) 'currencyPreference': currencyPreference,
+          if (addressId != null) 'addressId': addressId,
+          if (shippingZoneId != null) 'shippingZoneId': shippingZoneId,
         },
         requiresAuth: true,
       );

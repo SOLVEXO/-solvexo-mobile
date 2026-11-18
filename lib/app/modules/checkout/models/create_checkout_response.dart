@@ -68,6 +68,7 @@ class CheckoutSession {
   final String id;
   final String userId;
   final String? addressId;
+  final String? shippingZoneId;
   final String currency;
   final List<ApiCheckoutItem> items;
   final double subtotal;
@@ -81,6 +82,7 @@ class CheckoutSession {
     required this.id,
     required this.userId,
     this.addressId,
+    this.shippingZoneId,
     required this.currency,
     required this.items,
     required this.subtotal,
@@ -96,6 +98,7 @@ class CheckoutSession {
       id: json['_id'] as String,
       userId: json['userId'] as String,
       addressId: json['addressId'] as String?,
+      shippingZoneId: json['shippingZoneId'] as String?,
       // Matches the backend's own resolveCheckoutCurrency fallback (PKR,
       // since EduDeen is Pakistan-origin) — should never actually be hit
       // since the backend always sets Checkout.currency, but keeps this

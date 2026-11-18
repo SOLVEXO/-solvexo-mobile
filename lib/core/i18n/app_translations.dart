@@ -119,5 +119,10 @@ class AppTranslations extends Translations {
     'Password (if your account has one)': 'پاس ورڈ (اگر آپ کے اکاؤنٹ میں ہے)',
     'This permanently deletes your Edudeen account. Orders that are still open must be finished first.':
         'یہ آپ کا ایجودین اکاؤنٹ مستقل طور پر حذف کر دے گا۔ کھلے آرڈرز پہلے مکمل ہونے چاہئیں۔',
+
+    // Checkout delivery (backend 5adba44)
+    'Choose a delivery option': 'ڈیلیوری کا طریقہ منتخب کریں',
+    'Could not load delivery options. Please try again.':
+        'ڈیلیوری کے طریقے لوڈ نہیں ہو سکے۔ براہ کرم دوبارہ کوشش کریں۔',
   };
 }

@@ -6,6 +6,7 @@ import 'package:book_store_app/app/components/shimmer/trip_shimmer.dart';
 import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
 import 'package:book_store_app/app/data/repositories/shipping_repository.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
+import 'package:book_store_app/app/modules/checkout/utils/checkout_delivery.dart';
 import 'package:book_store_app/app/modules/cart/controllers/cart_controller.dart';
 import 'package:book_store_app/app/modules/checkout/models/create_checkout_response.dart';
 import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
@@ -45,6 +46,7 @@ class CheckoutController extends GetxController {
   final CreateCheckoutResponse? _initialCheckoutResponse;
 
   String _checkoutId = '';
+  String? _checkoutZoneId;
 
   /// Order Items (coming from Cart)
   RxList<CheckoutItem> orderItems = <CheckoutItem>[].obs;
@@ -150,6 +152,7 @@ class CheckoutController extends GetxController {
         _initialCheckoutResponse ?? Get.arguments as CreateCheckoutResponse?;
     if (response != null) {
       _checkoutId = response.checkout.id;
+      _checkoutZoneId = response.checkout.shippingZoneId;
       currency.value = response.checkout.currency;
       orderItems.assignAll(
         response.checkout.items.map((e) => e.toCheckoutItem()).toList(),
@@ -182,19 +185,15 @@ class CheckoutController extends GetxController {
 
       final zones = await _shippingRepository.getShippingZones();
 
-      // Filter only active zones and map to ShippingOption
-      final options = zones
-          .where((z) => z.status == 'active' && !z.isDelete)
-          .map((z) => z.toShippingOption())
-          .toList();
+      // Same "active" filter as the server (status != 'inactive').
+      final options = CheckoutDelivery.activeZones(zones).map((z) => z.toShippingOption()).toList();
 
       shippingOptions.assignAll(options);
 
-      // Auto-select first option and apply its price
-      if (options.isNotEmpty) {
-        selectedShipping.value = options.first;
-        shippingCost.value = options.first.amount;
-      }
+      // The zone was chosen before the checkout was created (cart). Show it;
+      // the fee stays the server's `checkout.shippingFee`, never the zone
+      // list price.
+      selectedShipping.value = options.firstWhereOrNull((o) => o.id == _checkoutZoneId);
     } on DioException catch (e) {
       DioExceptionHandler.handleDioException(e);
     } catch (e) {

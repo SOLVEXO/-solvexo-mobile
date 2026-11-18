@@ -4,7 +4,11 @@ import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
+import 'package:book_store_app/app/data/repositories/address_repository.dart';
 import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
+import 'package:book_store_app/app/data/repositories/shipping_repository.dart';
+import 'package:book_store_app/app/modules/checkout/models/shipping_options_model.dart';
+import 'package:book_store_app/app/modules/checkout/utils/checkout_delivery.dart';
 import 'package:book_store_app/app/data/services/auth_gate_service.dart';
 import 'package:book_store_app/app/modules/address/controllers/address_controller.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
@@ -25,9 +29,13 @@ class CartController extends BaseController {
   CartController({
     CartRepository? cartRepository,
     CheckoutRepository? checkoutRepository,
+    AddressRepository? addressRepository,
+    ShippingRepository? shippingRepository,
     WishlistController? wishlistController,
   }) : _cartRepository = cartRepository ?? CartRepository(),
        _checkoutRepository = checkoutRepository ?? CheckoutRepository(),
+       _addressRepository = addressRepository ?? AddressRepository(),
+       _shippingRepository = shippingRepository ?? ShippingRepository(),
        wishlistController =
            wishlistController ??
            (Get.isRegistered<WishlistController>()
@@ -36,6 +44,8 @@ class CartController extends BaseController {
 
   final CartRepository _cartRepository;
   final CheckoutRepository _checkoutRepository;
+  final AddressRepository _addressRepository;
+  final ShippingRepository _shippingRepository;
 
   // ─── State ────────────────────────────────────────────────────────────────
   final RxList<CartItem> cartItems = <CartItem>[].obs;
@@ -393,6 +403,19 @@ class CartController extends BaseController {
 
     isCheckingOut.value = true;
     try {
+      // Physical items: the address and delivery zone go WITH the create
+      // call (backend 5adba44 rejects a physical checkout without a zone
+      // once any active zone exists).
+      final hasPhysical = cartItems.any((i) => i.isSelected && i.productType != 'digital');
+      String? addressId;
+      String? zoneId;
+      if (hasPhysical) {
+        final delivery = await _chooseDelivery();
+        if (delivery == null) return; // no address, or the buyer closed the zone picker
+        addressId = delivery.addressId;
+        zoneId = delivery.zoneId;
+      }
+
       // If the buyer arrived via a platform/store banner tap within the last
       // 30 minutes, attribute this checkout to it for promotion conversion
       // tracking (see PromotionAttributionService doc comment).
@@ -401,6 +424,8 @@ class CartController extends BaseController {
         items: selected,
         attributedBannerId: attribution.bannerId,
         attributedStoreBannerId: attribution.storeBannerId,
+        addressId: addressId,
+        shippingZoneId: zoneId,
       );
       if (result.success && result.data != null) {
         Get.toNamed(Routes.checkoutView, arguments: result.data);
@@ -413,6 +438,58 @@ class CartController extends BaseController {
       isCheckingOut.value = false;
     }
   }
+
+  /// Address + zone for a physical checkout. Null = stop (no saved address
+  /// -> add-address prompt; or the buyer closed the zone picker).
+  Future<({String addressId, String? zoneId})?> _chooseDelivery() async {
+    final addresses = await _addressRepository.fetchAddresses();
+    final address = CheckoutDelivery.pickAddress(addresses);
+    if (address?.id == null) {
+      _promptAddDeliveryAddress();
+      return null;
+    }
+    List<ShippingZoneModel> zones;
+    try {
+      zones = CheckoutDelivery.activeZones(await _shippingRepository.getShippingZones());
+    } catch (_) {
+      ToastUtil.showToast('Could not load delivery options. Please try again.'.tr);
+      return null;
+    }
+    if (zones.isEmpty) return (addressId: address!.id!, zoneId: null);
+    final zone = CheckoutDelivery.autoZone(zones) ?? await _pickZone(zones);
+    if (zone == null) return null;
+    return (addressId: address!.id!, zoneId: zone.id);
+  }
+
+  /// Several active zones: the buyer chooses before the checkout is made.
+  /// Prices shown are the zone list's own (PKR, from the server); the
+  /// checkout's real shipping fee comes back from create-checkout.
+  Future<ShippingZoneModel?> _pickZone(List<ShippingZoneModel> zones) => Get.bottomSheet<ShippingZoneModel>(
+        SafeArea(
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text('Choose a delivery option'.tr, style: Get.theme.textTheme.titleMedium),
+            ),
+            Flexible(
+              child: ListView(shrinkWrap: true, children: [
+                for (final z in zones)
+                  ListTile(
+                    key: Key('zone_${z.id}'),
+                    minTileHeight: 56,
+                    leading: const Icon(Icons.local_shipping_outlined),
+                    title: Text([z.city, z.province].where((s) => s.isNotEmpty).join(', ')),
+                    subtitle: z.estimatedDeliveryTime.isEmpty ? null : Text(z.estimatedDeliveryTime),
+                    trailing: Text(z.toShippingOption().charges),
+                    onTap: () => Get.back(result: z),
+                  ),
+              ]),
+            ),
+          ]),
+        ),
+        backgroundColor: Get.theme.colorScheme.surface,
+        isScrollControlled: true,
+      );
 
   /// Shown when the buyer has no saved address at all (the backend resolves
   /// the delivery address itself and only rejects checkout in that case —

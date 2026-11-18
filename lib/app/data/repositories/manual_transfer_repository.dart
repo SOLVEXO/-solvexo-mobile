@@ -15,10 +15,19 @@ import 'package:flutter/material.dart';
 class ManualTransferRepository {
   final BaseClient _client = BaseClient();
 
-  /// GET /api/payment/manual-transfer/bank-details
-  Future<ManualPaymentBankDetails?> getBankDetails() async {
+  /// GET /api/payment/manual-transfer/bank-details?checkoutId=
+  /// Backend 5adba44: `checkoutId` is required (400 "checkoutId is required";
+  /// 404 "Checkout not found" when it is not the buyer's). Response:
+  /// {payeeName, bankName, accountTitle, accountNumber, iban, jazzcashNumber,
+  /// easypaisaNumber, instructions, usdToPkrRate}.
+  Future<ManualPaymentBankDetails?> getBankDetails(String checkoutId) async {
+    if (checkoutId.isEmpty) return null;
     try {
-      final response = await _client.get(ApiConstants.manualTransferBankDetails, requiresAuth: true);
+      final response = await _client.get(
+        ApiConstants.manualTransferBankDetails,
+        queryParameters: {'checkoutId': checkoutId},
+        requiresAuth: true,
+      );
       if (response.data['success'] == true) {
         return ManualPaymentBankDetails.fromJson(response.data['data'] as Map<String, dynamic>);
       }

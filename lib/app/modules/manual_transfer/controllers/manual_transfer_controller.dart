@@ -41,7 +41,7 @@ class ManualTransferController extends GetxController {
 
   Future<void> _loadBankDetails() async {
     isLoadingBankDetails.value = true;
-    final details = await _repository.getBankDetails();
+    final details = await _repository.getBankDetails(_checkoutId);
     if (details != null) bankDetails.value = details;
     isLoadingBankDetails.value = false;
   }

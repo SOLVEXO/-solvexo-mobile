@@ -2,6 +2,8 @@
 /// before they transfer money and upload proof — see
 /// `ManualTransferRepository.getBankDetails`.
 class ManualPaymentBankDetails {
+  /// Who the buyer pays (backend: accountTitle, else "Edudeen").
+  final String? payeeName;
   final String? bankName;
   final String? accountTitle;
   final String? accountNumber;
@@ -12,6 +14,7 @@ class ManualPaymentBankDetails {
   final double usdToPkrRate;
 
   const ManualPaymentBankDetails({
+    this.payeeName,
     this.bankName,
     this.accountTitle,
     this.accountNumber,
@@ -25,6 +28,7 @@ class ManualPaymentBankDetails {
   static const empty = ManualPaymentBankDetails(usdToPkrRate: 278);
 
   factory ManualPaymentBankDetails.fromJson(Map<String, dynamic> json) => ManualPaymentBankDetails(
+        payeeName: json['payeeName'] as String?,
         bankName: json['bankName'] as String?,
         accountTitle: json['accountTitle'] as String?,
         accountNumber: json['accountNumber'] as String?,
@@ -38,6 +42,7 @@ class ManualPaymentBankDetails {
   /// Only the account fields the admin has actually filled in — drives which
   /// rows the "how to pay" screen renders.
   List<MapEntry<String, String>> get filledFields => [
+        if (payeeName != null && payeeName!.isNotEmpty && payeeName != accountTitle) MapEntry('Pay to', payeeName!),
         if (bankName != null && bankName!.isNotEmpty) MapEntry('Bank', bankName!),
         if (accountTitle != null && accountTitle!.isNotEmpty) MapEntry('Account Title', accountTitle!),
         if (accountNumber != null && accountNumber!.isNotEmpty) MapEntry('Account Number', accountNumber!),
