@@ -171,7 +171,13 @@ class SellerStoreSettingsController extends GetxController {
         parsedDays[r] = DayRange(int.parse(minC.text.trim()), int.parse(maxC.text.trim()));
       }
     }
-    if (city.text.trim().length > 80) e['city'] = 'Use at most 80 characters.';
+    // Backend 5adba44 (store.service.ts ~813): shipFrom without a city is
+    // saved as null (the province is dropped), and the city is cut at 60.
+    if (city.text.trim().isEmpty && province.value != null) {
+      e['city'] = 'Add the city you ship from, or clear the province.';
+    } else if (city.text.trim().length > 60) {
+      e['city'] = 'Use at most 60 characters.';
+    }
     if (returnsAccepted.value) put('returnWindow', _int(returnWindow.text, 0, 90, required: true));
     if (returnNote.text.trim().length > 300) e['returnNote'] = 'Use at most 300 characters.';
     if (digitalNote.text.trim().length > 300) e['digitalNote'] = 'Use at most 300 characters.';

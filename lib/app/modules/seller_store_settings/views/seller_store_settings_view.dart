@@ -115,12 +115,13 @@ class SellerStoreSettingsView extends GetView<SellerStoreSettingsController> {
         const _Header('Shipping'),
         _field(c.city, 'Ships from (city)', error: e['city']),
         const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
+        DropdownButtonFormField<String?>(
           key: const Key('province'),
           initialValue: c.province.value,
           decoration: const InputDecoration(labelText: 'Province', border: OutlineInputBorder()),
           items: [
-            for (final p in SellerStoreSettingsController.provinces) DropdownMenuItem(value: p, child: Text(p)),
+            const DropdownMenuItem<String?>(value: null, child: Text('Not set')),
+            for (final p in SellerStoreSettingsController.provinces) DropdownMenuItem<String?>(value: p, child: Text(p)),
           ],
           onChanged: (v) {
             c.province.value = v;

@@ -101,4 +101,18 @@ void main() {
     final z = ShippingZone.fromJson({'country': 'Pakistan', 'province': 'Punjab', 'city': 'Lahore', 'shippingPrice': 200, 'estimatedDeliveryTime': '2-3 days', 'status': 'active'});
     expect(z.place, 'Lahore, Punjab, Pakistan');
   });
+
+  test('province without a city is an error, not a silent drop (5adba44)', () async {
+    final c = SellerStoreSettingsController(repository: SellerStoreSettingsRepository(client: _Client()), storeId: 's1');
+    await c.load();
+    c.city.text = '';
+    c.province.value = 'Punjab';
+    expect(c.validate(), isNull);
+    expect(c.errors['city'], contains('city'));
+    c.province.value = null;
+    expect(c.validate(), isNotNull, reason: 'no city and no province is fine');
+    c.city.text = 'x' * 61;
+    expect(c.validate(), isNull);
+    expect(c.errors['city'], contains('60'));
+  });
 }

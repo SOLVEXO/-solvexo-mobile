@@ -127,7 +127,7 @@ class OtpView extends StatelessWidget {
           CustomText(
             text: "For your security reason, we need to ensure it's really you."
                 "\nPlease enter the 6 digit code we sent to ${controller.email}"
-                "\nthis code is expires in 10 minutes",
+                "\nThis code expires in 5 minutes.", // backend OTP_TTL_SECONDS = 5 * 60
             textAlign: TextAlign.center,
             color: AppColors.greySwatch600,
             fontSize: AppFontSize.tiny,

@@ -31,6 +31,7 @@ class MyPlanCard extends StatelessWidget {
         'active' => AppColors.greenSuccess,
         'trialing' => AppColors.amberDark,
         'past_due' => AppColors.red,
+        'expired' => AppColors.red,
         _ => AppColors.gray600,
       };
 
@@ -38,7 +39,10 @@ class MyPlanCard extends StatelessWidget {
         'active' => 'Active',
         'trialing' => 'Trial',
         'past_due' => 'Payment past due',
-        _ => 'Canceled',
+        // Plan lapse statuses (docs 2.8): expired | past_due | canceled.
+        'expired' => 'Expired',
+        'canceled' || 'cancelled' => 'Canceled',
+        final s => s.isEmpty ? 'Canceled' : '${s[0].toUpperCase()}${s.substring(1).replaceAll('_', ' ')}',
       };
 
   @override
