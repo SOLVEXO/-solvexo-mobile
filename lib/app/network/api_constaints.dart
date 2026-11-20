@@ -90,6 +90,15 @@ class ApiConstants {
       "$apiPrefix/courses/learn/$idOrSlug/lessons/$lessonId/complete";
   static String courseCertificateDetails(String idOrSlug) => "$apiPrefix/courses/learn/$idOrSlug/certificate-details";
   static String courseCertificate(String code) => "$apiPrefix/courses/certificates/${Uri.encodeComponent(code)}";
+  // Edudeen Premium (B3).
+  static const String premiumPlans = "$apiPrefix/premium/plans";
+  static const String premiumMe = "$apiPrefix/premium/me";
+  static const String premiumBankDetails = "$apiPrefix/premium/bank-details";
+  static const String premiumSubscribe = "$apiPrefix/premium/subscribe";
+  static String premiumProof(String paymentId) => "$apiPrefix/premium/payments/$paymentId/proof";
+  static const String premiumCancel = "$apiPrefix/premium/cancel";
+  static const String premiumResume = "$apiPrefix/premium/resume";
+  static String premiumDeals(int limit) => "$apiPrefix/products/premium-deals?limit=$limit";
   // Every purchased digital item, one row per product (backend 5adba44).
   static const String myLibrary = "$apiPrefix/orders/my-library";
   // Seller course builder + students (docs 6.3 / 6.9; checklist #14).

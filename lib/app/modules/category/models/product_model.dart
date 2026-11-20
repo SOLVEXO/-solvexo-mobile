@@ -24,6 +24,9 @@ class ProductVariant {
   final List<VariantOption> options;
   final double price;
   final double? compareAtPrice;
+
+  /// Member price, only when the API sends one (Premium, docs §2.5).
+  final double? premiumPrice;
   final int? stock; // null = unlimited
   final bool unlimitedStock; // server-side flag; takes priority over `stock`
   final List<String> images;
@@ -41,6 +44,7 @@ class ProductVariant {
     this.options = const [],
     required this.price,
     this.compareAtPrice,
+    this.premiumPrice,
     required this.stock,
     this.unlimitedStock = false,
     required this.images,
@@ -85,6 +89,7 @@ class ProductVariant {
       compareAtPrice: json['compareAtPrice'] != null
           ? (json['compareAtPrice'] as num).toDouble()
           : null,
+      premiumPrice: (json['premiumPrice'] as num?)?.toDouble(),
       stock: _parseStock(json['stock']),
       unlimitedStock: json['unlimitedStock'] == true,
       images: List<String>.from(json['images'] ?? []),
@@ -135,7 +140,11 @@ class ActiveCampaign {
     this.discountType,
     this.discountValue,
     this.endDate,
+    this.earlyAccess = false,
   });
+
+  /// Premium members see a campaign early (activeCampaign.earlyAccess).
+  final bool earlyAccess;
 
   factory ActiveCampaign.fromJson(Map<String, dynamic> json) {
     return ActiveCampaign(
@@ -146,6 +155,7 @@ class ActiveCampaign {
       endDate: json['endDate'] != null
           ? DateTime.tryParse(json['endDate'].toString())
           : null,
+      earlyAccess: json['earlyAccess'] == true,
     );
   }
 

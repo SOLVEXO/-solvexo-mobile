@@ -40,6 +40,11 @@ class ProfileController extends GetxController {
             onTap: () => Get.toNamed(Routes.library),
           ),
           SettingsTile(
+            icon: AppIcons.coinIcon,
+            title: 'Edudeen Premium'.tr,
+            onTap: () => Get.toNamed(Routes.premium),
+          ),
+          SettingsTile(
             icon: AppIcons.heartIcon,
             title: 'Wishlist'.tr,
             onTap: () => Get.toNamed(Routes.WISHLIST),

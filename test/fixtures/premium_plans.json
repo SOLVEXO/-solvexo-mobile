@@ -1,0 +1,25 @@
+{
+ "success": true,
+ "data": [
+  {
+   "_id": "6ace2f3ee054cb47706096a7",
+   "name": "Edudeen Premium",
+   "description": "Unlock premium educational resources, enjoy exclusive discounts, access sales early, and receive priority support on Edudeen.",
+   "monthlyPriceUSD": 7,
+   "yearlyPriceUSD": 70,
+   "monthlyPricePKR": 1935,
+   "yearlyPricePKR": 19352,
+   "fxRate": 276.460596,
+   "yearlySavingsPercent": 17,
+   "isActive": true,
+   "sortOrder": 0,
+   "benefits": {
+    "childrenLimit": 15,
+    "earlyAccessHours": 2,
+    "monthlyCouponValue": 0,
+    "monthlyCouponType": "percentage",
+    "prioritySupport": true
+   }
+  }
+ ]
+}

@@ -71,6 +71,7 @@ abstract class Routes {
   // Buyer — library (files + courses) and support chat
   static const library = '/account/library';
   static const coursePlayer = '/course';
+  static const premium = '/premium';
   static const certificateView = '/certificates';
   static const certificateDetails = '/course/certificate-details';
   static const supportChat = '/support/chat';

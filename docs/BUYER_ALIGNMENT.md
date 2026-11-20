@@ -42,7 +42,7 @@ money only from the server.
      issuerName, signatureImageUrl}, storeLogoUrl}` (live, code
      EDU-8C00AFD7).
    - App today: nothing. No PDF package.
-3. [ ] **B3 Premium** (docs §2.5, §5.12; `src/premium`, `api/premium`):
+3. [x] **B3 Premium** (docs §2.5, §5.12; `src/premium`, `api/premium`):
    `GET plans`, `GET terms`, `GET me`, `GET bank-details`, `GET payments`,
    `POST subscribe`, `POST payments/:paymentId/proof`, `POST cancel`,
    `POST resume` (buyer role `user`). Member prices: only where the API

@@ -54,6 +54,9 @@ class DeepLinkRouter {
             return true;
           }
           return false;
+        case 'premium':
+          Get.toNamed(Routes.premium);
+          return true;
         case 'shop':
           if (seg.length > 1) {
             Get.toNamed(Routes.sellerStorefront, arguments: {'slug': seg[1]});

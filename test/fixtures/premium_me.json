@@ -1,0 +1,15 @@
+{
+ "success": true,
+ "data": {
+  "isPremium": false,
+  "entitlements": {
+   "isPremium": false,
+   "childrenLimit": 8,
+   "earlyAccessHours": 0,
+   "prioritySupport": false
+  },
+  "membership": null,
+  "coupon": null,
+  "pendingPayment": null
+ }
+}
