@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:book_store_app/app/data/repositories/notifications_repository.dart';
 import 'package:book_store_app/app/notification/local_notification_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
+import 'package:book_store_app/app/routes/incoming_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -143,9 +144,17 @@ class FcmService {
 
       /// Called when a push notification is tapped from the background.
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        debugPrint("onMessageOpenedApp: ${message.data}");
+        IncomingLinks.handle(message.data['link']?.toString());
       });
     }
+  }
+
+  /// Cold start from a notification tap: queue its link (opened after splash).
+  static Future<void> handleLaunchMessage() async {
+    try {
+      final m = await FirebaseMessaging.instance.getInitialMessage();
+      IncomingLinks.handle(m?.data['link']?.toString());
+    } catch (_) {}
   }
 
   Future<Map<String, dynamic>?> getInitialMessage() async {

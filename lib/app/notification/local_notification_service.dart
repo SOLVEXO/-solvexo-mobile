@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:book_store_app/app/routes/incoming_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -77,10 +78,9 @@ class LocalNotificationService {
           );
 
           try {
-            // var notificationPayload = NotificationItem.fromJson(jsonMapNotification);
-            // debugPrint("onDidReceiveNotificationResponse: notificationPayload $notificationPayload");
-
-            // NavigationService.navigateFromNotification(notificationPayload);
+            // Android foreground pushes are re-shown locally with the FCM
+            // data as payload; a tap opens data.link.
+            IncomingLinks.handle(jsonMapNotification['link']?.toString());
           } catch (e) {
             debugPrint("Error parsing notification --> $e");
           }
@@ -88,6 +88,14 @@ class LocalNotificationService {
       },
       settings: initializationSettings,
     );
+    // Terminated app opened by tapping a local notification (Android).
+    try {
+      final launch = await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+      final payload = launch?.notificationResponse?.payload;
+      if ((launch?.didNotificationLaunchApp ?? false) && payload != null) {
+        IncomingLinks.handle((jsonDecode(payload) as Map)['link']?.toString());
+      }
+    } catch (_) {}
   }
 
   void removeNotification(int id) {

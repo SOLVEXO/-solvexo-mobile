@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:book_store_app/app/notification/fcm_service.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/notification/fcm_background_handler.dart';
 import 'package:book_store_app/app/notification/local_notification_service.dart';
@@ -33,6 +36,8 @@ void main() async {
   // Must be registered before runApp() — see the handler's own doc comment
   // for why it has to be a top-level function.
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // Cold start from a notification tap: its data.link opens after splash.
+  unawaited(FcmService.handleLaunchMessage());
   // Creates the Android notification channel + initializes the local-
   // notifications plugin so FcmService's foreground-message listener can
   // actually display something once it starts running.

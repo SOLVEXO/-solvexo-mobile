@@ -7,7 +7,8 @@ import 'package:get/get.dart';
 /// fall back (e.g. stay on the inbox). Never throws.
 ///
 /// Supported (docs §10): /product/:slug, /shop/:slug, /course/:slug, /certificates/:code, /wishlist/shared/:token, /account/orders[/:id],
-/// /account/downloads, /account/dashboard?openChat=1, /wishlist,
+/// /account/downloads, /account/dashboard?openChat=1, /account/reviews,
+/// /account/premium, /cart, /store/:storeId/<area> (seller), /wishlist,
 /// /notifications, /messages, /?category=, /?campaign=, /?search=.
 class DeepLinkRouter {
   DeepLinkRouter._();
@@ -97,6 +98,15 @@ class DeepLinkRouter {
             case 'children':
               Get.toNamed(Routes.children);
               return true;
+            case 'reviews':
+              Get.toNamed(Routes.myReviews);
+              return true;
+            case 'premium':
+              Get.toNamed(Routes.premium);
+              return true;
+            case 'referrals':
+              Get.toNamed(Routes.referrals);
+              return true;
             case 'addresses':
               Get.toNamed(Routes.addressView);
               return true;
@@ -108,6 +118,24 @@ class DeepLinkRouter {
               }
               return true;
           }
+        case 'cart':
+          Get.toNamed(Routes.cartView);
+          return true;
+        // Seller notification links: /store/:storeId/<area>.
+        case 'store':
+          final area = seg.length > 2 ? seg[2] : 'dashboard';
+          final route = switch (area) {
+            'orders' => Routes.sellerOrders,
+            'returns' => Routes.sellerReturns,
+            'products' || 'categories' => Routes.sellerProducts,
+            'inventory' => Routes.sellerInventory,
+            'marketing' => Routes.sellerPromotions,
+            'plan-billing' => Routes.sellerPlatformPlan,
+            'ai' => Routes.sellerAiStudio,
+            _ => Routes.sellerHome,
+          };
+          Get.toNamed(route);
+          return true;
         default:
           return false;
       }

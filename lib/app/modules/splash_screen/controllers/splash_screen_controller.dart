@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:book_store_app/app/notification/fcm_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:flutter/material.dart';
+import 'package:book_store_app/app/routes/incoming_links.dart';
 import 'package:get/get.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 
@@ -116,6 +117,7 @@ class SplashScreenController extends GetxController
       // carousel once, then it's guest-mode Home from here on. Never a login wall.
       final hasSeenOnboarding = await AppPreferences.getHasSeenOnboarding();
       Get.offAllNamed(hasSeenOnboarding ? Routes.mainHome : Routes.onboarding);
+      if (hasSeenOnboarding) IncomingLinks.markReady();
       return;
     }
 
@@ -133,6 +135,8 @@ class SplashScreenController extends GetxController
       default:
         Get.offAllNamed(Routes.mainHome);
     }
+    // Open a link that started the app (notification tap / app link).
+    IncomingLinks.markReady();
   }
 
   @override
