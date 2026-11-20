@@ -20,6 +20,12 @@ class RefundRequestModel {
   final String? reviewedBy;
   final DateTime? reviewedAt;
   final String? resolutionNotes;
+  final String? reasonCode;
+  final String? note;
+  final List<String> evidenceImages;
+
+  /// [{status, at, by, byRole, note?}] (refund-request history, newest last).
+  final List<Map<String, dynamic>> history;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -41,6 +47,10 @@ class RefundRequestModel {
     this.reviewedBy,
     this.reviewedAt,
     this.resolutionNotes,
+    this.reasonCode,
+    this.note,
+    this.evidenceImages = const [],
+    this.history = const [],
     required this.createdAt,
     this.updatedAt,
   });
@@ -55,6 +65,10 @@ class RefundRequestModel {
       requestedBy: json['requestedBy'] as String? ?? '',
       requestedByRole: json['requestedByRole'] as String? ?? '',
       reason: json['reason'] as String? ?? '',
+      reasonCode: json['reasonCode'] as String?,
+      note: json['note'] as String?,
+      evidenceImages: (json['evidenceImages'] as List?)?.map((e) => '$e').toList() ?? const [],
+      history: [for (final h in (json['history'] as List? ?? const [])) if (h is Map) Map<String, dynamic>.from(h)],
       status: json['status'] as String? ?? 'pending',
       buyerRefundAmount: (json['buyerRefundAmount'] as num?)?.toDouble(),
       buyerRefundCurrency: json['buyerRefundCurrency'] as String?,

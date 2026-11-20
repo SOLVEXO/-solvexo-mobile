@@ -109,22 +109,27 @@ class OrderRepository {
     }
   }
 
-  /// Request a return/refund for a delivered order —
-  /// POST /api/orders/return-request/:orderId, body: { reason, itemIds? }
+  /// Send physical items back (item return) -
+  /// POST /api/orders/return-request/:orderId {itemIds, reasonCode, note,
+  /// evidenceImages}: same reason list and rules as refund requests
+  /// (5adba44 orders.service.ts returnRequest); delivered items only.
   Future<bool> requestReturn({
     required String orderId,
-    required String reason,
-    List<String>? itemIds,
+    required List<String> itemIds,
+    required String reasonCode,
+    required String note,
+    List<String> evidenceImages = const [],
   }) async {
     try {
-      debugPrint('🔄 Requesting return for order: $orderId');
-
       final response = await _baseClient.post(
         ApiConstants.returnRequest(orderId),
         data: {
-          'reason': reason,
-          if (itemIds != null && itemIds.isNotEmpty) 'itemIds': itemIds,
+          'itemIds': itemIds,
+          'reasonCode': reasonCode,
+          'note': note,
+          if (evidenceImages.isNotEmpty) 'evidenceImages': evidenceImages,
         },
+        requiresAuth: true,
       );
 
       debugPrint('✅ Return Request Response: ${response.data}');

@@ -1,454 +1,226 @@
-import 'package:book_store_app/app/components/buttons/app_button.dart';
-import 'package:book_store_app/app/components/common_image_view.dart';
-import 'package:book_store_app/app/components/custom_app_bar_two.dart';
-import 'package:book_store_app/app/components/custom_text.dart';
-import 'package:book_store_app/app/components/custom_text_field.dart';
-import 'package:book_store_app/app/components/recent_order.dart';
-import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/app/components/app_image_picker.dart';
+import 'package:book_store_app/app/components/buyer_states.dart';
 import 'package:book_store_app/app/data/models/refund_request_model.dart';
+import 'package:book_store_app/app/data/models/return_reasons.dart';
 import 'package:book_store_app/app/modules/myorders/models/order_item_model.dart';
 import 'package:book_store_app/app/modules/refund_request/controllers/refund_request_controller.dart';
-import 'package:book_store_app/config/resources/app_colors.dart';
-import 'package:book_store_app/config/resources/app_icons.dart';
-import 'package:book_store_app/utils/app_font_size.dart';
-import 'package:book_store_app/utils/currency_formatter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
+/// Returns & refunds (B5): your requests with status + timeline (and the
+/// seller's reject reason), then the form. Buyer screen: .tr, RTL-safe.
 class RefundRequestView extends StatelessWidget {
   RefundRequestView({super.key});
   final controller = Get.put(RefundRequestController());
 
   @override
   Widget build(BuildContext context) {
+    final c = controller;
     return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: CustomAppBarTwo(title: "Request Refund"),
+      appBar: AppBar(title: Text('Returns & refunds'.tr)),
       body: Obx(() {
-        final store = controller.selectedStore.value;
-        final showPicker = store == null || !controller.itemsConfirmed.value;
-
-        return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Container(
-            color: AppColors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// Order Header
-                RecentOrder(orders: controller.order),
-
-                const SizedBox(height: 20),
-
-                if (controller.eligibleStores.isEmpty)
-                  const CustomText(
-                    text:
-                        "No items on this order are eligible for a refund request.",
-                    fontSize: AppFontSize.small,
-                    color: AppColors.grey,
-                  )
-                else if (store == null)
-                  _storePicker()
-                else if (!controller.itemsConfirmed.value)
-                  _itemPicker(store)
-                else if (controller.selectedIssue.value == null)
-                  _issueList()
-                else
-                  _detailsSection(),
-
-                if (showPicker) ...[
-                  const SizedBox(height: 20),
-                  _continueButton(store),
-                ] else ...[
-                  const SizedBox(height: 20),
-                  Obx(
-                    () => AppButton(
-                      iconWidget: controller.isLoading.value
-                          ? const CircularProgressIndicator(
-                              color: AppColors.background,
-                            )
-                          : const SizedBox(),
-                      label: controller.isLoading.value
-                          ? "Submitting"
-                          : "Submit Request",
-                      onPressed: controller.canContinue
-                          ? controller.submitRefund
-                          : null,
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 28),
-                _statusSection(),
-              ],
-            ),
-          ),
-        );
+        if (c.isLoadingStatuses.value) return const BuyerSkeleton(rows: 3, rowHeight: 100);
+        return ListView(padding: const EdgeInsets.all(16), children: [
+          Text('#${c.order.orderNumber}', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          if (c.statusFailed.value) BuyerError(message: 'Could not load your requests.'.tr, onRetry: c.loadExistingRequests),
+          for (final r in c.existingRequests) _RequestCard(request: r),
+          for (final i in c.itemReturns) _ItemReturnCard(item: i),
+          const SizedBox(height: 8),
+          if (c.eligibleStores.isEmpty)
+            BuyerEmpty(icon: Icons.assignment_return_outlined, title: 'Nothing in this order can be returned now'.tr,
+                body: 'Items can be returned or refunded after they are delivered.'.tr)
+          else
+            const _Form(),
+        ]);
       }),
     );
   }
+}
 
-  Widget _continueButton(OrderStore? store) {
-    if (store == null) return const SizedBox.shrink();
-    return Obx(
-      () => AppButton(
-        iconWidget: const SizedBox(),
-        label: "Continue",
-        onPressed: controller.canConfirmItems ? controller.confirmItems : null,
+String _statusLabel(String s) => switch (s) {
+      'pending' || 'requested' => 'Waiting for the seller'.tr,
+      'approved' => 'Approved'.tr,
+      'rejected' => 'Rejected'.tr,
+      'item_received' => 'Item received back'.tr,
+      'replacement_sent' => 'Replacement sent'.tr,
+      _ => s,
+    };
+
+class _RequestCard extends StatelessWidget {
+  const _RequestCard({required this.request});
+  final RefundRequestModel request;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = request;
+    final t = Theme.of(context);
+    final df = DateFormat('d MMM y, h:mm a');
+    return Card(
+      key: Key('refund_${r.id}'),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text('Refund request'.tr, style: t.textTheme.titleSmall)),
+            Chip(label: Text(_statusLabel(r.status)), visualDensity: VisualDensity.compact),
+          ]),
+          Text(returnReasonLabel(r.reasonCode, r.reason)),
+          if ((r.note ?? '').isNotEmpty) Text(r.note!, style: t.textTheme.bodySmall),
+          if (r.isRejected && (r.resolutionNotes ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text('${'Seller said'.tr}: ${r.resolutionNotes}', key: const Key('sellerRejectReason'), style: TextStyle(color: t.colorScheme.error)),
+            ),
+          if (r.history.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            for (final h in r.history)
+              Row(children: [
+                const Icon(Icons.circle, size: 8),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text([
+                    _statusLabel('${h['status']}'),
+                    if (DateTime.tryParse('${h['at']}') != null) df.format(DateTime.parse('${h['at']}').toLocal()),
+                    if ((h['note'] ?? '').toString().isNotEmpty) '${h['note']}',
+                  ].join(' · '), style: t.textTheme.bodySmall),
+                ),
+              ]),
+          ],
+        ]),
       ),
     );
-  }
-
-  Widget _storePicker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomText(
-          text: "Which store's items would you like to return?",
-          fontWeight: FontWeight.w800,
-          fontSize: AppFontSize.regular,
-        ),
-        const SizedBox(height: 12),
-        ...controller.eligibleStores.map(
-          (store) => GestureDetector(
-            onTap: () => controller.selectStore(store),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: CustomText(
-                      text: store.sellerName ?? 'Store',
-                      fontWeight: FontWeight.w600,
-                      fontSize: AppFontSize.small,
-                    ),
-                  ),
-                  SvgIcon(assetName: AppIcons.chevronRight, size: 18),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _itemPicker(OrderStore store) {
-    final items = controller.returnableItems;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: CustomText(
-                text: "Which items would you like to return?",
-                fontWeight: FontWeight.w800,
-                fontSize: AppFontSize.regular,
-              ),
-            ),
-            if (controller.eligibleStores.length > 1)
-              GestureDetector(
-                onTap: controller.changeStore,
-                child: CustomText(
-                  text: "Change store",
-                  fontSize: AppFontSize.tiny,
-                  color: AppColors.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        if (items.isEmpty)
-          const CustomText(
-            text:
-                "No items from this store are currently eligible for a refund.",
-            fontSize: AppFontSize.small,
-            color: AppColors.grey,
-          )
-        else
-          ...items.map((item) => _itemTile(item)),
-      ],
-    );
-  }
-
-  Widget _itemTile(OrderItem item) {
-    return Obx(() {
-      final selected = controller.selectedItemIds.contains(item.itemId);
-      return GestureDetector(
-        onTap: () => controller.toggleItem(item.itemId),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColors.primaryColor.withOpacity(0.06)
-                : AppColors.background,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected ? AppColors.primaryColor : AppColors.transparent,
-            ),
-          ),
-          child: Row(
-            children: [
-              if (item.image != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: CommonImageView(
-                    url: item.image,
-                    width: 44,
-                    height: 44,
-                  ),
-                ),
-              if (item.image != null) const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomText(
-                      text: item.name,
-                      fontWeight: FontWeight.w600,
-                      fontSize: AppFontSize.small2,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    CustomText(
-                      text:
-                          'Qty ${item.quantity} · \$${item.totalPrice.toStringAsFixed(2)}',
-                      fontSize: AppFontSize.tiny,
-                      color: AppColors.grey,
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                selected ? Icons.check_box : Icons.check_box_outline_blank,
-                color: selected ? AppColors.primaryColor : AppColors.grey,
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
-  Widget _issueList() {
-    return Obx(
-      () => Container(
-        color: AppColors.white,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomText(
-              text: "What is the issue with your item?",
-              fontWeight: FontWeight.w800,
-              fontSize: AppFontSize.regular,
-            ),
-            ...controller.issues.entries.map((e) {
-              final selected = controller.selectedIssue.value == e.key;
-              return GestureDetector(
-                onTap: () => controller.selectedIssue.value = e.key,
-                child: Container(
-                  padding: const EdgeInsets.only(top: 25.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: CustomText(
-                          text: e.value,
-                          fontWeight: FontWeight.w600,
-                          fontSize: AppFontSize.small,
-                          color: AppColors.gray600,
-                        ),
-                      ),
-                      Icon(
-                        selected
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        size: 27,
-                        color: selected
-                            ? AppColors.primaryColor
-                            : AppColors.grey,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _detailsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomText(
-          text: "What is the issue with your item?",
-          fontWeight: FontWeight.w800,
-          fontSize: AppFontSize.regular,
-        ),
-        Obx(
-          () => ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: CustomText(
-              text: controller.issues[controller.selectedIssue.value] ?? '',
-              fontWeight: FontWeight.w500,
-              fontSize: AppFontSize.small,
-            ),
-            trailing: SvgIcon(assetName: AppIcons.chevronRight, size: 20),
-            onTap: () => controller.selectedIssue.value = null,
-          ),
-        ),
-        const SizedBox(height: 8),
-
-        /// Message
-        const CustomText(
-          text: "Additional details (optional)",
-          fontWeight: FontWeight.w600,
-          fontSize: AppFontSize.small,
-        ),
-        const SizedBox(height: 8),
-        CustomTextField(
-          controller: controller.messageController,
-          hintText: "Tell the seller more about the issue",
-          maxLines: 4,
-          isborder: true,
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ],
-    );
-  }
-
-  Widget _statusSection() {
-    return Obx(() {
-      if (controller.isLoadingStatuses.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      final requests = controller.existingRequests;
-      if (requests.isEmpty) return const SizedBox.shrink();
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Divider(height: 1, color: AppColors.lightGrey2),
-          const SizedBox(height: 16),
-          CustomText(
-            text: "Your refund requests",
-            fontWeight: FontWeight.w800,
-            fontSize: AppFontSize.regular,
-          ),
-          const SizedBox(height: 12),
-          ...requests.map((r) => _statusTile(r)),
-        ],
-      );
-    });
-  }
-
-  Widget _statusTile(RefundRequestModel r) {
-    final _StatusStyle style = _resolveStatusStyle(r.status);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: CustomText(
-                  text: r.reason,
-                  fontWeight: FontWeight.w600,
-                  fontSize: AppFontSize.small2,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: style.bg,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: CustomText(
-                  text: style.label,
-                  fontSize: AppFontSize.tiny,
-                  fontWeight: FontWeight.w600,
-                  color: style.fg,
-                ),
-              ),
-            ],
-          ),
-          if (r.isApproved && r.buyerRefundAmount != null) ...[
-            const SizedBox(height: 6),
-            CustomText(
-              text:
-                  'Refunded: ${CurrencyFormatter.amount(r.buyerRefundAmount!, r.buyerRefundCurrency)}',
-              fontSize: AppFontSize.verySmall,
-              color: AppColors.darkGreen,
-              fontWeight: FontWeight.w600,
-            ),
-          ],
-          if (r.isRejected &&
-              r.resolutionNotes != null &&
-              r.resolutionNotes!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            CustomText(
-              text: 'Seller note: ${r.resolutionNotes}',
-              fontSize: AppFontSize.verySmall,
-              color: AppColors.grey,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  _StatusStyle _resolveStatusStyle(String status) {
-    switch (status) {
-      case 'approved':
-        return const _StatusStyle(
-          'Approved',
-          AppColors.darkGreen,
-          AppColors.greenContainerInnerColor,
-        );
-      case 'rejected':
-        return const _StatusStyle(
-          'Rejected',
-          AppColors.red,
-          AppColors.lightRed,
-        );
-      default:
-        return const _StatusStyle(
-          'Pending',
-          AppColors.amberDark,
-          AppColors.yellowBg,
-        );
-    }
   }
 }
 
-class _StatusStyle {
-  final String label;
-  final Color fg;
-  final Color bg;
-  const _StatusStyle(this.label, this.fg, this.bg);
+class _ItemReturnCard extends StatelessWidget {
+  const _ItemReturnCard({required this.item});
+  final OrderItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        minTileHeight: 56,
+        title: Text(item.name),
+        subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('${'Return'.tr}: ${_statusLabel(item.returnStatus)}'),
+          if (item.returnStatus == 'rejected' && (item.returnRejectReason ?? '').isNotEmpty)
+            Text('${'Seller said'.tr}: ${item.returnRejectReason}', style: TextStyle(color: t.colorScheme.error)),
+        ]),
+      ),
+    );
+  }
+}
+
+class _Form extends GetView<RefundRequestController> {
+  const _Form();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.find<RefundRequestController>();
+    final t = Theme.of(context);
+    return Obx(() => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text('Report a problem'.tr, style: t.textTheme.titleMedium),
+          if (c.eligibleStores.length > 1) ...[
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: c.selectedStore.value?.sellerOrderId,
+              decoration: InputDecoration(labelText: 'Seller'.tr, border: const OutlineInputBorder()),
+              items: [for (final s in c.eligibleStores) DropdownMenuItem(value: s.sellerOrderId, child: Text(s.sellerName ?? s.storeId))],
+              onChanged: (v) => c.selectStore(c.eligibleStores.firstWhere((s) => s.sellerOrderId == v)),
+            ),
+          ],
+          const SizedBox(height: 8),
+          for (final i in c.returnableItems)
+            CheckboxListTile(
+              key: Key('returnItem_${i.itemId}'),
+              contentPadding: EdgeInsets.zero,
+              value: c.selectedItemIds.contains(i.itemId),
+              onChanged: (_) => c.toggleItem(i.itemId),
+              title: Text(i.name),
+              subtitle: Text(i.type == 'digital' ? 'Digital'.tr : 'Physical'.tr),
+            ),
+          if (c.errors['items'] != null) Text(c.errors['items']!, style: TextStyle(color: t.colorScheme.error)),
+          if (c.canSendBack) ...[
+            const SizedBox(height: 8),
+            SegmentedButton<String>(
+              key: const Key('returnKind'),
+              segments: [
+                ButtonSegment(value: 'return', label: Text('Return the item'.tr)),
+                ButtonSegment(value: 'refund', label: Text('Refund only'.tr)),
+              ],
+              selected: {c.kind.value},
+              onSelectionChanged: (v) => c.kind.value = v.first,
+            ),
+          ],
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: const Key('returnReason'),
+            initialValue: c.reasonCode.value,
+            isExpanded: true,
+            decoration: InputDecoration(labelText: '${'Reason'.tr} *', errorText: c.errors['reason'], border: const OutlineInputBorder()),
+            items: [for (final r in c.reasons) DropdownMenuItem(value: r.$1, child: Text(r.$2.tr))],
+            onChanged: (v) {
+              c.reasonCode.value = v;
+              c.errors.remove('reason');
+            },
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            key: const Key('returnNote'),
+            controller: c.noteController,
+            minLines: 3,
+            maxLines: 6,
+            maxLength: ReturnRules.noteMax,
+            onChanged: (_) => c.errors.remove('note'),
+            decoration: InputDecoration(
+              labelText: '${'Describe the problem'.tr} *',
+              helperText: '${ReturnRules.noteMin}-${ReturnRules.noteMax} ${'characters'.tr}',
+              errorText: c.errors['note'],
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          if (!c.selectionIsDigital) ...[
+            Text('${'Photos'.tr} (${c.photos.length}/${ReturnRules.maxPhotos})', style: t.textTheme.titleSmall),
+            const SizedBox(height: 6),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final p in c.photos)
+                Stack(children: [
+                  ClipRRect(borderRadius: BorderRadius.circular(8), child: CachedNetworkImage(imageUrl: p, width: 72, height: 72, fit: BoxFit.cover)),
+                  PositionedDirectional(
+                    top: 0,
+                    end: 0,
+                    child: InkWell(onTap: () => c.photos.remove(p), child: const CircleAvatar(radius: 12, child: Icon(Icons.close, size: 14))),
+                  ),
+                ]),
+              if (c.photos.length < ReturnRules.maxPhotos)
+                InkWell(
+                  key: const Key('addReturnPhoto'),
+                  onTap: c.uploading.value ? null : () => AppImagePicker.show(onPicked: c.addPhoto),
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(border: Border.all(color: t.colorScheme.outline), borderRadius: BorderRadius.circular(8)),
+                    child: c.uploading.value ? const Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.add_a_photo_outlined),
+                  ),
+                ),
+            ]),
+          ],
+          const SizedBox(height: 16),
+          FilledButton(
+            key: const Key('returnSubmit'),
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            onPressed: c.isLoading.value || c.uploading.value ? null : c.submit,
+            child: c.isLoading.value
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : Text(c.kind.value == 'return' && c.canSendBack ? 'Send return request'.tr : 'Send refund request'.tr),
+          ),
+        ]));
+  }
 }

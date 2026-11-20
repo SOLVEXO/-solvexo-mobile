@@ -38,7 +38,7 @@ class CustomActionButtons extends StatelessWidget {
             Expanded(
               child: DangerButton(
                 onPressed: () => Get.toNamed(Routes.refundRequestView, arguments: order),
-                label: "Request Refund",
+                label: "Return or refund".tr,
               ),
             ),
           ],

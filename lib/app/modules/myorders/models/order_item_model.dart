@@ -10,6 +10,7 @@ class OrderItem {
   final double totalPrice;
   final String status;
   final String returnStatus;
+  final String? returnRejectReason;
   final bool isReviewed;
 
   /// Server-decided and order-scoped: would a review sent with THIS order's
@@ -34,6 +35,7 @@ class OrderItem {
     required this.totalPrice,
     required this.status,
     this.returnStatus = 'none',
+    this.returnRejectReason,
     this.isReviewed = false,
     this.canReview = false,
     this.sellerName,
@@ -53,6 +55,7 @@ class OrderItem {
       totalPrice: (json['totalPrice'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? 'pending',
       returnStatus: json['returnStatus'] as String? ?? 'none',
+      returnRejectReason: json['returnRejectReason'] as String?,
       isReviewed: json['isReviewed'] as bool? ?? false,
       canReview: json['canReview'] as bool? ?? false,
     );
@@ -71,6 +74,7 @@ class OrderItem {
         totalPrice: totalPrice,
         status: status,
         returnStatus: returnStatus,
+        returnRejectReason: returnRejectReason,
         isReviewed: isReviewed,
         canReview: canReview,
         sellerName: sellerName,

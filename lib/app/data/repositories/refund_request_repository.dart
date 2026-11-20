@@ -24,16 +24,23 @@ class RefundRequestRepository {
     required String orderId,
     required String sellerOrderId,
     required List<String> itemIds,
-    required String reason,
+    required String reasonCode,
+    required String note,
+    List<String> evidenceImages = const [],
   }) async {
     try {
+      // CreateRefundRequestDto (5adba44): reasonCode + note (20-1000) +
+      // up to 4 evidenceImages (uploaded image links); `reason` defaults to
+      // the code's label on the server.
       final response = await _client.post(
         ApiConstants.createRefundRequest,
         data: {
           'orderId': orderId,
           'sellerOrderId': sellerOrderId,
           'itemIds': itemIds,
-          'reason': reason,
+          'reasonCode': reasonCode,
+          'note': note,
+          if (evidenceImages.isNotEmpty) 'evidenceImages': evidenceImages,
         },
         headers: _idempotencyHeader,
         requiresAuth: true,
