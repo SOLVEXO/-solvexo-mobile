@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 /// URL) into an in-app route. Unknown paths return `false` so the caller can
 /// fall back (e.g. stay on the inbox). Never throws.
 ///
-/// Supported (docs §10): /product/:slug, /shop/:slug, /account/orders[/:id],
+/// Supported (docs §10): /product/:slug, /shop/:slug, /course/:slug, /account/orders[/:id],
 /// /account/downloads, /account/dashboard?openChat=1, /wishlist,
 /// /notifications, /messages, /?category=, /?campaign=, /?search=.
 class DeepLinkRouter {
@@ -39,6 +39,12 @@ class DeepLinkRouter {
           if (seg.length > 1) {
             Get.toNamed(Routes.productDetailsView,
                 arguments: {'productId': seg[1]});
+            return true;
+          }
+          return false;
+        case 'course':
+          if (seg.length > 1) {
+            Get.toNamed(Routes.coursePlayer, arguments: {'slug': seg[1]});
             return true;
           }
           return false;

@@ -1,0 +1,58 @@
+{
+ "success": true,
+ "data": {
+  "product": {
+   "_id": "6ae33f4c3da5d8d7d7033bd4",
+   "name": "Basic Computer Skills Course",
+   "slug": "basic-computer-skills-course",
+   "image": "https://res.cloudinary.com/riaqwfoz/image/upload/v1793341971/uploads/images/w4scijrzabhc4tcvj0vi.jpg",
+   "storeName": "Ahad Learning Studio",
+   "storeSlug": "ahad-learning-studio"
+  },
+  "sections": [
+   {
+    "_id": "da67c48e70f3",
+    "title": "Getting started",
+    "lessons": [
+     {
+      "_id": "7050ecba2df2",
+      "title": "Lesson 1",
+      "type": "video",
+      "durationMinutes": 10
+     },
+     {
+      "_id": "b593bb5dbe14",
+      "title": "Lesson 2",
+      "type": "video",
+      "durationMinutes": 12
+     }
+    ]
+   }
+  ],
+  "certificateEnabled": true,
+  "certificateDetails": {
+   "fullName": "Abdul Ahad Siddiqui",
+   "guardianName": "Muhammad Siraj",
+   "institute": "Deenway School",
+   "city": "karachi",
+   "country": "Pakistan"
+  },
+  "certificateDetailsRequired": false,
+  "outcomes": [],
+  "instructor": {
+   "name": "Muhammad Ahsan",
+   "bio": ""
+  },
+  "accessExpiresAt": "2026-11-29T07:41:22.733Z",
+  "progress": {
+   "completedLessonIds": [
+    "7050ecba2df2",
+    "b593bb5dbe14"
+   ],
+   "quizScores": {},
+   "lastLessonId": "b593bb5dbe14",
+   "completedAt": "2026-10-30T07:54:17.693Z",
+   "certificateCode": "EDU-8C00AFD7"
+  }
+ }
+}

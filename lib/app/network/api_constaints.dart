@@ -83,6 +83,13 @@ class ApiConstants {
 
   // ── Library / courses (docs §5.9, §5.10) ───────────────────────────────
   static const String myCourses = "$apiPrefix/courses/mine";
+  // Buyer course player + certificates (B1/B2, backend 5adba44).
+  static String courseLearn(String idOrSlug) => "$apiPrefix/courses/learn/$idOrSlug";
+  static String courseLesson(String idOrSlug, String lessonId) => "$apiPrefix/courses/learn/$idOrSlug/lessons/$lessonId";
+  static String courseLessonComplete(String idOrSlug, String lessonId) =>
+      "$apiPrefix/courses/learn/$idOrSlug/lessons/$lessonId/complete";
+  static String courseCertificateDetails(String idOrSlug) => "$apiPrefix/courses/learn/$idOrSlug/certificate-details";
+  static String courseCertificate(String code) => "$apiPrefix/courses/certificates/${Uri.encodeComponent(code)}";
   // Every purchased digital item, one row per product (backend 5adba44).
   static const String myLibrary = "$apiPrefix/orders/my-library";
   // Seller course builder + students (docs 6.3 / 6.9; checklist #14).

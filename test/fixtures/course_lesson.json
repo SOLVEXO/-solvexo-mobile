@@ -1,0 +1,20 @@
+{
+ "success": true,
+ "data": {
+  "_id": "7050ecba2df2",
+  "title": "Lesson 1",
+  "type": "video",
+  "text": "",
+  "durationMinutes": 10,
+  "subtitles": [],
+  "file": {
+   "name": "7189833-uhd_2160_3840_25fps.mp4",
+   "mimeType": "video/mp4",
+   "url": "https://s3.us-east-005.backblazeb2.com/Edudeen.files/private/digital-products/fe9f3237-4a09-4e44-a676-53ca71f5f5b9-7189833-uhd_2160_3840_25fps.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=00585c8f7459fee0000000001%2F20261120%2Fus-east-005%2Fs3%2Faws4_request&X-Amz-Date=20261120T063428Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&response-content-disposition=inline&X-Amz-Signature=a986b7a51ed7b62708e76da206c4936a922c1b21b0ee<phone>e2a3b95af"
+  },
+  "media": {
+   "kind": "file",
+   "url": "https://s3.us-east-005.backblazeb2.com/Edudeen.files/private/digital-products/fe9f3237-4a09-4e44-a676-53ca71f5f5b9-7189833-uhd_2160_3840_25fps.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=00585c8f7459fee0000000001%2F20261120%2Fus-east-005%2Fs3%2Faws4_request&X-Amz-Date=20261120T063428Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&response-content-disposition=inline&X-Amz-Signature=a986b7a51ed7b62708e76da206c4936a922c1b21b0ee<phone>e2a3b95af"
+  }
+ }
+}

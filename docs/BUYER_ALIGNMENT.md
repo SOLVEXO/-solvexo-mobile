@@ -8,7 +8,7 @@ money only from the server.
 
 ## Items
 
-1. [ ] **B1 Course player** (docs §5.10, §7). Backend `src/classroom`
+1. [x] **B1 Course player** (docs §5.10, §7). Backend `src/classroom`
    (`classroom.controllers.ts` `api/courses`):
    - `GET /api/courses/learn/:idOrSlug` (auth) -> `{product{_id,name,slug,
      image,storeName,storeSlug}, sections[{_id,title,lessons[{_id,title,

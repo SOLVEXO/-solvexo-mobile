@@ -4,7 +4,6 @@ import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/modules/library/controllers/library_controller.dart';
 import 'package:book_store_app/app/modules/library/models/library_models.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
-import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/core/theme/base_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/core/widgets/base_empty_view.dart';
@@ -12,7 +11,6 @@ import 'package:book_store_app/core/widgets/base_error_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Library tab (docs §5.9): Files | Courses, each with loading skeleton,
 /// error + Retry, empty and signed-out states.
@@ -363,10 +361,7 @@ class _CoursesTab extends StatelessWidget {
 Future<void> _openCourse(LibraryCourse course) async {
   final slug = course.slug;
   if (slug == null) return;
-  await launchUrl(
-    Uri.parse(AppConfig.web('/course/$slug')),
-    mode: LaunchMode.inAppBrowserView,
-  );
+  await Get.toNamed(Routes.coursePlayer, arguments: {'slug': slug});
 }
 
 class _ResumeCard extends StatelessWidget {
