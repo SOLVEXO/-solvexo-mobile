@@ -90,6 +90,9 @@ class DeepLinkRouter {
             case 'wishlist':
               Get.toNamed(Routes.WISHLIST);
               return true;
+            case 'children':
+              Get.toNamed(Routes.children);
+              return true;
             case 'addresses':
               Get.toNamed(Routes.addressView);
               return true;

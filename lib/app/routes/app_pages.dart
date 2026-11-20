@@ -136,6 +136,8 @@ import '../modules/seller_activity_log/bindings/seller_activity_log_binding.dart
 import '../modules/seller_activity_log/views/seller_activity_log_view.dart';
 import '../modules/seller_store_banners/bindings/seller_store_banners_binding.dart';
 import '../modules/seller_store_banners/views/seller_store_banners_view.dart';
+import '../modules/children/bindings/children_binding.dart';
+import '../modules/children/views/children_view.dart';
 import '../modules/premium/bindings/premium_binding.dart';
 import '../modules/premium/views/premium_view.dart';
 import '../modules/certificate/bindings/certificate_binding.dart';
@@ -282,6 +284,11 @@ class AppPages {
       name: Routes.sellerStoreBanners,
       page: () => SellerStoreBannersView(),
       binding: SellerStoreBannersBinding(),
+    ),
+    GetPage(
+      name: Routes.children,
+      page: () => const ChildrenView(),
+      binding: ChildrenBinding(),
     ),
     GetPage(
       name: Routes.premium,

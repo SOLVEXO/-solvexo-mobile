@@ -92,6 +92,9 @@ class ApiConstants {
   static String courseCertificate(String code) => "$apiPrefix/courses/certificates/${Uri.encodeComponent(code)}";
   // Edudeen Premium (B3).
   static const String premiumPlans = "$apiPrefix/premium/plans";
+  // My children (B4): GET / POST, PATCH / DELETE :id.
+  static const String children = "$apiPrefix/children";
+  static String child(String id) => "$apiPrefix/children/$id";
   static const String premiumMe = "$apiPrefix/premium/me";
   static const String premiumBankDetails = "$apiPrefix/premium/bank-details";
   static const String premiumSubscribe = "$apiPrefix/premium/subscribe";
@@ -143,9 +146,12 @@ class ApiConstants {
     double? maxPrice,
     double? minRating,
     String? sortBy,
+    String? classLevel,
   }) {
     String url = '$apiPrefix/products/products-by-category';
     List<String> queryParams = [];
+    // `class` = a class slug (class-3, o-level, ...): products covering it.
+    if (classLevel != null && classLevel.isNotEmpty) queryParams.add('class=$classLevel');
 
     if (categoryId != null && categoryId.isNotEmpty) {
       queryParams.add('id=$categoryId');

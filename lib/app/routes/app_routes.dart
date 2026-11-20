@@ -72,6 +72,7 @@ abstract class Routes {
   static const library = '/account/library';
   static const coursePlayer = '/course';
   static const premium = '/premium';
+  static const children = '/account/children';
   static const certificateView = '/certificates';
   static const certificateDetails = '/course/certificate-details';
   static const supportChat = '/support/chat';

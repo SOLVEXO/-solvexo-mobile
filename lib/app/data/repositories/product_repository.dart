@@ -20,9 +20,11 @@ class ProductRepository {
     double? maxPrice,
     double? minRating,
     String? sortBy,
+    String? classLevel,
   }) async {
     try {
       final url = ApiConstants.getProductsByCategory(
+        classLevel: classLevel,
         categoryId: categoryId,
         page: page,
         limit: limit,

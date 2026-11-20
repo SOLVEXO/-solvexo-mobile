@@ -31,6 +31,7 @@ import 'package:book_store_app/app/bottom_bar/widget/app_nav_bar.dart';
 import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/app/modules/children/views/for_your_child_rail.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -148,6 +149,9 @@ class HomeView extends BaseView<HomeController> {
                   // ── Active marketing campaigns ─────────────────────────
                   CampaignsSection(),
                   SizedBox(height: BaseSpacing.xs),
+
+                  // ── For your child (B4) ────────────────────────────────
+                  const ForYourChildRail(),
 
                   // ── Platform trust stats ──────────────────────────────
                   PlatformStatsStrip(),

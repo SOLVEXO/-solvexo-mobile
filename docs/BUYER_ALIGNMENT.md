@@ -47,7 +47,7 @@ money only from the server.
    `POST subscribe`, `POST payments/:paymentId/proof`, `POST cancel`,
    `POST resume` (buyer role `user`). Member prices: only where the API
    sends them; never computed on the device. App today: nothing.
-4. [ ] **B4 My children** (docs §5.11; `src/children`, `api/children`, role
+4. [x] **B4 My children** (docs §5.11; `src/children`, `api/children`, role
    `user`): `GET`, `POST`, `PATCH :id`, `DELETE :id`. Limit from
    entitlements (Premium raises it). App today: nothing.
 5. [ ] **B5 Returns & refunds form** (docs §2.7): `POST /api/refund-request`,
