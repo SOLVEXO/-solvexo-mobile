@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 /// URL) into an in-app route. Unknown paths return `false` so the caller can
 /// fall back (e.g. stay on the inbox). Never throws.
 ///
-/// Supported (docs §10): /product/:slug, /shop/:slug, /course/:slug, /certificates/:code, /account/orders[/:id],
+/// Supported (docs §10): /product/:slug, /shop/:slug, /course/:slug, /certificates/:code, /wishlist/shared/:token, /account/orders[/:id],
 /// /account/downloads, /account/dashboard?openChat=1, /wishlist,
 /// /notifications, /messages, /?category=, /?campaign=, /?search=.
 class DeepLinkRouter {
@@ -64,7 +64,11 @@ class DeepLinkRouter {
           }
           return false;
         case 'wishlist':
-          Get.toNamed(Routes.WISHLIST);
+          if (seg.length > 2 && seg[1] == 'shared') {
+            Get.toNamed(Routes.sharedWishlist, arguments: {'token': seg[2]});
+          } else {
+            Get.toNamed(Routes.WISHLIST);
+          }
           return true;
         case 'notifications':
           Get.toNamed(Routes.notifications);

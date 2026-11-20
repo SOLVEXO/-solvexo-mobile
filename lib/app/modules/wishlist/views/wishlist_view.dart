@@ -15,6 +15,7 @@ import 'package:book_store_app/core/base/base_view.dart';
 import 'package:book_store_app/core/widgets/base_empty_view.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/dimens.dart';
+import 'package:book_store_app/app/modules/retention/views/retention_views.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -34,6 +35,14 @@ class WishlistView extends BaseView<WishlistController> {
     return CustomAppBarTwo(
       title: 'Wishlist',
       actions: [
+        // Share link + alerts (B6).
+        IconButton(
+          key: const Key('wishlistShareMenu'),
+          tooltip: 'Share your wishlist'.tr,
+          style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
+          onPressed: WishlistShareSheet.open,
+          icon: const Icon(Icons.ios_share_rounded),
+        ),
         // Reactive fix: the original action icon was built once outside any
         // Obx, so it never updated after the list emptied/filled — wrapped
         // here so it now reflects live wishlist state.

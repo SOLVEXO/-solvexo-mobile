@@ -55,7 +55,7 @@ money only from the server.
    orders). One reason list, note 20-1000, up to 4 photos, status +
    timeline, seller's reject reason. App today: refund form exists
    (`refund_request_repository.dart`), to be aligned.
-6. [ ] **B6 Wishlist share + referrals** (`src/retention`):
+6. [x] **B6 Wishlist share + referrals** (`src/retention`):
    `api/wishlist-share` (`GET public/:token`, `GET mine`, `POST`,
    `DELETE`), `api/referrals` (`GET me`, `POST apply`). Wishlist alerts are
    notification types `wishlist_back_in_stock` / `wishlist_price_drop` in

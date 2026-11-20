@@ -94,6 +94,10 @@ class ApiConstants {
   static const String premiumPlans = "$apiPrefix/premium/plans";
   // My children (B4): GET / POST, PATCH / DELETE :id.
   static const String children = "$apiPrefix/children";
+  // Wishlist share + referrals (B6, src/retention).
+  static String wishlistShare(String path) => path.isEmpty ? "$apiPrefix/wishlist-share" : "$apiPrefix/wishlist-share/$path";
+  static const String referralsMe = "$apiPrefix/referrals/me";
+  static const String referralsApply = "$apiPrefix/referrals/apply";
   static String child(String id) => "$apiPrefix/children/$id";
   static const String premiumMe = "$apiPrefix/premium/me";
   static const String premiumBankDetails = "$apiPrefix/premium/bank-details";
