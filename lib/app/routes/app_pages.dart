@@ -137,6 +137,7 @@ import '../modules/seller_activity_log/views/seller_activity_log_view.dart';
 import '../modules/seller_store_banners/bindings/seller_store_banners_binding.dart';
 import '../modules/seller_store_banners/views/seller_store_banners_view.dart';
 import '../modules/retention/views/retention_views.dart';
+import '../modules/my_reviews/my_reviews_view.dart';
 import '../modules/children/bindings/children_binding.dart';
 import '../modules/children/views/children_view.dart';
 import '../modules/premium/bindings/premium_binding.dart';
@@ -288,6 +289,7 @@ class AppPages {
     ),
     GetPage(name: Routes.sharedWishlist, page: () => const SharedWishlistView()),
     GetPage(name: Routes.referrals, page: () => const ReferralsView()),
+    GetPage(name: Routes.myReviews, page: () => const MyReviewsView()),
     GetPage(
       name: Routes.children,
       page: () => const ChildrenView(),

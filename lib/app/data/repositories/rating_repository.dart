@@ -1,4 +1,5 @@
 import 'package:book_store_app/app/data/models/rating/review_model.dart';
+import 'package:book_store_app/app/data/repositories/contact_repository.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -26,8 +27,35 @@ class ReviewResult {
   final String? message;
 }
 
+/// AddReviewDto limits (rating.dto, backend 5adba44).
+class ReviewRules {
+  static const commentMax = 2000;
+  static const maxPhotos = 4;
+  static const usedFor = ['home', 'classroom', 'school'];
+  static String usedForLabel(String v) => switch (v) { 'home' => 'At home', 'classroom' => 'In class', _ => 'At school' };
+}
+
 class RatingRepository {
-  final BaseClient _client = BaseClient();
+  RatingRepository({BaseClient? client, ContactRepository? contact})
+      : _client = client ?? BaseClient(),
+        _contact = contact ?? ContactRepository();
+  final BaseClient _client;
+  final ContactRepository _contact;
+
+  /// No buyer report route exists (`POST rating/:id/report` and
+  /// `flag/:id` are seller/admin only), so a buyer's report goes to the
+  /// support inbox (POST /api/contact) with the review id. Backend issue B7.
+  Future<bool> reportReview({required String reviewId, required String productId, required String reason, String details = ''}) async {
+    final name = await AppPreferences.getUserName();
+    final email = await AppPreferences.getUserEmail();
+    if (email == null || email.isEmpty) return false;
+    return _contact.submit(
+      name: (name ?? '').isEmpty ? 'Buyer' : name!,
+      email: email,
+      topic: 'Report a review',
+      message: 'Review $reviewId on product $productId\nReason: $reason${details.trim().isEmpty ? '' : '\n${details.trim()}'}',
+    );
+  }
 
   /// Writes a new review, or — if the buyer already reviewed this product —
   /// appends an extra comment to it (mirrors the backend's `addReview`
@@ -43,6 +71,8 @@ class RatingRepository {
     double? rating,
     String? comment,
     bool? isAnonymous,
+    String? usedFor,
+    List<String> media = const [],
   }) async {
     try {
       final response = await _client.post(
@@ -54,6 +84,8 @@ class RatingRepository {
           if (rating != null) 'rating': rating,
           if (comment != null && comment.isNotEmpty) 'comment': comment,
           if (isAnonymous != null) 'isAnonymous': isAnonymous,
+          if (usedFor != null) 'usedFor': usedFor,
+          if (media.isNotEmpty) 'media': media,
         },
       );
       if (response.data['success'] == true) return const ReviewResult.ok();
@@ -104,6 +136,13 @@ class RatingRepository {
       debugPrint('❌ deleteReview error: $e');
       return false;
     }
+  }
+
+  /// GET /api/rating/my-reviews; throws so the screen can offer Retry.
+  Future<List<ReviewModel>> fetchMyReviews({int page = 1}) async {
+    final r = await _client.get(ApiConstants.myReviews, requiresAuth: true, queryParameters: {'page': page, 'limit': 50});
+    final data = r.data['data'] as Map<String, dynamic>;
+    return (data['reviews'] as List? ?? []).map((e) => ReviewModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<({List<ReviewModel> reviews, int total, int totalPages})> getMyReviews({int page = 1}) async {

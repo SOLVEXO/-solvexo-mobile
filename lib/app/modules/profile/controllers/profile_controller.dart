@@ -40,6 +40,11 @@ class ProfileController extends GetxController {
             onTap: () => Get.toNamed(Routes.library),
           ),
           SettingsTile(
+            icon: AppIcons.profileIcon,
+            title: 'My reviews'.tr,
+            onTap: () => Get.toNamed(Routes.myReviews),
+          ),
+          SettingsTile(
             icon: AppIcons.coinIcon,
             title: 'Invite friends'.tr,
             onTap: () => Get.toNamed(Routes.referrals),

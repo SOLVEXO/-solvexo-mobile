@@ -75,6 +75,7 @@ abstract class Routes {
   static const children = '/account/children';
   static const sharedWishlist = '/wishlist/shared';
   static const referrals = '/account/referrals';
+  static const myReviews = '/account/reviews';
   static const certificateView = '/certificates';
   static const certificateDetails = '/course/certificate-details';
   static const supportChat = '/support/chat';

@@ -62,12 +62,15 @@ money only from the server.
    the **`promotions`** preference category (`notification.types.ts:115-116`)
    - there is no separate alerts route; the toggle is that preference.
    App today: nothing for share / referrals.
-7. [ ] **B7 Reviews** (docs §5.8; `api/rating`): `POST add-review`,
+7. [x] **B7 Reviews** (docs §5.8; `api/rating`): `POST add-review`,
    `GET my-reviews`, `GET my-reviewed-ids`, `PATCH/DELETE :reviewId`,
    `POST :reviewId/helpful`, `GET product/:productId`. Note:
    `POST :reviewId/report` is **seller-only** (`@Roles('seller')`, line 180)
-   - a buyer report route must be checked (`flag/:reviewId`). App today:
-   add / my reviews constants exist.
+   - checked: `flag/:reviewId` is `@Roles('seller','admin')` too, so there is
+   **no buyer report route**. App sends buyer reports to the support inbox
+   (`POST /api/contact`, topic "Report a review", with the review id).
+   **Backend issue:** add a buyer `POST rating/:reviewId/report` (reason enum).
+   `my-reviews` rows do not return `usedFor`.
 8. [ ] **B8 Buyer extras + checkout check**: `GET /api/cart/buy-now`,
    `GET /api/checkout/delivery-info`, `GET /api/search/trending`, ZIP
    `GET /api/orders/download-zip-link/:orderId/:productId` ->

@@ -10,6 +10,7 @@ import 'package:book_store_app/core/widgets/buttons/base_buttons.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:book_store_app/app/modules/my_reviews/my_reviews_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -279,6 +280,23 @@ class _ReviewTile extends StatelessWidget {
               ),
             ),
           ),
+          if (!review.isOwn)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                key: Key('reportReview_${review.reviewId}'),
+                style: TextButton.styleFrom(minimumSize: const Size(44, 44)),
+                onPressed: () {
+                  if (profileController.user.value.isNull) {
+                    Get.toNamed(Routes.authTabView);
+                    return;
+                  }
+                  ReportReviewSheet.open(review);
+                },
+                icon: const Icon(Icons.flag_outlined, size: 16),
+                label: Text('Report'.tr),
+              ),
+            ),
           if (review.sellerReply != null)
             Container(
               margin: EdgeInsets.only(left: BaseSpacing.xxl, right: BaseSpacing.md, bottom: BaseSpacing.sm),
