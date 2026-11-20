@@ -1,0 +1,31 @@
+{
+ "success": true,
+ "data": {
+  "code": "EDU-8C00AFD7",
+  "learnerName": "Abdul Ahad Siddiqui",
+  "courseName": "Basic Computer Skills Course",
+  "courseSlug": "basic-computer-skills-course",
+  "teacher": "Ahad Learning Studio",
+  "storeSlug": "ahad-learning-studio",
+  "completedAt": "2026-10-30T07:54:17.693Z",
+  "guardianName": "Muhammad Siraj",
+  "gender": null,
+  "institute": "Deenway School",
+  "city": "karachi",
+  "country": "Pakistan",
+  "courseTitle": "Basic Computer Skills Course",
+  "issuedAt": "2026-10-30T07:54:17.693Z",
+  "storeName": "Ahad Learning Studio",
+  "instructorName": "Muhammad Ahsan",
+  "config": {
+   "watermarkText": null,
+   "watermarkImageUrl": "https://res.cloudinary.com/riaqwfoz/image/upload/v1793343398/uploads/images/hslsgvqlxrgm257hye6g.png",
+   "stampImageUrl": "https://res.cloudinary.com/riaqwfoz/image/upload/v1793342580/uploads/images/az4gpg3fulxun7vv8lir.jpg",
+   "signatureName": "Muhammad Ahsan",
+   "signatureTitle": "Course Instructor",
+   "issuerName": "The Deenway",
+   "signatureImageUrl": "https://res.cloudinary.com/riaqwfoz/image/upload/v1793345040/uploads/images/muuygyuauqmkjf88infg.png"
+  },
+  "storeLogoUrl": ""
+ }
+}

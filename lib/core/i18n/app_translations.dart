@@ -178,6 +178,27 @@ class AppTranslations extends Translations {
     "I'm here, continue": 'میں موجود ہوں، جاری رکھیں',
     'Pick up where you left off': 'جہاں چھوڑا تھا وہیں سے شروع کریں',
     'Later': 'بعد میں',
+
+    // Certificates (B2)
+    'Certificate': 'سرٹیفکیٹ',
+    'No certificate with that code': 'اس کوڈ کا کوئی سرٹیفکیٹ نہیں',
+    'Could not load the certificate.': 'سرٹیفکیٹ لوڈ نہیں ہو سکا۔',
+    'Verified certificate': 'تصدیق شدہ سرٹیفکیٹ',
+    'Save or share as PDF': 'پی ڈی ایف کے طور پر محفوظ یا شیئر کریں',
+    'Could not create the PDF.': 'پی ڈی ایف نہیں بن سکی۔',
+    'Get your certificate': 'اپنا سرٹیفکیٹ حاصل کریں',
+    'Your certificate': 'آپ کا سرٹیفکیٹ',
+    'Add the name to print on it.': 'اس پر چھپنے والا نام شامل کریں۔',
+    'Certificate details': 'سرٹیفکیٹ کی تفصیلات',
+    'These details are printed on your certificate and cannot be changed after it is issued.':
+        'یہ تفصیلات آپ کے سرٹیفکیٹ پر چھپیں گی اور جاری ہونے کے بعد تبدیل نہیں ہو سکیں گی۔',
+    'Full name': 'پورا نام',
+    'Full name must be 2-80 characters': 'پورا نام 2 سے 80 حروف کا ہو',
+    'Parent / guardian name': 'والد / سرپرست کا نام',
+    'School / institute': 'اسکول / ادارہ',
+    'Country': 'ملک',
+    'Use at most': 'زیادہ سے زیادہ',
+    'characters': 'حروف',
     'To change your login email, contact support.': 'لاگ اِن ای میل تبدیل کرنے کے لیے سپورٹ سے رابطہ کریں۔',
     'Could not load delivery options. Please try again.':
         'ڈیلیوری کے طریقے لوڈ نہیں ہو سکے۔ براہ کرم دوبارہ کوشش کریں۔',

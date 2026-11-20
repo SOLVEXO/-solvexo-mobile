@@ -1,6 +1,7 @@
 import 'package:book_store_app/app/components/buyer_states.dart';
 import 'package:book_store_app/app/data/repositories/course_repository.dart';
 import 'package:book_store_app/app/modules/course_player/controllers/course_player_controller.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -35,6 +36,7 @@ class CoursePlayerView extends GetView<CoursePlayerController> {
             ListView(padding: const EdgeInsets.only(bottom: 24), children: [
               const _Media(),
               const _LessonActions(),
+              const _CertificateCard(),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 4),
                 child: Text('${'Progress'.tr}: ${controller.percent}%', style: Theme.of(context).textTheme.titleSmall),
@@ -236,6 +238,40 @@ class _LessonActions extends GetView<CoursePlayerController> {
               ),
           ]),
         ]),
+      );
+    });
+  }
+}
+
+/// Shown when every lesson is complete and the course gives a certificate.
+class _CertificateCard extends GetView<CoursePlayerController> {
+  const _CertificateCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final c = controller.course.value;
+      final finished = controller.lessons.isNotEmpty && controller.lessons.every((l) => controller.isDone(l.id));
+      if (c == null || !c.certificateEnabled || !finished) return const SizedBox.shrink();
+      final code = controller.certificateCode.value;
+      return Card(
+        margin: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 0),
+        child: ListTile(
+          key: const Key('certificateCard'),
+          minTileHeight: 56,
+          leading: const Icon(Icons.workspace_premium_outlined),
+          title: Text(code == null ? 'Get your certificate'.tr : 'Your certificate'.tr),
+          subtitle: Text(code ?? 'Add the name to print on it.'.tr),
+          trailing: const Icon(Icons.chevron_right_rounded),
+          onTap: () async {
+            if (code != null) {
+              Get.toNamed(Routes.certificateView, arguments: {'code': code});
+            } else {
+              final issued = await Get.toNamed(Routes.certificateDetails, arguments: {'slug': controller.slug});
+              if (issued is String && issued.isNotEmpty) controller.certificateCode.value = issued;
+            }
+          },
+        ),
       );
     });
   }

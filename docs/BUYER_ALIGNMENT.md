@@ -29,7 +29,7 @@ money only from the server.
    - App today: Library Courses opens the **web** page in a browser; no
      player, no `/course/:slug` route. `video_player` is installed; no
      web-view package for YouTube/Vimeo.
-2. [ ] **B2 Certificates** (docs §5.10):
+2. [x] **B2 Certificates** (docs §5.10):
    - `POST /api/courses/learn/:idOrSlug/certificate-details {fullName (2-80,
      required), guardianName (80), institute (120), city (60), country
      (60)}` -> `{certificateDetails, certificateCode, certificateDetailsRequired}`;
