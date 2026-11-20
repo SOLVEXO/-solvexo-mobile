@@ -568,6 +568,23 @@ class _BottomBar extends StatelessWidget {
         child: Row(
           spacing: BaseSpacing.sm,
           children: [
+            if (controller.noPaymentMethod)
+              Expanded(
+                child: Text(
+                  'No payment method is available for this order right now.'.tr,
+                  key: const Key('noPaymentMethod'),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            if (controller.canPayFree)
+              Expanded(
+                child: PrimaryButton(
+                  key: const Key('placeFreeOrder'),
+                  label: 'Place free order'.tr,
+                  isLoading: isPlacing,
+                  onPressed: busy ? null : controller.placeFreeOrder,
+                ),
+              ),
             if (controller.canPayCOD)
               Expanded(
                 child: OutlineButton(

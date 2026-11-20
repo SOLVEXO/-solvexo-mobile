@@ -3,7 +3,12 @@ import 'package:book_store_app/utils/cart_limits.dart';
 
 import 'package:book_store_app/app/components/custom_app_snack_bar.dart';
 import 'package:book_store_app/app/data/models/rating/review_model.dart';
+import 'package:book_store_app/app/data/repositories/buyer_extras_repository.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
+import 'package:book_store_app/app/data/repositories/checkout_repository.dart';
+import 'package:book_store_app/app/modules/product_details/widgets/buyer_extras_widgets.dart';
+import 'package:book_store_app/app/routes/app_pages.dart';
+import 'package:book_store_app/app/services/account_switch_prompt.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/rating_repository.dart';
 import 'package:book_store_app/app/data/repositories/search_repository.dart';
@@ -38,6 +43,57 @@ class ProductDetailController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxBool isAddtoCartLoading = false.obs;
+  final RxBool isBuyNowLoading = false.obs;
+  final BuyerExtrasRepository _extras = BuyerExtrasRepository();
+
+  /// Buy now (B8): GET /api/cart/buy-now prices this one selection on the
+  /// server (cart untouched) -> confirm sheet -> delivery (physical) ->
+  /// create-checkout with `buyNow` -> checkout screen.
+  Future<void> buyNow() async {
+    final p = product.value;
+    final v = selectedVariant.value;
+    if (p == null || v == null || v.id.isEmpty || isBuyNowLoading.value) return;
+    if (!await AppPreferences.isLoggedIn()) {
+      Get.toNamed(Routes.authTabView);
+      return;
+    }
+    // Checkout is buyer-only (create-checkout is @Roles('user') -> 403).
+    if (await AppPreferences.getUserRole() == 'seller') {
+      await AccountSwitchPrompt.onBuyerOnly403('Switch to your buyer account'.tr);
+      return;
+    }
+    isBuyNowLoading.value = true;
+    try {
+      final line = await _extras.buyNow(productId: p.id, variantId: v.id, quantity: productQty.value);
+      isBuyNowLoading.value = false;
+      final go = await BuyNowSheet.open(line);
+      if (go != true) return;
+      isBuyNowLoading.value = true;
+      String? addressId, zoneId;
+      if (line.isPhysical) {
+        final d = await Get.find<CartController>().chooseDelivery();
+        if (d == null) return;
+        addressId = d.addressId;
+        zoneId = d.zoneId;
+      }
+      final result = await CheckoutRepository().createCheckout(
+        buyNow: {'productId': p.id, 'variantId': v.id, 'quantity': productQty.value},
+        addressId: addressId,
+        shippingZoneId: zoneId,
+      );
+      if (result.success && result.data != null) {
+        Get.toNamed(Routes.checkoutView, arguments: result.data);
+      } else {
+        ToastUtil.showToast(result.message ?? 'Failed to create checkout'.tr);
+      }
+    } on String catch (msg) {
+      ToastUtil.showToast(msg);
+    } catch (_) {
+      // 403 for a seller session is handled by the switch-account prompt.
+    } finally {
+      isBuyNowLoading.value = false;
+    }
+  }
   final RxBool isLoadingVariant = false.obs;
 
   // ─── Reviews ──────────────────────────────────────────────────────────────

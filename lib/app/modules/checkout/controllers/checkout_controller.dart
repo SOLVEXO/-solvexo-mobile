@@ -19,6 +19,7 @@ import 'package:book_store_app/utils/app_font_size.dart';
 import 'package:book_store_app/utils/currency_formatter.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
+import 'package:book_store_app/config/stripe_config.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/checkout_item_model.dart';
@@ -108,13 +109,39 @@ class CheckoutController extends GetxController {
   /// checkout — set once `_loadInitialData()` resolves.
   String get checkoutId => _checkoutId;
 
-  bool get canPayCOD =>
-      _allowedPaymentMethods.isEmpty ||
-      _allowedPaymentMethods.contains('cash_on_delivery');
+  /// True when none of the payment actions can be offered (e.g. a PKR
+  /// checkout whose only server method is card) - the view says so.
+  bool get noPaymentMethod => !canPayFree && !canPayCOD && !canPayOnline && !canSplitPay && !canPayManualBankTransfer;
 
-  bool get canPayOnline =>
-      _allowedPaymentMethods.isEmpty ||
-      _allowedPaymentMethods.contains('stripe');
+  /// Server total is 0: the only action is "Place free order".
+  bool get canPayFree => _allowedPaymentMethods.contains('free');
+
+  bool get canPayCOD =>
+      !canPayFree &&
+      (_allowedPaymentMethods.isEmpty ||
+          _allowedPaymentMethods.contains('cash_on_delivery'));
+
+  /// Card only when the app has a Stripe key AND the checkout is in USD.
+  bool get canPayOnline => onlineAllowed(_allowedPaymentMethods, currency.value, StripeConfig.isConfigured);
+
+  /// Pure rule (tested): card needs the server's 'stripe' (or the legacy
+  /// empty list), a Stripe key in the app, a USD checkout, and not 'free'.
+  static bool onlineAllowed(List<String> allowed, String currency, bool stripeConfigured) =>
+      !allowed.contains('free') &&
+      stripeConfigured &&
+      currency.toUpperCase() == 'USD' &&
+      (allowed.isEmpty || allowed.contains('stripe'));
+
+  Future<void> placeFreeOrder() async {
+    if (!validateAddressSelected() || isPlacingOrder.value) return;
+    isPlacingOrder.value = true;
+    try {
+      final result = await _checkoutRepository.placeFreeOrder(_checkoutId);
+      if (result.success) onPaymentSuccess(orderIds: result.orderIds);
+    } finally {
+      isPlacingOrder.value = false;
+    }
+  }
 
   /// True for a mixed (digital + physical) cart — the backend only ever
   /// returns `['split']` in that case, never alongside `'stripe'`/

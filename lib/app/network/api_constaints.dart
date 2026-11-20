@@ -105,6 +105,12 @@ class ApiConstants {
   static String premiumProof(String paymentId) => "$apiPrefix/premium/payments/$paymentId/proof";
   static const String premiumCancel = "$apiPrefix/premium/cancel";
   static const String premiumResume = "$apiPrefix/premium/resume";
+  // Buyer extras (B8)
+  static const String buyNow = "$apiPrefix/cart/buy-now";
+  static const String deliveryInfo = "$apiPrefix/checkout/delivery-info";
+  static const String searchTrending = "$apiPrefix/search/trending";
+  static const String freeCheckout = "$apiPrefix/payment/free-checkout";
+  static String downloadZipLink(String orderId, String productId) => "$apiPrefix/orders/download-zip-link/$orderId/$productId";
   static String premiumDeals(int limit) => "$apiPrefix/products/premium-deals?limit=$limit";
   // Every purchased digital item, one row per product (backend 5adba44).
   static const String myLibrary = "$apiPrefix/orders/my-library";

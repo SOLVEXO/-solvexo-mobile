@@ -7,7 +7,8 @@ import 'package:book_store_app/utils/toast_util.dart';
 import 'package:dio/dio.dart';
 
 class CheckoutRepository {
-  final BaseClient _client = BaseClient();
+  CheckoutRepository({BaseClient? client}) : _client = client ?? BaseClient();
+  final BaseClient _client;
 
   /// POST /api/checkout/create-checkout
   /// The server reads the cart from the auth token. [items] narrows the
@@ -26,6 +27,7 @@ class CheckoutRepository {
     String? currencyPreference,
     String? addressId,
     String? shippingZoneId,
+    Map<String, Object>? buyNow,
   }) async {
     try {
       final response = await _client.post(
@@ -37,6 +39,8 @@ class CheckoutRepository {
           if (currencyPreference != null) 'currencyPreference': currencyPreference,
           if (addressId != null) 'addressId': addressId,
           if (shippingZoneId != null) 'shippingZoneId': shippingZoneId,
+          // Buy Now (B8): one product-page line; the cart is not touched.
+          if (buyNow != null) 'buyNow': buyNow,
         },
         requiresAuth: true,
       );
@@ -164,6 +168,7 @@ class CheckoutRepository {
         ApiConstants.codPayment,
         data: {'checkoutId': checkoutId},
         requiresAuth: true,
+        headers: {'Idempotency-Key': 'cod:$checkoutId'},
       );
 
       if (response.data['success'] == true) {
@@ -178,6 +183,30 @@ class CheckoutRepository {
       DioExceptionHandler.handleDioException(e);
       return (success: false, orderIds: <String>[]);
     } catch (e) {
+      ToastUtil.showToast('Failed to place order');
+      return (success: false, orderIds: <String>[]);
+    }
+  }
+
+  /// POST /api/payment/free-checkout - only when the server offers 'free'
+  /// (its total is 0); the server re-checks that.
+  Future<({bool success, List<String> orderIds})> placeFreeOrder(String checkoutId) async {
+    try {
+      final response = await _client.post(
+        ApiConstants.freeCheckout,
+        data: {'checkoutId': checkoutId},
+        requiresAuth: true,
+        headers: {'Idempotency-Key': 'free:$checkoutId'},
+      );
+      if (response.data['success'] == true) {
+        return (success: true, orderIds: _extractOrderIds(response.data['data']));
+      }
+      ToastUtil.showToast(ApiError.msg(response.data['message']) ?? 'Failed to place order');
+      return (success: false, orderIds: <String>[]);
+    } on DioException catch (e) {
+      DioExceptionHandler.handleDioException(e);
+      return (success: false, orderIds: <String>[]);
+    } catch (_) {
       ToastUtil.showToast('Failed to place order');
       return (success: false, orderIds: <String>[]);
     }

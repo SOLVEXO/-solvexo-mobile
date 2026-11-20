@@ -71,7 +71,7 @@ money only from the server.
    (`POST /api/contact`, topic "Report a review", with the review id).
    **Backend issue:** add a buyer `POST rating/:reviewId/report` (reason enum).
    `my-reviews` rows do not return `usedFor`.
-8. [ ] **B8 Buyer extras + checkout check**: `GET /api/cart/buy-now`,
+8. [x] **B8 Buyer extras + checkout check**: `GET /api/cart/buy-now`,
    `GET /api/checkout/delivery-info`, `GET /api/search/trending`, ZIP
    `GET /api/orders/download-zip-link/:orderId/:productId` ->
    `download-zip-file`; checkout: free + COD to success, bank proof with an
@@ -80,5 +80,13 @@ money only from the server.
    "Switch to your buyer account" (`dio_exception_handler.dart:49-53`).
    Live shipping zones: `GET /api/checkout/getShippingZones` returned
    `data: []` on 2026-11-20 (the admin's zone is not visible yet).
+   Found while building: the app had no free-checkout call and sent no
+   Idempotency-Key on COD or the bank proof (all three fixed). Buy Now on a
+   PKR store whose only server method is `stripe` leaves nothing to pay with
+   (card is USD-only), so checkout now says "No payment method is available
+   for this order right now". `buy-now` itself is not role-guarded (a seller
+   gets 200); the app blocks sellers before calling it. Live COD/free success
+   could not be reached: no COD-enabled store and no free product on the test
+   accounts (covered by unit tests with the server's response shape).
 
 Details per item (routes, DTO rules, live JSON) are in each item's commit.

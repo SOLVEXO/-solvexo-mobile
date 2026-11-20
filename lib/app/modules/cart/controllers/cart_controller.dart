@@ -418,7 +418,7 @@ class CartController extends BaseController {
       String? addressId;
       String? zoneId;
       if (hasPhysical) {
-        final delivery = await _chooseDelivery();
+        final delivery = await chooseDelivery();
         if (delivery == null) return; // no address, or the buyer closed the zone picker
         addressId = delivery.addressId;
         zoneId = delivery.zoneId;
@@ -449,7 +449,7 @@ class CartController extends BaseController {
 
   /// Address + zone for a physical checkout. Null = stop (no saved address
   /// -> add-address prompt; or the buyer closed the zone picker).
-  Future<({String addressId, String? zoneId})?> _chooseDelivery() async {
+  Future<({String addressId, String? zoneId})?> chooseDelivery() async {
     final addresses = await _addressRepository.fetchAddresses();
     final address = CheckoutDelivery.pickAddress(addresses);
     if (address?.id == null) {

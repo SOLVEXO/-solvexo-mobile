@@ -44,6 +44,9 @@ class ManualTransferRepository {
 
   /// POST /api/payment/manual-transfer/submit (multipart) — places the
   /// order(s) and attaches the buyer's uploaded receipt in one step.
+  static String manualProofKey(String checkoutId, File f) =>
+      'manual-proof:$checkoutId:${f.path.split('/').last}:${f.existsSync() ? f.lengthSync() : 0}';
+
   Future<({bool success, ManualPaymentProof? proof, String? message})> submitPayment({
     required String checkoutId,
     required File proofImage,
@@ -63,6 +66,9 @@ class ManualTransferRepository {
         ApiConstants.manualTransferSubmit,
         data: formData,
         requiresAuth: true,
+        // Same checkout + same file = same key, so a double tap or retry
+        // cannot create two proofs (IdempotencyInterceptor on submit).
+        headers: {'Idempotency-Key': manualProofKey(checkoutId, proofImage)},
       );
 
       if (response.data['success'] == true) {

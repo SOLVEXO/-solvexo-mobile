@@ -302,6 +302,26 @@ class AppTranslations extends Translations {
     'Digital file is not working': 'ڈیجیٹل فائل کام نہیں کر رہی',
     'Other': 'دیگر',
 
+    // Buyer extras (B8)
+    'No payment method is available for this order right now.': 'اس آرڈر کے لیے ابھی کوئی ادائیگی کا طریقہ دستیاب نہیں۔',
+    'Buy now': 'ابھی خریدیں',
+    'Your cart is not changed.': 'آپ کی کارٹ تبدیل نہیں ہوئی۔',
+    'Continue to checkout': 'چیک آؤٹ پر جائیں',
+    'Failed to create checkout': 'چیک آؤٹ نہیں بن سکا',
+    'Instant digital delivery': 'فوری ڈیجیٹل ڈیلیوری',
+    'Free delivery': 'مفت ڈیلیوری',
+    'Delivery': 'ڈیلیوری',
+    'Delivery fee is shown at checkout': 'ڈیلیوری فیس چیک آؤٹ پر دکھائی جائے گی',
+    'Arrives in': 'پہنچنے میں',
+    'days': 'دن',
+    'Ships in': 'روانگی میں',
+    'Cash on delivery available': 'کیش آن ڈیلیوری دستیاب',
+    'Trending searches': 'مقبول تلاشیں',
+    'Could not open the download.': 'ڈاؤن لوڈ نہیں کھل سکا۔',
+    'Could not prepare the ZIP file': 'ZIP فائل تیار نہیں ہو سکی',
+    'Download all': 'سب ڈاؤن لوڈ کریں',
+    'Place free order': 'مفت آرڈر کریں',
+
     // Reviews (B7)
     'Write a review': 'ریویو لکھیں',
     'This item could not be loaded.': 'یہ آئٹم لوڈ نہیں ہو سکا۔',

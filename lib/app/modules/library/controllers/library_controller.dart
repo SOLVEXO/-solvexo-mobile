@@ -1,3 +1,6 @@
+import 'package:book_store_app/utils/toast_util.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:book_store_app/app/data/repositories/buyer_extras_repository.dart';
 import 'dart:async';
 
 import 'package:book_store_app/app/data/repositories/library_repository.dart';
@@ -75,6 +78,27 @@ class LibraryController extends GetxController {
       unawaited(maybeShowResumePopup());
     } catch (_) {
       coursesState.value = LibraryLoad.error;
+    }
+  }
+
+  /// "Download all" (B8): step 1 GET download-zip-link (JWT) gives a
+  /// 10-minute token; step 2 opens download-zip-file?token= in the browser,
+  /// which streams every file of the product as one ZIP.
+  final RxnString zipBusy = RxnString();
+  Future<void> downloadAll(LibraryFile f) async {
+    if (zipBusy.value != null) return;
+    zipBusy.value = f.key;
+    try {
+      final url = await BuyerExtrasRepository().zipLink(f.orderId, f.productId);
+      if (!await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)) {
+        ToastUtil.showToast('Could not open the download.'.tr);
+      }
+    } on String catch (m) {
+      ToastUtil.showToast(m);
+    } catch (_) {
+      ToastUtil.showToast('Could not prepare the ZIP file'.tr);
+    } finally {
+      zipBusy.value = null;
     }
   }
 

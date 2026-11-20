@@ -157,6 +157,27 @@ class SearchView extends StatelessWidget {
                     : const SizedBox(),
               ),
 
+              // Trending searches (B8)
+              Obx(() => c.searchText.value.isEmpty && !c.showResults.value && c.popularSearches.isNotEmpty
+                  ? Padding(
+                      key: const Key('trendingSearches'),
+                      padding: EdgeInsets.only(top: BaseSpacing.sm),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text('Trending searches'.tr, style: Theme.of(context).textTheme.titleSmall),
+                        const SizedBox(height: 6),
+                        Wrap(spacing: 8, runSpacing: 4, children: [
+                          for (final q in c.popularSearches)
+                            ActionChip(
+                              avatar: const Icon(Icons.trending_up_rounded, size: 16),
+                              label: Text(q),
+                              materialTapTargetSize: MaterialTapTargetSize.padded,
+                              onPressed: () => c.searchTerm(q),
+                            ),
+                        ]),
+                      ]),
+                    )
+                  : const SizedBox()),
+
               SizedBox(height: BaseSpacing.xl),
 
               // Products / Stores tabs — only once there's something to switch between

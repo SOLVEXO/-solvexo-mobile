@@ -263,16 +263,27 @@ class _FileCard extends StatelessWidget {
               if (file.canDownload)
                 Obx(() {
                   final busy = c.downloads.isBusy(file.key);
-                  return FilledButton.tonalIcon(
-                    onPressed: busy ? null : () => c.download(file),
-                    icon: busy
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.download_rounded, size: 18),
-                    label: Text(busy ? 'Preparing…'.tr : 'Download'.tr),
-                  );
+                  final zipping = c.zipBusy.value == file.key;
+                  return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
+                    FilledButton.tonalIcon(
+                      onPressed: busy ? null : () => c.download(file),
+                      icon: busy
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.download_rounded, size: 18),
+                      label: Text(busy ? 'Preparing…'.tr : 'Download'.tr),
+                    ),
+                    // Several files -> one ZIP (B8).
+                    if (file.fileCount > 1)
+                      TextButton(
+                        key: Key('downloadAll_${file.key}'),
+                        style: TextButton.styleFrom(minimumSize: const Size(44, 44)),
+                        onPressed: zipping ? null : () => c.downloadAll(file),
+                        child: Text(zipping ? 'Preparing…'.tr : '${'Download all'.tr} (${file.fileCount})'),
+                      ),
+                  ]);
                 })
               else if (file.unavailable == 'expired')
                 Chip(label: Text('Download period ended'.tr))

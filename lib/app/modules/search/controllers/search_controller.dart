@@ -5,6 +5,7 @@ import 'package:book_store_app/app/data/repositories/stores_repository.dart';
 import 'package:book_store_app/app/modules/category/models/product_model.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/toast_util.dart';
+import 'package:book_store_app/app/data/repositories/buyer_extras_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -377,14 +378,23 @@ class SearchBarController extends GetxController {
 
   final RxList<String> popularSearches = <String>[].obs;
 
+  /// Trending terms (B8): GET /api/search/trending. Hidden when empty.
   Future<void> loadPopularSearches() async {
-    // Uncomment when endpoint is ready:
-    // try {
-    //   final popular = await _productRepository.getPopularSearches();
-    //   if (popular != null) popularSearches.assignAll(popular);
-    // } catch (e) {
-    //   debugPrint('Error loading popular searches: $e');
-    // }
+    try {
+      popularSearches.assignAll(await BuyerExtrasRepository().trending());
+    } catch (_) {
+      popularSearches.clear();
+    }
+  }
+
+  /// Run a search for a tapped trending / recent term.
+  void searchTerm(String q) {
+    textController.text = q;
+    searchText.value = q;
+    showSuggestions.value = false;
+    addToRecentSearches(q);
+    performSearch(q);
+    performStoreSearch(q);
   }
 
   // ─── 9. Utilities ─────────────────────────────────────────────────────────
