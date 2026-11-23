@@ -132,7 +132,7 @@ class StoresRepository {
     }
   }
 
-  // ─── GET /api/store/public/testimonials ──────────────────────────────────
+  // ─── GET /api/testimonials ───────────────────────────────────────────────
   // Unauthenticated, server-cached (600s). Non-critical content — same
   // swallow-all-errors philosophy as above.
 

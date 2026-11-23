@@ -444,7 +444,7 @@ class ApiConstants {
   static const String publicPlatformStats =
       '$apiPrefix/store/public/platform-stats';
   static String publicTestimonials({int limit = 6}) =>
-      '$apiPrefix/store/public/testimonials?limit=$limit';
+      '$apiPrefix/testimonials?limit=$limit';
   static String publicAnnouncements(String audience) =>
       '$apiPrefix/announcements/active?audience=$audience';
   static const String publicWorksheetTrial =
