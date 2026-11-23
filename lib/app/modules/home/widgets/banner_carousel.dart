@@ -35,7 +35,8 @@ class _BannerCarouselState extends State<BannerCarousel> {
     // and timers leaked for the lifetime of the app. Starting once here in
     // `initState` and cancelling in `dispose` fixes both.
     _autoScrollTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      if (!mounted) return;
+      // A deactivated element (route being replaced) is still `mounted`.
+      if (!mounted || !_active) return;
       if (controllerPage.hasClients && c.banners.isNotEmpty) {
         final nextPage = (c.bannerIndex.value + 1) % c.banners.length;
         controllerPage.animateToPage(
@@ -45,6 +46,20 @@ class _BannerCarouselState extends State<BannerCarousel> {
         );
       }
     });
+  }
+
+  bool _active = true;
+
+  @override
+  void deactivate() {
+    _active = false;
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    _active = true;
   }
 
   @override
