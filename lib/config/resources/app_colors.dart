@@ -23,14 +23,14 @@ class AppColors {
   static const Color black2 = Color(0xFF343434);
   static const Color blackColor = Color(0xFF231F20);
   static const Color transparent = Colors.transparent;
-  static const Color grey = Color(0xFF7D7D7D);
+  static const Color grey = Color(0xFF757575); // R4: 4.6:1 on white (was 4.1)
   static const Color lightGrey = Color(0xFF999999);
   static const Color lightGrey2 = Color(0xFFE8E8E8);
   static const Color lightGrey3 = Color(0xFFF9F9F9);
   static const Color lightGrey4 = Color(0xFFE7E7E7);
   static const Color lightGrey5 = Color(0xFF8C8C8C);
   static const Color lightGrey6 = Color(0xFF848484);
-  static const Color lightGrey7 = Color(0xFFAEAEAE);
+  static const Color lightGrey7 = Color(0xFF767676); // R4: 4.5:1 on white (was 2.2)
   static const Color lightGrey8 = Color(0xFF94A3B8);
   static const Color lightGrey9 = Color(0xFFA9A9A9);
   static const Color lightGrey10 = Color(0xFFF4F4F5);
@@ -54,7 +54,7 @@ class AppColors {
 
   static const Color delete = Color(0xFFEC0071);
   static const Color green = Color(0xFF00FF36);
-  static const Color green2 = Color(0xFF00C06F);
+  static const Color green2 = Color(0xFF00804A); // R4: 5.0:1 on white (was 2.4)
   static const Color red = Color(0xFFEC3B3B);
   static const Color error = Color(0xFFFF5A4E);
 
@@ -66,7 +66,7 @@ class AppColors {
   static const Color separatorColor = Color(0xFFD9D9D9);
   static const Color barrierColor = Color(0xFF333333);
   static const Color bottomSheetDividerColor = Color(0xFFF7F7F7);
-  static const Color gray600 = Color(0xFF7c7c7e);
+  static const Color gray600 = Color(0xFF737375); // R4: 4.7:1 on white (was 4.2)
 
   static const Color classBg = Color(0xFFFBF9F4);
   static const Color classBg2 = Color(0xFFFBFBFB);

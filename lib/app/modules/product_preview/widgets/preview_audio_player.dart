@@ -31,6 +31,7 @@ class PreviewAudioPlayer extends StatelessWidget {
             Icon(Icons.audiotrack_rounded, size: 64, color: AppColors.primaryColor),
             Obx(
               () => IconButton(
+                tooltip: controller.isAudioPlaying.value ? 'Pause'.tr : 'Play'.tr,
                 iconSize: 56,
                 color: AppColors.primaryColor,
                 icon: Icon(

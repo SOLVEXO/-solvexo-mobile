@@ -29,7 +29,10 @@ class LoyaltyShimmer extends StatelessWidget {
         SizedBox(height: BaseSpacing.md),
         Container(
           height: 160,
-          decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(BaseRadius.lg)),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(BaseRadius.lg),
+          ),
         ),
       ],
     );
@@ -39,7 +42,10 @@ class LoyaltyShimmer extends StatelessWidget {
     return Container(
       height: 90,
       padding: EdgeInsets.all(BaseSpacing.sm),
-      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(BaseRadius.lg)),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(BaseRadius.lg),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,

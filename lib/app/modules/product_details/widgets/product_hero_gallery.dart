@@ -42,6 +42,7 @@ class ProductHeroGallery extends StatelessWidget {
             Row(
               children: [
                 _CircleIconButton(
+                  label: 'Back'.tr,
                   assetName: AppIcons.chevronLeft,
                   onTap: () => Get.back(),
                 ),
@@ -142,25 +143,32 @@ class ProductHeroGallery extends StatelessWidget {
 class _CircleIconButton extends StatelessWidget {
   final String? assetName;
   final VoidCallback? onTap;
-  const _CircleIconButton({this.assetName, this.onTap});
+  final String? label;
+  const _CircleIconButton({this.assetName, this.onTap, this.label});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: AppColors.primaryColor.withOpacity(0.10),
-          borderRadius: BorderRadius.circular(BaseRadius.sm),
-          boxShadow: BaseShadows.forLevel(BaseElevation.level1),
-        ),
-        alignment: Alignment.center,
-        child: SvgIcon(
-          assetName: assetName!,
-          size: 18,
-          color: AppColors.primaryColor,
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: label != null,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          // 44 px tap target (R4).
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor.withOpacity(0.10),
+            borderRadius: BorderRadius.circular(BaseRadius.sm),
+            boxShadow: BaseShadows.forLevel(BaseElevation.level1),
+          ),
+          alignment: Alignment.center,
+          child: SvgIcon(
+            assetName: assetName!,
+            size: 18,
+            color: AppColors.primaryColor,
+          ),
         ),
       ),
     );

@@ -101,6 +101,7 @@ class EditProfileView extends StatelessWidget {
                       bottomRight: Radius.circular(AppDimen.borderRadius),
                     ),
                     suffixIcon: CustomIconButton(
+                      semanticLabel: 'Pick on map'.tr,
                       isPadding: true,
                       assetName: AppIcons.mapsIcon,
                       onPressed: () async {

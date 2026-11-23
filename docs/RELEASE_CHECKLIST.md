@@ -71,3 +71,22 @@ Tracks R1-R7 (docs §10, §13, §14 phase 7). `[x]` = done in the app;
      emulator/system image (`emulator -list-avds` empty) and no device. Owner: run
      `flutter run --profile` on a low-end device (2-3 GB RAM) and check Home scroll and the
      product page in DevTools.
+
+4. [x] **R4 Accessibility**
+   - **Labels**: 60 `IconButton`s audited, 25 had no label; all buyer ones now have
+     `tooltip` (= screen-reader label, `.tr`), seller ones English. Shared widgets gained a
+     label: `CustomIconButton(semanticLabel:)`, `AppIconButton(semanticLabel:)`, storefront and
+     product-gallery round buttons. Password eye buttons say Show/Hide by state.
+   - **Tap targets**: `CustomIconButton` (bare SVG + GestureDetector) now has a 44x44 minimum;
+     storefront back/share and product-page back went 36-40 px -> 44 px (test uses Flutter's
+     `iOSTapTargetGuideline`).
+   - **Text scaling**: the app capped text at 1.2x; now 0.9-1.3x. Device check (iPhone 17 Pro,
+     Urdu, 1.3x): Home, Library, Course player, Certificate, Premium, My children, Wishlist,
+     Referrals, My reviews, Product page, Search, Cart, My orders, Profile, Notifications,
+     Addresses, Returns & refunds - **no overflow, RTL on every screen**.
+   - **Contrast** (WCAG AA 4.5:1 on white): `gray600` 4.2 -> 4.7, `grey` 4.1 -> 4.6,
+     `lightGrey7` 2.2 -> 4.5, `green2` 2.4 -> 5.0; primary blue 4.8 (ok). Small visual change.
+   - **Raw keys**: `cannot_be_empty`, `is_too_short`, `lbl_delete_validation`, ... showed as raw
+     snake_case text (no English map); now real English + Urdu.
+   - Not covered: strings that are still hard-coded English in older buyer widgets (no `.tr`)
+     stay English in Urdu mode; layout is RTL-correct but those labels need wrapping.

@@ -47,75 +47,94 @@ class ProductDetailsBottomBar extends StatelessWidget {
         bottom: BaseSpacing.md + 4,
         top: BaseSpacing.xxs + 1,
       ),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Row(
-        spacing: BaseSpacing.sm,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Qty stepper ───────────────────────────────────────────
-          Obx(
-            () => Container(
-              width: size.width / 2.5,
-              padding: EdgeInsets.symmetric(vertical: 1),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.textPrimary, width: 0.4),
-                borderRadius: BorderRadius.circular(BaseRadius.sm),
+          Row(
+            spacing: BaseSpacing.sm,
+            children: [
+              // ── Qty stepper ───────────────────────────────────────────
+              Obx(
+                () => Container(
+                  width: size.width / 2.5,
+                  padding: EdgeInsets.symmetric(vertical: 1),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.textPrimary,
+                      width: 0.4,
+                    ),
+                    borderRadius: BorderRadius.circular(BaseRadius.sm),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      IconButton(
+                        tooltip: 'Decrease quantity'.tr,
+                        onPressed: controller.decreaseQty,
+                        icon: Icon(Icons.remove, color: AppColors.primaryColor),
+                      ),
+                      CustomText(
+                        text: controller.productQty.value.toString(),
+                        color: AppColors.black,
+                        fontSize: AppFontSize.small,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      IconButton(
+                        tooltip: 'Increase quantity'.tr,
+                        onPressed: controller.increaseQty,
+                        icon: Icon(Icons.add, color: AppColors.primaryColor),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                    onPressed: controller.decreaseQty,
-                    icon: Icon(Icons.remove, color: AppColors.primaryColor),
-                  ),
-                  CustomText(
-                    text: controller.productQty.value.toString(),
-                    color: AppColors.black,
-                    fontSize: AppFontSize.small,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  IconButton(
-                    onPressed: controller.increaseQty,
-                    icon: Icon(Icons.add, color: AppColors.primaryColor),
-                  ),
-                ],
-              ),
-            ),
-          ),
 
-          // ── Add to cart ───────────────────────────────────────────
-          Expanded(
-            child: Obx(
-              () => PrimaryButton(
-                label: controller.isAddtoCartLoading.value
-                    ? "Adding..."
-                    : controller.inStock
-                    ? 'Add to cart'
-                    : 'Out of stock',
-                isLoading: controller.isAddtoCartLoading.value,
-                onPressed:
-                    (controller.isAddtoCartLoading.value || !controller.inStock)
-                    ? null
-                    : () => controller.addToCart(),
+              // ── Add to cart ───────────────────────────────────────────
+              Expanded(
+                child: Obx(
+                  () => PrimaryButton(
+                    label: controller.isAddtoCartLoading.value
+                        ? "Adding..."
+                        : controller.inStock
+                        ? 'Add to cart'
+                        : 'Out of stock',
+                    isLoading: controller.isAddtoCartLoading.value,
+                    onPressed:
+                        (controller.isAddtoCartLoading.value ||
+                            !controller.inStock)
+                        ? null
+                        : () => controller.addToCart(),
+                  ),
+                ),
               ),
-            ),
+            ],
+          ),
+          // ── Buy now (B8): server-priced, does not touch the cart ──
+          Obx(
+            () => controller.inStock
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: OutlinedButton(
+                      key: const Key('buyNow'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(46),
+                      ),
+                      onPressed: controller.isBuyNowLoading.value
+                          ? null
+                          : controller.buyNow,
+                      child: controller.isBuyNowLoading.value
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text('Buy now'.tr),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),
-      // ── Buy now (B8): server-priced, does not touch the cart ──
-      Obx(() => controller.inStock
-          ? Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: OutlinedButton(
-                key: const Key('buyNow'),
-                style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(46)),
-                onPressed: controller.isBuyNowLoading.value ? null : controller.buyNow,
-                child: controller.isBuyNowLoading.value
-                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Text('Buy now'.tr),
-              ),
-            )
-          : const SizedBox.shrink()),
-      ]),
     );
   }
 }

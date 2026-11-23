@@ -162,15 +162,15 @@ class ProfileController extends GetxController {
   /// English / Urdu. Urdu flips the app to RTL and the Nastaliq font.
   void chooseLanguage() {
     Widget option(String label, bool urdu) => ListTile(
-          title: Text(label),
-          trailing: LocaleService.isUrdu == urdu
-              ? Icon(Icons.check_rounded, color: Get.theme.colorScheme.primary)
-              : null,
-          onTap: () {
-            Get.back();
-            LocaleService.setUrdu(urdu);
-          },
-        );
+      title: Text(label),
+      trailing: LocaleService.isUrdu == urdu
+          ? Icon(Icons.check_rounded, color: Get.theme.colorScheme.primary)
+          : null,
+      onTap: () {
+        Get.back();
+        LocaleService.setUrdu(urdu);
+      },
+    );
     Get.bottomSheet(
       SafeArea(
         child: Column(
@@ -295,7 +295,6 @@ class ProfileController extends GetxController {
         isLoading.value = false;
         return;
       }
-
 
       final userData = await _authRepository.getUserProfile(token: token);
 
@@ -489,7 +488,9 @@ class ProfileController extends GetxController {
             ? null
             : addressController.text.trim(),
         profileImage: imageUrl ?? user.value?.profileImage,
-        currencyPreference: currencyPreference.value.isEmpty ? null : currencyPreference.value,
+        currencyPreference: currencyPreference.value.isEmpty
+            ? null
+            : currencyPreference.value,
       );
 
       if (updatedUser != null) {
@@ -581,6 +582,9 @@ class ProfileController extends GetxController {
                       labelText: 'Current Password',
                       border: OutlineInputBorder(),
                       suffixIcon: IconButton(
+                        tooltip: showCurrentPassword.value
+                            ? 'Hide password'.tr
+                            : 'Show password'.tr,
                         icon: Icon(
                           showCurrentPassword.value
                               ? Icons.visibility
@@ -609,6 +613,9 @@ class ProfileController extends GetxController {
                       labelText: 'New Password',
                       border: OutlineInputBorder(),
                       suffixIcon: IconButton(
+                        tooltip: showNewPassword.value
+                            ? 'Hide password'.tr
+                            : 'Show password'.tr,
                         icon: Icon(
                           showNewPassword.value
                               ? Icons.visibility
@@ -640,6 +647,9 @@ class ProfileController extends GetxController {
                       labelText: 'Confirm Password',
                       border: OutlineInputBorder(),
                       suffixIcon: IconButton(
+                        tooltip: showConfirmPassword.value
+                            ? 'Hide password'.tr
+                            : 'Show password'.tr,
                         icon: Icon(
                           showConfirmPassword.value
                               ? Icons.visibility
@@ -732,59 +742,72 @@ class ProfileController extends GetxController {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('This permanently deletes your Edudeen account. Orders that are still open must be finished first.'.tr),
+              Text(
+                'This permanently deletes your Edudeen account. Orders that are still open must be finished first.'
+                    .tr,
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: confirmCtrl,
                 autocorrect: false,
                 textCapitalization: TextCapitalization.characters,
-                decoration: InputDecoration(labelText: 'Type DELETE to confirm'.tr),
+                decoration: InputDecoration(
+                  labelText: 'Type DELETE to confirm'.tr,
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: passwordCtrl,
                 obscureText: true,
                 decoration: InputDecoration(
-                    labelText: 'Password (if your account has one)'.tr),
+                  labelText: 'Password (if your account has one)'.tr,
+                ),
               ),
-              Obx(() => error.value == null
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text(error.value!,
-                          style: TextStyle(color: Get.theme.colorScheme.error)),
-                    )),
+              Obx(
+                () => error.value == null
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Text(
+                          error.value!,
+                          style: TextStyle(color: Get.theme.colorScheme.error),
+                        ),
+                      ),
+              ),
             ],
           ),
         ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: Text('Cancel'.tr)),
-          Obx(() => FilledButton(
-                style: FilledButton.styleFrom(
-                    backgroundColor: Get.theme.colorScheme.error),
-                onPressed: busy.value
-                    ? null
-                    : () async {
-                        if (confirmCtrl.text.trim() != 'DELETE') {
-                          error.value = 'Type DELETE to confirm'.tr;
-                          return;
-                        }
-                        busy.value = true;
-                        error.value = null;
-                        final result = await _authRepository.deleteAccount(
-                          password: passwordCtrl.text,
-                        );
-                        busy.value = false;
-                        if (result.ok) {
-                          Get.back();
-                          ToastUtil.showToast('Account deleted successfully');
-                          await _authController.logout();
-                        } else {
-                          error.value = result.message;
-                        }
-                      },
-                child: Text('Delete'.tr),
-              )),
+          Obx(
+            () => FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: Get.theme.colorScheme.error,
+              ),
+              onPressed: busy.value
+                  ? null
+                  : () async {
+                      if (confirmCtrl.text.trim() != 'DELETE') {
+                        error.value = 'Type DELETE to confirm'.tr;
+                        return;
+                      }
+                      busy.value = true;
+                      error.value = null;
+                      final result = await _authRepository.deleteAccount(
+                        password: passwordCtrl.text,
+                      );
+                      busy.value = false;
+                      if (result.ok) {
+                        Get.back();
+                        ToastUtil.showToast('Account deleted successfully');
+                        await _authController.logout();
+                      } else {
+                        error.value = result.message;
+                      }
+                    },
+              child: Text('Delete'.tr),
+            ),
+          ),
         ],
       ),
     );

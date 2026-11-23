@@ -55,7 +55,7 @@ class CustomAppBarTwo extends StatelessWidget implements PreferredSizeWidget {
       leading: !showLeading
           ? null
           : showBackButton
-              ? IconButton(
+              ? IconButton(tooltip: 'Previous'.tr, 
                   onPressed: onBack ?? () => Get.back(),
                   icon: Icon(
                     Icons.chevron_left,
@@ -64,6 +64,7 @@ class CustomAppBarTwo extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 )
               : IconButton(
+                  tooltip: 'Back'.tr,
                   onPressed: onBack ?? () => Get.back(),
                   icon: SvgIcon(
                     assetName: assetName,

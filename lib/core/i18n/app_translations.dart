@@ -9,9 +9,21 @@ import 'package:get/get.dart';
 class AppTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
-        'en_US': const {},
+        'en_US': _en,
         'ur_PK': _ur,
       };
+
+  /// Older code still uses a few snake_case keys; give them real English text
+  /// so a raw key is never shown (R4).
+  static const Map<String, String> _en = {
+    'field': 'This field',
+    'cannot_be_empty': 'cannot be empty',
+    'is_too_short': ' is too short',
+    'lbl_delete_cap': 'DELETE',
+    'lbl_delete_validation': 'Type DELETE to confirm',
+    'please_select_a_time_later_than': 'Please select a time later than',
+    'address': 'Address',
+  };
 
   static const Map<String, String> _ur = {
     // Navigation
@@ -301,6 +313,27 @@ class AppTranslations extends Translations {
     'Not as described': 'بیان کے مطابق نہیں',
     'Digital file is not working': 'ڈیجیٹل فائل کام نہیں کر رہی',
     'Other': 'دیگر',
+
+    // Accessibility labels + legacy keys (R4)
+    'Decrease quantity': 'تعداد کم کریں',
+    'Increase quantity': 'تعداد بڑھائیں',
+    'field': 'یہ خانہ',
+    'cannot_be_empty': 'خالی نہیں ہو سکتا',
+    'is_too_short': ' بہت چھوٹا ہے',
+    'lbl_delete_cap': 'DELETE',
+    'lbl_delete_validation': 'تصدیق کے لیے DELETE لکھیں',
+    'please_select_a_time_later_than': 'براہ کرم اس کے بعد کا وقت منتخب کریں',
+    'address': 'پتہ',
+    'Add': 'شامل کریں',
+    'Back': 'واپس',
+    'Clear wishlist': 'وش لسٹ خالی کریں',
+    'Hide password': 'پاس ورڈ چھپائیں',
+    'Show password': 'پاس ورڈ دکھائیں',
+    'Pick on map': 'نقشے پر منتخب کریں',
+    'Previous': 'پچھلا',
+    'Remove from cart': 'کارٹ سے ہٹائیں',
+    'Set as default address': 'بطور ڈیفالٹ پتہ مقرر کریں',
+    'More options': 'مزید اختیارات',
 
     // Deep-linked shelves (R2)
     'Bundle': 'بنڈل',

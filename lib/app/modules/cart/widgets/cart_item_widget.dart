@@ -106,6 +106,7 @@ class CartItemWidget extends StatelessWidget {
 
               /// Delete — productId is now non-nullable
               CustomIconButton(
+                semanticLabel: 'Remove from cart'.tr,
                 assetName: AppIcons.deleteIcon,
                 size: 30,
                 isPadding: true,

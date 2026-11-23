@@ -45,6 +45,7 @@ class StorefrontHeader extends StatelessWidget {
                 top: MediaQuery.of(context).padding.top + BaseSpacing.xs + 2,
                 left: BaseSpacing.md,
                 child: _RoundIconButton(
+                  label: 'Back'.tr,
                   icon: AppIcons.chevronLeft,
                   onTap: () => Get.back(),
                 ),
@@ -53,6 +54,7 @@ class StorefrontHeader extends StatelessWidget {
                 top: MediaQuery.of(context).padding.top + BaseSpacing.xs + 2,
                 right: BaseSpacing.md,
                 child: _RoundIconButton(
+                  label: 'Share'.tr,
                   icon: AppIcons.shareIcon,
                   onTap: c.shareStore,
                 ),
@@ -225,20 +227,31 @@ class _Cover extends StatelessWidget {
 class _RoundIconButton extends StatelessWidget {
   final String icon;
   final VoidCallback onTap;
-  const _RoundIconButton({required this.icon, required this.onTap});
+  final String label;
+  const _RoundIconButton({
+    required this.icon,
+    required this.onTap,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppColors.primaryColor,
-          borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          // 22 + 2*11 = 44 px tap target (R4).
+          padding: const EdgeInsets.all(11),
+          decoration: BoxDecoration(
+            color: AppColors.primaryColor,
+            borderRadius: BorderRadius.circular(AppDimen.borderRadius),
+          ),
+          alignment: Alignment.center,
+          child: SvgIcon(assetName: icon, size: 22, color: AppColors.white),
         ),
-        alignment: Alignment.center,
-        child: SvgIcon(assetName: icon, size: 22, color: AppColors.white),
       ),
     );
   }

@@ -49,6 +49,7 @@ class WishlistView extends BaseView<WishlistController> {
         Obx(
           () => controller.wishlistItems.isNotEmpty
               ? CustomIconButton(
+                  semanticLabel: 'Clear wishlist'.tr,
                   assetName: AppIcons.deleteIcon,
                   size: 24,
                   isPadding: true,

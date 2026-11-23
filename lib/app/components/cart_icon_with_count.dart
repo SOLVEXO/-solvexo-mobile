@@ -23,6 +23,7 @@ class CartIconWithCount extends StatelessWidget {
           onPressed: () => Get.toNamed(Routes.cartView),
           isPadding: false,
           assetName: AppIcons.cartIcon,
+          semanticLabel: 'Cart'.tr,
           color: color,
           size: size,
         ),

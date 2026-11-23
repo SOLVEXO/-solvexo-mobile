@@ -210,6 +210,7 @@ class AddressView extends StatelessWidget {
                 ),
               ),
               CustomIconButton(
+                semanticLabel: 'Set as default address'.tr,
                 assetName: AppIcons.checkIcon,
                 size: 30,
                 color: a.isDefault ? AppColors.primaryColor : AppColors.gray600,

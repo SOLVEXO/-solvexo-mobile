@@ -82,6 +82,7 @@ class MapPickerScreen extends StatelessWidget {
                     child: IconBadge(
                       ischild: true,
                       child: CustomIconButton(
+                        semanticLabel: 'Back'.tr,
                         onPressed: () => Get.back(),
                         assetName: AppIcons.chevronLeft,
                         color: AppColors.primaryColor,

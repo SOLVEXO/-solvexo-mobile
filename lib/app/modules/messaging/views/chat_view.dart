@@ -87,6 +87,7 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
       shadowColor: AppColors.black.withOpacity(0.06),
       leadingWidth: 44,
       leading: IconButton(
+        tooltip: 'Back'.tr,
         onPressed: () => Get.back(),
         icon: const SvgIcon(assetName: AppIcons.chevronLeft),
       ),

@@ -91,27 +91,48 @@ class _LoyaltyProgramTabState extends State<LoyaltyProgramTab> {
             title: 'Earning Rules',
             child: Column(
               children: [
-                _NumberField(label: 'Points per ${StoreCurrency.format(1)} spent', controller: _perDollarCtrl),
+                _NumberField(
+                  label: 'Points per ${StoreCurrency.format(1)} spent',
+                  controller: _perDollarCtrl,
+                ),
                 SizedBox(height: BaseSpacing.sm),
-                _NumberField(label: 'Points per review', controller: _perReviewCtrl),
+                _NumberField(
+                  label: 'Points per review',
+                  controller: _perReviewCtrl,
+                ),
                 SizedBox(height: BaseSpacing.sm),
-                _NumberField(label: 'Points per referral', controller: _perReferralCtrl),
+                _NumberField(
+                  label: 'Points per referral',
+                  controller: _perReferralCtrl,
+                ),
                 SizedBox(height: BaseSpacing.sm),
-                _NumberField(label: 'Birthday bonus points', controller: _birthdayCtrl),
+                _NumberField(
+                  label: 'Birthday bonus points',
+                  controller: _birthdayCtrl,
+                ),
                 SizedBox(height: BaseSpacing.sm),
-                _NumberField(label: 'Points expiry (months, blank = never)', controller: _expiryCtrl),
+                _NumberField(
+                  label: 'Points expiry (months, blank = never)',
+                  controller: _expiryCtrl,
+                ),
                 SizedBox(height: BaseSpacing.sm),
                 _SaveButton(
                   isSaving: c.isSavingProgram.value,
                   label: 'Save Earning Rules',
                   onTap: () async {
                     await c.updateEarningRules(
-                      pointsPerDollar: int.tryParse(_perDollarCtrl.text.trim()) ?? 0,
-                      pointsPerReview: int.tryParse(_perReviewCtrl.text.trim()) ?? 0,
-                      pointsPerReferral: int.tryParse(_perReferralCtrl.text.trim()) ?? 0,
-                      birthdayBonusPoints: int.tryParse(_birthdayCtrl.text.trim()) ?? 0,
+                      pointsPerDollar:
+                          int.tryParse(_perDollarCtrl.text.trim()) ?? 0,
+                      pointsPerReview:
+                          int.tryParse(_perReviewCtrl.text.trim()) ?? 0,
+                      pointsPerReferral:
+                          int.tryParse(_perReferralCtrl.text.trim()) ?? 0,
+                      birthdayBonusPoints:
+                          int.tryParse(_birthdayCtrl.text.trim()) ?? 0,
                     );
-                    await c.updatePointsExpiry(int.tryParse(_expiryCtrl.text.trim()));
+                    await c.updatePointsExpiry(
+                      int.tryParse(_expiryCtrl.text.trim()),
+                    );
                   },
                 ),
               ],
@@ -146,7 +167,11 @@ class _SaveButton extends StatelessWidget {
   final bool isSaving;
   final String label;
   final VoidCallback onTap;
-  const _SaveButton({required this.isSaving, required this.label, required this.onTap});
+  const _SaveButton({
+    required this.isSaving,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -156,10 +181,25 @@ class _SaveButton extends StatelessWidget {
         width: double.infinity,
         constraints: const BoxConstraints(minHeight: 46),
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.md)),
+        decoration: BoxDecoration(
+          color: AppColors.primaryColor,
+          borderRadius: BorderRadius.circular(BaseRadius.md),
+        ),
         child: isSaving
-            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-            : CustomText(text: label, color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.white,
+                ),
+              )
+            : CustomText(
+                text: label,
+                color: AppColors.white,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w700,
+              ),
       ),
     );
   }
@@ -187,7 +227,12 @@ class _SectionCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CustomText(text: title, color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w700),
+              CustomText(
+                text: title,
+                color: AppColors.black2,
+                fontSize: AppFontSize.extraSmall,
+                fontWeight: FontWeight.w700,
+              ),
               if (trailing != null) trailing!,
             ],
           ),
@@ -206,10 +251,18 @@ class _TiersEditor extends StatelessWidget {
   final List<LoyaltyTierModel> tiers;
   const _TiersEditor({required this.controller, required this.tiers});
 
-  void _openTierSheet(BuildContext context, {LoyaltyTierModel? existing, int? index}) {
+  void _openTierSheet(
+    BuildContext context, {
+    LoyaltyTierModel? existing,
+    int? index,
+  }) {
     final nameCtrl = TextEditingController(text: existing?.name ?? '');
-    final minPointsCtrl = TextEditingController(text: existing?.minPoints.toString() ?? '');
-    final benefitsCtrl = TextEditingController(text: existing?.benefits.join(', ') ?? '');
+    final minPointsCtrl = TextEditingController(
+      text: existing?.minPoints.toString() ?? '',
+    );
+    final benefitsCtrl = TextEditingController(
+      text: existing?.benefits.join(', ') ?? '',
+    );
 
     CustomConfirmDialog.show(
       context,
@@ -218,21 +271,42 @@ class _TiersEditor extends StatelessWidget {
       contentBuilder: (_) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomTextField(hintText: 'Tier name (e.g. Gold)', controller: nameCtrl, isborder: true),
+          CustomTextField(
+            hintText: 'Tier name (e.g. Gold)',
+            controller: nameCtrl,
+            isborder: true,
+          ),
           SizedBox(height: BaseSpacing.sm),
-          CustomTextField(hintText: 'Minimum lifetime points', controller: minPointsCtrl, isborder: true, keyboardType: TextInputType.number),
+          CustomTextField(
+            hintText: 'Minimum lifetime points',
+            controller: minPointsCtrl,
+            isborder: true,
+            keyboardType: TextInputType.number,
+          ),
           SizedBox(height: BaseSpacing.sm),
-          CustomTextField(hintText: 'Benefits, comma separated', controller: benefitsCtrl, isborder: true),
+          CustomTextField(
+            hintText: 'Benefits, comma separated',
+            controller: benefitsCtrl,
+            isborder: true,
+          ),
         ],
       ),
       onConfirm: () {
         final name = nameCtrl.text.trim();
         final minPoints = int.tryParse(minPointsCtrl.text.trim());
         if (name.isEmpty || minPoints == null) return;
-        final benefits = benefitsCtrl.text.split(',').map((b) => b.trim()).where((b) => b.isNotEmpty).toList();
+        final benefits = benefitsCtrl.text
+            .split(',')
+            .map((b) => b.trim())
+            .where((b) => b.isNotEmpty)
+            .toList();
 
         final updated = List<LoyaltyTierModel>.from(tiers);
-        final newTier = LoyaltyTierModel(name: name, minPoints: minPoints, benefits: benefits);
+        final newTier = LoyaltyTierModel(
+          name: name,
+          minPoints: minPoints,
+          benefits: benefits,
+        );
         if (index != null) {
           updated[index] = newTier;
         } else {
@@ -258,34 +332,72 @@ class _TiersEditor extends StatelessWidget {
           if (tiers.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: BaseSpacing.sm),
-              child: CustomText(text: 'No tiers configured yet. Add one to reward your most loyal buyers.', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+              child: CustomText(
+                text:
+                    'No tiers configured yet. Add one to reward your most loyal buyers.',
+                color: AppColors.gray600,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ...tiers.asMap().entries.map((entry) {
             final i = entry.key;
             final t = entry.value;
             return Container(
               margin: EdgeInsets.only(bottom: BaseSpacing.xs),
-              padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm, vertical: BaseSpacing.xs + 2),
-              decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(BaseRadius.md)),
+              padding: EdgeInsets.symmetric(
+                horizontal: BaseSpacing.sm,
+                vertical: BaseSpacing.xs + 2,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(BaseRadius.md),
+              ),
               child: Row(
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CustomText(text: t.name, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
-                        CustomText(text: '${t.minPoints}+ lifetime points', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+                        CustomText(
+                          text: t.name,
+                          color: AppColors.black2,
+                          fontSize: AppFontSize.tiny,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        CustomText(
+                          text: '${t.minPoints}+ lifetime points',
+                          color: AppColors.gray600,
+                          fontSize: AppFontSize.tiny,
+                          fontWeight: FontWeight.w600,
+                        ),
                         if (t.benefits.isNotEmpty)
-                          CustomText(text: t.benefits.join(' · '), color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+                          CustomText(
+                            text: t.benefits.join(' · '),
+                            color: AppColors.gray600,
+                            fontSize: AppFontSize.tiny,
+                            fontWeight: FontWeight.w600,
+                          ),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryColor),
-                    onPressed: () => _openTierSheet(context, existing: t, index: i),
+                    tooltip: 'Edit',
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: AppColors.primaryColor,
+                    ),
+                    onPressed: () =>
+                        _openTierSheet(context, existing: t, index: i),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.red),
+                    tooltip: 'Delete',
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      size: 18,
+                      color: AppColors.red,
+                    ),
                     onPressed: () => _deleteTier(i),
                   ),
                 ],
@@ -303,7 +415,12 @@ class _TiersEditor extends StatelessWidget {
                 border: Border.all(color: AppColors.primaryColor, width: 1.5),
                 borderRadius: BorderRadius.circular(BaseRadius.md),
               ),
-              child: CustomText(text: '+ Add Tier', color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+              child: CustomText(
+                text: '+ Add Tier',
+                color: AppColors.primaryColor,
+                fontSize: AppFontSize.tiny,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

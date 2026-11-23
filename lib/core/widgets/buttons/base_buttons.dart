@@ -342,6 +342,7 @@ class AppIconButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Color? background;
   final double size;
+  final String? semanticLabel;
 
   const AppIconButton({
     super.key,
@@ -349,12 +350,13 @@ class AppIconButton extends StatelessWidget {
     required this.onPressed,
     this.background,
     this.size = 48,
+    this.semanticLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     final tapSize = size < 48 ? 48.0 : size;
-    return PressableScale(
+    final button = PressableScale(
       onTap: onPressed == null ? null : () { HapticFeedback.selectionClick(); onPressed!(); },
       child: Container(
         width: tapSize,
@@ -367,5 +369,8 @@ class AppIconButton extends StatelessWidget {
         child: icon,
       ),
     );
+    final label = semanticLabel;
+    if (label == null) return button;
+    return Tooltip(message: label, child: Semantics(button: true, label: label, excludeSemantics: true, child: button));
   }
 }

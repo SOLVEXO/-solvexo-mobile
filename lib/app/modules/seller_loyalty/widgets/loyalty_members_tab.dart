@@ -28,11 +28,27 @@ class LoyaltyMembersTab extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.groups_outlined, size: 48, color: AppColors.lightGrey),
+                Icon(
+                  Icons.groups_outlined,
+                  size: 48,
+                  color: AppColors.lightGrey,
+                ),
                 SizedBox(height: BaseSpacing.sm),
-                CustomText(text: 'No loyalty members yet', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w600),
+                CustomText(
+                  text: 'No loyalty members yet',
+                  color: AppColors.black2,
+                  fontSize: AppFontSize.extraSmall,
+                  fontWeight: FontWeight.w600,
+                ),
                 SizedBox(height: BaseSpacing.xxs),
-                CustomText(text: 'Members appear automatically once buyers start earning points.', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600, textAlign: TextAlign.center),
+                CustomText(
+                  text:
+                      'Members appear automatically once buyers start earning points.',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),
@@ -73,7 +89,9 @@ class _MemberCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials = member.userName.trim().isNotEmpty ? member.userName.trim()[0].toUpperCase() : '?';
+    final initials = member.userName.trim().isNotEmpty
+        ? member.userName.trim()[0].toUpperCase()
+        : '?';
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -88,26 +106,54 @@ class _MemberCard extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
               alignment: Alignment.center,
-              child: CustomText(text: initials, color: AppColors.primaryColor, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.bold),
+              child: CustomText(
+                text: initials,
+                color: AppColors.primaryColor,
+                fontSize: AppFontSize.extraSmall,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             SizedBox(width: BaseSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomText(text: member.userName, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+                  CustomText(
+                    text: member.userName,
+                    color: AppColors.black2,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w700,
+                  ),
                   if (member.currentTier != null)
-                    CustomText(text: member.currentTier!, color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+                    CustomText(
+                      text: member.currentTier!,
+                      color: AppColors.primaryColor,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w600,
+                    ),
                 ],
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                CustomText(text: '${member.pointsBalance}', color: AppColors.black2, fontSize: AppFontSize.extraSmall, fontWeight: FontWeight.w800),
-                CustomText(text: 'points', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+                CustomText(
+                  text: '${member.pointsBalance}',
+                  color: AppColors.black2,
+                  fontSize: AppFontSize.extraSmall,
+                  fontWeight: FontWeight.w800,
+                ),
+                CustomText(
+                  text: 'points',
+                  color: AppColors.gray600,
+                  fontSize: AppFontSize.tiny,
+                  fontWeight: FontWeight.w600,
+                ),
               ],
             ),
           ],
@@ -145,17 +191,41 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
     Get.bottomSheet(
       StatefulBuilder(
         builder: (context, setSheetState) => Container(
-          decoration: const BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-          padding: EdgeInsets.fromLTRB(BaseSpacing.lg, BaseSpacing.md, BaseSpacing.lg, MediaQuery.of(context).viewInsets.bottom + BaseSpacing.lg),
+          decoration: const BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.fromLTRB(
+            BaseSpacing.lg,
+            BaseSpacing.md,
+            BaseSpacing.lg,
+            MediaQuery.of(context).viewInsets.bottom + BaseSpacing.lg,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomText(text: 'Award or Deduct Points', color: AppColors.black2, fontSize: AppFontSize.verySmall, fontWeight: FontWeight.bold),
+              CustomText(
+                text: 'Award or Deduct Points',
+                color: AppColors.black2,
+                fontSize: AppFontSize.verySmall,
+                fontWeight: FontWeight.bold,
+              ),
               SizedBox(height: BaseSpacing.md),
-              CustomTextField(label: 'Points (negative to deduct)', controller: pointsCtrl, isborder: true, keyboardType: const TextInputType.numberWithOptions(signed: true)),
+              CustomTextField(
+                label: 'Points (negative to deduct)',
+                controller: pointsCtrl,
+                isborder: true,
+                keyboardType: const TextInputType.numberWithOptions(
+                  signed: true,
+                ),
+              ),
               SizedBox(height: BaseSpacing.sm),
-              CustomTextField(label: 'Reason', controller: descCtrl, isborder: true),
+              CustomTextField(
+                label: 'Reason',
+                controller: descCtrl,
+                isborder: true,
+              ),
               SizedBox(height: BaseSpacing.sm),
               Wrap(
                 spacing: BaseSpacing.xs,
@@ -175,15 +245,28 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
                   final points = int.tryParse(pointsCtrl.text.trim());
                   final desc = descCtrl.text.trim();
                   if (points == null || points == 0 || desc.isEmpty) return;
-                  final ok = await widget.controller.awardPoints(widget.member.id, points: points, type: type, description: desc);
+                  final ok = await widget.controller.awardPoints(
+                    widget.member.id,
+                    points: points,
+                    type: type,
+                    description: desc,
+                  );
                   if (ok) Get.back();
                 },
                 child: Container(
                   width: double.infinity,
                   constraints: const BoxConstraints(minHeight: 48),
                   alignment: Alignment.center,
-                  decoration: BoxDecoration(color: AppColors.primaryColor, borderRadius: BorderRadius.circular(BaseRadius.md)),
-                  child: CustomText(text: 'Apply', color: AppColors.white, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    borderRadius: BorderRadius.circular(BaseRadius.md),
+                  ),
+                  child: CustomText(
+                    text: 'Apply',
+                    color: AppColors.white,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -198,13 +281,25 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.75),
-      decoration: const BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.75,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(height: BaseSpacing.sm),
-          Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.lightGrey2, borderRadius: BorderRadius.circular(2))),
+          Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.lightGrey2,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
           Padding(
             padding: EdgeInsets.all(BaseSpacing.lg),
             child: Row(
@@ -213,17 +308,39 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomText(text: widget.member.userName, color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
-                      CustomText(text: '${widget.member.pointsBalance} points · ${widget.member.lifetimePoints} lifetime', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
+                      CustomText(
+                        text: widget.member.userName,
+                        color: AppColors.black2,
+                        fontSize: AppFontSize.small2,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      CustomText(
+                        text:
+                            '${widget.member.pointsBalance} points · ${widget.member.lifetimePoints} lifetime',
+                        color: AppColors.gray600,
+                        fontSize: AppFontSize.tiny,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ],
                   ),
                 ),
                 GestureDetector(
                   onTap: _showAwardDialog,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: BaseSpacing.sm, vertical: BaseSpacing.xs),
-                    decoration: BoxDecoration(color: AppColors.primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(BaseRadius.pill)),
-                    child: CustomText(text: 'Award Points', color: AppColors.primaryColor, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w700),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: BaseSpacing.sm,
+                      vertical: BaseSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(BaseRadius.pill),
+                    ),
+                    child: CustomText(
+                      text: 'Award Points',
+                      color: AppColors.primaryColor,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -233,39 +350,61 @@ class _MemberDetailSheetState extends State<_MemberDetailSheet> {
             child: _transactions == null
                 ? const Center(child: CircularProgressIndicator())
                 : _transactions!.isEmpty
-                    ? Center(child: CustomText(text: 'No transaction history yet', color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600))
-                    : ListView.separated(
-                        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg),
-                        itemCount: _transactions!.length,
-                        separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.lightGrey3),
-                        itemBuilder: (_, i) {
-                          final tx = _transactions![i];
-                          final positive = tx.points >= 0;
-                          return Padding(
-                            padding: EdgeInsets.symmetric(vertical: BaseSpacing.sm),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      CustomText(text: tx.description ?? tx.type, color: AppColors.black2, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
-                                      if (tx.createdAt != null)
-                                        CustomText(text: DateFormat('MMM d, yyyy · h:mm a').format(tx.createdAt!.toLocal()), color: AppColors.gray600, fontSize: AppFontSize.tiny, fontWeight: FontWeight.w600),
-                                    ],
+                ? Center(
+                    child: CustomText(
+                      text: 'No transaction history yet',
+                      color: AppColors.gray600,
+                      fontSize: AppFontSize.tiny,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                : ListView.separated(
+                    padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg),
+                    itemCount: _transactions!.length,
+                    separatorBuilder: (_, __) =>
+                        Divider(height: 1, color: AppColors.lightGrey3),
+                    itemBuilder: (_, i) {
+                      final tx = _transactions![i];
+                      final positive = tx.points >= 0;
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: BaseSpacing.sm),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CustomText(
+                                    text: tx.description ?? tx.type,
+                                    color: AppColors.black2,
+                                    fontSize: AppFontSize.tiny,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                ),
-                                CustomText(
-                                  text: '${positive ? '+' : ''}${tx.points}',
-                                  color: positive ? AppColors.greenSuccess : AppColors.red,
-                                  fontSize: AppFontSize.extraSmall,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ],
+                                  if (tx.createdAt != null)
+                                    CustomText(
+                                      text: DateFormat(
+                                        'MMM d, yyyy · h:mm a',
+                                      ).format(tx.createdAt!.toLocal()),
+                                      color: AppColors.gray600,
+                                      fontSize: AppFontSize.tiny,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                ],
+                              ),
                             ),
-                          );
-                        },
-                      ),
+                            CustomText(
+                              text: '${positive ? '+' : ''}${tx.points}',
+                              color: positive
+                                  ? AppColors.greenSuccess
+                                  : AppColors.red,
+                              fontSize: AppFontSize.extraSmall,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
