@@ -8,6 +8,12 @@ redirects, `Content-Type: application/json`:
 | `assetlinks.json` | `https://edudeen.com/.well-known/assetlinks.json` (and `www.`) |
 | `apple-app-site-association` (no extension) | `https://edudeen.com/.well-known/apple-app-site-association` (and `www.`) |
 
+**Redirect warning (checked 2026-11-23):** `https://edudeen.com/*` answers `308 -> https://www.edudeen.com/*`.
+Apple does not follow redirects for `apple-app-site-association` and Android App Links
+verification fails on redirects too. Either serve both `.well-known` files on the apex
+**without** the redirect, or the apex entries (`applinks:edudeen.com` / host `edudeen.com`)
+will simply not verify; `www` links still work.
+
 ## Values to fill / update
 - **Android `sha256_cert_fingerprints`**: Play Console -> Setup -> App integrity ->
   App signing -> "SHA-256 certificate fingerprint" (app signing key) **and** the upload

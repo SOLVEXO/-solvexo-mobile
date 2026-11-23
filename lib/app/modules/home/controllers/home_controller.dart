@@ -3,7 +3,6 @@ import 'package:book_store_app/app/components/product_filter_bottom_sheet.dart';
 import 'package:book_store_app/app/data/repositories/announcements_repository.dart';
 import 'package:book_store_app/app/data/repositories/banners_repository.dart';
 import 'package:book_store_app/app/data/repositories/cart_repository.dart';
-import 'package:book_store_app/app/data/repositories/category_repository.dart';
 import 'package:book_store_app/app/data/repositories/marketing_repository.dart';
 import 'package:book_store_app/app/data/repositories/product_repository.dart';
 import 'package:book_store_app/app/data/repositories/promotions_repository.dart';
@@ -31,7 +30,6 @@ import 'package:get/get.dart';
 class HomeController extends BaseController {
   HomeController({
     ProductRepository? productRepository,
-    CategoryRepository? categoryRepository,
     BannersRepository? bannersRepository,
     CartRepository? cartRepository,
     StoresRepository? storesRepository,
@@ -40,7 +38,6 @@ class HomeController extends BaseController {
     WishlistController? wishlistController,
     CategoryController? categoryController,
   }) : _productRepository = productRepository ?? ProductRepository(),
-       _categoryRepository = categoryRepository ?? CategoryRepository(),
        _bannersRepository = bannersRepository ?? BannersRepository(),
        _cartRepository = cartRepository ?? CartRepository(),
        _storesRepository = storesRepository ?? StoresRepository(),
@@ -59,7 +56,6 @@ class HomeController extends BaseController {
                : Get.put(CategoryController(), permanent: true));
 
   final ProductRepository _productRepository;
-  final CategoryRepository _categoryRepository;
   final BannersRepository _bannersRepository;
   final CartRepository _cartRepository;
   final StoresRepository _storesRepository;
@@ -256,7 +252,9 @@ class HomeController extends BaseController {
 
   Future<void> fetchCategories() async {
     try {
-      final trees = await _categoryRepository.getAllCategoryTrees();
+      // Shares CategoryController's request (no second call at start).
+      if (categoryController.categoryTrees.isEmpty) await categoryController.fetchAllCategories();
+      final trees = categoryController.categoryTrees;
       categories.assignAll(trees);
       debugPrint('✅ Fetched ${trees.length} category trees for home');
     } catch (e) {

@@ -192,7 +192,7 @@ class _Form extends GetView<RefundRequestController> {
             Wrap(spacing: 8, runSpacing: 8, children: [
               for (final p in c.photos)
                 Stack(children: [
-                  ClipRRect(borderRadius: BorderRadius.circular(8), child: CachedNetworkImage(imageUrl: p, width: 72, height: 72, fit: BoxFit.cover)),
+                  ClipRRect(borderRadius: BorderRadius.circular(8), child: CachedNetworkImage(imageUrl: p, width: 72, memCacheWidth: 216, height: 72, fit: BoxFit.cover)),
                   PositionedDirectional(
                     top: 0,
                     end: 0,

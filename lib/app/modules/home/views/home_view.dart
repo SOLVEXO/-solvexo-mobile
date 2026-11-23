@@ -128,113 +128,120 @@ class HomeView extends BaseView<HomeController> {
           children: [
             CustomRefreshWrapper(
               onRefresh: controller.refreshHome,
-              child: ListView(
-                padding: EdgeInsets.zero,
+              // Slivers (R3): the product grid is built lazily.
+              child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  // ── Active announcement banner (dismissible) ──────────
-                  Obx(
-                    () => AnnouncementBanner(
-                      announcement: controller.announcementDismissed.value
-                          ? null
-                          : controller.announcements.firstOrNull,
-                      onDismiss: controller.dismissAnnouncement,
-                    ),
-                  ),
-                  SizedBox(height: BaseSpacing.sm),
-                  const HomeSearchFilterRow(),
-                  // ── Greeting ──────────────────────────────────────────
-                  const HomeGreetingHeader(),
-
-                  // ── Active marketing campaigns ─────────────────────────
-                  CampaignsSection(),
-                  SizedBox(height: BaseSpacing.xs),
-
-                  // ── For your child (B4) ────────────────────────────────
-                  const ForYourChildRail(),
-
-                  // ── Platform trust stats ──────────────────────────────
-                  PlatformStatsStrip(),
-
-                  SizedBox(height: BaseSpacing.lg),
-                  // ── Promotional banner ───────────────────────────────
-                  isLoading ? BannerShimmer() : BannerCarousel(),
-
-                  // ── Search + filter ───────────────────────────────────
-                  SizedBox(height: BaseSpacing.lg),
-
-                  // ── Browse by Category ───────────────────────────────
-                  const HomeSectionHeader(title: 'Browse by Category'),
-                  CategoriesGrid(),
-
-                  // SizedBox(height: BaseSpacing.sm),
-
-                  // ── Top Stores ────────────────────────────────────────
-                  HomeSectionHeader(
-                    title: 'Top Stores',
-                    viewMore: true,
-                    onViewMore: () => Get.toNamed(Routes.storesView),
-                  ),
-
-                  // SizedBox(height: BaseSpacing.sm),
-                  TopStoresRow(),
-
-                  SizedBox(height: BaseSpacing.sm),
-
-                  // ── Trending Now ─────────────────────────────────────
-                  HomeSectionHeader(
-                    title: 'Trending near you',
-                    viewMore: true,
-                    onViewMore: () => Get.toNamed(Routes.trendingProducts),
-                  ),
-
-                  // SizedBox(height: BaseSpacing.sm),
-                  isLoading
-                      ? const DynamicShimmer()
-                      : _ProductsSection(controller: controller),
-
-                  SizedBox(height: BaseSpacing.lg),
-
-                  // // ── Staff Picks ──────────────────────────────────────
-                  // const HomeSectionHeader(title: 'Staff Picks'),
-
-                  // const HomeStaffPicks(),
-
-                  // SizedBox(height: BaseSpacing.lg),
-
-                  // ── What buyers say ───────────────────────────────────
-                  Obx(
-                    () => controller.testimonials.isEmpty
-                        ? const SizedBox.shrink()
-                        : const HomeSectionHeader(title: 'What buyers say'),
-                  ),
-                  TestimonialsCarousel(),
-
-                  SizedBox(height: BaseSpacing.lg),
-
-                  // ── Free AI Worksheet Builder trial promo ─────────────
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppDimen.allPadding,
-                    ),
-                    child: const WorksheetTrialPromoCard(),
-                  ),
-
-                  // ── "Sell on EduDeen" — guests only, deliberately below
-                  // the fold so it never competes with the login banner ───
-                  if (profileController.user.isNull) ...[
-                    SizedBox(height: BaseSpacing.lg),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppDimen.allPadding,
+                slivers: [
+                  SliverList.list(
+                    children: [
+                      // ── Active announcement banner (dismissible) ──────────
+                      Obx(
+                        () => AnnouncementBanner(
+                          announcement: controller.announcementDismissed.value
+                              ? null
+                              : controller.announcements.firstOrNull,
+                          onDismiss: controller.dismissAnnouncement,
+                        ),
                       ),
-                      child: const SellOnSolvexoCard(),
-                    ),
-                  ],
+                      SizedBox(height: BaseSpacing.sm),
+                      const HomeSearchFilterRow(),
+                      // ── Greeting ──────────────────────────────────────────
+                      const HomeGreetingHeader(),
 
-                  // Lets the last card scroll fully clear of the floating
-                  // nav bar instead of resting permanently tucked behind it.
-                  SizedBox(height: AppNavBar.contentBottomInset),
+                      // ── Active marketing campaigns ─────────────────────────
+                      CampaignsSection(),
+                      SizedBox(height: BaseSpacing.xs),
+
+                      // ── For your child (B4) ────────────────────────────────
+                      const ForYourChildRail(),
+
+                      // ── Platform trust stats ──────────────────────────────
+                      PlatformStatsStrip(),
+
+                      SizedBox(height: BaseSpacing.lg),
+                      // ── Promotional banner ───────────────────────────────
+                      isLoading ? BannerShimmer() : BannerCarousel(),
+
+                      // ── Search + filter ───────────────────────────────────
+                      SizedBox(height: BaseSpacing.lg),
+
+                      // ── Browse by Category ───────────────────────────────
+                      const HomeSectionHeader(title: 'Browse by Category'),
+                      CategoriesGrid(),
+
+                      // SizedBox(height: BaseSpacing.sm),
+
+                      // ── Top Stores ────────────────────────────────────────
+                      HomeSectionHeader(
+                        title: 'Top Stores',
+                        viewMore: true,
+                        onViewMore: () => Get.toNamed(Routes.storesView),
+                      ),
+
+                      // SizedBox(height: BaseSpacing.sm),
+                      TopStoresRow(),
+
+                      SizedBox(height: BaseSpacing.sm),
+
+                      // ── Trending Now ─────────────────────────────────────
+                      HomeSectionHeader(
+                        title: 'Trending near you',
+                        viewMore: true,
+                        onViewMore: () => Get.toNamed(Routes.trendingProducts),
+                      ),
+
+                      // SizedBox(height: BaseSpacing.sm),
+                    ],
+                  ),
+                  isLoading
+                      ? const SliverToBoxAdapter(child: DynamicShimmer())
+                      : _ProductsSection(controller: controller),
+                  SliverList.list(
+                    children: [
+                      SizedBox(height: BaseSpacing.lg),
+
+                      // // ── Staff Picks ──────────────────────────────────────
+                      // const HomeSectionHeader(title: 'Staff Picks'),
+
+                      // const HomeStaffPicks(),
+
+                      // SizedBox(height: BaseSpacing.lg),
+
+                      // ── What buyers say ───────────────────────────────────
+                      Obx(
+                        () => controller.testimonials.isEmpty
+                            ? const SizedBox.shrink()
+                            : const HomeSectionHeader(title: 'What buyers say'),
+                      ),
+                      TestimonialsCarousel(),
+
+                      SizedBox(height: BaseSpacing.lg),
+
+                      // ── Free AI Worksheet Builder trial promo ─────────────
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppDimen.allPadding,
+                        ),
+                        child: const WorksheetTrialPromoCard(),
+                      ),
+
+                      // ── "Sell on EduDeen" — guests only, deliberately below
+                      // the fold so it never competes with the login banner ───
+                      if (profileController.user.isNull) ...[
+                        SizedBox(height: BaseSpacing.lg),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppDimen.allPadding,
+                          ),
+                          child: const SellOnSolvexoCard(),
+                        ),
+                      ],
+
+                      // Lets the last card scroll fully clear of the floating
+                      // nav bar instead of resting permanently tucked behind it.
+                      SizedBox(height: AppNavBar.contentBottomInset),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -270,31 +277,33 @@ class _ProductsSection extends StatelessWidget {
       final isFetching = controller.isFetchingProducts.value;
 
       if (isEmpty && !isFetching) {
-        return SizedBox(
-          height: 240,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgIcon(
-                  assetName: AppIcons.shoppingBag,
-                  size: 64,
-                  color: AppColors.greySwatch400,
-                ),
-                SizedBox(height: BaseSpacing.sm),
-                CustomText(
-                  text: 'No products found',
-                  color: AppColors.gray600,
-                  fontSize: AppFontSize.tiny,
-                ),
-                SizedBox(height: BaseSpacing.xxs),
-                CustomText(
-                  text: 'Try a different category or search term',
-                  color: AppColors.lightGrey7,
-                  fontSize: AppFontSize.tiny,
-                  fontWeight: FontWeight.w400,
-                ),
-              ],
+        return SliverToBoxAdapter(
+          child: SizedBox(
+            height: 240,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgIcon(
+                    assetName: AppIcons.shoppingBag,
+                    size: 64,
+                    color: AppColors.greySwatch400,
+                  ),
+                  SizedBox(height: BaseSpacing.sm),
+                  CustomText(
+                    text: 'No products found',
+                    color: AppColors.gray600,
+                    fontSize: AppFontSize.tiny,
+                  ),
+                  SizedBox(height: BaseSpacing.xxs),
+                  CustomText(
+                    text: 'Try a different category or search term',
+                    color: AppColors.lightGrey7,
+                    fontSize: AppFontSize.tiny,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -303,37 +312,45 @@ class _ProductsSection extends StatelessWidget {
       final shown = controller.filteredProducts.length;
       final total = controller.totalProductsCount.value;
 
-      return Column(
-        children: [
-          const ProductsGrid(),
-          // SizedBox(height: BaseSpacing.md),
-          if (total > 0)
-            CustomText(
-              text: 'Showing $shown of $total products',
-              color: AppColors.gray600,
-              fontSize: AppFontSize.tiny,
+      return SliverMainAxisGroup(
+        slivers: [
+          const ProductsGrid.sliver(),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                SizedBox(height: BaseSpacing.xs),
+                if (total > 0)
+                  CustomText(
+                    text: 'Showing $shown of $total products',
+                    color: AppColors.gray600,
+                    fontSize: AppFontSize.tiny,
+                  ),
+                SizedBox(height: BaseSpacing.sm),
+                if (controller.hasMoreProducts.value)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimen.allPadding,
+                    ),
+                    child: OutlineButton(
+                      onPressed: isFetching
+                          ? null
+                          : controller.loadMoreProducts,
+                      isLoading: isFetching,
+                      label: 'Load More',
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                      expand: false,
+                      compact: true,
+                    ),
+                  )
+                else
+                  CustomText(
+                    text: "You've reached the end",
+                    color: AppColors.lightGrey7,
+                    fontSize: AppFontSize.tiny,
+                  ),
+              ],
             ),
-          SizedBox(height: BaseSpacing.sm),
-          if (controller.hasMoreProducts.value)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimen.allPadding,
-              ),
-              child: OutlineButton(
-                onPressed: isFetching ? null : controller.loadMoreProducts,
-                isLoading: isFetching,
-                label: 'Load More',
-                icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                expand: false,
-                compact: true,
-              ),
-            )
-          else
-            CustomText(
-              text: "You've reached the end",
-              color: AppColors.lightGrey7,
-              fontSize: AppFontSize.tiny,
-            ),
+          ),
         ],
       );
     });

@@ -40,3 +40,34 @@ Tracks R1-R7 (docs §10, §13, §14 phase 7). `[x]` = done in the app;
      fill the Play signing SHA-256, enable "Associated Domains" on the App ID in the
      Apple developer portal (needed for device builds/provisioning), then verify on a
      device (simulator can't verify without the hosted files).
+
+3. [x] **R3 Performance**
+   - **Images**: `CommonImageView` (71 call sites) now decodes network images at the size shown
+     (`memCacheWidth` from the widget/layout width x device pixel ratio, max 1600 px) and shows a
+     flat placeholder instead of one spinner per tile; fixed-size thumbnails elsewhere also get
+     `memCacheWidth` (`lib/utils/image_sizing.dart`). Disk cache = `cached_network_image`.
+   - **Lazy lists**: Home is now a `CustomScrollView`; the product grid is a `SliverGrid`, so
+     "Load more" pages no longer lay out every earlier card (it was a `shrinkWrap` grid inside
+     a `ListView`). Other long lists already use `ListView.builder`/`separated`.
+   - **Start-up requests** (guest cold start, iPhone 17 Pro simulator, 2026-11-23): 16 calls; the
+     only duplicate was `GET /api/categories/category-tree` (Home and CategoryController each
+     fetched it) - now one shared, de-duplicated request. The 3 `promotions/track/impression`
+     calls are one per banner by design. Everything else is one call per section, in parallel.
+   - **Release size (2026-11-23, `1.0.11+15`)**
+     | Artifact | Size |
+     |---|---|
+     | `app-arm64-v8a-release.apk` | 43.3 MB |
+     | `app-armeabi-v7a-release.apk` | 42.0 MB |
+     | `app-x86_64-release.apk` | 44.7 MB |
+     | `app-release.aab` (all ABIs; Play serves ~43 MB per device) | 76.0 MB |
+     | iOS `Runner.app` (release, no codesign) | 106.6 MB uncompressed |
+     | IPA estimate (zip of Runner.app) | 34.2 MB |
+     Biggest parts: Dart code `libapp.so` 15.8 MB, Flutter engine 10.5 MB, Java/Kotlin dex
+     ~25 MB uncompressed (Stripe, Firebase, Google Maps, Facebook SDKs; R8 minify + resource
+     shrinking already on); iOS: App.framework 22 MB, Stripe frameworks ~25 MB, Flutter 9 MB.
+     Assets are only 4.9 MB (fonts). Biggest possible saving: drop `flutter_facebook_auth`
+     if Facebook login is not used (it has no App ID configured, see R6).
+   - **Jank on a low-end Android emulator: NOT measured.** This Mac has the Android SDK but no
+     emulator/system image (`emulator -list-avds` empty) and no device. Owner: run
+     `flutter run --profile` on a low-end device (2-3 GB RAM) and check Home scroll and the
+     product page in DevTools.

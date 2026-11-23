@@ -5,14 +5,50 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ProductsGrid extends StatelessWidget {
-  const ProductsGrid({super.key});
+  const ProductsGrid({super.key}) : sliver = false;
+
+  /// Lazy variant for a CustomScrollView (R3): only visible tiles are built,
+  /// so "Load more" pages do not rebuild/lay out every earlier card.
+  const ProductsGrid.sliver({super.key}) : sliver = true;
+  final bool sliver;
 
   static const double _gridHPad = BaseSpacing.md - 1;
   static const double _crossGap = BaseSpacing.sm;
 
+  static SliverGridDelegate delegateFor(double totalWidth) {
+    int cols = 2;
+    if (totalWidth >= 600) cols = 3;
+    if (totalWidth >= 900) cols = 4;
+    final double cellWidth =
+        (totalWidth - _gridHPad * 2 - _crossGap * (cols - 1)) / cols;
+    return SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: cols,
+      mainAxisSpacing: BaseSpacing.md - 2,
+      crossAxisSpacing: _crossGap,
+      mainAxisExtent: cellWidth * 1.55,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.find();
+    if (sliver) {
+      return SliverLayoutBuilder(
+        builder: (context, c) => SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: _gridHPad),
+          sliver: Obx(
+            () => SliverGrid.builder(
+              itemCount: controller.filteredProducts.length,
+              gridDelegate: delegateFor(c.crossAxisExtent),
+              itemBuilder: (_, i) => ProductCard(
+                product: controller.filteredProducts[i],
+                index: i,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {

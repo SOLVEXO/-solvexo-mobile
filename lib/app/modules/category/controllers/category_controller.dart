@@ -71,7 +71,13 @@ class CategoryController extends GetxController {
 
   // ─── 1. Fetch all category trees ─────────────────────────────────────────
 
-  Future<void> fetchAllCategories() async {
+  Future<void>? _inFlight;
+
+  /// One request at a time (R3): Home and this controller both need the tree
+  /// at start; a second caller joins the running request.
+  Future<void> fetchAllCategories() => _inFlight ??= _fetchAllCategories().whenComplete(() => _inFlight = null);
+
+  Future<void> _fetchAllCategories() async {
     try {
       isLoading.value = true;
       final trees = await _categoryRepo.getAllCategoryTrees();

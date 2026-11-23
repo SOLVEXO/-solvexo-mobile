@@ -82,7 +82,7 @@ class _MyReviewsViewState extends State<MyReviewsView> {
                     if ((r.product?.image ?? '').isNotEmpty)
                       Padding(
                         padding: const EdgeInsetsDirectional.only(end: 10),
-                        child: CachedNetworkImage(imageUrl: r.product!.image!, width: 44, height: 44, fit: BoxFit.cover),
+                        child: CachedNetworkImage(imageUrl: r.product!.image!, width: 44, memCacheWidth: 132, height: 44, fit: BoxFit.cover),
                       ),
                     Expanded(child: Text(r.product?.name ?? '', style: t.textTheme.titleSmall, maxLines: 2, overflow: TextOverflow.ellipsis)),
                     IconButton(

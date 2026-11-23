@@ -132,7 +132,7 @@ class ImageThumbnail extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppDimen.borderRadius),
           child: CachedNetworkImage(
             imageUrl: url,
-            width: 80,
+            width: 80, memCacheWidth: 240,
             height: 80,
             fit: BoxFit.cover,
             placeholder: (_, __) => Container(

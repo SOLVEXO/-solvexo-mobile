@@ -202,7 +202,7 @@ class _SharedWishlistViewState extends State<SharedWishlistView> {
           return Card(
             child: ListTile(
               minTileHeight: 72,
-              leading: p.images.isEmpty ? const Icon(Icons.image_outlined) : CachedNetworkImage(imageUrl: p.images.first, width: 56, height: 56, fit: BoxFit.contain),
+              leading: p.images.isEmpty ? const Icon(Icons.image_outlined) : CachedNetworkImage(imageUrl: p.images.first, width: 56, memCacheWidth: 168, height: 56, fit: BoxFit.contain),
               title: Text(p.name, maxLines: 2, overflow: TextOverflow.ellipsis),
               subtitle: p.sellerName == null ? null : Text(p.sellerName!),
               onTap: () => Get.toNamed(Routes.productDetailsView, arguments: {'productId': p.id}),

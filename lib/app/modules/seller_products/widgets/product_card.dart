@@ -200,7 +200,7 @@ class _ProductImage extends StatelessWidget {
       child: url != null
           ? CachedNetworkImage(
               imageUrl: url,
-              width: 72,
+              width: 72, memCacheWidth: 216,
               height: 72,
               fit: BoxFit.cover,
               placeholder: (_, __) => const _ImagePlaceholder(),

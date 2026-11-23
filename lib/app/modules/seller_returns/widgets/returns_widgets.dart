@@ -207,7 +207,7 @@ class ReturnCard extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(width: 6),
                   itemBuilder: (_, i) => ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: CachedNetworkImage(imageUrl: item.photos[i], width: 64, height: 64, fit: BoxFit.cover),
+                    child: CachedNetworkImage(imageUrl: item.photos[i], width: 64, memCacheWidth: 192, height: 64, fit: BoxFit.cover),
                   ),
                 ),
               ),

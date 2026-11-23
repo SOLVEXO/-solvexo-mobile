@@ -3,6 +3,7 @@ import 'package:book_store_app/app/components/svg_icon.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_images.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:book_store_app/utils/image_sizing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -143,29 +144,25 @@ class CommonImageView extends StatelessWidget {
         errorBuilder: (context, _, e) => _buildPlaceholder(),
       );
     } else if (url != null && url!.isNotEmpty) {
-      return CachedNetworkImage(
-        height: height,
-        width: width,
-        fit: fit,
-        imageUrl: url!,
-        color: color,
-        placeholder: (context, url) => Container(
+      // Decode at the shown size (R3). Width from the widget, else from the
+      // layout; height is used only when the width is unknown.
+      return LayoutBuilder(builder: (context, c) {
+        final w = width ?? (c.hasBoundedWidth ? c.maxWidth : null);
+        final cacheW = ImageSizing.cachePx(context, w);
+        return CachedNetworkImage(
           height: height,
           width: width,
-          color: AppColors.greySwatch200,
-          child: Center(
-            child: SizedBox(
-              height: 30,
-              width: 30,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.greySwatch400,
-              ),
-            ),
-          ),
-        ),
-        errorWidget: (context, url, error) => _buildPlaceholder(),
-      );
+          fit: fit,
+          imageUrl: url!,
+          color: color,
+          memCacheWidth: cacheW,
+          memCacheHeight: cacheW == null ? ImageSizing.cachePx(context, height) : null,
+          fadeInDuration: const Duration(milliseconds: 150),
+          // A flat placeholder: one spinner per tile in a grid costs frames.
+          placeholder: (context, url) => Container(height: height, width: width, color: AppColors.greySwatch200),
+          errorWidget: (context, url, error) => _buildPlaceholder(),
+        );
+      });
     } else if (svgPath != null && svgPath!.isNotEmpty) {
       return SizedBox(
         height: height,
