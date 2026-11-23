@@ -54,6 +54,18 @@ void main() {
       '/store/6abb/plan-billing': Routes.sellerPlatformPlan,
       '/store/6abb/dashboard': Routes.sellerHome,
       'https://edudeen.com/wishlist/shared/tok': Routes.sharedWishlist,
+      // R2 app-link paths
+      'https://www.edudeen.com/product/p1': Routes.productDetailsView,
+      'https://edudeen.com/shop/jami-store': Routes.sellerStorefront,
+      'https://edudeen.com/course/basic-computer-skills-course': Routes.coursePlayer,
+      'https://edudeen.com/certificates/EDU-8C00AFD7': Routes.certificateView,
+      'https://edudeen.com/account/orders': Routes.myOrdersView,
+      'https://edudeen.com/bundles/starter-set': Routes.shelf,
+      'https://edudeen.com/picks/eid-gifts': Routes.shelf,
+      'https://edudeen.com/learning-paths/grade-1': Routes.shelf,
+      'https://edudeen.com/learning-paths': Routes.learningPaths,
+      'https://edudeen.com/?category=books': Routes.searchView,
+      'https://edudeen.com/?campaign=6abc': Routes.searchView,
     };
     for (final e in cases.entries) {
       expect(DeepLinkRouter.open(e.key), isTrue, reason: e.key);

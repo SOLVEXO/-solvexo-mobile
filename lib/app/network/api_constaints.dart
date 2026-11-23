@@ -105,6 +105,11 @@ class ApiConstants {
   static String premiumProof(String paymentId) => "$apiPrefix/premium/payments/$paymentId/proof";
   static const String premiumCancel = "$apiPrefix/premium/cancel";
   static const String premiumResume = "$apiPrefix/premium/resume";
+  // Deep-linked shelves (R2)
+  static String bundleBySlug(String slug) => "$apiPrefix/bundles/public/${Uri.encodeComponent(slug)}";
+  static String curatedCollection(String slug) => "$apiPrefix/curated-collections/${Uri.encodeComponent(slug)}";
+  static const String learningPaths = "$apiPrefix/learning-paths";
+  static String learningPath(String slug) => "$apiPrefix/learning-paths/${Uri.encodeComponent(slug)}";
   // Buyer extras (B8)
   static const String buyNow = "$apiPrefix/cart/buy-now";
   static const String deliveryInfo = "$apiPrefix/checkout/delivery-info";

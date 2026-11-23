@@ -21,3 +21,22 @@ Tracks R1-R7 (docs §10, §13, §14 phase 7). `[x]` = done in the app;
      `/cart`, `/product/:slug`, `/store/:storeId/<orders|returns|products|categories|
      inventory|marketing|plan-billing|ai|dashboard|reviews|questions>` (seller).
    - Owner: Firebase project keys (APNs key upload for iOS push) - see R6.
+
+2. [x] **R2 Deep links (App Links / Universal Links)**
+   - Paths: `/product`, `/shop`, `/course`, `/certificates`, `/account/orders`,
+     `/wishlist/shared`, `/bundles`, `/picks`, `/learning-paths`, `/?category=`,
+     `/?campaign=` on `edudeen.com` and `www.edudeen.com`.
+   - Android: `autoVerify` intent filter on MainActivity (https, both hosts, path
+     prefixes + `/`); Flutter's own deep linking off (`flutter_deeplinking_enabled=false`).
+   - iOS: `Runner/Runner.entitlements` with `applinks:edudeen.com` and
+     `applinks:www.edudeen.com` (all three build configs); `FlutterDeepLinkingEnabled=false`.
+   - App: `app_links` -> `IncomingLinks` -> `DeepLinkRouter`; a cold-start link waits for
+     the splash. New screens for links that had none: bundle, curated picks and learning
+     path (`/shelf`), and the learning-paths list.
+   - Live 2026-11-23: bundles/public, curated-collections/home and learning-paths all
+     return `data: []`, so no real slug exists to open yet.
+   - **Owner / web team:** host `docs/deep-links/assetlinks.json` and
+     `docs/deep-links/apple-app-site-association` (see `docs/deep-links/README.md`),
+     fill the Play signing SHA-256, enable "Associated Domains" on the App ID in the
+     Apple developer portal (needed for device builds/provisioning), then verify on a
+     device (simulator can't verify without the hosted files).

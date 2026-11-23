@@ -302,6 +302,21 @@ class AppTranslations extends Translations {
     'Digital file is not working': 'ڈیجیٹل فائل کام نہیں کر رہی',
     'Other': 'دیگر',
 
+    // Deep-linked shelves (R2)
+    'Bundle': 'بنڈل',
+    'Picks': 'منتخب اشیاء',
+    'Learning path': 'لرننگ پاتھ',
+    'Learning paths': 'لرننگ پاتھس',
+    'Could not load this page.': 'یہ صفحہ لوڈ نہیں ہو سکا۔',
+    'This page is not available': 'یہ صفحہ دستیاب نہیں',
+    'Instead of': 'بجائے',
+    'You save': 'آپ کی بچت',
+    'Buy all items in one order from this store to get the bundle price.': 'بنڈل قیمت کے لیے اس اسٹور سے تمام اشیاء ایک ہی آرڈر میں خریدیں۔',
+    'Nothing here yet': 'یہاں ابھی کچھ نہیں',
+    'Step': 'مرحلہ',
+    'No learning paths yet': 'ابھی کوئی لرننگ پاتھ نہیں',
+    'steps': 'مراحل',
+
     // Buyer extras (B8)
     'No payment method is available for this order right now.': 'اس آرڈر کے لیے ابھی کوئی ادائیگی کا طریقہ دستیاب نہیں۔',
     'Buy now': 'ابھی خریدیں',

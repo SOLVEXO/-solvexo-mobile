@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 ///
 /// Supported (docs §10): /product/:slug, /shop/:slug, /course/:slug, /certificates/:code, /wishlist/shared/:token, /account/orders[/:id],
 /// /account/downloads, /account/dashboard?openChat=1, /account/reviews,
-/// /account/premium, /cart, /store/:storeId/<area> (seller), /wishlist,
+/// /account/premium, /cart, /bundles/:slug, /picks/:slug, /learning-paths[/:slug], /store/:storeId/<area> (seller), /wishlist,
 /// /notifications, /messages, /?category=, /?campaign=, /?search=.
 class DeepLinkRouter {
   DeepLinkRouter._();
@@ -120,6 +120,20 @@ class DeepLinkRouter {
           }
         case 'cart':
           Get.toNamed(Routes.cartView);
+          return true;
+        case 'bundles':
+        case 'picks':
+          if (seg.length > 1) {
+            Get.toNamed(Routes.shelf, arguments: {'kind': seg.first == 'bundles' ? 'bundle' : 'picks', 'slug': seg[1]});
+            return true;
+          }
+          return false;
+        case 'learning-paths':
+          if (seg.length > 1) {
+            Get.toNamed(Routes.shelf, arguments: {'kind': 'learningPath', 'slug': seg[1]});
+          } else {
+            Get.toNamed(Routes.learningPaths);
+          }
           return true;
         // Seller notification links: /store/:storeId/<area>.
         case 'store':

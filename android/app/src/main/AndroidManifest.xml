@@ -49,6 +49,38 @@
               <action android:name="android.intent.action.MAIN"/>
               <category android:name="android.intent.category.LAUNCHER"/>
           </intent-filter>
+
+          <!-- R2 App Links: edudeen.com pages open in the app (needs
+               https://edudeen.com/.well-known/assetlinks.json, see docs/deep-links/). -->
+          <intent-filter android:autoVerify="true">
+              <action android:name="android.intent.action.VIEW"/>
+              <category android:name="android.intent.category.DEFAULT"/>
+              <category android:name="android.intent.category.BROWSABLE"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/product"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/shop"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/course"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/certificates"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/account/orders"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/wishlist/shared"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/bundles"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/picks"/>
+              <data android:scheme="https" android:host="edudeen.com" android:pathPrefix="/learning-paths"/>
+              <data android:scheme="https" android:host="edudeen.com" android:path="/"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/product"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/shop"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/course"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/certificates"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/account/orders"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/wishlist/shared"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/bundles"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/picks"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:pathPrefix="/learning-paths"/>
+              <data android:scheme="https" android:host="www.edudeen.com" android:path="/"/>
+          </intent-filter>
+
+          <!-- app_links handles incoming URLs; Flutter's own deep linking
+               would push the raw path onto the navigator. -->
+          <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
       </activity>
 
       <meta-data

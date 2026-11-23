@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_links/app_links.dart';
 import 'package:book_store_app/app/routes/deep_link_router.dart';
 import 'package:flutter/foundation.dart';
 
@@ -18,6 +19,21 @@ class IncomingLinks {
   /// Opener; tests swap it.
   @visibleForTesting
   static bool Function(String link) opener = DeepLinkRouter.open;
+
+  static StreamSubscription<Uri>? _sub;
+
+  /// R2: App Links / Universal Links. `uriLinkStream` also delivers the
+  /// link that cold-started the app; the 3 s de-dupe covers platforms that
+  /// report it twice. Only https edudeen.com links reach the app (intent
+  /// filter / associated domains), and DeepLinkRouter re-checks the host.
+  static Future<void> listenForAppLinks() async {
+    if (_sub != null) return;
+    try {
+      _sub = AppLinks().uriLinkStream.listen((u) => handle(u.toString()), onError: (_) {});
+    } catch (e) {
+      debugPrint('IncomingLinks: app links unavailable: $e');
+    }
+  }
 
   /// Push `data.link`, or any edudeen.com URL / path.
   static void handle(String? link) {
