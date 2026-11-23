@@ -8,6 +8,11 @@ class PayoutScheduleModel {
   final DateTime? nextPayoutAt;
   final String? defaultPayoutMethodId;
 
+  /// false = the server's default for this currency, not saved yet (GET
+  /// payout-schedule no longer creates a record, backend fix #11). The first
+  /// PATCH saves it.
+  final bool saved;
+
   const PayoutScheduleModel({
     this.currency = 'USD',
     required this.frequency,
@@ -17,6 +22,7 @@ class PayoutScheduleModel {
     required this.isEnabled,
     this.nextPayoutAt,
     this.defaultPayoutMethodId,
+    this.saved = true,
   });
 
   static const empty = PayoutScheduleModel(
@@ -32,6 +38,7 @@ class PayoutScheduleModel {
         isEnabled: json['isEnabled'] as bool? ?? true,
         nextPayoutAt: json['nextPayoutAt'] != null ? DateTime.tryParse(json['nextPayoutAt'] as String) : null,
         defaultPayoutMethodId: json['defaultPayoutMethodId'] as String?,
+        saved: json['saved'] != false,
       );
 
   static const _weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

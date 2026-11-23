@@ -117,7 +117,7 @@ class SellerFinanceRepository {
           if (status != null) 'status': status,
           if (from != null) 'from': from,
           if (to != null) 'to': to,
-          if (currency != null) 'currency': currency,
+          if (currency != null && currency.isNotEmpty) 'currency': currency,
           'page': page,
           'limit': limit,
         },
@@ -304,7 +304,8 @@ class SellerFinanceRepository {
     try {
       final response = await _client.get(
         ApiConstants.financePayoutSchedule(storeId),
-        queryParameters: {'currency': currency},
+        // No currency = the store's own currency on the server (backend fix #11).
+        queryParameters: {if (currency.isNotEmpty) 'currency': currency},
         requiresAuth: true,
       );
       return PayoutScheduleModel.fromJson(response.data as Map<String, dynamic>);

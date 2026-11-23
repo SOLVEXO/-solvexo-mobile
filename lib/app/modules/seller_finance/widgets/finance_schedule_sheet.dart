@@ -97,6 +97,15 @@ class _FinanceScheduleSheetState extends State<FinanceScheduleSheet> {
                     ),
                   ),
                   CustomText(text: 'Payout Schedule', color: AppColors.black2, fontSize: AppFontSize.small2, fontWeight: FontWeight.bold),
+                  if (!widget.controller.payoutSchedule.value.saved) ...[
+                    const SizedBox(height: 4),
+                    CustomText(
+                      key: const Key('scheduleNotSaved'),
+                      text: 'This is the default schedule. Save to keep your own settings.',
+                      color: AppColors.lightGrey5,
+                      fontSize: AppFontSize.verySmall,
+                    ),
+                  ],
                   const SizedBox(height: BaseSpacing.md),
                   CustomText(text: 'Frequency', color: AppColors.black2, fontSize: AppFontSize.verySmall, fontWeight: FontWeight.w600),
                   const SizedBox(height: 8),

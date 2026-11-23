@@ -168,12 +168,13 @@ class SellerFinanceController extends GetxController {
   // whole finance screen is currently showing.
   ///
   /// Payouts debit the wallet of the payout method's currency (API:
-  /// requestPayout uses method.currency). The dashboard lists a wallet for
-  /// every currency with a balance OR a payout-schedule record, and a
-  /// payout-schedule read creates a record - so an empty USD wallet can
-  /// appear for a PKR store just because the schedule was read in USD.
-  /// Empty wallets in other currencies are hidden; the store's own currency
-  /// is always shown. Each wallet stands alone; nothing is converted.
+  /// requestPayout uses method.currency - unchanged; a change would be a
+  /// money rule, proposed in the backend PR, not decided). Since backend fix
+  /// #11 a payout-schedule read creates nothing and the dashboard lists only
+  /// currencies with a balance. Stores still holding an old empty USD
+  /// schedule record are covered by hiding empty wallets in other
+  /// currencies; the store's own currency is always shown. Each wallet
+  /// stands alone; nothing is converted.
   final RxString selectedCurrency = ''.obs;
 
   String get storeCurrency =>
