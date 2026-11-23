@@ -66,15 +66,15 @@ source on 2026-11-18** (details: `docs/BACKEND_DIFF_REPORT.md` 3.2):
 | # | Issue | Status | Evidence in 5adba44 |
 |---|---|---|---|
 | 1 | Refund-request "502" | Not a backend issue (retracted) | – |
-| 2 | GET payout-schedule creates a record (USD default) | **Open** | `finance.service.ts:209-224` find -> create; `finance.controller.ts:190` defaults to USD |
+| 2 | GET payout-schedule creates a record (USD default) | **Fixed on `jami-branch` (PR i9experts/edudeen_api#1, not merged)**: GET is read-only (`saved:false`), store currency default; payout currency rule = owner decision | `finance.service.ts:209-224` find -> create; `finance.controller.ts:190` defaults to USD |
 | 3 | Empty enum list in "type must be one of the following values: " | **Open** | `add-payout-method.dto.ts:7` `@IsEnum([...])` with an array (same in coupon, plan, loyalty, discount DTOs); `@IsIn` fixes it. Seen again live 2026-11-18 on PATCH payout-methods without `type` |
 | 4 | Docs gap: earnings-summary, seller-returns-all not in EDUDEEN_DOCS Part C | **Open (docs)** | covered by `docs/DOCS_ERRATA.md` E15 |
-| 5 | fee-estimate ignores Premium input | **Open** | `finance.controller.ts:52-64`, `finance.service.ts:1363-1384` |
-| 6 | update-store accepts an empty `productTypes` | **Open** | `store.service.ts:690-698, 844-847` |
-| 7 | update-store coerces `codEnabled`, loose `shipFrom` | **Open** | `store.service.ts:720` (`!!value`); `:813-821` (drops keys, stringifies a numeric province; no city -> shipFrom null) |
-| 8 | 500 on bad ids in course routes; silent title cutting | **Partly fixed** | roster routes now 400 "Invalid id"; builder / students / PUT still 500 on a bad storeId (`classroom.controllers.ts:281-298` -> `store-ownership.util.ts:27`); titles still cut at 120/150 (`course.util.ts:6,187,191`) |
-| 9 | Seller manual-payments controller still registered | **Open (new)** | see 9 below |
-| 10 | Server does not require a free sample to publish digital products | **Open (new)** | see 10 below |
+| 5 | fee-estimate ignores Premium input | **Fixed on `jami-branch` (PR i9experts/edudeen_api#1, not merged)**: `premiumPercent`/`productId` -> `premium` block; app shows member-price earnings | `finance.controller.ts:52-64`, `finance.service.ts:1363-1384` |
+| 6 | update-store accepts an empty `productTypes` | **Fixed on `jami-branch` (PR i9experts/edudeen_api#1, not merged)**: 400 for an empty list | `store.service.ts:690-698, 844-847` |
+| 7 | update-store coerces `codEnabled`, loose `shipFrom` | **Fixed on `jami-branch` (PR i9experts/edudeen_api#1, not merged)**: boolean required, known province + city required | `store.service.ts:720` (`!!value`); `:813-821` (drops keys, stringifies a numeric province; no city -> shipFrom null) |
+| 8 | 500 on bad ids in course routes; silent title cutting | **Fixed on `jami-branch` (PR i9experts/edudeen_api#1, not merged)**: all builder routes 400 on bad ids; titles over 120/150 -> 400 | roster routes now 400 "Invalid id"; builder / students / PUT still 500 on a bad storeId (`classroom.controllers.ts:281-298` -> `store-ownership.util.ts:27`); titles still cut at 120/150 (`course.util.ts:6,187,191`) |
+| 9 | Seller manual-payments controller still registered | **Fixed on `jami-branch` (PR i9experts/edudeen_api#1, not merged)**: every route 410, one message | see 9 below |
+| 10 | Server does not require a free sample to publish digital products | **Fixed on `jami-branch` (PR i9experts/edudeen_api#1, not merged)**: 400 when a download goes live without a sample (courses exempt) | see 10 below |
 
 1. **Refund-request "502" — retracted (not a backend issue).** Reported
    during P1 (#8 commit message) as `PATCH /api/refund-request/<id>/approve|

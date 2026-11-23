@@ -71,6 +71,10 @@ money only from the server.
    (`POST /api/contact`, topic "Report a review", with the review id).
    **Backend issue:** add a buyer `POST rating/:reviewId/report` (reason enum).
    `my-reviews` rows do not return `usedFor`.
+   **Update:** fixed on edudeen_api `jami-branch` (PR #1, not merged):
+   `POST /api/rating/:reviewId/report-by-buyer {reasonCode, text?}` (409 on a
+   repeat) - the app uses it, the contact-form fallback is gone; `my-reviews`
+   rows have `usedFor` and `photos`. `buy-now` is buyer-only (403 for sellers).
 8. [x] **B8 Buyer extras + checkout check**: `GET /api/cart/buy-now`,
    `GET /api/checkout/delivery-info`, `GET /api/search/trending`, ZIP
    `GET /api/orders/download-zip-link/:orderId/:productId` ->

@@ -26,6 +26,13 @@ names the backend code it comes from. The full diff is in
 | E15 | Part C (endpoint appendix) | Cut off before the finance and orders modules | Also live and used by the app: `GET /api/finance/:storeId/earnings-summary`, `GET /api/orders/seller-returns-all/:storeId`, `GET /api/orders/my-library`, `GET/PUT /api/courses/seller/:storeId/:productId`, `GET /api/courses/seller/:storeId/roster` (+ `/export`) | backend route table, report Appendix D |
 
 Notes
+- Backend `jami-branch` (PR i9experts/edudeen_api#1, NOT merged/deployed)
+  changes E5: the server then also requires a free sample to publish a
+  digital download (same message as the app). Until that is deployed, E5
+  describes the live API. Its other app-facing changes are listed in
+  `edudeen_api/docs/APP_BACKEND_FIXES.md`. The ZIP link call
+  (`GET /api/orders/download-zip-link/:orderId/:productId`) answers
+  `{token, endpoint}`, not a URL (seen on the local run).
 - `/api/seller/manual-payments/*` (doc line 103) do return 410 as the docs
   say, but the controller is still registered. The app must never call
   these routes.
