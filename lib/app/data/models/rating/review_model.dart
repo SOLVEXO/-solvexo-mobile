@@ -50,6 +50,10 @@ class ReviewModel {
   final double? rating;
   final List<ReviewComment> comments;
   final List<String> media;
+
+  /// "Used for" answer: home | classroom | school (my-reviews sends it since
+  /// backend fix #7), else null.
+  final String? usedFor;
   final bool isVerifiedPurchase;
   final SellerReply? sellerReply;
   final bool isFlagged;
@@ -66,6 +70,7 @@ class ReviewModel {
     this.rating,
     this.comments = const [],
     this.media = const [],
+    this.usedFor,
     this.isVerifiedPurchase = false,
     this.sellerReply,
     this.isFlagged = false,
@@ -85,6 +90,7 @@ class ReviewModel {
         rating: rating,
         comments: comments,
         media: media,
+        usedFor: usedFor,
         isVerifiedPurchase: isVerifiedPurchase,
         sellerReply: sellerReply,
         isFlagged: isFlagged,
@@ -105,7 +111,9 @@ class ReviewModel {
                 ?.map((c) => ReviewComment.fromJson(c as Map<String, dynamic>))
                 .toList() ??
             const [],
-        media: (json['media'] as List?)?.cast<String>() ?? const [],
+        // `photos` (my-reviews, backend fix #7) is the same list as `media`.
+        media: ((json['media'] ?? json['photos']) as List?)?.map((e) => '$e').toList() ?? const [],
+        usedFor: json['usedFor']?.toString(),
         isVerifiedPurchase: json['isVerifiedPurchase'] as bool? ?? false,
         sellerReply: json['sellerReply'] != null ? SellerReply.fromJson(json['sellerReply'] as Map<String, dynamic>) : null,
         isFlagged: json['isFlagged'] as bool? ?? false,

@@ -14,6 +14,13 @@ import 'package:get/get.dart' hide Response;
 //   "name":"Basic Computer Skills Course","image":".."},"rating":5,"comments":[{"text":"TEST review - will be deleted"}],
 //   "media":[],"isVerifiedPurchase":true,"sellerReply":null}]}
 // DELETE /api/rating/6afff059d1f43443b864e9c9 -> 200 "Review deleted"
+// Local jami-branch API (backend fix #7): my-reviews rows add usedFor + photos.
+const _withUsedFor = {
+  'reviewId': 'r2', 'product': {'productId': 'p2', 'name': 'Phonics Book', 'image': null}, 'rating': 4,
+  'comments': [{'text': 'Good'}], 'media': ['https://x/a.jpg'], 'photos': ['https://x/a.jpg'], 'usedFor': 'classroom',
+  'isVerifiedPurchase': true, 'sellerReply': null,
+};
+
 const _live = {
   'reviewId': '6afff059d1f43443b864e9c9',
   'product': {'productId': '6ae33f4c3da5d8d7d7033bd4', 'name': 'Basic Computer Skills Course', 'image': null},
@@ -26,10 +33,17 @@ const _live = {
 
 class _Client extends BaseClient {
   Map? sent;
+  String? url;
+  int status = 201;
   @override
   Future<Response> post(String url, {dynamic data, Map<String, dynamic>? queryParameters, bool requiresAuth = true, Map<String, dynamic>? headers}) async {
     sent = data as Map;
-    return Response(requestOptions: RequestOptions(path: url), statusCode: 201, data: {'success': true});
+    this.url = url;
+    final ro = RequestOptions(path: url);
+    if (status == 409) {
+      throw DioException(requestOptions: ro, response: Response(requestOptions: ro, statusCode: 409, data: {'message': 'You already reported this review', 'statusCode': 409}));
+    }
+    return Response(requestOptions: ro, statusCode: 201, data: {'success': true, 'message': 'Thanks. Edudeen will look at this review.', 'data': {'reportId': 'x', 'status': 'pending'}});
   }
 }
 
@@ -71,5 +85,26 @@ void main() {
     await t.tap(find.byKey(const Key('reportSend')));
     await t.pump();
     expect(find.text('Choose a reason.'), findsOneWidget);
+  });
+
+  test('buyer report uses the report-by-buyer route (no contact form)', () async {
+    final c = _Client();
+    final r = await RatingRepository(client: c).reportReview(reviewId: 'rev1', reasonCode: 'spam');
+    expect(r.ok, isTrue);
+    expect(c.url, endsWith('/api/rating/rev1/report-by-buyer'));
+    expect(c.sent, {'reasonCode': 'spam'});
+    c.status = 409;
+    final again = await RatingRepository(client: c).reportReview(reviewId: 'rev1', reasonCode: 'other', text: ' copied text ');
+    expect(again.ok, isFalse);
+    expect(again.alreadyReported, isTrue);
+    expect(c.sent, {'reasonCode': 'other', 'text': 'copied text'});
+    expect(ReportReasons.codes, ['spam', 'abusive', 'off_topic', 'personal_info', 'wrong_product', 'other']);
+  });
+
+  testWidgets('my reviews shows usedFor and photos', (t) async {
+    await t.pumpWidget(_app(MyReviewsView(repo: _Repo([ReviewModel.fromJson(_withUsedFor)]))));
+    await t.pumpAndSettle();
+    expect(find.text('Used: In class'), findsOneWidget);
+    expect(find.byKey(const Key('myReviewPhotos_r2')), findsOneWidget);
   });
 }

@@ -95,6 +95,23 @@ class _MyReviewsViewState extends State<MyReviewsView> {
                   if (r.rating != null)
                     Row(children: [for (var k = 1; k <= 5; k++) Icon(k <= r.rating!.round() ? Icons.star_rounded : Icons.star_border_rounded, size: 18, color: Colors.amber)]),
                   if (r.commentText.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(r.commentText)),
+                  if (r.usedFor != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text('${'Used'.tr}: ${ReviewRules.usedForLabel(r.usedFor!).tr}', key: Key('myReviewUsedFor_${r.reviewId}'), style: t.textTheme.bodySmall),
+                    ),
+                  if (r.media.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Wrap(spacing: 6, runSpacing: 6, key: Key('myReviewPhotos_${r.reviewId}'), children: [
+                        for (final url in r.media.take(ReviewRules.maxPhotos))
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: CachedNetworkImage(imageUrl: url, width: 56, height: 56, memCacheWidth: 168, fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) => const SizedBox(width: 56, height: 56, child: Icon(Icons.broken_image_outlined))),
+                          ),
+                      ]),
+                    ),
                   if (r.sellerReply != null)
                     Padding(padding: const EdgeInsets.only(top: 6), child: Text('${'Seller response'.tr}: ${r.sellerReply!.text}', style: t.textTheme.bodySmall)),
                 ]),
@@ -108,14 +125,12 @@ class _MyReviewsViewState extends State<MyReviewsView> {
   }
 }
 
-/// Report a review (buyer). Sent to the support inbox; see
-/// RatingRepository.reportReview.
+/// Report a review (buyer): POST /api/rating/:reviewId/report-by-buyer
+/// (backend fix #6). Goes to the Edudeen moderation queue.
 class ReportReviewSheet extends StatefulWidget {
   const ReportReviewSheet({super.key, required this.review, this.repo});
   final ReviewModel review;
   final RatingRepository? repo;
-
-  static const reasons = ['Spam or advertising', 'Offensive or abusive', 'Not about this product', 'Shares personal information', 'Other'];
 
   static Future<void> open(ReviewModel r) =>
       Get.bottomSheet(ReportReviewSheet(review: r), isScrollControlled: true, backgroundColor: Get.theme.colorScheme.surface);
@@ -139,19 +154,24 @@ class _ReportReviewSheetState extends State<ReportReviewSheet> {
 
   Future<void> _send() async {
     if (_reason == null) return setState(() => _error = 'Choose a reason.'.tr);
-    if (_reason == 'Other' && _details.text.trim().length < 10) return setState(() => _error = 'Please tell us more (at least 10 characters).'.tr);
+    if (_reason == 'other' && _details.text.trim().length < ReportReasons.otherMin) {
+      return setState(() => _error = 'Please tell us more (at least 5 characters).'.tr);
+    }
     setState(() {
       _busy = true;
       _error = null;
     });
-    final ok = await _repo.reportReview(reviewId: widget.review.reviewId, productId: widget.review.productId ?? '', reason: _reason!, details: _details.text);
+    final r = await _repo.reportReview(reviewId: widget.review.reviewId, reasonCode: _reason!, text: _details.text);
     if (!mounted) return;
     setState(() => _busy = false);
-    if (ok) {
+    if (r.ok) {
       Get.back();
       ToastUtil.showToast('Thanks. Our team will check this review.'.tr);
+    } else if (r.alreadyReported) {
+      Get.back();
+      ToastUtil.showToast('You already reported this review.'.tr);
     } else {
-      setState(() => _error = 'Could not send your report. Please try again.'.tr);
+      setState(() => _error = r.message ?? 'Could not send your report. Please try again.'.tr);
     }
   }
 
@@ -166,10 +186,11 @@ class _ReportReviewSheetState extends State<ReportReviewSheet> {
             groupValue: _reason,
             onChanged: (v) => setState(() => _reason = v),
             child: Column(children: [
-              for (final r in ReportReviewSheet.reasons) RadioListTile<String>(key: Key('reportReason_$r'), value: r, title: Text(r.tr), contentPadding: EdgeInsets.zero),
+              for (final code in ReportReasons.codes)
+                RadioListTile<String>(key: Key('reportReason_$code'), value: code, title: Text(ReportReasons.label(code).tr), contentPadding: EdgeInsets.zero),
             ]),
           ),
-          TextField(controller: _details, maxLength: 500, maxLines: 3, decoration: InputDecoration(labelText: 'Details (optional)'.tr, border: const OutlineInputBorder())),
+          TextField(controller: _details, maxLength: ReportReasons.textMax, maxLines: 3, decoration: InputDecoration(labelText: 'Details (optional)'.tr, border: const OutlineInputBorder())),
           if (_error != null) Text(_error!, key: const Key('reportError'), style: TextStyle(color: Theme.of(context).colorScheme.error)),
           const SizedBox(height: 8),
           FilledButton(

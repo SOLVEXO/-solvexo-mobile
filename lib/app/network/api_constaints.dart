@@ -234,6 +234,8 @@ class ApiConstants {
   static const String myReviews = "$apiPrefix/rating/my-reviews";
   static String editReview(String reviewId) => "$apiPrefix/rating/$reviewId";
   static String deleteReview(String reviewId) => "$apiPrefix/rating/$reviewId";
+  /// Buyer report of a review (backend fix #6): POST {reasonCode, text?}.
+  static String reportReviewByBuyer(String reviewId) => "$apiPrefix/rating/$reviewId/report-by-buyer";
   static String productReviews(String productId) =>
       "$apiPrefix/rating/product/$productId";
   static String reviewHelpful(String reviewId) =>

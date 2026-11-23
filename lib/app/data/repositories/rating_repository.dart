@@ -1,5 +1,4 @@
 import 'package:book_store_app/app/data/models/rating/review_model.dart';
-import 'package:book_store_app/app/data/repositories/contact_repository.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/api_error.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -35,26 +34,46 @@ class ReviewRules {
   static String usedForLabel(String v) => switch (v) { 'home' => 'At home', 'classroom' => 'In class', _ => 'At school' };
 }
 
-class RatingRepository {
-  RatingRepository({BaseClient? client, ContactRepository? contact})
-      : _client = client ?? BaseClient(),
-        _contact = contact ?? ContactRepository();
-  final BaseClient _client;
-  final ContactRepository _contact;
+/// Reasons a buyer can report a review: the server's codes
+/// (`GET /api/rating/report-reasons`, backend fix #6) with app labels.
+/// `other` needs at least [otherMin] characters; text is at most [textMax].
+class ReportReasons {
+  static const codes = ['spam', 'abusive', 'off_topic', 'personal_info', 'wrong_product', 'other'];
+  static const otherMin = 5;
+  static const textMax = 300;
+  static String label(String code) => switch (code) {
+        'spam' => 'Spam or advertising',
+        'abusive' => 'Offensive or abusive',
+        'off_topic' => 'Not about this product',
+        'personal_info' => 'Shares personal information',
+        'wrong_product' => 'Wrong product',
+        _ => 'Other',
+      };
+}
 
-  /// No buyer report route exists (`POST rating/:id/report` and
-  /// `flag/:id` are seller/admin only), so a buyer's report goes to the
-  /// support inbox (POST /api/contact) with the review id. Backend issue B7.
-  Future<bool> reportReview({required String reviewId, required String productId, required String reason, String details = ''}) async {
-    final name = await AppPreferences.getUserName();
-    final email = await AppPreferences.getUserEmail();
-    if (email == null || email.isEmpty) return false;
-    return _contact.submit(
-      name: (name ?? '').isEmpty ? 'Buyer' : name!,
-      email: email,
-      topic: 'Report a review',
-      message: 'Review $reviewId on product $productId\nReason: $reason${details.trim().isEmpty ? '' : '\n${details.trim()}'}',
-    );
+class RatingRepository {
+  RatingRepository({BaseClient? client}) : _client = client ?? BaseClient();
+  final BaseClient _client;
+
+  /// Buyer report: POST /api/rating/:reviewId/report-by-buyer
+  /// {reasonCode, text?} -> 201. 409 = already reported by this buyer,
+  /// 429 = too many reports today; [message] is the server's text.
+  Future<({bool ok, bool alreadyReported, String? message})> reportReview({
+    required String reviewId,
+    required String reasonCode,
+    String text = '',
+  }) async {
+    try {
+      final res = await _client.post(
+        ApiConstants.reportReviewByBuyer(reviewId),
+        data: {'reasonCode': reasonCode, if (text.trim().isNotEmpty) 'text': text.trim()},
+        requiresAuth: true,
+      );
+      final b = res.data;
+      return (ok: b is Map && b['success'] == true, alreadyReported: false, message: ApiError.fromBody(b));
+    } on DioException catch (e) {
+      return (ok: false, alreadyReported: e.response?.statusCode == 409, message: ApiError.fromDio(e));
+    }
   }
 
   /// Writes a new review, or — if the buyer already reviewed this product —
