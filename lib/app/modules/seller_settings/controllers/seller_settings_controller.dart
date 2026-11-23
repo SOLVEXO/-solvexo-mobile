@@ -13,6 +13,7 @@ import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:book_store_app/app/modules/seller/utils/store_currency.dart';
+import 'package:book_store_app/app/services/legal_links.dart';
 import 'package:get/get.dart';
 
 class SettingsTile {
@@ -199,6 +200,27 @@ class SellerSettingsController extends GetxController {
           emoji: AppIcons.emailIcon,
           title: 'Contact Us',
           onTap: () => Get.toNamed(Routes.contactUsView),
+        ),
+      ],
+    ),
+    // R7: store-compliance pages (seller panel stays English).
+    SettingsSection(
+      header: 'LEGAL',
+      tiles: [
+        SettingsTile(
+          emoji: AppIcons.privacy,
+          title: 'Privacy Policy',
+          onTap: () => LegalLinks.open(LegalLinks.privacyPolicy),
+        ),
+        SettingsTile(
+          emoji: AppIcons.privacy,
+          title: 'Terms of Service',
+          onTap: () => LegalLinks.open(LegalLinks.termsOfService),
+        ),
+        SettingsTile(
+          emoji: AppIcons.deleteIcon,
+          title: 'Delete account on the website',
+          onTap: () => LegalLinks.open(LegalLinks.deleteAccount),
         ),
       ],
     ),

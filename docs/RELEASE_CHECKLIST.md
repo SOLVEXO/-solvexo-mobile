@@ -162,3 +162,51 @@ Tracks R1-R7 (docs §10, §13, §14 phase 7). `[x]` = done in the app;
    9. Backend/web: Stripe / PK gateway return URLs and any `com.solvexo.*` allow-lists; Play/App
       Store links in Admin -> Homepage content.
    10. Smoke test login (email, Google, Apple), push (register token, tap), deep links, payments.
+
+7. [x] **R7 Store compliance**
+   - **In-app links** (buyer Account and seller Settings): Privacy Policy
+     `https://www.edudeen.com/privacy-policy`, Terms of Service
+     `https://www.edudeen.com/terms-of-service`, Delete account on the web
+     `https://www.edudeen.com/delete-account` (all 200 on 2026-11-23), plus the existing in-app
+     Delete Account (`DELETE /api/users/profile`). Use these URLs in Play Console and App Store
+     Connect. (The apex `edudeen.com/...` 308-redirects to `www`.)
+   - **Permission texts (English + Urdu)**: iOS `NSCameraUsageDescription`,
+     `NSPhotoLibraryUsageDescription`, `NSMicrophoneUsageDescription`,
+     `NSLocationWhenInUseUsageDescription` in `Info.plist` (English) and
+     `ios/Runner/ur.lproj/InfoPlist.strings` (Urdu, `CFBundleLocalizations` = en, ur). iOS has no
+     usage string for notifications; the app shows its own explanation first. Android system
+     dialogs cannot be customised, so the app explains camera / photos / notifications in its own
+     dialog (`.tr`, English + Urdu) before the system prompt.
+   - **Version / build scheme**: `pubspec.yaml` `version: MAJOR.MINOR.PATCH+BUILD`
+     (today `1.0.11+15`). `BUILD` = Android `versionCode` = iOS `CFBundleVersion`; it must go up by
+     1 for **every** store upload (both stores, even a re-upload of the same version).
+     `MAJOR.MINOR.PATCH` = `versionName` / `CFBundleShortVersionString`: PATCH for fixes, MINOR for
+     features, MAJOR for breaking changes. Build with
+     `flutter build appbundle --build-name=1.1.0 --build-number=16` or bump `pubspec.yaml` in the
+     release commit; tag `v1.1.0+16`.
+
+   **Draft - Google Play Data safety** (from what the app actually sends)
+   | Data type | Collected | Shared | Purpose | Optional? |
+   |---|---|---|---|---|
+   | Name, email, phone | Yes (account, orders) | With the seller of an order (name, phone, address for delivery) | Account management, app functionality | Required for an account; browsing works as a guest |
+   | Physical address | Yes (delivery addresses) | With the seller of a physical order | App functionality | Only for physical orders |
+   | Approximate/precise location | Yes, only when the user taps "Pick on map" (geolocator); not stored as location, only the chosen address | No | App functionality | Optional |
+   | Payment info | Card data goes to Stripe directly (not to Edudeen); bank-transfer proof images are uploaded | Stripe (processor) | Payments | Optional (COD/bank) |
+   | Purchase history | Yes (orders, library) | Seller sees their own orders | App functionality | - |
+   | Photos | Yes, only images the user uploads (profile, reviews, return evidence, payment proof, seller products) | Public where the user publishes them (reviews, products) | App functionality | Optional |
+   | Audio | Not collected. `RECORD_AUDIO` + `NSMicrophoneUsageDescription` are declared but no app code records audio - **remove both before submission** unless a feature needs them | - | - | - |
+   | Messages | Yes (buyer-seller chat, support chat) | With the other party of the chat | App functionality | Optional |
+   | App activity | Searches (recent searches), recently viewed, banner impressions/clicks, product page visits | No | Personalisation, analytics (first-party) | - |
+   | Device or other IDs | FCM push token | Google (FCM) as processor | Notifications | Optional (notification permission) |
+   | Crash logs / diagnostics | Only if built with `SENTRY_DSN` (R5); no personal data | Sentry (processor) | App stability | - |
+   Data is encrypted in transit (HTTPS). Users can request deletion in-app and at `/delete-account`.
+   No advertising ID (AD_ID removed in the manifest), no data sold.
+
+   **Draft - App Store privacy ("nutrition label")**
+   - Data linked to the user: Contact Info (name, email, phone, address), Purchases, User Content
+     (photos, reviews, messages, customer support), Identifiers (user ID), Usage Data (product
+     interaction, search history) - all for App Functionality; Usage Data also Analytics.
+   - Data not linked to the user: Diagnostics (crash data) only when Sentry is on.
+   - Tracking: **No** (no third-party advertising/tracking; no ATT prompt needed).
+   - Location: Precise location only at "Pick on map", App Functionality, not stored as location.
+   - Owner to confirm with legal before submitting; keep in sync with the web privacy policy.

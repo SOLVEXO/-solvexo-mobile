@@ -314,6 +314,22 @@ class AppTranslations extends Translations {
     'Digital file is not working': 'ڈیجیٹل فائل کام نہیں کر رہی',
     'Other': 'دیگر',
 
+    // Store compliance (R7)
+    'Could not open the page.': 'صفحہ نہیں کھل سکا۔',
+    'Terms of Service': 'شرائط و ضوابط',
+    'Delete account on the website': 'ویب سائٹ پر اکاؤنٹ حذف کریں',
+    'Allow camera access': 'کیمرہ تک رسائی دیں',
+    'Allow photo access': 'تصاویر تک رسائی دیں',
+    'Turn on notifications': 'اطلاعات آن کریں',
+    'Edudeen uses the camera only when you take a photo to upload, such as a payment proof, a return photo or your profile picture.': 'ایڈودین کیمرہ صرف اس وقت استعمال کرتا ہے جب آپ اپ لوڈ کرنے کے لیے تصویر لیتے ہیں، جیسے ادائیگی کا ثبوت، واپسی کی تصویر یا پروفائل تصویر۔',
+    'Edudeen opens your photos only to upload the picture you choose, such as a payment proof, a review photo or your profile picture.': 'ایڈودین آپ کی تصاویر صرف وہ تصویر اپ لوڈ کرنے کے لیے کھولتا ہے جو آپ منتخب کریں، جیسے ادائیگی کا ثبوت، ریویو کی تصویر یا پروفائل تصویر۔',
+    'Get updates about your orders, downloads, messages and offers. You can change this anytime in Notification Preferences.': 'اپنے آرڈرز، ڈاؤن لوڈز، پیغامات اور پیشکشوں کی اپ ڈیٹس حاصل کریں۔ آپ اسے کسی بھی وقت نوٹیفکیشن کی ترجیحات میں بدل سکتے ہیں۔',
+    'Not now': 'ابھی نہیں',
+    'Camera': 'کیمرہ',
+    'access is off': 'رسائی بند ہے',
+    'Turn it on in your phone settings to upload photos.': 'تصاویر اپ لوڈ کرنے کے لیے فون کی سیٹنگز میں اسے آن کریں۔',
+    'Open Settings': 'سیٹنگز کھولیں',
+
     // Accessibility labels + legacy keys (R4)
     'Decrease quantity': 'تعداد کم کریں',
     'Increase quantity': 'تعداد بڑھائیں',

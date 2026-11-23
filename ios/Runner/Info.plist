@@ -6,6 +6,11 @@
 	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ur</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -53,13 +58,13 @@
 	<key>NSCalendarsUsageDescription</key>
 	<string>This app needs access to your calendar to display and manage events.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>We need access to your camera to take photos or scan QR codes.</string>
+	<string>Edudeen uses the camera only when you take a photo to upload, such as a payment proof, a return photo or your profile picture.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Edudeen uses your location while the app is open to show nearby sellers and products, and to pick your address on the map.</string>
+	<string>Edudeen uses your location only while the app is open, to pick your delivery address on the map.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to your microphone to record audio during video capture.</string>
+	<string>Edudeen uses the microphone only when you record a video to upload.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to upload a kid's profile photo.</string>
+	<string>Edudeen opens your photos only to upload the picture you choose, such as a payment proof, a review photo or your profile picture.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This app requires speech recognition to process voice input.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

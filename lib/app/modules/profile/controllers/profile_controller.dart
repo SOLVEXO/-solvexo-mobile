@@ -15,6 +15,7 @@ import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/utils/custom_alert_dialog_util.dart';
 import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:book_store_app/app/services/legal_links.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -126,10 +127,21 @@ class ProfileController extends GetxController {
           title: 'Contact Us'.tr,
           onTap: () => Get.toNamed(Routes.contactUsView),
         ),
+        // R7: the same web pages the store listings link to.
         SettingsTile(
           icon: AppIcons.privacy,
           title: 'Privacy Policy'.tr,
-          onTap: () => Get.toNamed(Routes.PRIVACY_POLICY),
+          onTap: () => LegalLinks.open(LegalLinks.privacyPolicy),
+        ),
+        SettingsTile(
+          icon: AppIcons.privacy,
+          title: 'Terms of Service'.tr,
+          onTap: () => LegalLinks.open(LegalLinks.termsOfService),
+        ),
+        SettingsTile(
+          icon: AppIcons.deleteIcon,
+          title: 'Delete account on the website'.tr,
+          onTap: () => LegalLinks.open(LegalLinks.deleteAccount),
         ),
         SettingsTile(
           icon: AppIcons.aboutIcon,

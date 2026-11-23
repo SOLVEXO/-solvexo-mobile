@@ -5,6 +5,8 @@ import 'package:book_store_app/app/data/repositories/notifications_repository.da
 import 'package:book_store_app/app/notification/local_notification_service.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
 import 'package:book_store_app/app/routes/incoming_links.dart';
+import 'package:book_store_app/app/services/notification_ask.dart';
+import 'package:book_store_app/app/services/permission_rationale.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -56,6 +58,22 @@ class FcmService {
   /// there to catch a thrown error. It must never throw.
   Future<NotificationSettings?> init() async {
     try {
+      // R7: explain first (English/Urdu) before the system prompt; "Not now"
+      // skips the prompt and we ask again after a week at the earliest.
+      final current = await _firebaseMessaging.getNotificationSettings();
+      if (current.authorizationStatus == AuthorizationStatus.notDetermined) {
+        if (!await NotificationAsk.shouldAsk()) {
+          _setupListeners();
+          return current;
+        }
+        await NotificationAsk.waitForStableScreen();
+        final ok = await PermissionRationale.ask(PermissionKind.notifications);
+        await NotificationAsk.markAsked();
+        if (!ok) {
+          _setupListeners();
+          return current;
+        }
+      }
       final settings = await _firebaseMessaging.requestPermission(
         sound: true,
         badge: true,

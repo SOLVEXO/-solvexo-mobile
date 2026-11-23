@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/app/services/permission_rationale.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -117,11 +118,9 @@ class AppImagePicker {
       return false;
     }
 
-    // Show rationale before requesting (Android best practice)
-    if (await permission.shouldShowRequestRationale) {
-      final proceed = await _showRationaleDialog(_permissionLabel(permission));
-      if (!proceed) return false;
-    }
+    // Explain why before Android's system dialog (R7: English + Urdu).
+    final kind = permission == Permission.camera ? PermissionKind.camera : PermissionKind.photos;
+    if (!await PermissionRationale.ask(kind)) return false;
 
     status = await permission.request();
 
@@ -134,45 +133,9 @@ class AppImagePicker {
   }
 
   static String _permissionLabel(Permission p) =>
-      p == Permission.camera ? 'Camera' : 'Photo Library';
+      p == Permission.camera ? 'Camera'.tr : 'Photos'.tr;
 
   // ── Dialogs ─────────────────────────────────────────────────────────────────
-
-  /// Rationale dialog — explains WHY before Android's system dialog appears.
-  static Future<bool> _showRationaleDialog(String permissionName) async {
-    final result = await Get.dialog<bool>(
-      AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: CustomText(
-          text: '$permissionName Access',
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: AppColors.black,
-        ),
-        content: CustomText(
-          text: 'This app needs access to your $permissionName to let you upload photos.',
-          fontSize: 14,
-          color: AppColors.grey,
-          height: 1.5,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const CustomText(text: 'Not Now', color: AppColors.grey),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: const CustomText(
-              text: 'Allow',
-              color: AppColors.primaryColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-    return result ?? false;
-  }
 
   /// Settings redirect dialog — shown when permission is permanently denied.
   static void _showSettingsDialog(String permissionName) {
@@ -180,13 +143,13 @@ class AppImagePicker {
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: CustomText(
-          text: '$permissionName Blocked',
+          text: '$permissionName: ${'access is off'.tr}',
           fontSize: 16,
           fontWeight: FontWeight.bold,
           color: AppColors.black,
         ),
         content: CustomText(
-          text: '$permissionName access was denied. Please enable it in your device settings to upload photos.',
+          text: 'Turn it on in your phone settings to upload photos.'.tr,
           fontSize: 14,
           color: AppColors.grey,
           height: 1.5,
@@ -194,15 +157,15 @@ class AppImagePicker {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const CustomText(text: 'Cancel', color: AppColors.grey),
+            child: CustomText(text: 'Cancel'.tr, color: AppColors.grey),
           ),
           TextButton(
             onPressed: () {
               Get.back();
               openAppSettings();
             },
-            child: const CustomText(
-              text: 'Open Settings',
+            child: CustomText(
+              text: 'Open Settings'.tr,
               color: AppColors.primaryColor,
               fontWeight: FontWeight.w600,
             ),
