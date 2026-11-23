@@ -7,10 +7,12 @@ import 'package:get/get.dart';
 
 /// Current maintenance state as told by the API (docs §3 "Maintenance").
 ///
-/// Sources: a 503 body `{maintenanceMode, scope, title, message, endsAt}` from
-/// any call, or `GET /api/platform-config/maintenance`. Both shapes are read
-/// defensively because the status endpoint's exact body was not verified
-/// against the live API from this environment.
+/// Sources: a 503 body `{maintenanceMode, scope, scopes, title, message,
+/// endsAt}` from any call, or `GET /api/platform-config/maintenance`, whose
+/// `state` is exactly 'off' | 'scheduled' | 'active' (documented by backend
+/// fix #12, `MAINTENANCE_STATES`): 'off' = nothing else is sent;
+/// 'scheduled' = future `startsAt`, nothing blocked (banner); 'active' =
+/// blocking now for `scopes`. `endsAt` is only an estimate.
 class MaintenanceState {
   const MaintenanceState({
     required this.enabled,
@@ -20,7 +22,12 @@ class MaintenanceState {
     this.startsAt,
     this.endsAt,
     this.scopeMessages = const {},
+    this.serverState,
   });
+
+  /// The status endpoint's `state` ('scheduled' | 'active'), null when the
+  /// value came from a 503 body.
+  final String? serverState;
 
   final bool enabled;
   final List<String> scopes;
@@ -32,9 +39,11 @@ class MaintenanceState {
 
   static const off = MaintenanceState(enabled: false, scopes: []);
 
-  /// `startsAt` in the future = scheduled: banner only, nothing is blocked.
-  bool get isScheduled =>
-      startsAt != null && startsAt!.isAfter(DateTime.now());
+  /// Scheduled: banner only, nothing is blocked. The server's `state` wins;
+  /// without it (503 body) a future `startsAt` means scheduled.
+  bool get isScheduled => serverState != null
+      ? serverState == 'scheduled'
+      : startsAt != null && startsAt!.isAfter(DateTime.now());
 
   bool get isActive => enabled && !isScheduled;
 
@@ -61,16 +70,11 @@ class MaintenanceState {
     final json = raw['data'] is Map<String, dynamic>
         ? raw['data'] as Map<String, dynamic>
         : raw;
-    // Live status endpoint answers `{data: {state: 'off'}}` (verified
-    // 2026-11-17). Only 'off' was observed; 'on'/'active' are assumed for the
-    // enabled case, any other value falls back to the boolean fields.
+    // Status endpoint: 'off' | 'scheduled' | 'active' (backend fix #12).
+    // No `state` = a 503 body (`maintenanceMode: true`).
     final state = json['state']?.toString().toLowerCase();
-    final enabled = state == 'off'
-        ? false
-        : state == 'on' ||
-            state == 'active' ||
-            json['maintenanceMode'] == true ||
-            json['enabled'] == true;
+    final known = state == 'off' || state == 'scheduled' || state == 'active';
+    final enabled = known ? state != 'off' : json['maintenanceMode'] == true || json['enabled'] == true;
     final scopes = <String>[
       if (json['scopes'] is List)
         ...(json['scopes'] as List).map((e) => e.toString()),
@@ -93,6 +97,7 @@ class MaintenanceState {
       startsAt: _date(json['startsAt']),
       endsAt: _date(json['endsAt']),
       scopeMessages: scopeMessages,
+      serverState: known && state != 'off' ? state : null,
     );
   }
 }

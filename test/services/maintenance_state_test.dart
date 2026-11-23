@@ -65,12 +65,44 @@ void main() {
       expect(s.enabled, isFalse);
     });
 
-    test('state on (assumed shape) blocks the buyer app', () {
+    // Documented states (backend fix #12): off | scheduled | active; no 'on'.
+    test("state 'active' blocks its scopes", () {
       final s = MaintenanceState.fromJson({
-        'data': {'state': 'on', 'message': 'Back soon'},
+        'data': {'state': 'active', 'scopes': ['all'], 'message': 'Back soon', 'startsAt': null},
       });
+      expect(s.isActive, isTrue);
       expect(s.blocksBuyerApp, isTrue);
       expect(s.message, 'Back soon');
+      final feature = MaintenanceState.fromJson({
+        'data': {'state': 'active', 'scopes': ['feature:search']},
+      });
+      expect(feature.blocksBuyerApp, isFalse);
+      expect(feature.blocksFeature('search'), isTrue);
+    });
+
+    test("state 'scheduled' shows the banner and blocks nothing", () {
+      final s = MaintenanceState.fromJson({
+        'data': {'state': 'scheduled', 'scopes': ['all'], 'startsAt': DateTime.now().add(const Duration(hours: 2)).toUtc().toIso8601String()},
+      });
+      expect(s.enabled, isTrue, reason: 'used to parse as off, so the banner never showed');
+      expect(s.isScheduled, isTrue);
+      expect(s.blocksBuyerApp, isFalse);
+    });
+
+    test("the server's state wins over the device clock", () {
+      // Device clock ahead: startsAt already passed here, but the server still says scheduled.
+      final s = MaintenanceState.fromJson({
+        'data': {'state': 'scheduled', 'scopes': ['all'], 'startsAt': DateTime.now().subtract(const Duration(minutes: 1)).toUtc().toIso8601String()},
+      });
+      expect(s.isScheduled, isTrue);
+      expect(s.blocksBuyerApp, isFalse);
+    });
+
+    test("unknown 'on' is not a state; a 503 body still blocks", () {
+      expect(MaintenanceState.fromJson({'data': {'state': 'on'}}).enabled, isFalse);
+      final b = MaintenanceState.fromJson({'statusCode': 503, 'maintenanceMode': true, 'scope': 'checkout', 'scopes': ['checkout']});
+      expect(b.isActive, isTrue);
+      expect(b.blocksFeature('checkout'), isTrue);
     });
 
     test('disabled config is off', () {
