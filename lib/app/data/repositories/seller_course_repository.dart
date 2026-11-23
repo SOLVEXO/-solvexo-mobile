@@ -41,7 +41,9 @@ class CourseLesson {
   bool get isLegacy => !isVideo;
   bool get isUpload => file != null && (file!['url'] ?? '').toString().isNotEmpty;
 
-  static const maxTitle = 150; // longer titles are cut by the server
+  /// Server limit: a longer lesson title is a 400 "Lesson N in "<section>" title
+  /// must be at most 150 characters" (backend fix #2). Kept as inline validation.
+  static const maxTitle = 150;
 
   factory CourseLesson.fromJson(Map j) => CourseLesson(
         id: j['_id']?.toString(),
@@ -90,7 +92,9 @@ class CourseSection {
   String title;
   final List<CourseLesson> lessons;
 
-  static const maxTitle = 120; // longer titles are cut by the server
+  /// Server limit: a longer section title is a 400 "Section N title must be at
+  /// most 120 characters" (backend fix #2). Kept as inline validation.
+  static const maxTitle = 120;
 
   factory CourseSection.fromJson(Map j) => CourseSection(
         id: j['_id']?.toString(),
@@ -205,10 +209,15 @@ class SellerCourseRepository {
   SellerCourseRepository({BaseClient? client}) : _client = client ?? BaseClient();
   final BaseClient _client;
 
-  /// Throws on failure.
+  /// Throws [CourseLoadException] with the server's message (e.g. 400
+  /// "Invalid id" for a bad store / product id, 404 for a missing course).
   Future<CourseContent> load(String storeId, String productId) async {
-    final res = await _client.get(ApiConstants.sellerCourse(storeId, productId), requiresAuth: true);
-    return CourseContent.fromJson((res.data as Map)['data'] as Map);
+    try {
+      final res = await _client.get(ApiConstants.sellerCourse(storeId, productId), requiresAuth: true);
+      return CourseContent.fromJson((res.data as Map)['data'] as Map);
+    } on DioException catch (e) {
+      throw CourseLoadException(ApiError.fromDio(e));
+    }
   }
 
   Future<({bool ok, CourseContent? saved, String? message})> save(String storeId, String productId, CourseContent c) async {
@@ -262,4 +271,12 @@ class CourseUploadException implements Exception {
   final bool cancelled;
   @override
   String toString() => message;
+}
+
+/// A course that could not be loaded; [message] is the server's text if any.
+class CourseLoadException implements Exception {
+  const CourseLoadException(this.message);
+  final String? message;
+  @override
+  String toString() => message ?? 'Could not load the course.';
 }

@@ -171,8 +171,10 @@ class SellerStoreSettingsController extends GetxController {
         parsedDays[r] = DayRange(int.parse(minC.text.trim()), int.parse(maxC.text.trim()));
       }
     }
-    // Backend 5adba44 (store.service.ts ~813): shipFrom without a city is
-    // saved as null (the province is dropped), and the city is cut at 60.
+    // Same rules as the server (backend fix #3, store-settings.util.ts): a
+    // province needs a city (400 "Choose the city you ship from for this
+    // province"), the city is at most 60 characters, and the province must
+    // be one of [provinces]. Checked here first so the seller sees it inline.
     if (city.text.trim().isEmpty && province.value != null) {
       e['city'] = 'Add the city you ship from, or clear the province.';
     } else if (city.text.trim().length > 60) {
@@ -219,7 +221,11 @@ class SellerStoreSettingsController extends GetxController {
         ToastUtil.showToast('Settings saved');
         return true;
       }
-      ToastUtil.showToast(r.message ?? 'Could not save the settings.');
+      final msg = r.message ?? 'Could not save the settings.';
+      // A server 400 (the authority) goes under the field it is about.
+      final field = fieldForServerError(msg);
+      if (field != null) errors.assignAll({...errors, field: msg});
+      ToastUtil.showToast(msg);
       return false;
     } finally {
       saving.value = false;
@@ -227,4 +233,14 @@ class SellerStoreSettingsController extends GetxController {
   }
 
   void discard() => _apply(_loaded);
+
+  /// Which field a store-settings 400 belongs to (backend fix #3 messages),
+  /// or null for a general error.
+  static String? fieldForServerError(String message) {
+    final m = message.toLowerCase();
+    if (m.contains('product type') || m.contains('producttype')) return 'types';
+    if (m.contains('city you ship from') || m.contains('shipfrom.city')) return 'city';
+    if (m.contains('province')) return 'province';
+    return null;
+  }
 }

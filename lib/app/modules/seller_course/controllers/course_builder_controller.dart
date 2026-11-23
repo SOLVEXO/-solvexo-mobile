@@ -22,6 +22,8 @@ class CourseBuilderController extends GetxController {
 
   final RxBool isLoading = true.obs;
   final RxBool failed = false.obs;
+  /// The server's reason when loading failed (e.g. "Invalid id"), else null.
+  final RxnString loadError = RxnString();
   final RxBool saving = false.obs;
   final RxBool dirty = false.obs;
   final Rx<CourseContent?> content = Rx<CourseContent?>(null);
@@ -40,11 +42,15 @@ class CourseBuilderController extends GetxController {
   Future<void> load() async {
     isLoading.value = true;
     failed.value = false;
+    loadError.value = null;
     storeId = _storeIdOverride ?? await AppPreferences.getStoreId() ?? '';
     productId = _productIdOverride ?? productId;
     try {
       content.value = await _repo.load(storeId, productId);
       dirty.value = false;
+    } on CourseLoadException catch (e) {
+      loadError.value = e.message;
+      failed.value = true;
     } catch (_) {
       failed.value = true;
     }

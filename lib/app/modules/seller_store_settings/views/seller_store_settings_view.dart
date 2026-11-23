@@ -118,7 +118,7 @@ class SellerStoreSettingsView extends GetView<SellerStoreSettingsController> {
         DropdownButtonFormField<String?>(
           key: const Key('province'),
           initialValue: c.province.value,
-          decoration: const InputDecoration(labelText: 'Province', border: OutlineInputBorder()),
+          decoration: InputDecoration(labelText: 'Province', border: const OutlineInputBorder(), errorText: e['province']),
           items: [
             const DropdownMenuItem<String?>(value: null, child: Text('Not set')),
             for (final p in SellerStoreSettingsController.provinces) DropdownMenuItem<String?>(value: p, child: Text(p)),

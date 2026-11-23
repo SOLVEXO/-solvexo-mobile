@@ -40,7 +40,7 @@ class CourseBuilderView extends GetView<CourseBuilderController> {
             body: controller.isLoading.value
                 ? const ListSkeleton(rows: 5, rowHeight: 88)
                 : controller.failed.value || controller.content.value == null
-                    ? ErrorRetry(message: 'Could not load the course.', onRetry: controller.load)
+                    ? ErrorRetry(message: controller.loadError.value ?? 'Could not load the course.', onRetry: controller.load)
                     : _body(context, controller.content.value!),
             bottomNavigationBar: controller.content.value == null
                 ? null
