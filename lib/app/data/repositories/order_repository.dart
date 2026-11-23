@@ -75,7 +75,7 @@ class OrderRepository {
 
       debugPrint('🔄 Fetching order: $orderId');
 
-      final response = await _baseClient.get('${ApiConstants.orders}/$orderId');
+      final response = await _baseClient.get('${ApiConstants.orders}/$orderId', requiresAuth: true);
 
       debugPrint('✅ Get Order Response: ${response.data}');
 
