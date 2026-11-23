@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 import 'package:book_store_app/app/data/repositories/buyer_extras_repository.dart';
@@ -107,4 +108,20 @@ void main() {
     expect(CheckoutController.onlineAllowed(['stripe'], 'PKR', true), isFalse);
     expect(CheckoutController.onlineAllowed(['free'], 'USD', true), isFalse);
   });
+
+  test('buy-now 403 (seller session, backend fix #8) is a BuyerOnlyException, not a raw error', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({});
+    final c = _Client403();
+    await expectLater(BuyerExtrasRepository(client: c).buyNow(productId: 'p', variantId: 'v'), throwsA(isA<BuyerOnlyException>()));
+  });
+}
+
+class _Client403 extends BaseClient {
+  @override
+  Future<Response> get(String url, {Map<String, dynamic>? queryParameters, dynamic data, bool requiresAuth = false, ResponseType? responseType}) async {
+    final ro = RequestOptions(path: url);
+    throw DioException(requestOptions: ro, type: DioExceptionType.badResponse,
+        response: Response(requestOptions: ro, statusCode: 403, data: {'message': 'Access Denied: Insufficient role', 'statusCode': 403}));
+  }
 }

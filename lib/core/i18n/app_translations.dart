@@ -105,6 +105,7 @@ class AppTranslations extends Translations {
     'This is your seller account': 'یہ آپ کا سیلر اکاؤنٹ ہے',
     'Buying needs your buyer account. Switch to it to continue.': 'خریداری کے لیے خریدار اکاؤنٹ چاہیے۔ جاری رکھنے کے لیے اس پر سوئچ کریں۔',
     'Switch to your buyer account': 'اپنے خریدار اکاؤنٹ پر جائیں',
+    'Could not start Buy Now': 'ابھی خریدیں شروع نہیں ہو سکا',
     'Could not switch account.': 'اکاؤنٹ تبدیل نہیں ہو سکا۔',
     'Open your seller account?': 'اپنا سیلر اکاؤنٹ کھولیں؟',
     'Start selling on Edudeen?': 'ایجودین پر فروخت شروع کریں؟',

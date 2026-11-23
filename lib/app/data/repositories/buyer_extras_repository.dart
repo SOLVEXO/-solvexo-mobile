@@ -43,11 +43,19 @@ class BuyNowLine {
   bool get isPhysical => type != 'digital';
 }
 
+/// The server refused a buyer-only call for this session (403); the user has
+/// already been shown the switch-account prompt or the server message.
+class BuyerOnlyException implements Exception {
+  const BuyerOnlyException();
+}
+
 class BuyerExtrasRepository {
   BuyerExtrasRepository({BaseClient? client}) : _client = client ?? BaseClient();
   final BaseClient _client;
 
-  /// Throws a message string on 4xx (e.g. "Invalid Buy Now selection").
+  /// Throws a message string on 4xx (e.g. "Invalid Buy Now selection"), and
+  /// [BuyerOnlyException] on 403: buy-now is buyer-only on the server since
+  /// backend fix #8 (a seller gets "Switch to your buyer account").
   Future<BuyNowLine> buyNow({required String productId, required String variantId, int quantity = 1}) async {
     try {
       final r = await _client.get(ApiConstants.buyNow,
@@ -57,7 +65,7 @@ class BuyerExtrasRepository {
     } on DioException catch (e) {
       if (e.response?.statusCode == 403) {
         DioExceptionHandler.handleDioException(e); // seller -> "Switch to your buyer account"
-        rethrow;
+        throw const BuyerOnlyException();
       }
       throw ApiError.fromDio(e) ?? 'Could not start Buy Now';
     }

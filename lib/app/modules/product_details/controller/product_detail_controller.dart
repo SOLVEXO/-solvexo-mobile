@@ -57,7 +57,8 @@ class ProductDetailController extends GetxController {
       Get.toNamed(Routes.authTabView);
       return;
     }
-    // Checkout is buyer-only (create-checkout is @Roles('user') -> 403).
+    // Checkout and buy-now are buyer-only on the server (403 for a seller,
+    // backend fix #8). Blocked here first so a seller never sends the call.
     if (await AppPreferences.getUserRole() == 'seller') {
       await AccountSwitchPrompt.onBuyerOnly403('Switch to your buyer account'.tr);
       return;
@@ -88,8 +89,10 @@ class ProductDetailController extends GetxController {
       }
     } on String catch (msg) {
       ToastUtil.showToast(msg);
+    } on BuyerOnlyException {
+      // Server 403: the switch-account prompt (or the server text) was shown.
     } catch (_) {
-      // 403 for a seller session is handled by the switch-account prompt.
+      ToastUtil.showToast('Could not start Buy Now'.tr);
     } finally {
       isBuyNowLoading.value = false;
     }
