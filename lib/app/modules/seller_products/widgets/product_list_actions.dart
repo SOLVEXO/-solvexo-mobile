@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:book_store_app/app/components/skeleton.dart';
 import 'package:book_store_app/app/data/models/finance/earnings_models.dart';
 import 'package:book_store_app/app/data/repositories/seller_finance_repository.dart';
@@ -217,8 +219,9 @@ class _InlineEditSheetState extends State<InlineEditSheet> {
 }
 
 /// Premium offer for one product (docs 2.5): members get [percent] % off,
-/// 1-50. "Your earnings" is the server's fee estimate for the normal price
-/// (GET finance/:storeId/fee-estimate); the app does no money maths.
+/// 1-50. "Your earnings" is the server's fee estimate (GET finance/:storeId/
+/// fee-estimate) for the normal price and, with `premiumPercent`, at the
+/// member price (backend fix #5); the app does no money maths.
 class PremiumOfferSheet extends StatefulWidget {
   const PremiumOfferSheet({super.key, required this.controller, required this.product, this.finance});
   final SellerProductsController controller;
@@ -241,27 +244,42 @@ class _PremiumOfferSheetState extends State<PremiumOfferSheet> {
   bool _busy = false;
   FeeEstimate? _estimate;
   bool _estimateFailed = false;
+  Timer? _debounce;
+  int _request = 0;
 
   @override
   void initState() {
     super.initState();
+    _c.addListener(_percentChanged);
     _loadEstimate();
   }
 
+  /// The typed percent when it is valid (1-50), else null.
+  int? get _validPercent =>
+      SellerProductsController.validatePremium(_c.text) == null ? int.tryParse(_c.text.trim()) : null;
+
+  void _percentChanged() {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), _loadEstimate);
+  }
+
   Future<void> _loadEstimate() async {
+    final request = ++_request;
     setState(() => _estimateFailed = false);
     try {
       final storeId = await AppPreferences.getStoreId() ?? '';
-      final e = await (widget.finance ?? SellerFinanceRepository())
-          .getFeeEstimate(storeId, price: widget.product.price, type: widget.product.isPhysical ? 'physical' : 'digital');
-      if (mounted) setState(() => _estimate = e);
+      final e = await (widget.finance ?? SellerFinanceRepository()).getFeeEstimate(storeId,
+          price: widget.product.price, type: widget.product.isPhysical ? 'physical' : 'digital', premiumPercent: _validPercent);
+      if (mounted && request == _request) setState(() => _estimate = e);
     } catch (_) {
-      if (mounted) setState(() => _estimateFailed = true);
+      if (mounted && request == _request) setState(() => _estimateFailed = true);
     }
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _c.removeListener(_percentChanged);
     _c.dispose();
     super.dispose();
   }
@@ -322,6 +340,18 @@ class _PremiumOfferSheetState extends State<PremiumOfferSheet> {
                         'you get ${Money.format(e.net, e.currency)}.',
                         key: const Key('earningsLine')),
                     if (e.reason != null) Text(e.reason!, style: t.textTheme.bodySmall),
+                    if (e.premium != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                          'Members pay ${Money.format(e.premium!.memberPrice, e.currency)}'
+                          '${e.premium!.platformFunded > 0 ? ' (Edudeen adds ${Money.format(e.premium!.platformFunded, e.currency)})' : ''}: '
+                          'platform fee ${Money.format(e.premium!.fee, e.currency)}, you get ${Money.format(e.premium!.net, e.currency)}.',
+                          key: const Key('memberEarningsLine')),
+                    ] else if (e.premiumAsked) ...[
+                      const SizedBox(height: 6),
+                      Text('Members would not pay less than the normal price here, so no member price applies.',
+                          key: const Key('memberEarningsLine'), style: t.textTheme.bodySmall),
+                    ],
                     const SizedBox(height: 4),
                     Text('Member orders are paid at the member price; each order shows what you earn.',
                         style: t.textTheme.bodySmall),

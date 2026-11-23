@@ -192,8 +192,10 @@ class StatementRow {
       );
 }
 
-/// `GET /api/finance/:storeId/fee-estimate?price&type`
-/// -> {currency, type, price, generatedAt, fee, net, reason}.
+/// `GET /api/finance/:storeId/fee-estimate?price&type[&premiumPercent]`
+/// -> {currency, type, price, generatedAt, fee, net, reason, premium?}.
+/// `premium` is only sent when `premiumPercent` (or `productId`) was asked
+/// (backend fix #5); it is null when no member price applies.
 class FeeEstimate {
   const FeeEstimate({
     required this.currency,
@@ -202,6 +204,8 @@ class FeeEstimate {
     required this.fee,
     required this.net,
     this.reason,
+    this.premium,
+    this.premiumAsked = false,
   });
 
   final String currency;
@@ -211,6 +215,13 @@ class FeeEstimate {
   final double net;
   final String? reason;
 
+  /// Earnings at the member price, from the server; null = not asked, or
+  /// asked and no member price applies (see [premiumAsked]).
+  final PremiumEstimate? premium;
+
+  /// The response carried a `premium` key (the server was asked for it).
+  final bool premiumAsked;
+
   factory FeeEstimate.fromJson(Map<String, dynamic> j) => FeeEstimate(
         currency: j['currency']?.toString() ?? '',
         type: j['type']?.toString() ?? '',
@@ -218,5 +229,44 @@ class FeeEstimate {
         fee: _d(j['fee']),
         net: _d(j['net']),
         reason: j['reason']?.toString(),
+        premiumAsked: j.containsKey('premium'),
+        premium: j['premium'] is Map ? PremiumEstimate.fromJson(Map<String, dynamic>.from(j['premium'] as Map)) : null,
+      );
+}
+
+/// The `premium` block of the fee estimate: what a Premium member pays and
+/// what the seller is credited, using the same rule as a real member sale.
+class PremiumEstimate {
+  const PremiumEstimate({
+    required this.memberPrice,
+    required this.sellerPercent,
+    required this.platformPercent,
+    required this.memberDiscountPercent,
+    required this.platformFunded,
+    required this.saleValue,
+    required this.feePercent,
+    required this.fee,
+    required this.net,
+  });
+
+  final double memberPrice, sellerPercent, platformPercent, memberDiscountPercent;
+
+  /// Part of the member discount Edudeen pays (credited to the seller).
+  final double platformFunded;
+
+  /// What the seller is credited before the fee: member price + platformFunded.
+  final double saleValue;
+  final double feePercent, fee, net;
+
+  factory PremiumEstimate.fromJson(Map<String, dynamic> j) => PremiumEstimate(
+        memberPrice: _d(j['memberPrice']),
+        sellerPercent: _d(j['sellerPercent']),
+        platformPercent: _d(j['platformPercent']),
+        memberDiscountPercent: _d(j['memberDiscountPercent']),
+        platformFunded: _d(j['platformFunded']),
+        saleValue: _d(j['saleValue']),
+        feePercent: _d(j['feePercent']),
+        fee: _d(j['fee']),
+        net: _d(j['net']),
       );
 }

@@ -58,11 +58,13 @@ class SellerFinanceRepository {
     );
   }
 
-  /// Server-side fee for a price (never computed on the device). Throws.
-  Future<FeeEstimate> getFeeEstimate(String storeId, {required num price, required String type}) async {
+  /// Server-side fee for a price (never computed on the device). With
+  /// [premiumPercent] (1-50) the answer also has the earnings at the member
+  /// price (`premium`). Throws.
+  Future<FeeEstimate> getFeeEstimate(String storeId, {required num price, required String type, int? premiumPercent}) async {
     final res = await _client.get(
       ApiConstants.financeFeeEstimate(storeId),
-      queryParameters: {'price': price, 'type': type},
+      queryParameters: {'price': price, 'type': type, if (premiumPercent != null) 'premiumPercent': premiumPercent},
       requiresAuth: true,
     );
     return FeeEstimate.fromJson(Map<String, dynamic>.from(res.data as Map));
