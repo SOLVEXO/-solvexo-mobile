@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:book_store_app/app/notification/fcm_service.dart';
 import 'package:book_store_app/app/routes/incoming_links.dart';
+import 'package:book_store_app/app/services/error_monitoring.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/notification/fcm_background_handler.dart';
 import 'package:book_store_app/app/notification/local_notification_service.dart';
@@ -56,7 +57,8 @@ void main() async {
   // platform config (cached, refreshed quietly). Neither blocks startup.
   Get.put(MaintenanceService(), permanent: true).check();
   Get.put(PlatformConfigService(), permanent: true).load();
-  runApp(const MyApp());
+  // R5: Sentry only when built with --dart-define=SENTRY_DSN=...
+  await ErrorMonitoring.run(() => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

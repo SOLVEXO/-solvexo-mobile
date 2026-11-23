@@ -90,3 +90,16 @@ Tracks R1-R7 (docs §10, §13, §14 phase 7). `[x]` = done in the app;
      snake_case text (no English map); now real English + Urdu.
    - Not covered: strings that are still hard-coded English in older buyer widgets (no `.tr`)
      stay English in Urdu mode; layout is RTL-correct but those labels need wrapping.
+
+5. [x] **R5 Error monitoring (optional Sentry)**
+   - `sentry_flutter` 8.14; `lib/app/services/error_monitoring.dart`. **Off by default**: without
+     `--dart-define=SENTRY_DSN=...` the SDK is never started (no network, no native init).
+     Optional `--dart-define=APP_ENV=staging` (default `production`).
+   - No personal data: `sendDefaultPii=false`, no user set, no screenshots / view hierarchy,
+     **print breadcrumbs off** (the app's debug logs include profile email/phone), **UI-interaction
+     breadcrumbs off**, http breadcrumbs keep only method / status / URL **without query string**
+     (download tokens live there), every message/exception text is scrubbed of emails, phone
+     numbers, JWT/Bearer tokens and `token|code|password|otp|key=` params; `extra` cleared.
+   - Errors only (`tracesSampleRate=0`).
+   - Owner: create the Sentry project (separate DSN per app/env), set it in the release build
+     command / CI secret; optional: upload debug symbols (`--split-debug-info` + `sentry-dart-plugin`).
