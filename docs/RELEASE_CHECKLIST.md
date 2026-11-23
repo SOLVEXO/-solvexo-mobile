@@ -171,7 +171,7 @@ Tracks R1-R7 (docs §10, §13, §14 phase 7). `[x]` = done in the app;
      Delete Account (`DELETE /api/users/profile`). Use these URLs in Play Console and App Store
      Connect. (The apex `edudeen.com/...` 308-redirects to `www`.)
    - **Permission texts (English + Urdu)**: iOS `NSCameraUsageDescription`,
-     `NSPhotoLibraryUsageDescription`, `NSMicrophoneUsageDescription`,
+     `NSPhotoLibraryUsageDescription`,
      `NSLocationWhenInUseUsageDescription` in `Info.plist` (English) and
      `ios/Runner/ur.lproj/InfoPlist.strings` (Urdu, `CFBundleLocalizations` = en, ur). iOS has no
      usage string for notifications; the app shows its own explanation first. Android system
@@ -194,7 +194,7 @@ Tracks R1-R7 (docs §10, §13, §14 phase 7). `[x]` = done in the app;
    | Payment info | Card data goes to Stripe directly (not to Edudeen); bank-transfer proof images are uploaded | Stripe (processor) | Payments | Optional (COD/bank) |
    | Purchase history | Yes (orders, library) | Seller sees their own orders | App functionality | - |
    | Photos | Yes, only images the user uploads (profile, reviews, return evidence, payment proof, seller products) | Public where the user publishes them (reviews, products) | App functionality | Optional |
-   | Audio | Not collected. `RECORD_AUDIO` + `NSMicrophoneUsageDescription` are declared but no app code records audio - **remove both before submission** unless a feature needs them | - | - | - |
+   | Audio | Not collected. No microphone permission: `RECORD_AUDIO` is removed (`tools:node="remove"`, also against plugin manifests) and `NSMicrophoneUsageDescription` / `NSSpeechRecognitionUsageDescription` are gone. `permission_handler` keeps `PERMISSION_MICROPHONE=0` (its default) | - | - | - |
    | Messages | Yes (buyer-seller chat, support chat) | With the other party of the chat | App functionality | Optional |
    | App activity | Searches (recent searches), recently viewed, banner impressions/clicks, product page visits | No | Personalisation, analytics (first-party) | - |
    | Device or other IDs | FCM push token | Google (FCM) as processor | Notifications | Optional (notification permission) |

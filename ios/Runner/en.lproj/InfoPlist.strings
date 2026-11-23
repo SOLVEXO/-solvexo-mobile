@@ -1,5 +1,4 @@
 /* Permission prompts (R7). Keys match Info.plist. */
 "NSCameraUsageDescription" = "Edudeen uses the camera only when you take a photo to upload, such as a payment proof, a return photo or your profile picture.";
 "NSPhotoLibraryUsageDescription" = "Edudeen opens your photos only to upload the picture you choose, such as a payment proof, a review photo or your profile picture.";
-"NSMicrophoneUsageDescription" = "Edudeen uses the microphone only when you record a video to upload.";
 "NSLocationWhenInUseUsageDescription" = "Edudeen uses your location only while the app is open, to pick your delivery address on the map.";

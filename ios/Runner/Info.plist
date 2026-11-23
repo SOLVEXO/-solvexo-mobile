@@ -61,12 +61,8 @@
 	<string>Edudeen uses the camera only when you take a photo to upload, such as a payment proof, a return photo or your profile picture.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Edudeen uses your location only while the app is open, to pick your delivery address on the map.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Edudeen uses the microphone only when you record a video to upload.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Edudeen opens your photos only to upload the picture you choose, such as a payment proof, a review photo or your profile picture.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>This app requires speech recognition to process voice input.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
