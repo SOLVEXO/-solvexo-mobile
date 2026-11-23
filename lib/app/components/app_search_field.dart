@@ -58,7 +58,14 @@ class AppSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final field = GetX<_SearchHintController>(
-      tag: identityHashCode(controller).toString(),
+      // Local to this widget (not in the GetX registry). A global instance
+      // tagged by the text controller was shared when the same screen was
+      // rebuilt (e.g. Home after login): the old widget then deleted it and
+      // disposed the FocusNode the new one was using.
+      global: false,
+      // Not registered, so GetX won't close it: run onClose ourselves
+      // (cancels the hint timer, disposes the FocusNode).
+      dispose: (state) => state.controller?.onDelete(),
       init: _SearchHintController(
         textController: controller,
         hints: rotatingHints,
@@ -146,9 +153,8 @@ class AppSearchField extends StatelessWidget {
 }
 
 /// Focus tracking + the rotation timer for one [AppSearchField] instance.
-/// Created and disposed automatically by the `GetX` widget wrapping it
-/// (`autoRemove` defaults to true) — no manual dispose plumbing needed even
-/// though this is a plain `StatelessWidget`.
+/// Local to one `GetX` widget (`global: false`); closed by its `dispose`
+/// callback, so each field owns its own FocusNode.
 class _SearchHintController extends GetxController {
   _SearchHintController({
     required this.textController,
