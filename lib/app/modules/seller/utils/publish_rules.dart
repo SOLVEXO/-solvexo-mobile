@@ -67,6 +67,11 @@ class PublishRules {
     return null;
   }
 
+  /// Same text as the server's 400 (products.service.ts
+  /// FREE_SAMPLE_REQUIRED_MESSAGE).
+  static const freeSampleRequired =
+      'Add a free sample file before publishing a digital product. You can save it as a draft without one.';
+
   /// First problem that blocks saving with [status]
   /// ('active' | 'scheduled' | 'draft'), or null when OK.
   /// Drafts only need a valid range when one is given.
@@ -88,10 +93,11 @@ class PublishRules {
       return 'Choose the class range to publish a digital product.';
     }
     // Checklist #3, docs Part B 2.9: a free sample is required to publish
-    // digital (stored as `digital.sampleFile`).
-    if (isDigital && !hasSample) {
-      return 'Add a free sample file to publish a digital product.';
-    }
+    // digital (stored as `digital.sampleFile`). The server enforces the same
+    // rule since backend fix #4 (jami-branch) with this exact message, so the
+    // seller reads one text whether the app or the server catches it; a
+    // server 400 is shown by DioExceptionHandler.
+    if (isDigital && !hasSample) return freeSampleRequired;
     return null;
   }
 }

@@ -79,7 +79,10 @@ void main() {
       expect(
           PublishRules.validate(
               status: 'active', isDigital: true, coverStyle: 'book', classFrom: 'class-3', classTo: 'class-5'),
-          contains('free sample'));
+          PublishRules.freeSampleRequired,
+          reason: 'same text as the server 400 (backend fix #4)');
+      expect(PublishRules.freeSampleRequired,
+          'Add a free sample file before publishing a digital product. You can save it as a draft without one.');
       expect(
           PublishRules.validate(
               status: 'draft', isDigital: true, coverStyle: null, classFrom: null, classTo: null),
