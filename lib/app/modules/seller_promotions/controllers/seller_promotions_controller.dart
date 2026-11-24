@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/data/models/promotions/promotion_analytics_model.dart';
 import 'package:book_store_app/app/data/models/promotions/promotion_request_model.dart';
 import 'package:book_store_app/app/data/repositories/promotions_repository.dart';
@@ -67,7 +68,7 @@ class SellerPromotionsController extends GetxController {
   /// [PromotionsRepository.pay]/[PromotionsRepository.confirm] instead of
   /// the checkout repository.
   Future<void> payNow(PromotionRequestModel request) async {
-    if (payingId.value != null) return;
+    if (!AppFeatures.digitalPurchases || payingId.value != null) return;
 
     if (!StripeConfig.isConfigured) {
       ToastUtil.showToast('Online payments are not available yet. Please try again later.');

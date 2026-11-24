@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/seller_onboarding/controllers/seller_onboarding_controller.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
@@ -60,7 +61,7 @@ class Step5GoLive extends StatelessWidget {
                 const SizedBox(height: 14),
                 const _NextStepsTimeline(),
                 const SizedBox(height: 20),
-                _UpgradeNote(),
+                if (AppFeatures.digitalPurchases) _UpgradeNote(),
               ],
             ),
           ),

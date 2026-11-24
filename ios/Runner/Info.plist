@@ -14,7 +14,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>EduDeen</string>
+	<string>Edudeen</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -22,7 +22,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>EduDeen</string>
+	<string>Edudeen</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -36,14 +36,14 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.707145385701-8fq45ig5sadbpdgvr463du7r2migqn6t</string>
+				<string>com.googleusercontent.apps.644843992125-1smknlr1aus57ru9567fghejquuturm2</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>2</string>
 	<key>GIDClientID</key>
-	<string>707145385701-8fq45ig5sadbpdgvr463du7r2migqn6t.apps.googleusercontent.com</string>
+	<string>644843992125-1smknlr1aus57ru9567fghejquuturm2.apps.googleusercontent.com</string>
 	<key>GMSApiKey</key>
 	<string>AIzaSyBbnJMcOAOF5hP0GVMgbKduGtYRa5Q56v0</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -68,7 +68,6 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
-		<string>fetch</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

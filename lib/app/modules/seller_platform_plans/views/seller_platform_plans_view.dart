@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -16,7 +17,9 @@ class SellerPlatformPlansView extends GetView<SellerPlatformPlansController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBarTwo(title: 'Plan & Billing'),
+      appBar: CustomAppBarTwo(
+        title: AppFeatures.digitalPurchases ? 'Plan & Billing' : 'Plan',
+      ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
@@ -26,6 +29,22 @@ class SellerPlatformPlansView extends GetView<SellerPlatformPlansController> {
 
         final sub = controller.myPlan.value;
         final entitlements = controller.entitlements.value;
+
+        // Read-only status while digital purchases are off: no price, no
+        // billing, no add-ons, no plan comparison, no links.
+        if (!AppFeatures.digitalPurchases) {
+          return CustomRefreshWrapper(
+            onRefresh: controller.refresh,
+            child: ListView(
+              padding: EdgeInsets.all(BaseSpacing.md),
+              children: [
+                if (sub != null) PlanStatusCard(sub: sub),
+                if (sub != null) SizedBox(height: BaseSpacing.sm),
+                if (entitlements != null) UsageCard(data: entitlements),
+              ],
+            ),
+          );
+        }
 
         return CustomRefreshWrapper(
           onRefresh: controller.refresh,

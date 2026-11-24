@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/app/services/device_camera.dart';
 import 'package:book_store_app/app/services/permission_rationale.dart';
+import 'package:book_store_app/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,8 +14,9 @@ import 'package:permission_handler/permission_handler.dart';
 ///
 /// iOS  → image_picker triggers the native system dialog; no manual
 ///         permission code is needed or used.
-/// Android → full permission lifecycle: check → rationale → request →
-///           permanently-denied settings redirect.
+/// Android → gallery uses the system Photo Picker (no storage/media
+///           permission). Only the camera has a permission lifecycle:
+///           check → rationale → request → settings redirect.
 ///
 /// Usage anywhere in the app:
 /// ```dart
@@ -40,6 +43,7 @@ class AppImagePicker {
       _PickerSheet(
         title: title,
         canRemove: canRemove,
+        showCamera: DeviceCamera.available,
         onCamera: () async {
           Get.back();
           final file = await _fromCamera();
@@ -65,14 +69,15 @@ class AppImagePicker {
   // ── Pick methods ────────────────────────────────────────────────────────────
 
   static Future<File?> _fromGallery() async {
-    // iOS: image_picker handles its own system permission prompt
-    if (!Platform.isAndroid || await _checkAndroid(_galleryPermission())) {
-      return _pickImage(ImageSource.gallery);
-    }
-    return null;
+    // Android: system Photo Picker, no permission. iOS: PHPicker, same.
+    return _pickImage(ImageSource.gallery);
   }
 
   static Future<File?> _fromCamera() async {
+    if (!DeviceCamera.available) {
+      ToastUtil.showToast('No camera available on this device');
+      return null;
+    }
     // iOS: image_picker handles its own system permission prompt
     if (!Platform.isAndroid || await _checkAndroid(Permission.camera)) {
       return _pickImage(ImageSource.camera);
@@ -97,15 +102,6 @@ class AppImagePicker {
 
   // ── Android permission helpers ──────────────────────────────────────────────
 
-  /// Returns the correct Android gallery permission based on OS version.
-  /// Android 13+ (API 33+): READ_MEDIA_IMAGES
-  /// Android < 13          : READ_EXTERNAL_STORAGE
-  static Permission _galleryPermission() {
-    // permission_handler maps Permission.photos to READ_MEDIA_IMAGES on
-    // Android 13+ and READ_EXTERNAL_STORAGE on older versions automatically.
-    return Permission.photos;
-  }
-
   /// Full Android permission lifecycle.
   /// Returns true if permission is granted and we can proceed.
   static Future<bool> _checkAndroid(Permission permission) async {
@@ -119,7 +115,7 @@ class AppImagePicker {
     }
 
     // Explain why before Android's system dialog (R7: English + Urdu).
-    final kind = permission == Permission.camera ? PermissionKind.camera : PermissionKind.photos;
+    const kind = PermissionKind.camera;
     if (!await PermissionRationale.ask(kind)) return false;
 
     status = await permission.request();
@@ -184,10 +180,12 @@ class _PickerSheet extends StatelessWidget {
   final VoidCallback onCamera;
   final VoidCallback onGallery;
   final VoidCallback? onRemove;
+  final bool showCamera;
 
   const _PickerSheet({
     required this.title,
     required this.canRemove,
+    this.showCamera = true,
     required this.onCamera,
     required this.onGallery,
     this.onRemove,
@@ -227,12 +225,14 @@ class _PickerSheet extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: AppColors.lightGrey2),
-          _Option(
-            icon: Icons.camera_alt_rounded,
-            label: 'Take Photo',
-            onTap: onCamera,
-          ),
-          const Divider(height: 1, indent: 72, color: AppColors.lightGrey2),
+          if (showCamera) ...[
+            _Option(
+              icon: Icons.camera_alt_rounded,
+              label: 'Take Photo',
+              onTap: onCamera,
+            ),
+            const Divider(height: 1, indent: 72, color: AppColors.lightGrey2),
+          ],
           _Option(
             icon: Icons.photo_library_rounded,
             label: 'Choose from Gallery',

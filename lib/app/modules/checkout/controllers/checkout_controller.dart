@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -184,6 +185,14 @@ class CheckoutController extends GetxController {
       orderItems.assignAll(
         response.checkout.items.map((e) => e.toCheckoutItem()).toList(),
       );
+      // Safety net (deep link / stale checkout): never show a payable digital order.
+      if (orderItems.any((i) => AppFeatures.blocksPurchase(i.productType))) {
+        orderItems.clear();
+        isLoading.value = false;
+        ToastUtil.showToast(AppFeatures.digitalUnavailableMessage.tr);
+        Future.microtask(() => Get.back());
+        return;
+      }
       shippingCost.value = response.checkout.shippingFee;
       _allowedPaymentMethods.assignAll(response.allowedPaymentMethods);
       subscriberSavings.value = response.summary.subscriberSavingsUSD;

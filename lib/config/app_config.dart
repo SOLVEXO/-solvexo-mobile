@@ -4,7 +4,32 @@
 ///
 ///   flutter run --dart-define-from-file=config/dev.json
 ///
-/// Keys: API_BASE_URL, WEB_BASE_URL, STRIPE_PUBLISHABLE_KEY, FACEBOOK_APP_ID.
+/// Keys: API_BASE_URL, WEB_BASE_URL, STRIPE_PUBLISHABLE_KEY.
+/// Compile-time feature switches. Flip in ONE place to change behaviour app-wide.
+class AppFeatures {
+  AppFeatures._();
+
+  /// First store release: only PHYSICAL products can be bought in the app.
+  /// Digital items (courses, files, e-books, downloads) stay visible but cannot
+  /// be bought, and paid seller digital services (platform plan purchase /
+  /// billing, add-ons, AI credits, promotions) and Premium are switched off.
+  /// Set to true to enable all of them again.
+  static const bool digitalPurchases = false;
+
+  static const String digitalUnavailableMessage =
+      "This item isn't available for purchase in the app yet.";
+
+  /// 'digital' plus the legacy 'educational' type (migrated to digital).
+  static bool isDigitalType(String? type) {
+    final t = (type ?? '').toLowerCase();
+    return t == 'digital' || t == 'educational';
+  }
+
+  /// True when [type] is a digital item that must not be bought right now.
+  static bool blocksPurchase(String? type) =>
+      !digitalPurchases && isDigitalType(type);
+}
+
 class AppConfig {
   AppConfig._();
 
@@ -17,12 +42,6 @@ class AppConfig {
   /// Stripe *publishable* key (safe to ship). Empty = card payments hidden.
   static const String stripePublishableKey =
       String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
-
-  /// Facebook app id (public). Empty = the "Facebook" sign-in button is
-  /// hidden. The native SDK also needs the id (and client token) in iOS
-  /// Info.plist / Android strings before Facebook login can work.
-  static const String facebookAppId = String.fromEnvironment('FACEBOOK_APP_ID');
-  static bool get facebookLoginEnabled => facebookAppId.trim().isNotEmpty;
 
   static String web(String path) =>
       '$webBaseUrl${path.startsWith('/') ? path : '/$path'}';

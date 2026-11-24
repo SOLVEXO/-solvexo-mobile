@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/modules/seller/utils/plan_lapse.dart';
 import 'package:book_store_app/app/modules/seller_plan_expired/controllers/seller_plan_expired_controller.dart';
 import 'package:flutter/material.dart';
@@ -55,13 +56,15 @@ class SellerPlanExpiredView extends GetView<SellerPlanExpiredController> {
                 title: PlanLapse.title(status),
                 body: '${PlanLapse.message(status)}\n\nYou cannot add or publish products while the plan is not active. You can still see and ship your existing orders.',
                 actions: [
-                  FilledButton(
-                    key: const Key('choosePlan'),
-                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-                    onPressed: controller.choosePlan,
-                    child: const Text('Choose a plan'),
-                  ),
-                  const SizedBox(height: 12),
+                  if (AppFeatures.digitalPurchases) ...[
+                    FilledButton(
+                      key: const Key('choosePlan'),
+                      style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                      onPressed: controller.choosePlan,
+                      child: const Text('Choose a plan'),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   OutlinedButton(
                     key: const Key('switchBuyer'),
                     style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),

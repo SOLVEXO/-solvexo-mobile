@@ -8,7 +8,7 @@ class LocalNotificationService {
       FlutterLocalNotificationsPlugin();
   final AndroidNotificationChannel channel = const AndroidNotificationChannel(
     '1',
-    'SMV2',
+    'Edudeen notifications',
     description: 'This channel is used for important notifications.',
     importance: Importance.high,
   );
@@ -23,12 +23,9 @@ class LocalNotificationService {
   }
 
   Future<void> init() async {
-    ///Requesting Android notification permission
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+    // Android 13+ POST_NOTIFICATIONS is NOT requested here (it would prompt
+    // over a blank launch). FcmService.init() asks once, after a rationale,
+    // via FirebaseMessaging.requestPermission().
 
     ///Requesting iOS notification permission
     // await flutterLocalNotificationsPlugin

@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/modules/cart/models/cart_response_model.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/network/base_client.dart';
@@ -83,10 +84,6 @@ class CartRepository {
       debugPrint('Quantity:   $quantity');
       debugPrint('URL:        ${ApiConstants.addToCart}');
       debugPrint('═══════════════════════════════════');
-
-      final userId = await AppPreferences.getUserId();
-      final token = await AppPreferences.getAccessTokenAsync();
-      debugPrint('UserId: $userId | Token: $token');
 
       final response = await _baseClient.post(
         ApiConstants.addToCart,
@@ -209,6 +206,8 @@ class CartRepository {
       final productVariantId = json['productVariantId'] as String? ?? '';
       final quantity = (json['quantity'] as num?)?.toInt() ?? 1;
       if (productId.isEmpty || productVariantId.isEmpty) continue;
+      // Digital items cannot be bought yet: don't carry them into the account cart.
+      if (AppFeatures.blocksPurchase(json['productType'] as String?)) continue;
       try {
         await addToCart(
           productId: productId,

@@ -27,7 +27,9 @@ class OrderTrackingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBarTwo(title: controller.filteredOrders[index].orderNumber),
+      appBar: CustomAppBarTwo(
+        title: controller.filteredOrders[index].orderNumber,
+      ),
       body: SingleChildScrollView(
         physics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
         padding: EdgeInsets.all(BaseSpacing.md),
@@ -45,7 +47,10 @@ class OrderTrackingView extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: EdgeInsets.symmetric(horizontal: BaseSpacing.xl, vertical: BaseSpacing.xl),
+        padding: EdgeInsets.symmetric(
+          horizontal: BaseSpacing.xl,
+          vertical: BaseSpacing.xl,
+        ),
         child: CustomActionButtons(index: index),
       ),
     );

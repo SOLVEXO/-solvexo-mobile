@@ -110,7 +110,7 @@ class LoginView extends StatelessWidget {
           Obx(
             () => SocialSignInRow(
               onGoogle: authController.signInWithGoogle,
-              onFacebook: authController.signInWithFacebook,
+              onApple: authController.signInWithApple,
               isBusy: authController.isSocialLoading.value,
               activeProvider: authController.activeSocialProvider.value,
             ),

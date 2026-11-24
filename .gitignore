@@ -51,3 +51,5 @@ android/key.properties
 # Local build config (copy config/example.json)
 config/*.json
 !config/example.json
+
+key.properties

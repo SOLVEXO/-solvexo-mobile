@@ -225,41 +225,6 @@ class AuthController extends BaseController {
     }
   }
 
-  Future<void> signInWithFacebook() async {
-    if (isSocialLoading.value) return;
-    try {
-      isSocialLoading.value = true;
-      activeSocialProvider.value = 'facebook';
-
-      final dto = await _socialAuth.signInWithFacebook();
-      if (dto == null) return;
-
-      if (dto.token == null || dto.token!.isEmpty) {
-        _showError(_socialErrorMessage(null, dto.authProvider));
-        return;
-      }
-
-      final role = await AppPreferences.getIntentRole();
-      final auth = await _authRepository.socialLogin(
-        dto.copyWith(role: role ?? 'user'),
-      );
-
-      if (auth == null) {
-        _showError('Facebook sign in failed. Please try again.');
-        return;
-      }
-
-      await _navigateByRole(auth.user.role);
-      _showSuccess('Welcome ${auth.user.name}!');
-    } catch (e) {
-      debugPrint('❌ Facebook sign in error: $e');
-      _showError(_socialErrorMessage(e, 'Facebook'));
-    } finally {
-      isSocialLoading.value = false;
-      activeSocialProvider.value = '';
-    }
-  }
-
   Future<void> signInWithApple() async {
     if (isSocialLoading.value) return;
     try {

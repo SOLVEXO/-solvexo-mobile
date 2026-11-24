@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["B43H8KM3XZ.com.solvexo.ios"],
+        "appIDs": ["B43H8KM3XZ.com.edudeen.app"],
         "components": [
           { "/": "/product/*" },
           { "/": "/shop/*" },

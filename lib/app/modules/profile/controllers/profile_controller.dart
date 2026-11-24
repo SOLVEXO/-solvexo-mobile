@@ -1,3 +1,5 @@
+import 'package:book_store_app/config/app_config.dart';
+import 'package:book_store_app/app/services/device_camera.dart';
 import 'dart:io';
 import 'package:book_store_app/core/i18n/locale_service.dart';
 import 'package:book_store_app/app/components/custom_bottom_sheet.dart';
@@ -55,11 +57,12 @@ class ProfileController extends GetxController {
             title: 'My children'.tr,
             onTap: () => Get.toNamed(Routes.children),
           ),
-          SettingsTile(
-            icon: AppIcons.coinIcon,
-            title: 'Edudeen Premium'.tr,
-            onTap: () => Get.toNamed(Routes.premium),
-          ),
+          if (AppFeatures.digitalPurchases)
+            SettingsTile(
+              icon: AppIcons.coinIcon,
+              title: 'Edudeen Premium'.tr,
+              onTap: () => Get.toNamed(Routes.premium),
+            ),
           SettingsTile(
             icon: AppIcons.heartIcon,
             title: 'Wishlist'.tr,
@@ -379,6 +382,10 @@ class ProfileController extends GetxController {
 
   /// Take photo with camera
   Future<void> takePhoto() async {
+    if (!DeviceCamera.available) {
+      ToastUtil.showToast('No camera available on this device');
+      return;
+    }
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
@@ -414,14 +421,15 @@ class ProfileController extends GetxController {
                 pickImage();
               },
             ),
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: CustomText(text: 'Take Photo'),
-              onTap: () {
-                Get.back();
-                takePhoto();
-              },
-            ),
+            if (DeviceCamera.available)
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: CustomText(text: 'Take Photo'),
+                onTap: () {
+                  Get.back();
+                  takePhoto();
+                },
+              ),
             if (user.value?.profileImage != null ||
                 selectedImageFile.value != null)
               ListTile(

@@ -1,34 +1,36 @@
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/components/svg_icon.dart';
-import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
 import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:book_store_app/core/theme/base_spacing.dart';
 import 'package:book_store_app/utils/app_font_size.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Social sign-in row — outlined pill buttons with icon + label. Shared by
 // LoginView and SignUpView so both tabs of AuthTabsView offer the same
-// providers. Facebook shows only when the build has a FACEBOOK_APP_ID
-// (`--dart-define`); without it the button is hidden.
+// providers: Google everywhere, plus Sign in with Apple on iOS only (Apple
+// requires it whenever Google sign-in is offered).
 class SocialSignInRow extends StatelessWidget {
   const SocialSignInRow({
     super.key,
     required this.onGoogle,
-    this.onFacebook,
+    this.onApple,
     required this.isBusy,
     required this.activeProvider,
-    this.facebookEnabled,
+    this.appleEnabled,
   });
   final VoidCallback onGoogle;
-  final VoidCallback? onFacebook;
+  final VoidCallback? onApple;
   final bool isBusy;
   final String activeProvider;
 
-  /// Overrides [AppConfig.facebookLoginEnabled] (tests).
-  final bool? facebookEnabled;
+  /// Overrides the iOS-only check (tests).
+  final bool? appleEnabled;
 
-  bool get _showFacebook => onFacebook != null && (facebookEnabled ?? AppConfig.facebookLoginEnabled);
+  bool get _showApple =>
+      onApple != null &&
+      (appleEnabled ?? defaultTargetPlatform == TargetPlatform.iOS);
 
   @override
   Widget build(BuildContext context) {
@@ -42,15 +44,15 @@ class SocialSignInRow extends StatelessWidget {
           disabled: isBusy,
           isLoading: activeProvider == 'google',
         ),
-        if (_showFacebook) ...[
+        if (_showApple) ...[
           SizedBox(width: BaseSpacing.sm),
           _SocialButton(
-            key: const Key('socialFacebook'),
-            icon: AppIcons.facebookIcon,
-            label: 'Facebook',
-            onTap: onFacebook!,
+            key: const Key('socialApple'),
+            icon: AppIcons.appleIcon,
+            label: 'Apple',
+            onTap: onApple!,
             disabled: isBusy,
-            isLoading: activeProvider == 'facebook',
+            isLoading: activeProvider == 'apple',
           ),
         ],
       ],

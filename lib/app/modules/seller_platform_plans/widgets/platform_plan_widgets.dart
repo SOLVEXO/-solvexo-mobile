@@ -22,6 +22,50 @@ String _fmtDate(DateTime? d) => d == null ? '—' : DateFormat('MMM d, yyyy').fo
 
 // ── Current plan card ────────────────────────────────────────────────────────
 
+/// Read-only plan status (no price, no actions, no links) shown while
+/// [AppFeatures.digitalPurchases] is off.
+class PlanStatusCard extends StatelessWidget {
+  final PlatformSubscriptionModel sub;
+  const PlanStatusCard({super.key, required this.sub});
+
+  String get _statusLabel => switch (sub.status) {
+        'active' => 'Active',
+        'trialing' => 'Trial',
+        'past_due' => 'Not active',
+        'expired' => 'Expired',
+        'canceled' || 'cancelled' => 'Canceled',
+        final s => s.isEmpty ? 'Canceled' : '${s[0].toUpperCase()}${s.substring(1).replaceAll('_', ' ')}',
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(BaseSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(BaseRadius.lg),
+        boxShadow: BaseShadows.forLevel(BaseElevation.level1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomText(text: 'Your Plan', color: AppColors.gray600, fontSize: AppFontSize.tiny),
+          SizedBox(height: BaseSpacing.xxs),
+          CustomText(
+            text: sub.plan?.name ?? 'Starter',
+            color: AppColors.black2,
+            fontSize: AppFontSize.medium,
+            fontWeight: FontWeight.w700,
+          ),
+          SizedBox(height: BaseSpacing.xxs),
+          CustomText(text: 'Status: $_statusLabel', color: AppColors.gray600, fontSize: AppFontSize.verySmall),
+        ],
+      ),
+    );
+  }
+}
+
 class MyPlanCard extends StatelessWidget {
   final PlatformSubscriptionModel sub;
   final SellerPlatformPlansController controller;

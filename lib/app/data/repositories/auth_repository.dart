@@ -350,7 +350,6 @@ class AuthRepository {
 
       debugPrint("========== GET ME DEBUG ==========");
       debugPrint("Status: ${response.statusCode}");
-      debugPrint("Headers sent: Bearer $token");
       debugPrint("Raw response: ${response.data}");
       debugPrint("Success field: ${response.data['success']}");
       debugPrint("Data field: ${response.data['data']}");

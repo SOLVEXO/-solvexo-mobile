@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,12 +30,14 @@ class PlanLockedCard extends StatelessWidget {
           ]),
           const SizedBox(height: 6),
           Text(message, style: t.textTheme.bodySmall),
-          const SizedBox(height: 10),
-          FilledButton.tonal(
-            style: FilledButton.styleFrom(minimumSize: const Size(140, 44)),
-            onPressed: openPlans,
-            child: const Text('Upgrade plan'),
-          ),
+          if (AppFeatures.digitalPurchases) ...[
+            const SizedBox(height: 10),
+            FilledButton.tonal(
+              style: FilledButton.styleFrom(minimumSize: const Size(140, 44)),
+              onPressed: openPlans,
+              child: const Text('Upgrade plan'),
+            ),
+          ],
         ]),
       ),
     );
@@ -52,15 +55,16 @@ Future<void> showPlanLocked(String message) => Get.dialog(AlertDialog(
         TextButton(
           style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
           onPressed: () => Get.back(),
-          child: const Text('Not now'),
+          child: Text(AppFeatures.digitalPurchases ? 'Not now' : 'OK'),
         ),
-        FilledButton(
-          style: FilledButton.styleFrom(minimumSize: const Size(64, 48)),
-          onPressed: () {
-            Get.back();
-            PlanLockedCard.openPlans();
-          },
-          child: const Text('Upgrade plan'),
-        ),
+        if (AppFeatures.digitalPurchases)
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(64, 48)),
+            onPressed: () {
+              Get.back();
+              PlanLockedCard.openPlans();
+            },
+            child: const Text('Upgrade plan'),
+          ),
       ],
     ));

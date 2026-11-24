@@ -1,8 +1,8 @@
 import 'package:book_store_app/app/data/models/common_models/social_login_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class SocialAuthService {
@@ -32,10 +32,15 @@ class SocialAuthService {
       debugPrint('🔄 Starting Google Sign In...');
 
       await _googleSignIn.initialize(
-        clientId:
-            '707145385701-8fq45ig5sadbpdgvr463du7r2migqn6t.apps.googleusercontent.com',
+        // iOS OAuth client (GoogleService-Info.plist CLIENT_ID). Only used on
+        // iOS; Android resolves its client from google-services.json.
+        clientId: defaultTargetPlatform == TargetPlatform.iOS
+            ? '644843992125-1smknlr1aus57ru9567fghejquuturm2.apps.googleusercontent.com'
+            : null,
+        // WEB client (google-services.json client_type 3); must match the
+        // backend GOOGLE_CLIENT_ID.
         serverClientId:
-            '707145385701-quuhmj7p5tgvr1jjuuqgb0h0t2r7rqk2.apps.googleusercontent.com',
+            '644843992125-vuf9corbqceveiim2eg8ehidl8ft8n50.apps.googleusercontent.com',
       );
 
       final GoogleSignInAccount account = await _googleSignIn.authenticate();
@@ -57,43 +62,6 @@ class SocialAuthService {
       return null;
     }
   }
-  // ─────────────────────────────────────────
-  // FACEBOOK SIGN IN
-  // ─────────────────────────────────────────
-
-  Future<SocialLoginModel?> signInWithFacebook() async {
-    try {
-      debugPrint('🔄 Starting Facebook Sign In...');
-
-      final result = await FacebookAuth.instance.login(
-        permissions: ['email', 'public_profile'],
-      );
-
-      if (result.status != LoginStatus.success) {
-        debugPrint('❌ Facebook Sign In failed: ${result.status}');
-        return null;
-      }
-
-      final userData = await FacebookAuth.instance.getUserData();
-      final fcmToken = await _getFcmToken();
-
-      debugPrint('✅ Facebook Sign In successful: ${userData['email']}');
-
-      return SocialLoginModel(
-        authProvider: 'facebook',
-        socialId: userData['id'],
-        userName: userData['name'] ?? 'User',
-        email: userData['email'] ?? '',
-        image: userData['picture']?['data']?['url'],
-        fcmToken: fcmToken,
-        token: result.accessToken?.tokenString,
-      );
-    } catch (e) {
-      debugPrint('❌ Facebook Sign In error: $e');
-      return null;
-    }
-  }
-
   // ─────────────────────────────────────────
   // APPLE SIGN IN
   // ─────────────────────────────────────────
@@ -151,17 +119,7 @@ class SocialAuthService {
     }
   }
 
-  Future<void> signOutFacebook() async {
-    try {
-      await FacebookAuth.instance.logOut();
-      debugPrint('✅ Facebook signed out');
-    } catch (e) {
-      debugPrint('⚠️ Facebook sign out error: $e');
-    }
-  }
-
   Future<void> signOutAll() async {
     await signOutGoogle();
-    await signOutFacebook();
   }
 }

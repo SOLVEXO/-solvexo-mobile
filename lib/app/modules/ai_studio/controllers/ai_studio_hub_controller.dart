@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/data/models/ai_studio/ai_credits_overview_model.dart';
 import 'package:book_store_app/app/data/repositories/ai_studio_repository.dart';
 import 'package:book_store_app/app/data/repositories/platform_plans_repository.dart';
@@ -39,7 +40,7 @@ class AiStudioHubController extends GetxController {
   }
 
   Future<void> buyCredits() async {
-    if (isBuyingCredits.value) return;
+    if (!AppFeatures.digitalPurchases || isBuyingCredits.value) return;
     isBuyingCredits.value = true;
     final ok = await _platformRepo.purchaseAddon(storeId, addonType: 'extra_ai_credits');
     isBuyingCredits.value = false;

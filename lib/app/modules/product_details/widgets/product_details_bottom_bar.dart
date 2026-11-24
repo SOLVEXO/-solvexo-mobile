@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/modules/product_details/controller/product_detail_controller.dart';
 import 'package:book_store_app/app/modules/profile/controllers/profile_controller.dart';
@@ -39,6 +40,39 @@ class ProductDetailsBottomBar extends StatelessWidget {
     //   );
     // }
 
+    return Obx(() {
+      // Digital items: visible but not purchasable (AppFeatures.digitalPurchases).
+      final blocked =
+          AppFeatures.blocksPurchase(controller.product.value?.type);
+      if (!blocked) return _purchaseBar();
+      return Container(
+        color: AppColors.white,
+        padding: EdgeInsets.only(
+          left: BaseSpacing.xxl - 2,
+          right: BaseSpacing.xxl - 2,
+          bottom: BaseSpacing.md + 4,
+          top: BaseSpacing.xxs + 1,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            key: const Key('digitalUnavailable'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+            onPressed: null,
+            child: Text(
+              AppFeatures.digitalUnavailableMessage.tr,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _purchaseBar() {
     return Container(
       color: AppColors.white,
       padding: EdgeInsets.only(

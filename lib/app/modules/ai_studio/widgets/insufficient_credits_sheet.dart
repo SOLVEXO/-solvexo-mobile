@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/repositories/platform_plans_repository.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -48,7 +49,7 @@ class _InsufficientCreditsSheetState extends State<InsufficientCreditsSheet> {
   bool _purchasing = false;
 
   Future<void> _buy() async {
-    if (_purchasing) return;
+    if (!AppFeatures.digitalPurchases || _purchasing) return;
     setState(() => _purchasing = true);
     final ok = await _repo.purchaseAddon(widget.storeId, addonType: 'extra_ai_credits');
     if (!mounted) return;
@@ -87,13 +88,16 @@ class _InsufficientCreditsSheetState extends State<InsufficientCreditsSheet> {
               fontSize: AppFontSize.verySmall,
             ),
             SizedBox(height: BaseSpacing.lg),
-            PrimaryButton(
-              label: 'Buy 500 credits',
-              isLoading: _purchasing,
-              onPressed: _buy,
-            ),
-            SizedBox(height: BaseSpacing.xs),
-            GhostButton(label: 'Cancel', onPressed: () => Get.back(result: false)),
+            if (AppFeatures.digitalPurchases) ...[
+              PrimaryButton(
+                label: 'Buy 500 credits',
+                isLoading: _purchasing,
+                onPressed: _buy,
+              ),
+              SizedBox(height: BaseSpacing.xs),
+              GhostButton(label: 'Cancel', onPressed: () => Get.back(result: false)),
+            ] else
+              PrimaryButton(label: 'OK', onPressed: () => Get.back(result: false)),
           ],
         ),
       ),

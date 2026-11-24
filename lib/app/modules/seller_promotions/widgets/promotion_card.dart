@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_confirm_dialog.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -157,7 +158,7 @@ class PromotionCard extends StatelessWidget {
                 ),
               ),
             ],
-            if (request.canPay || request.canCancel) ...[
+            if (AppFeatures.digitalPurchases && (request.canPay || request.canCancel)) ...[
               SizedBox(height: BaseSpacing.sm),
               Row(
                 children: [

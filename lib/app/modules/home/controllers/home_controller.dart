@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/app/components/product_filter_bottom_sheet.dart';
 import 'package:book_store_app/app/data/repositories/announcements_repository.dart';
@@ -423,6 +424,10 @@ class HomeController extends BaseController {
   /// there) — always uses the first variant and quantity 1, same fallback
   /// the wishlist heart already relies on.
   Future<void> quickAddToCart(ProductModel product) async {
+    if (AppFeatures.blocksPurchase(product.type)) {
+      ToastUtil.showToast(AppFeatures.digitalUnavailableMessage.tr);
+      return;
+    }
     if (product.variants.isEmpty) {
       ToastUtil.showToast('Product is not available');
       return;

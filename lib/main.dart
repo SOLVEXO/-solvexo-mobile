@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:book_store_app/app/notification/fcm_service.dart';
 import 'package:book_store_app/app/routes/incoming_links.dart';
+import 'package:book_store_app/app/services/device_camera.dart';
 import 'package:book_store_app/app/services/error_monitoring.dart';
 import 'package:book_store_app/app/network/api_constaints.dart';
 import 'package:book_store_app/app/notification/fcm_background_handler.dart';
@@ -33,6 +33,7 @@ void main() async {
     debugPrint = (String? message, {int? wrapWidth}) {};
   }
   ApiConstants.warnIfDebugBuildUsesProduction();
+  await DeviceCamera.init();
   // Initialize SharedPreferences
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Must be registered before runApp() — see the handler's own doc comment

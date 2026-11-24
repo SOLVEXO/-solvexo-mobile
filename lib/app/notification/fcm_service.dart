@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -26,6 +27,10 @@ class FcmService {
 
   String? _fcmToken;
   bool _initialized = false;
+  // True between signOut() and the next init(): a token refresh triggered by
+  // deleteToken() must not re-register the device for the old user.
+  bool _signedOut = false;
+  static const _pushTimeout = Duration(seconds: 6);
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final NotificationsRepository _notificationsRepository = NotificationsRepository();
 
@@ -57,6 +62,7 @@ class FcmService {
   /// push setup never blocks login/navigation — which means nothing is
   /// there to catch a thrown error. It must never throw.
   Future<NotificationSettings?> init() async {
+    _signedOut = false;
     try {
       // R7: explain first (English/Urdu) before the system prompt; "Not now"
       // skips the prompt and we ask again after a week at the earliest.
@@ -100,7 +106,6 @@ class FcmService {
 
         try {
           _fcmToken = await _firebaseMessaging.getToken();
-          debugPrint("FCM token: $_fcmToken");
           await registerDeviceToken();
           await subscribeToUserId();
         } catch (e) {
@@ -133,9 +138,13 @@ class FcmService {
       // token expiry) — without this the backend keeps sending to a dead
       // token and push silently stops working until reinstall.
       _firebaseMessaging.onTokenRefresh.listen((newToken) async {
+        if (_signedOut) return;
         _fcmToken = newToken;
-        debugPrint("FCM token refreshed: $newToken");
-        await registerDeviceToken();
+        try {
+          await registerDeviceToken();
+        } catch (e) {
+          debugPrint("⚠️ token refresh registration failed (ignored): $e");
+        }
       });
 
       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
@@ -208,7 +217,6 @@ class FcmService {
       debugPrint("Unsubscribing from topic $userId");
       await _firebaseMessaging.unsubscribeFromTopic(userId);
     }
-    await removeDeviceToken();
   }
 
   /// Registers this device's FCM token with the backend device-token registry
@@ -231,10 +239,42 @@ class FcmService {
     await _notificationsRepository.removeDeviceToken(token);
   }
 
-  /// Full teardown for logout: unsubscribe from the topic and remove the
-  /// device token, so the very next push after sign-out never reaches this
-  /// install.
-  Future<void> signOut() => unsubscribeToUserId();
+  /// Full push teardown for logout and account switch. Must run while the
+  /// current session (access token + user id) is still stored. Every step is
+  /// independent, time-boxed and swallows its own errors, so push problems
+  /// can never block or fail the logout / switch:
+  ///  1. backend DELETE of this device's token (fetching it first if needed),
+  ///  2. unsubscribe the user-id topic,
+  ///  3. delete the FCM token on the device, so the old user's pushes stop
+  ///     even when step 1 failed.
+  Future<void> signOut() async {
+    _signedOut = true;
+
+    try {
+      var token = _fcmToken;
+      if (token == null || token.isEmpty) {
+        token = await _firebaseMessaging.getToken().timeout(_pushTimeout);
+      }
+      if (token != null && token.isNotEmpty) {
+        await _notificationsRepository.removeDeviceToken(token).timeout(_pushTimeout);
+      }
+    } catch (e) {
+      debugPrint("⚠️ FCM backend token removal failed (ignored): $e");
+    }
+
+    try {
+      await unsubscribeToUserId().timeout(_pushTimeout);
+    } catch (e) {
+      debugPrint("⚠️ FCM topic unsubscribe failed (ignored): $e");
+    }
+
+    try {
+      await _firebaseMessaging.deleteToken().timeout(_pushTimeout);
+    } catch (e) {
+      debugPrint("⚠️ FCM deleteToken failed (ignored): $e");
+    }
+    _fcmToken = null;
+  }
 
   String? get fcmToken => _fcmToken;
 }

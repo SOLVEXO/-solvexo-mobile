@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/services/device_camera.dart';
 import 'dart:io';
 
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -128,15 +129,16 @@ class SellerEditProfileController extends GetxController {
                 if (f != null) selectedImage.value = f;
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt_rounded),
-              title: const CustomText(text: 'Take Photo'),
-              onTap: () async {
-                Get.back();
-                final f = await _uploadRepo.pickImage(source: ImageSource.camera);
-                if (f != null) selectedImage.value = f;
-              },
-            ),
+            if (DeviceCamera.available)
+              ListTile(
+                leading: const Icon(Icons.camera_alt_rounded),
+                title: const CustomText(text: 'Take Photo'),
+                onTap: () async {
+                  Get.back();
+                  final f = await _uploadRepo.pickImage(source: ImageSource.camera);
+                  if (f != null) selectedImage.value = f;
+                },
+              ),
             if (user.value?.profileImage != null || selectedImage.value != null)
               ListTile(
                 leading: const Icon(Icons.delete_rounded, color: Colors.red),

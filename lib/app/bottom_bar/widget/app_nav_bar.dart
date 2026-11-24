@@ -1,4 +1,9 @@
+import 'dart:ffi';
+
 import 'package:book_store_app/app/bottom_bar/controllers/bottom_navbar_controller.dart';
+import 'package:book_store_app/app/components/svg_icon.dart';
+import 'package:book_store_app/config/resources/app_colors.dart';
+import 'package:book_store_app/config/resources/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,36 +34,36 @@ class AppNavBar extends StatelessWidget {
           onDestinationSelected: controller.changeTab,
           destinations: [
             NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home_rounded),
+              icon: customIcon(AppIcons.home),
+              selectedIcon: customIcon(AppIcons.home, isselected: true),
               label: 'Home'.tr,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.explore_outlined),
-              selectedIcon: const Icon(Icons.explore_rounded),
+              icon: customIcon(AppIcons.searchIcon),
+              selectedIcon: customIcon(AppIcons.searchIcon, isselected: true),
               label: 'Browse'.tr,
             ),
             NavigationDestination(
               icon: Badge(
                 isLabelVisible: count > 0,
                 label: Text(count > 99 ? '99+' : '$count'),
-                child: const Icon(Icons.shopping_bag_outlined),
+                child: customIcon(AppIcons.cartIcon),
               ),
               selectedIcon: Badge(
                 isLabelVisible: count > 0,
                 label: Text(count > 99 ? '99+' : '$count'),
-                child: const Icon(Icons.shopping_bag_rounded),
+                child: customIcon(AppIcons.cartIcon, isselected: true),
               ),
               label: 'Cart'.tr,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.local_library_outlined),
-              selectedIcon: const Icon(Icons.local_library_rounded),
+              icon: customIcon(AppIcons.ordersIcon),
+              selectedIcon: customIcon(AppIcons.ordersIcon, isselected: true),
               label: 'Library'.tr,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.person_outline_rounded),
-              selectedIcon: const Icon(Icons.person_rounded),
+              icon: customIcon(AppIcons.more),
+              selectedIcon: customIcon(AppIcons.more, isselected: true),
               label: 'Account'.tr,
             ),
           ],
@@ -66,4 +71,9 @@ class AppNavBar extends StatelessWidget {
       );
     });
   }
+
+  SvgIcon customIcon(String icon, {bool isselected = false}) => SvgIcon(
+    assetName: icon,
+    color: isselected ? AppColors.white : AppColors.gray600,
+  );
 }

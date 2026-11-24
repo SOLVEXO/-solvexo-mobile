@@ -1,3 +1,4 @@
+import 'package:book_store_app/app/services/device_camera.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -36,14 +37,15 @@ class ImageEnhancerView extends GetView<ImageEnhancerController> {
                   controller.pickImage(ImageSource.gallery);
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primaryColor),
-                title: CustomText(text: 'Take a photo', fontSize: AppFontSize.verySmall),
-                onTap: () {
-                  Get.back();
-                  controller.pickImage(ImageSource.camera);
-                },
-              ),
+              if (DeviceCamera.available)
+                ListTile(
+                  leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primaryColor),
+                  title: CustomText(text: 'Take a photo', fontSize: AppFontSize.verySmall),
+                  onTap: () {
+                    Get.back();
+                    controller.pickImage(ImageSource.camera);
+                  },
+                ),
             ],
           ),
         ),

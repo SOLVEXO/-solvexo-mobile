@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
 import 'package:book_store_app/app/data/models/ai_studio/ai_credits_overview_model.dart';
 import 'package:book_store_app/config/resources/app_colors.dart';
@@ -87,7 +88,8 @@ class AiCreditsCard extends StatelessWidget {
               fontSize: AppFontSize.tiny,
             ),
           ],
-          SizedBox(height: BaseSpacing.md),
+          if (AppFeatures.digitalPurchases) SizedBox(height: BaseSpacing.md),
+          if (AppFeatures.digitalPurchases)
           Material(
             color: Colors.transparent,
             child: InkWell(

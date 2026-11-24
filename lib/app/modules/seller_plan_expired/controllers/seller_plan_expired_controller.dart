@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/modules/seller/utils/plan_lapse.dart';
 import 'package:book_store_app/app/routes/app_pages.dart';
 import 'package:book_store_app/app/services/account_switch_service.dart';
@@ -45,7 +46,10 @@ class SellerPlanExpiredController extends GetxController {
     load.value = PlanExpiredLoad.ready;
   }
 
-  void choosePlan() => Get.toNamed(Routes.sellerPlatformPlan);
+  void choosePlan() {
+    if (!AppFeatures.digitalPurchases) return;
+    Get.toNamed(Routes.sellerPlatformPlan);
+  }
 
   void continueToDashboard() => Get.offAllNamed(Routes.sellerHome);
 

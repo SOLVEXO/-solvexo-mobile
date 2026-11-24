@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/data/models/common_models/user_model.dart';
 import 'package:book_store_app/app/data/repositories/auth_repository.dart';
 import 'package:book_store_app/app/data/repositories/notifications_repository.dart';
@@ -74,7 +75,7 @@ class SellerSettingsController extends GetxController {
         ),
         SettingsTile(
           emoji: AppIcons.starOutlined,
-          title: 'Plan & Billing',
+          title: AppFeatures.digitalPurchases ? 'Plan & Billing' : 'Plan',
           onTap: () => Get.toNamed(Routes.sellerPlatformPlan),
         ),
         SettingsTile(

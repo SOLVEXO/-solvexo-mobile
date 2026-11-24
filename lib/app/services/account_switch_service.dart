@@ -81,6 +81,10 @@ class AccountSwitchService {
       final body = res.data;
       if (body is Map && body['success'] == true) {
         final session = AuthResponseModel.fromJson(Map<String, dynamic>.from(body));
+        // Old account's push teardown first, while its session is still stored.
+        try {
+          await FcmService().signOut().timeout(const Duration(seconds: 10));
+        } catch (_) {}
         await _store(session);
         return SwitchResult.ok(session);
       }

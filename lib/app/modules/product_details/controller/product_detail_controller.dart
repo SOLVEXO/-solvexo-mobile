@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'dart:async';
 import 'package:book_store_app/utils/cart_limits.dart';
 
@@ -53,6 +54,10 @@ class ProductDetailController extends GetxController {
     final p = product.value;
     final v = selectedVariant.value;
     if (p == null || v == null || v.id.isEmpty || isBuyNowLoading.value) return;
+    if (AppFeatures.blocksPurchase(p.type)) {
+      ToastUtil.showToast(AppFeatures.digitalUnavailableMessage.tr);
+      return;
+    }
     if (!await AppPreferences.isLoggedIn()) {
       Get.toNamed(Routes.authTabView);
       return;
@@ -349,6 +354,10 @@ class ProductDetailController extends GetxController {
     final p = product.value;
     if (p == null) {
       ToastUtil.showToast('Product not available');
+      return;
+    }
+    if (AppFeatures.blocksPurchase(p.type)) {
+      ToastUtil.showToast(AppFeatures.digitalUnavailableMessage.tr);
       return;
     }
 

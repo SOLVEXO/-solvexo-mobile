@@ -7,6 +7,7 @@ import 'package:book_store_app/utils/toast_util.dart';
 import 'package:book_store_app/utils/upload_rules.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:book_store_app/app/services/device_camera.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UploadRepository {
@@ -21,6 +22,10 @@ class UploadRepository {
     double maxHeight = 1024,
     int quality = 85,
   }) async {
+    if (source == ImageSource.camera && !DeviceCamera.available) {
+      ToastUtil.showToast('No camera available on this device');
+      return null;
+    }
     try {
       final XFile? picked = await _picker.pickImage(
         source: source,

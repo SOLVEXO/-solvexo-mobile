@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
 import 'package:book_store_app/utils/cart_limits.dart';
 import 'package:book_store_app/app/components/common_image_view.dart';
@@ -209,6 +210,10 @@ class ProductController extends GetxController {
   void addToCart(context, prodImg) {
     if (selectedProduct.value == null) {
       ToastUtil.showToast('Please select a product');
+      return;
+    }
+    if (AppFeatures.blocksPurchase(selectedProduct.value!.type)) {
+      ToastUtil.showToast(AppFeatures.digitalUnavailableMessage.tr);
       return;
     }
     if (!selectedProduct.value!.inStock) {

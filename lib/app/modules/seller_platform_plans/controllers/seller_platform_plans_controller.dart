@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_addon_model.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_entitlements_model.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_invoice_model.dart';
@@ -14,8 +15,9 @@ import 'package:book_store_app/utils/toast_util.dart';
 /// Placeholder return-url for the Stripe-hosted billing portal — there's no
 /// in-app deep-link callback handling; the seller manually returns to the
 /// app after managing billing in the external browser tab.
+// TODO(edudeen): confirm this return URL with the web/backend team.
 const String _kBillingPortalReturnUrl =
-    'https://solvexo.store/seller/platform-plan';
+    'https://edudeen.com/seller/platform-plan';
 
 class SellerPlatformPlansController extends GetxController {
   SellerPlatformPlansController({PlatformPlansRepository? repository})
@@ -93,6 +95,7 @@ class SellerPlatformPlansController extends GetxController {
   /// pricing math to [PlanChangePreviewSheet] — the seller only actually
   /// commits (via [_applyPlanChange]) after confirming there.
   Future<void> selectPlan(PlatformPlanModel plan) async {
+    if (!AppFeatures.digitalPurchases) return; // billing is off in this release
     if (isUpdating.value || isPreviewing.value) return;
     if (isCurrentPlan(plan) &&
         myPlan.value?.billingInterval == billingInterval.value) {
@@ -119,6 +122,7 @@ class SellerPlatformPlansController extends GetxController {
   /// The actual plan/interval switch — only reached once the seller taps
   /// "Confirm Change" on the preview sheet.
   Future<void> _applyPlanChange(PlatformPlanModel plan) async {
+    if (!AppFeatures.digitalPurchases) return; // billing is off in this release
     if (isUpdating.value) return;
     isUpdating.value = true;
     try {
@@ -138,6 +142,7 @@ class SellerPlatformPlansController extends GetxController {
   /// unaffected until then. [reason] is optional (max 500 chars, enforced
   /// server-side).
   Future<void> cancelPlan(String? reason) async {
+    if (!AppFeatures.digitalPurchases) return; // billing is off in this release
     if (isUpdating.value) return;
     isUpdating.value = true;
     try {
@@ -150,6 +155,7 @@ class SellerPlatformPlansController extends GetxController {
 
   /// Undoes a pending cancellation from [cancelPlan].
   Future<void> reactivatePlan() async {
+    if (!AppFeatures.digitalPurchases) return; // billing is off in this release
     if (isUpdating.value) return;
     isUpdating.value = true;
     try {
@@ -164,6 +170,7 @@ class SellerPlatformPlansController extends GetxController {
   /// for this store, whatever placeholder URL the backend echoes back) in
   /// an external browser tab.
   Future<void> openBillingPortal() async {
+    if (!AppFeatures.digitalPurchases) return; // billing is off in this release
     if (isUpdating.value) return;
     isUpdating.value = true;
     try {
@@ -185,6 +192,7 @@ class SellerPlatformPlansController extends GetxController {
   }
 
   Future<void> purchaseAddon(String addonType, {int quantity = 1}) async {
+    if (!AppFeatures.digitalPurchases) return; // billing is off in this release
     if (isUpdating.value) return;
     isUpdating.value = true;
     try {
@@ -200,6 +208,7 @@ class SellerPlatformPlansController extends GetxController {
   }
 
   Future<void> cancelAddon(PlatformAddonModel addon) async {
+    if (!AppFeatures.digitalPurchases) return; // billing is off in this release
     if (isUpdating.value) return;
     isUpdating.value = true;
     try {

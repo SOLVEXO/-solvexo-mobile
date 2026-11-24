@@ -1,7 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+  <!-- Photos/files are picked through the system Photo Picker / document picker
+       (image_picker, file_picker), which need no storage or media permission.
+       Strip them even if a plugin adds them (Google Play photo/video policy). -->
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" tools:node="remove"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove"/>
+  <!-- No biometric/fingerprint login feature; androidx.biometric (transitive) adds these. -->
+  <uses-permission android:name="android.permission.USE_BIOMETRIC" tools:node="remove"/>
+  <uses-permission android:name="android.permission.USE_FINGERPRINT" tools:node="remove"/>
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
   <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
@@ -16,14 +25,14 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-  <uses-feature android:name="android.hardware.camera" android:required="true" />
+  <uses-feature android:name="android.hardware.camera" android:required="false" />
 
 
 
 
   <application
-      android:usesCleartextTraffic="true"
-      android:label="EduDeen"
+      android:usesCleartextTraffic="false"
+      android:label="Edudeen"
       android:name="${applicationName}"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher">
@@ -93,6 +102,9 @@
       <meta-data
           android:name="com.google.firebase.messaging.default_notification_icon"
           android:resource="@drawable/notif_icon"/>
+      <meta-data
+          android:name="com.google.firebase.messaging.default_notification_color"
+          android:resource="@color/notification_color"/>
 
   </application>
 

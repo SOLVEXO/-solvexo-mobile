@@ -1,5 +1,5 @@
 class SocialLoginModel {
-  final String authProvider; // 'google', 'facebook', 'apple'
+  final String authProvider; // 'google', 'apple'
   final String socialId;
   final String userName;
   final String email;

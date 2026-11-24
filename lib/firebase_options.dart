@@ -50,19 +50,18 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCTgAJRMcc3h8Cisd6XHbuyEp5kOcyvOfM',
-    appId: '1:707145385701:android:9402a5a036486f4c38360c',
-    messagingSenderId: '707145385701',
-    projectId: 'solvexo-cec1a',
-    storageBucket: 'solvexo-cec1a.firebasestorage.app',
+    apiKey: 'AIzaSyBORl2mYICfrQdolBRwHfQ7iGj-YgZi-oM',
+    appId: '1:644843992125:android:a244b404c579b7e5b56654',
+    messagingSenderId: '644843992125',
+    projectId: 'edudeen-f1a97',
+    storageBucket: 'edudeen-f1a97.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyD8SBN_Z7No0yeqhzy1qzxJlQ9DpANVGfc',
-    appId: '1:707145385701:ios:c336af8a2c871d0438360c',
-    messagingSenderId: '707145385701',
-    projectId: 'solvexo-cec1a',
-    storageBucket: 'solvexo-cec1a.firebasestorage.app',
-    iosBundleId: 'com.solvexo.ios',
+    apiKey: 'AIzaSyA0uBzsSHPfNdQMN650gayzxT4gypluLxo',
+    appId: '1:644843992125:ios:ff0971a72f8f1ddbb56654',
+    messagingSenderId: '644843992125',
+    projectId: 'edudeen-f1a97',
+    storageBucket: 'edudeen-f1a97.firebasestorage.app',
+    iosBundleId: 'com.edudeen.app',
   );
 }

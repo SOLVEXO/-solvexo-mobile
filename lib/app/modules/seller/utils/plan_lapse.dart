@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/data/models/platform_plans/platform_subscription_model.dart';
 import 'package:book_store_app/app/data/repositories/platform_plans_repository.dart';
 import 'package:book_store_app/shared_prefrences/app_prefrences.dart';
@@ -15,12 +16,15 @@ class PlanLapse {
   static bool isLapsed(String? status) => lapsedStatuses.contains(status);
 
   static String title(String? status) => switch (status) {
+        'past_due' when !AppFeatures.digitalPurchases => 'Your plan is not active',
         'past_due' => 'Your plan payment is overdue',
         'canceled' => 'Your plan was canceled',
         _ => 'Your plan has ended',
       };
 
   static String message(String? status) => switch (status) {
+        _ when !AppFeatures.digitalPurchases =>
+          'Your listings are not visible to buyers while your plan is not active.',
         'past_due' =>
           'We could not take the payment for your Edudeen plan. Your listings are paused until a plan is active again.',
         _ =>

@@ -2,7 +2,6 @@ class AppIcons {
   static const String _baseIconsPath = "assets/icons/";
   static const String appLogoSvg = '${_baseIconsPath}favicon.svg';
   static const String googleIcon = '${_baseIconsPath}google.png';
-  static const String facebookIcon = '${_baseIconsPath}facebook.png';
   static const String uploadImageIcon =
       '${_baseIconsPath}upload_photo_icon.svg';
   static const String appleIcon = '${_baseIconsPath}apple.svg';

@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/core/base/base_controller.dart';
 import 'package:book_store_app/utils/cart_limits.dart';
 import 'package:book_store_app/app/components/buttons/app_button.dart';
@@ -90,6 +91,7 @@ class CartController extends BaseController {
         cartItems.assignAll(cart.items);
         selectAll.value = true;
         calculateTotal();
+        await _purgeBlockedDigital();
       } else {
         cartItems.clear();
         calculateTotal();
@@ -108,6 +110,44 @@ class CartController extends BaseController {
     cartItems.assignAll(raw.map(CartItem.fromLocalJson));
     selectAll.value = true;
     calculateTotal();
+    await _purgeBlockedDigital();
+  }
+
+  bool _purging = false;
+
+  /// While [AppFeatures.digitalPurchases] is off: drops any digital line that
+  /// is already in the cart (added before this rule, or from another device)
+  /// and tells the buyer. Silent no-op otherwise. Returns true if it removed
+  /// something. Never throws.
+  Future<bool> _purgeBlockedDigital() async {
+    if (AppFeatures.digitalPurchases || _purging) return false;
+    final blocked =
+        cartItems.where((i) => AppFeatures.isDigitalType(i.productType)).toList();
+    if (blocked.isEmpty) return false;
+    _purging = true;
+    try {
+      if (await isUserLogin()) {
+        for (final line in blocked) {
+          try {
+            await _cartRepository.removeFromCart(
+              line.productId,
+              line.productVariantId,
+              storeId: line.storeId,
+            );
+          } catch (e) {
+            debugPrint('⚠️ could not remove digital cart line: $e');
+          }
+        }
+      }
+      cartItems.removeWhere((i) => AppFeatures.isDigitalType(i.productType));
+      updateSelectAll();
+      calculateTotal();
+      if (!await isUserLogin()) await _persistLocalCart();
+      ToastUtil.showToast(AppFeatures.digitalUnavailableMessage.tr);
+      return true;
+    } finally {
+      _purging = false;
+    }
   }
 
   Future<void> _persistLocalCart() async {
@@ -120,6 +160,10 @@ class CartController extends BaseController {
   /// product/variant data — no network round-trip needed) to the local guest
   /// cart, summing quantity on conflict just like the backend's `addToCart`.
   Future<void> addLocalItem(CartItem newItem) async {
+    if (AppFeatures.blocksPurchase(newItem.productType)) {
+      ToastUtil.showToast(AppFeatures.digitalUnavailableMessage.tr);
+      return;
+    }
     final index = cartItems.indexWhere(
       (i) =>
           i.productId == newItem.productId &&
@@ -154,6 +198,7 @@ class CartController extends BaseController {
         }
         selectAll.value = true;
         calculateTotal();
+        await _purgeBlockedDigital();
       } else {
         await fetchCart();
       }
@@ -392,6 +437,10 @@ class CartController extends BaseController {
       message: 'Login to place your order.',
     );
     if (!allowed) return;
+
+    // Digital lines cannot be bought yet: remove them and say so before checkout.
+    await fetchCart();
+    await _purgeBlockedDigital();
 
     // Only the ticked cart lines go to checkout — without this the backend
     // defaults to checking out the ENTIRE cart.

@@ -72,13 +72,13 @@ Not yet verified against the live API: response shapes of
 
 ## Release checklist
 
-Identity is still the old one and is NOT changed in code yet; do these
-together before a store release:
+App identity is now Edudeen (`com.edudeen.app`, Firebase `edudeen-f1a97`, Apple team
+`B43H8KM3XZ`). Still to do before a store release (TODO: Google Sign-In client IDs,
+release SHA-256 in `docs/deep-links/assetlinks.json`):
 
 - **Bundle / application ids**: iOS `PRODUCT_BUNDLE_IDENTIFIER` is
-  `com.solvexo.ios` (ios/Runner.xcodeproj); check `applicationId` in
-  android/app/build.gradle. Decide the Edudeen ids first — changing them
-  creates a new app in both stores.
+  `com.edudeen.app` (ios/Runner.xcodeproj); check `applicationId` in
+  android/app/build.gradle. 
 - **Firebase**: register the new ids in the Firebase project, then replace
   `ios/Runner/GoogleService-Info.plist`, `android/app/google-services.json`
   and regenerate `lib/firebase_options.dart` (`flutterfire configure`).

@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'dart:io';
 
 import 'package:book_store_app/app/data/repositories/premium_repository.dart';
@@ -74,7 +75,7 @@ class PremiumController extends GetxController {
   }
 
   Future<void> subscribe(PremiumPlan plan) async {
-    if (busy.value) return;
+    if (!AppFeatures.digitalPurchases || busy.value) return;
     busy.value = true;
     final r = await _repo.subscribe(plan.id, interval);
     busy.value = false;
@@ -88,6 +89,7 @@ class PremiumController extends GetxController {
   static String? validateProof(File? f) => f == null ? 'Add a photo of your transfer receipt.'.tr : null;
 
   Future<void> submitProof() async {
+    if (!AppFeatures.digitalPurchases) return;
     final payment = status.value?.pendingPayment;
     final err = validateProof(proof.value);
     if (err != null) {

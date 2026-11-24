@@ -223,12 +223,12 @@ void main() {
     expect(await AppPreferences.isLoggedIn(), false);
     print('✅ Logout returns to guest-mode Home, not a login wall');
 
-    // ── Seller path: Sell on Solvexo -> seller landing -> seller login ──────
+    // ── Seller path: Sell on Edudeen -> seller landing -> seller login ──────
     Get.find<BottomNavController>().changeTab(4);
     await pumpFor(tester, const Duration(seconds: 1));
-    await tester.tap(find.text('Sell on Solvexo'));
+    await tester.tap(find.text('Sell on Edudeen'));
     await pumpUntil(tester, () => Get.currentRoute == Routes.welcome);
-    print('✅ "Sell on Solvexo" opens the seller landing screen');
+    print('✅ "Sell on Edudeen" opens the seller landing screen');
 
     await tester.tap(find.text('Get Started'));
     await pumpUntil(tester, () => Get.currentRoute == Routes.authTabView);

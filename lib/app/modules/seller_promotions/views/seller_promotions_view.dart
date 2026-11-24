@@ -1,3 +1,4 @@
+import 'package:book_store_app/config/app_config.dart';
 import 'package:book_store_app/app/components/custom_app_bar_two.dart';
 import 'package:book_store_app/app/components/custom_refresh_wrapper.dart';
 import 'package:book_store_app/app/components/custom_text.dart';
@@ -34,8 +35,10 @@ class SellerPromotionsView extends GetView<SellerPromotionsController> {
           child: ListView(
             padding: EdgeInsets.fromLTRB(BaseSpacing.md, BaseSpacing.md, BaseSpacing.md, BaseSpacing.xxl * 2),
             children: [
-              PrimaryButton(label: '+ New Promotion', onPressed: () => _openCreate(context)),
-              SizedBox(height: BaseSpacing.md),
+              if (AppFeatures.digitalPurchases) ...[
+                PrimaryButton(label: '+ New Promotion', onPressed: () => _openCreate(context)),
+                SizedBox(height: BaseSpacing.md),
+              ],
               PromotionAnalyticsSection(data: controller.analytics.value),
               SizedBox(height: BaseSpacing.lg),
               CustomText(
@@ -87,8 +90,9 @@ class _EmptyState extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: BaseSpacing.lg),
             child: CustomText(
-              text:
-                  'Get your store featured in a shared homepage or marketplace placement. If this isn\'t available on your plan yet, you\'ll see a note when you submit a request.',
+              text: AppFeatures.digitalPurchases
+                  ? 'Get your store featured in a shared homepage or marketplace placement. If this isn\'t available on your plan yet, you\'ll see a note when you submit a request.'
+                  : 'Your promotion requests will appear here.',
               fontSize: AppFontSize.tiny,
               color: AppColors.gray600,
               textAlign: TextAlign.center,

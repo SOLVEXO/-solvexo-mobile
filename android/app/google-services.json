@@ -1,56 +1,56 @@
 {
   "project_info": {
-    "project_number": "707145385701",
-    "project_id": "solvexo-cec1a",
-    "storage_bucket": "solvexo-cec1a.firebasestorage.app"
+    "project_number": "644843992125",
+    "project_id": "edudeen-f1a97",
+    "storage_bucket": "edudeen-f1a97.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:707145385701:android:9402a5a036486f4c38360c",
+        "mobilesdk_app_id": "1:644843992125:android:a244b404c579b7e5b56654",
         "android_client_info": {
-          "package_name": "com.solvexo.app"
+          "package_name": "com.edudeen.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "707145385701-si9vgmalovmug4q75ruqe9s3kj2kpo1u.apps.googleusercontent.com",
+          "client_id": "644843992125-hhl466qmfv51gqs1b6u8gugcv6436bb3.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.solvexo.app",
-            "certificate_hash": "9e45e6dcae2f908626c9b7f4800df78759a1934b"
-          }
-        },
-        {
-          "client_id": "707145385701-utile119eic2h4tpabagorjn6eim4960.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.solvexo.app",
+            "package_name": "com.edudeen.app",
             "certificate_hash": "262d042c917cfb2cc450c346d9989128857aca3e"
           }
         },
         {
-          "client_id": "707145385701-24e0irbfrsvkqbv0i74o6araatqthptn.apps.googleusercontent.com",
+          "client_id": "644843992125-r9rso3b11oa7rst5dsharioqm8c4snte.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.edudeen.app",
+            "certificate_hash": "bc0ca187fa728df74624b66b9ff09946259ba538"
+          }
+        },
+        {
+          "client_id": "644843992125-vuf9corbqceveiim2eg8ehidl8ft8n50.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCTgAJRMcc3h8Cisd6XHbuyEp5kOcyvOfM"
+          "current_key": "AIzaSyBORl2mYICfrQdolBRwHfQ7iGj-YgZi-oM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "707145385701-24e0irbfrsvkqbv0i74o6araatqthptn.apps.googleusercontent.com",
+              "client_id": "644843992125-vuf9corbqceveiim2eg8ehidl8ft8n50.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "707145385701-8fq45ig5sadbpdgvr463du7r2migqn6t.apps.googleusercontent.com",
+              "client_id": "644843992125-1smknlr1aus57ru9567fghejquuturm2.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.solvexo.ios"
+                "bundle_id": "com.edudeen.app"
               }
             }
           ]
